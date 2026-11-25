@@ -1167,3 +1167,27 @@ body { background: #000; }
 .bplus__btn { justify-self: start; min-height: 48px; padding: 10px 24px; font-size: 13px; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: #fff; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.4); transition: background 160ms; }
 .bplus__btn:hover { background: rgba(255, 255, 255, 0.1); }
 @media (max-width: 480px) { .bcards__grid { grid-template-columns: repeat(2, 1fr); gap: 40px 38px; padding: 30px 20px 10px; } }
+
+/* ───────── Cloche et notifications ───────── */
+.bell { position: relative; flex: none; display: grid; place-items: center; width: 38px; height: 38px; margin-left: 4px; border-radius: 50%; color: var(--cream); background: #0c0d14; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22); transition: background 160ms, transform 160ms; }
+.bell:hover { background: #1a1c2a; }
+.bell.has-unread { color: #ffc94d; box-shadow: inset 0 0 0 1.5px #ffc94d, 0 0 14px rgba(255, 190, 70, 0.45); animation: bell-ring 2.4s ease-in-out infinite; }
+.bell i { position: absolute; right: -4px; top: -4px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 99px; display: grid; place-items: center; font-style: normal; font-size: 11px; font-weight: 800; color: #fff; background: #ff3d5e; box-shadow: 0 0 0 2px #000; }
+@keyframes bell-ring { 0%, 86%, 100% { transform: rotate(0); } 89% { transform: rotate(-14deg); } 93% { transform: rotate(12deg); } 97% { transform: rotate(-6deg); } }
+@media (prefers-reduced-motion: reduce) { .bell.has-unread { animation: none; } }
+.notifs { position: absolute; z-index: 30; right: max(12px, calc((100vw - 1080px) / 2 + 16px)); top: 60px; width: min(380px, calc(100vw - 24px)); max-height: min(70vh, 520px); display: grid; grid-template-rows: auto 1fr; border-radius: 18px; background: #0a0b11; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16), 0 24px 60px rgba(0, 0, 0, 0.8); animation: fade 160ms both; }
+.notifs header { display: flex; align-items: center; gap: 12px; padding: 12px 12px 10px 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+.notifs h2 { margin-right: auto; font-size: 16px; font-weight: 800; color: #fff; }
+.notifs__close { width: 40px; height: 40px; border-radius: 50%; font-size: 22px; color: var(--cream); }
+.notifs__close:hover { background: rgba(255, 255, 255, 0.1); }
+.notifs ul { overflow-y: auto; list-style: none; padding: 8px; display: grid; gap: 6px; align-content: start; }
+.notifs li { --nc: #7d9bff; display: grid; gap: 3px; padding: 10px 12px 10px 14px; border-radius: 12px; background: #000; box-shadow: inset 3px 0 0 var(--nc); font-size: 13.5px; line-height: 1.4; color: var(--text); }
+.notifs li b { color: #fff; }
+.notifs li time { font-size: 11.5px; color: var(--text-faint); }
+.notifs li.is-new { background: color-mix(in srgb, var(--nc) 14%, #000); color: #fff; }
+.notifs li.notifs--pull { --nc: #ff5d7a; } .notifs li.notifs--level { --nc: #ffc94d; } .notifs li.notifs--saga { --nc: #2bc8d9; } .notifs li.notifs--drop { --nc: #a56bff; } .notifs li.notifs--rebirth { --nc: #ff9a4a; } .notifs li.notifs--free { --nc: #7ff0ff; } .notifs li.notifs--energy { --nc: #ffd24d; }
+.notifs li.notifs__empty { box-shadow: none; background: none; color: var(--text-dim); }
+@media (max-width: 480px) { .bell { width: 32px; height: 32px; margin-left: 2px; } .bell svg { width: 18px; height: 18px; } }
+@media (max-width: 400px) { .topbar .logo { transform: scale(0.82); transform-origin: left center; margin-right: -8px; } .topbar__in { gap: 4px; padding-left: 10px; padding-right: 10px; } }
+/* la barre du haut reste au-dessus du contenu quand la page défile (sinon ses boutons ne répondent plus) */
+.topbar { z-index: 25; }

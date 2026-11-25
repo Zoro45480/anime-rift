@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { BANNERS, COST, type Banner } from '../data/banners'
 import { heroById, type Hero } from '../data/heroes'
+import { isPityRarity, RARITIES } from '../data/rarities'
 import { pullMany } from '../game/gacha'
 import { cardState, power, ENERGY_MAX, ENERGY_REGEN_MS, energyNow, ACCOUNT_XP, accountLevel, AWAKEN_COST, LEVEL_CAP, REBIRTH_SHARDS, levelFromXp, MAX_LEVEL, MERGE_XP, REBIRTH_KEEP, REBIRTH_LEVEL, REBIRTH_REFUND, REBIRTH_SEALS, REBIRTH_XP, SCROLLS, type ScrollId } from '../game/progression'
 import { makeUnit, simulate, type BattleEvent, type Unit } from '../game/battle'
@@ -31,8 +32,13 @@ type State = {
   energyAt: number
   saga: Record<string, number> // étoiles gagnées à chaque combat de la Saga
   team: string[] // équipe de combat (3 cartes au plus)
+  notifs: Notif[] // les plus récentes d'abord
   awakened: string[] // cartes libérées (niveau maximum 100)
 }
+
+// Notification affichée sous la cloche de la barre du haut. Elles naissent d'événements réels de la partie.
+export type Notif = { id: number; t: number; kind: 'pull' | 'level' | 'saga' | 'drop' | 'rebirth' | 'free'; text: string; read: boolean }
+const NOTIF_MAX = 30
 
 // Ce qu'un combat a donné : de quoi le rejouer à l'écran et afficher les récompenses.
 export type FightResult = {
@@ -41,6 +47,8 @@ export type FightResult = {
 }
 
 type Store = State & {
+  readNotifs: () => void // tout marquer comme lu
+  clearNotifs: () => void
   teamNow: string[] // l'équipe réellement utilisée : celle choisie, sinon les 3 cartes les plus puissantes
   setTeam: (ids: string[]) => void
   fight: (stageId: string) => FightResult | null // null = combat impossible (verrouillé, pas d'énergie ou pas d'équipe)
@@ -68,7 +76,7 @@ const LOG_MAX = 30
 // Dotation de départ du compte.
 export const START_GEMS = 600
 const START: State = {
-  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [],
+  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [],
   tickets: 20, gems: START_GEMS, pity: Object.fromEntries(BANNERS.map((b) => [b.id, 0])), owned: {},
   xp: {}, scrolls: { small: 0, medium: 0, large: 0 }, wish: [], pinned: [], log: {},
 }
@@ -116,6 +124,19 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     const withLog = (log: State['log'], heroId: string, entry: Omit<LogEntry, 't'>) =>
       ({ ...log, [heroId]: [{ t: Date.now(), ...entry }, ...(log[heroId] ?? [])].slice(0, LOG_MAX) })
 
+    // Ajoute des notifications à la liste (les plus récentes d'abord), et signale un passage de niveau de compte.
+    const notify = (list: Notif[], items: [Notif['kind'], string][]): Notif[] =>
+      [...items.map(([kind, text], i) => ({ id: Date.now() * 100 + i + Math.floor(Math.random() * 50), t: Date.now(), kind, text, read: false })).reverse(), ...list].slice(0, NOTIF_MAX)
+    const levelNote = (xpAfter: number): [Notif['kind'], string][] => {
+      const before = accountLevel(state.accountXp, state.rebirths).level
+      const after = accountLevel(xpAfter, state.rebirths).level
+      if (after <= before) return []
+      const style = after % 25 === 0 && after < REBIRTH_LEVEL ? ' Nouveau style de niveau débloqué.' : ''
+      return [['level', after >= REBIRTH_LEVEL ? `Compte niveau ${REBIRTH_LEVEL} : la Renaissance est disponible.` : `Compte niveau ${after}.${style}`]]
+    }
+    const readNotifs = () => { if (state.notifs.some((x) => !x.read)) setState({ ...state, notifs: state.notifs.map((x) => ({ ...x, read: true })) }) }
+    const clearNotifs = () => setState({ ...state, notifs: [] })
+
     const summon = (banner: Banner, currency: Currency, count: number) => {
       if (!canAfford(currency, count)) return null
       const { heroes, pity } = pullMany(banner, state.pity[banner.id], count, Math.random)
@@ -133,6 +154,10 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         gems: state.gems - (currency === 'gems' ? price(currency, count) : 0),
         pity: { ...state.pity, [banner.id]: pity },
         owned, log, accountXp,
+        notifs: notify(state.notifs, [
+          ...heroes.filter((h) => isPityRarity(h.rarity)).map((h): [Notif['kind'], string] => ['pull', `Gros tirage : ${h.name} (${RARITIES[h.rarity].short}) sur la bannière ${banner.world}.`]),
+          ...levelNote(accountXp),
+        ]),
         gemsSpent: state.gemsSpent + (currency === 'gems' ? price(currency, count) : 0),
       })
       return heroes
@@ -144,7 +169,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       const xp = (state.xp[heroId] ?? 0) + amount
       const after = levelFromXp(xp, capOf(heroId)).level
       const note = `${label} · +${amount.toLocaleString('fr-FR')} XP${after > before ? ` · niveau ${after}` : ''}`
-      setState({ ...state, ...extra, accountXp: state.accountXp + Math.round(amount / 10), xp: { ...state.xp, [heroId]: xp }, log: withLog(state.log, heroId, { ...entry, note }) })
+      setState({ ...state, ...extra, notifs: notify(state.notifs, levelNote(state.accountXp + Math.round(amount / 10))), accountXp: state.accountXp + Math.round(amount / 10), xp: { ...state.xp, [heroId]: xp }, log: withLog(state.log, heroId, { ...entry, note }) })
     }
     const capOf = (heroId: string) => (state.awakened.includes(heroId) ? MAX_LEVEL : LEVEL_CAP)
     const maxed = (heroId: string) => levelFromXp(state.xp[heroId] ?? 0, capOf(heroId)).level >= capOf(heroId)
@@ -210,6 +235,11 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         saga: { ...state.saga, [stage.id]: Math.max(stars, state.saga[stage.id] ?? 0) },
         gems: state.gems + newStars * SOULS_PER_STAR,
         accountXp: state.accountXp + stage.accountXp,
+        notifs: notify(state.notifs, [
+          ...(stage.boss && !(state.saga[stage.id] > 0) ? [['saga', `Arc ${stage.world} terminé.${stageById(`${stage.arc + 1}-0`) ? ` L'arc ${stageById(`${stage.arc + 1}-0`)!.world} est ouvert.` : ' Tu as fini La Saga !'}`] as [Notif['kind'], string]] : []),
+          ...drops.filter((id) => id !== 'small').map((id): [Notif['kind'], string] => ['drop', `${SCROLLS[id].label} obtenu dans La Saga (${stage.world}).`]),
+          ...levelNote(state.accountXp + stage.accountXp),
+        ]),
       })
       return { stage, allies, foes, events, win, stars, newStars, souls: newStars * SOULS_PER_STAR, accountXp: stage.accountXp, cardXp, scrolls: drops }
     }
@@ -217,7 +247,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     const awaken = (heroId: string) => {
       const cost = AWAKEN_COST[heroById(heroId).rarity]
       if (state.rebirths < 1 || !state.owned[heroId] || state.awakened.includes(heroId) || state.shards < cost) return false
-      setState({ ...state, shards: state.shards - cost, awakened: [...state.awakened, heroId], log: withLog(state.log, heroId, { k: 'merge', note: `Libération · niveau maximum 100 · ${cost} fragments` }) })
+      setState({ ...state, notifs: notify(state.notifs, [['free', `${heroById(heroId).name} est libérée : niveau maximum 100.`]]), shards: state.shards - cost, awakened: [...state.awakened, heroId], log: withLog(state.log, heroId, { k: 'merge', note: `Libération · niveau maximum 100 · ${cost} fragments` }) })
       return true
     }
     const rebirth = (keep: string[]) => {
@@ -231,6 +261,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         accountXp: 0, rebirths: state.rebirths + 1, gemsSpent: 0, saga: {}, team: state.team.filter((id) => kept.includes(id)),
         gems: START_GEMS + Math.floor(state.gemsSpent * REBIRTH_REFUND),
         tickets: state.tickets + REBIRTH_SEALS,
+        notifs: notify(state.notifs, [['rebirth', `Renaissance n° ${state.rebirths + 1} accomplie : tes bonus définitifs sont actifs.`]]),
       })
       return true
     }
@@ -243,7 +274,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setArt((a) => Object.fromEntries(Object.entries(a).filter(([k]) => k !== heroId)))
       void removeArt(heroId)
     }
-    return { ...state, canAfford, summon, merge, useScroll, toggleWish, togglePin, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, customArt, setCustomArt, clearCustomArt }
+    return { ...state, canAfford, summon, merge, useScroll, toggleWish, togglePin, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, customArt, setCustomArt, clearCustomArt }
   }, [state, customArt, remoteArt, remoteStatus, remoteFans, now])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>
