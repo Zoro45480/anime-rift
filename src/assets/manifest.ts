@@ -7,3 +7,9 @@ const files = import.meta.glob('./art/*.png', { eager: true, query: '?url', impo
 export type ArtKind = 'full' | 'bust'
 
 export const heroArt = (model: string, kind: ArtKind): string => files[`./art/${model}-${kind}.png`] ?? ''
+
+const icons = import.meta.glob('./icons/*.png', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
+
+export type IconName = 'gem' | 'ticket' | 'bolt'
+
+export const iconArt = (name: IconName): string => icons[`./icons/${name}.png`] ?? ''

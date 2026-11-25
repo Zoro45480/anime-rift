@@ -6,7 +6,8 @@ import { RARITIES, RARITY_ORDER } from '../data/rarities'
 import { heroArt } from '../assets/manifest'
 import { useStore, type Currency } from '../state/store'
 import { Card } from '../ui/Card'
-import { IconArrow, IconChevron, IconGem, IconInfo, IconTicket } from '../ui/icons'
+import { IconArrow, IconChevron, IconInfo } from '../ui/icons'
+import { Coin } from '../ui/Coin'
 
 const pct = (x: number) => `${(x * 100).toLocaleString('fr-FR', { maximumFractionDigits: 2 })} %`
 
@@ -37,8 +38,7 @@ export const Banners = () => {
   const star = heroById(banner.star)
   const left = useCountdown(banner.endsAt)
   const pity = store.pity[banner.id]
-  const unit = currency === 'ticket' ? 'ticket' : 'gemmes'
-  const cost = (n: number) => `${n * (currency === 'ticket' ? COST.ticket : COST.gems)} ${unit}${currency === 'ticket' && n > 1 ? 's' : ''}`
+  const price = (n: number) => n * (currency === 'ticket' ? COST.ticket : COST.gems)
 
   const choose = (id: string) => { setBannerId(id); setFocus(1); top.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
   const summon = (n: number) => { const r = store.summon(banner, currency, n); if (r) setResults(r) }
@@ -77,17 +77,17 @@ export const Banners = () => {
           <h2 className="eyebrow">Moyen d'invocation</h2>
           <div className="switch" role="radiogroup">
             <button role="radio" aria-checked={currency === 'ticket'} className={currency === 'ticket' ? 'is-active' : ''} onClick={() => setCurrency('ticket')}>
-              <i style={{ color: 'var(--gold)' }}><IconTicket /></i>Tickets<b>{store.tickets}</b>
+              <Coin name="ticket" size={28} />Tickets<b>{store.tickets}</b>
             </button>
             <button role="radio" aria-checked={currency === 'gems'} className={currency === 'gems' ? 'is-active' : ''} onClick={() => setCurrency('gems')}>
-              <i style={{ color: 'var(--ember)' }}><IconGem /></i>Gemmes<b>{store.gems}</b>
+              <Coin name="gem" size={28} />Gemmes<b>{store.gems}</b>
             </button>
           </div>
           <div className="summon__row">
-            <button className="btn" disabled={!store.canAfford(currency, 1)} onClick={() => summon(1)}>Invoquer ×1<span>{cost(1)}</span></button>
-            <button className="btn" disabled={!store.canAfford(currency, 5)} onClick={() => summon(5)}>Invoquer ×5<span>{cost(5)}</span></button>
+            <button className="btn" disabled={!store.canAfford(currency, 1)} onClick={() => summon(1)}>Invoquer ×1<span><Coin name={currency === 'ticket' ? 'ticket' : 'gem'} size={24} />{price(1)}</span></button>
+            <button className="btn" disabled={!store.canAfford(currency, 5)} onClick={() => summon(5)}>Invoquer ×5<span><Coin name={currency === 'ticket' ? 'ticket' : 'gem'} size={24} />{price(5)}</span></button>
           </div>
-          <button className="btn btn--gold" disabled={!store.canAfford(currency, 10)} onClick={() => summon(10)}>Invoquer ×10<span>{cost(10)}</span></button>
+          <button className="btn btn--gold" disabled={!store.canAfford(currency, 10)} onClick={() => summon(10)}>Invoquer ×10<span><Coin name={currency === 'ticket' ? 'ticket' : 'gem'} size={26} />{price(10)}</span></button>
           <div className="pity" title={`Une carte LR ou MR est garantie au plus tard à la ${PITY_MAX}e invocation`}>
             <span className="eyebrow">Garantie</span>
             <div className="bar"><i style={{ width: `${(pity / PITY_MAX) * 100}%` }} /></div>

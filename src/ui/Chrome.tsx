@@ -1,5 +1,6 @@
 import { useStore } from '../state/store'
-import { IconBanners, IconBolt, IconGem, IconGrid, IconPlay, IconTicket } from './icons'
+import { IconBanners, IconGrid, IconPlay } from './icons'
+import { Coin } from './Coin'
 
 export type TabId = 'banners' | 'play' | 'collection'
 
@@ -26,9 +27,9 @@ export const TopBar = () => {
       <div className="topbar__in">
         <Logo />
         <div className="wallet" aria-label="Vos ressources">
-          <span title="Énergie"><i style={{ color: 'var(--gold)' }}><IconBolt /></i>10<small>/10</small></span>
-          <span title="Gemmes"><i style={{ color: 'var(--ember)' }}><IconGem /></i>{gems}</span>
-          <span title="Tickets d'invocation"><i style={{ color: 'var(--r-rift)' }}><IconTicket /></i>{tickets}</span>
+          <span title="Énergie"><Coin name="bolt" />10<small>/10</small></span>
+          <span title="Gemmes"><Coin name="gem" />{gems}</span>
+          <span title="Tickets d'invocation"><Coin name="ticket" />{tickets}</span>
         </div>
       </div>
     </header>
