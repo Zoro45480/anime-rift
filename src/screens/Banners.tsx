@@ -8,6 +8,8 @@ import { useStore, type Currency } from '../state/store'
 import { Card } from '../ui/Card'
 import { IconChevron, IconInfo } from '../ui/icons'
 import { Coin } from '../ui/Coin'
+import { SummonCinematic } from '../summon/SummonCinematic'
+import { primeAudio } from '../summon/audio'
 
 const pct = (x: number) => `${(x * 100).toLocaleString('fr-FR', { maximumFractionDigits: 2 })} %`
 const two = (n: number) => String(n).padStart(2, '0')
@@ -53,7 +55,11 @@ export const Banners = () => {
   const coin = currency === 'ticket' ? 'ticket' : 'gem'
   const price = (n: number) => n * (currency === 'ticket' ? COST.ticket : COST.gems)
   const turn = (step: number) => setIndex((i) => (i + step + BANNERS.length) % BANNERS.length)
-  const summon = (n: number) => { const r = store.summon(banner, currency, n); if (r) setResults(r) }
+  const summon = (n: number) => {
+    primeAudio() // le son n'est autorisé par le navigateur que pendant ce clic
+    const r = store.summon(banner, currency, n) // le tirage réel : c'est lui qui fixe les raretés
+    if (r) setResults(r)
+  }
 
   return (
     <div className="summon" style={{ ['--hue' as string]: banner.hue }}>
@@ -144,18 +150,7 @@ export const Banners = () => {
         document.body,
       )}
 
-      {results && createPortal(
-        <div className="modal modal--result" role="dialog" aria-modal="true" aria-label="Résultat de l'invocation">
-          <div className="result">
-            <h2 className="result__title">La faille répond</h2>
-            <div className={`result__grid result__grid--${results.length}`}>
-              {results.map((h, i) => <Card key={i} hero={h} className="result__card" style={{ animationDelay: `${i * 90}ms` }} />)}
-            </div>
-            <button className="btn btn--gold" onClick={() => setResults(null)}>Continuer</button>
-          </div>
-        </div>,
-        document.body,
-      )}
+      {results && createPortal(<SummonCinematic heroes={results} onClose={() => setResults(null)} />, document.body)}
     </div>
   )
 }
