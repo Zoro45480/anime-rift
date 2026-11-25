@@ -27,6 +27,13 @@ export type SummonPreset = {
 }
 
 export const PRESETS: Record<RarityId, SummonPreset> = {
+  // N — gris, blanc et bleu pâle : un petit portail, une apparition simple et courte.
+  common: {
+    rank: 'Commune', colors: { core: 0xf2f5ff, accent: 0x9aa6c4, second: 0xcfe0ff, deep: 0x1a2038 },
+    camera: 'Cam_Push', times: { gather: 0.5, open: 0.7, surge: 0.8, hush: 0, burst: 0.45 },
+    portalScale: 0.7, rings: 1, crystals: 3, fragments: 2, beams: false, particles: 280, bolts: 1, shocks: 1,
+    bloom: 0.55, shake: 0, darkness: 0, distortion: 0, voidDisc: false, crackStays: false,
+  },
   // R — bleu électrique et cyan : un portail net, court, une petite explosion.
   rare: {
     rank: 'Rare', colors: { core: 0xd8f4ff, accent: 0x2f9bff, second: 0x4be3ff, deep: 0x06224f },
@@ -41,12 +48,19 @@ export const PRESETS: Record<RarityId, SummonPreset> = {
     portalScale: 0.95, rings: 3, crystals: 9, fragments: 8, beams: false, particles: 950, bolts: 2, shocks: 2,
     bloom: 0.9, shake: 0.3, darkness: 0, distortion: 0.25, voidDisc: false, crackStays: false,
   },
-  // LR — or et blanc : portail monumental, colonnes de lumière, travelling circulaire, explosion dorée.
-  legend: {
-    rank: 'Légendaire', colors: { core: 0xfffbe0, accent: 0xffc531, second: 0xffe98a, deep: 0x5c3a00 },
-    camera: 'Cam_Orbit', times: { gather: 1.0, open: 1.3, surge: 2.4, hush: 0.25, burst: 0.8 },
-    portalScale: 1.12, rings: 5, crystals: 14, fragments: 12, beams: true, particles: 1900, bolts: 3, shocks: 3,
+  // SSR — or, blanc et jaune : portail doré, colonnes de lumière, travelling circulaire, explosion dorée.
+  ultra: {
+    rank: 'Ultra rare', colors: { core: 0xfffbe0, accent: 0xffc531, second: 0xffe98a, deep: 0x5c3a00 },
+    camera: 'Cam_Orbit', times: { gather: 0.9, open: 1.2, surge: 2.0, hush: 0.15, burst: 0.7 },
+    portalScale: 1.05, rings: 4, crystals: 14, fragments: 12, beams: true, particles: 1900, bolts: 3, shocks: 3,
     bloom: 1.15, shake: 0.55, darkness: 0.25, distortion: 0.4, voidDisc: false, crackStays: false,
+  },
+  // LR — arc-en-ciel : portail monumental aux reflets rose, cyan et or, colonnes de lumière, explosion prismatique.
+  legend: {
+    rank: 'Légendaire', colors: { core: 0xffffff, accent: 0xff6ec7, second: 0x6fdcff, deep: 0x3a1466 },
+    camera: 'Cam_Orbit', times: { gather: 1.1, open: 1.4, surge: 2.6, hush: 0.4, burst: 0.9 },
+    portalScale: 1.22, rings: 5, crystals: 14, fragments: 12, beams: true, particles: 1900, bolts: 3, shocks: 3,
+    bloom: 1.2, shake: 0.55, darkness: 0.25, distortion: 0.4, voidDisc: false, crackStays: false,
   },
   // MR — noir cosmique, rouge, or et violet : une faille gigantesque, la lumière absorbée, le silence, puis tout explose.
   rift: {

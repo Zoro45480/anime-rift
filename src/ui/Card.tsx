@@ -57,8 +57,8 @@ export const Card = ({ hero, count, locked, className = '', style }: Props) => {
             <span className="card__world">{hero.world}</span>
             <span className="card__rule" />
             <span className="card__stats">
-              <b><small>ATK</small>{hero.atk.toLocaleString('fr-FR')}</b>
-              <b><small>DEF</small>{hero.def.toLocaleString('fr-FR')}</b>
+              <b><small>Dégâts</small>{hero.atk.toLocaleString('fr-FR')}</b>
+              <b><small>Défense</small>{hero.def.toLocaleString('fr-FR')}</b>
               <em>N° {String(hero.no).padStart(4, '0')}</em>
             </span>
           </div>

@@ -4,6 +4,7 @@ import { BANNERS, COST, PITY_MAX } from '../data/banners'
 import { HEROES, heroById, type Hero } from '../data/heroes'
 import { RARITIES, RARITY_ORDER } from '../data/rarities'
 import { heroArt } from '../assets/manifest'
+import { cardRate } from '../game/gacha'
 import { useStore, type Currency } from '../state/store'
 import { Card } from '../ui/Card'
 import { IconChevron, IconInfo } from '../ui/icons'
@@ -11,7 +12,7 @@ import { Coin } from '../ui/Coin'
 import { SummonCinematic } from '../summon/SummonCinematic'
 import { primeAudio } from '../summon/audio'
 
-const pct = (x: number) => `${(x * 100).toLocaleString('fr-FR', { maximumFractionDigits: 2 })} %`
+const pct = (x: number) => `${(x * 100).toLocaleString('fr-FR', { maximumFractionDigits: 3 })} %`
 const two = (n: number) => String(n).padStart(2, '0')
 
 const useCountdown = (iso: string) => {
@@ -27,20 +28,17 @@ const useCountdown = (iso: string) => {
   return ms === 0 ? 'Terminée' : `${d} j ${h} h ${m} min`
 }
 
-// Cadran de garantie : un anneau qui se remplit jusqu'à la carte LR garantie.
-const PityDial = ({ value }: { value: number }) => {
-  const r = 30
-  const c = 2 * Math.PI * r
-  return (
-    <div className="dial" title={`Une carte LR ou MR est garantie au plus tard à la ${PITY_MAX}e invocation`}>
-      <svg viewBox="0 0 72 72" aria-hidden="true">
-        <circle cx="36" cy="36" r={r} className="dial__track" />
-        <circle cx="36" cy="36" r={r} className="dial__fill" strokeDasharray={c} strokeDashoffset={c * (1 - value / PITY_MAX)} />
-      </svg>
-      <div className="dial__num"><b>{PITY_MAX - value}</b><span>avant LR</span></div>
+// Barre de pity : elle se remplit à chaque invocation sans carte SSR, LR ou MR ; pleine, la suivante en est une.
+const PityBar = ({ value }: { value: number }) => (
+  <div className="pity" role="meter" aria-valuemin={0} aria-valuemax={PITY_MAX} aria-valuenow={value} aria-label="Garantie">
+    <div className="pity__row">
+      <span className="pity__label">Garantie SSR ou mieux</span>
+      <b className="pity__count">{value}<i> / {PITY_MAX}</i></b>
     </div>
-  )
-}
+    <div className="pity__track"><i style={{ width: `${(value / PITY_MAX) * 100}%` }} /></div>
+    <p className="pity__note">{value + 1 >= PITY_MAX ? 'La prochaine invocation est garantie SSR, LR ou MR.' : `Encore ${PITY_MAX - value} invocations au plus avant une carte SSR, LR ou MR garantie.`}</p>
+  </div>
+)
 
 export const Banners = () => {
   const store = useStore()
@@ -74,7 +72,7 @@ export const Banners = () => {
           <p className="poster__sub">{banner.subtitle}</p>
           <div className="poster__chips">
             <span className="chip chip--time">Ferme dans <b>{left}</b></span>
-            <span className="chip">MR {pct(RARITIES.rift.rate)}</span>
+            <span className="chip">MR {pct(RARITIES.rift.rate)} · LR {pct(RARITIES.legend.rate)}</span>
           </div>
         </div>
         <button className="poster__nav poster__nav--prev" onClick={() => turn(-1)} aria-label="Bannière précédente"><IconChevron left /></button>
@@ -88,7 +86,7 @@ export const Banners = () => {
           return (
             <button key={b.id} role="tab" aria-selected={i === index} className={`rail__item ${i === index ? 'is-active' : ''}`} style={{ ['--hue' as string]: b.hue }} onClick={() => setIndex(i)}>
               <img src={heroArt(heroById(b.star).model, 'bust')} alt="" />
-              <span><b>{b.world}</b><small>{have}/{b.featured.length} cartes · garantie {store.pity[b.id]}/{PITY_MAX}</small></span>
+              <span><b>{b.world}</b><small>{have}/{b.featured.length} cartes · pity {store.pity[b.id]}/{PITY_MAX}</small></span>
             </button>
           )
         })}
@@ -98,7 +96,7 @@ export const Banners = () => {
       <section className="lineup">
         <header className="lineup__head">
           <h2>À l'affiche</h2>
-          <button className="linkbtn" onClick={() => setShowIndex(true)}><IconInfo />Taux et contenu</button>
+          <button className="linkbtn" onClick={() => setShowIndex(true)}><IconInfo />Index et taux</button>
         </header>
         <div className="lineup__cards">
           {banner.featured.map((id) => (
@@ -121,8 +119,8 @@ export const Banners = () => {
               <Coin name="soul" size={40} /><span>Âmes<b>{store.gems}</b></span>
             </button>
           </div>
-          <PityDial value={pity} />
         </div>
+        <PityBar value={pity} />
         <div className="console__pulls">
           {[1, 5, 10].map((n) => (
             <button key={n} className={`pull ${n === 10 ? 'pull--gold' : ''}`} disabled={!store.canAfford(currency, n)} onClick={() => summon(n)}>
@@ -134,16 +132,32 @@ export const Banners = () => {
       </section>
 
       {showIndex && createPortal(
-        <div className="modal" role="dialog" aria-modal="true" aria-label="Taux et contenu de la bannière" onClick={() => setShowIndex(false)}>
-          <div className="modal__box" onClick={(e) => e.stopPropagation()}>
-            <h2 className="modal__title">Taux — {banner.world}</h2>
-            <p className="modal__note">Probabilités par invocation. Quand une rareté sort, un personnage à l'affiche de cette rareté a 1 chance sur 2 d'être choisi. Une LR ou MR est garantie au plus tard à la {PITY_MAX}e invocation.</p>
-            {RARITY_ORDER.map((rid) => (
-              <div key={rid} className="rates">
-                <div className="rates__head" style={{ color: RARITIES[rid].color }}><b>{RARITIES[rid].short}</b>{RARITIES[rid].label}<span>{pct(RARITIES[rid].rate)}</span></div>
-                <p>{HEROES.filter((h) => h.rarity === rid).map((h) => `${h.name}${banner.featured.includes(h.id) ? ' ★' : ''}`).join(' · ')}</p>
-              </div>
-            ))}
+        <div className="modal" role="dialog" aria-modal="true" aria-label="Index de la bannière" onClick={() => setShowIndex(false)}>
+          <div className="modal__box index" onClick={(e) => e.stopPropagation()}>
+            <h2 className="modal__title">Index — {banner.world}</h2>
+            <p className="modal__note">Toutes les cartes que cette bannière peut donner, avec la chance exacte d'obtenir chacune en une invocation. Les cartes marquées ★ sont à l'affiche : elles sortent plus souvent que les autres cartes de leur rareté. Une carte SSR, LR ou MR est garantie au plus tard à la {PITY_MAX}e invocation.</p>
+            {RARITY_ORDER.map((rid) => {
+              const cards = HEROES.filter((h) => h.rarity === rid)
+              return (
+                <section key={rid} className="index__group">
+                  <header className="index__head" style={{ color: RARITIES[rid].color }}>
+                    <b>{RARITIES[rid].short}</b><span>{RARITIES[rid].label}</span><em>{pct(RARITIES[rid].rate)}</em>
+                  </header>
+                  <div className="index__cards">
+                    {cards.map((h) => (
+                      <figure key={h.id} className="index__card">
+                        <Card hero={h} />
+                        <figcaption>
+                          <span>{banner.featured.includes(h.id) ? '★ ' : ''}{h.name}</span>
+                          <b>{pct(cardRate(banner, h))}</b>
+                          <small>1 sur {Math.round(1 / cardRate(banner, h)).toLocaleString('fr-FR')}</small>
+                        </figcaption>
+                      </figure>
+                    ))}
+                  </div>
+                </section>
+              )
+            })}
             <button className="btn" onClick={() => setShowIndex(false)}>Fermer</button>
           </div>
         </div>,

@@ -20,7 +20,7 @@ import bpy
 OUT = os.path.join(os.path.dirname(__file__), '..', '..', 'src', 'assets', 'frames')
 W, H = 2.5, 3.5  # demi-largeur et demi-hauteur de la carte
 RES = (936, 1196)  # 7.2 × 9.2 unités à 130 px par unité
-ONLY = [a for a in sys.argv[1:] if a in ('rare', 'epic', 'legend', 'rift')]
+ONLY = [a for a in sys.argv[1:] if a in ('common', 'rare', 'epic', 'ultra', 'legend', 'rift')]
 
 
 # --- matières ------------------------------------------------------------------------------------------------
@@ -87,6 +87,11 @@ def materials():
         'holo': rainbow('Holo'),
         'pearl': principled('Pearl', (1.0, 0.97, 0.98), 0.75, 0.12, film=520),
         'gold': principled('Gold', (1.0, 0.72, 0.22), 1, 0.12, (1.0, 0.7, 0.2), 0.25),
+        'iron': principled('Iron', (0.32, 0.3, 0.3), 1, 0.42),
+        'ironlip': principled('IronLip', (0.55, 0.5, 0.46), 1, 0.3),
+        'deepgold': principled('DeepGold', (0.55, 0.3, 0.05), 1, 0.2),
+        'amber': principled('Amber', (1.0, 0.45, 0.05), 0.6, 0.12, (1.0, 0.4, 0.02), 0.8),
+        'goldlip': principled('GoldLip', (1.0, 0.85, 0.4), 0.5, 0.2, (1.0, 0.8, 0.3), 1.2),
     }
 
 
@@ -210,6 +215,13 @@ SIDES = [  # départ, arrivée, normale sortante, ondulations
 ]
 
 RECIPES = {
+    # N — fer brut : une simple moulure sombre et quatre rivets. Rien ne dépasse.
+    'common': dict(band=0.26, frame='iron', lip='ironlip', vines=[], amp=0, vine_r=0, thorn=None,
+                   spiral=None, blades=None, studs=None, back=None, gems=('ironlip', 0.085), tendrils=0),
+    # SSR — or massif : deux lianes d'or clair et d'or sombre, épines d'ambre, gerbes dorées derrière.
+    'ultra': dict(band=0.34, frame='gold', lip='goldlip', vines=['deepgold', 'gold'], amp=0.22, vine_r=0.08, thorn=(0.4, 0.052, ['gold', 'amber']),
+                  spiral=(0.38, 0.07, 'gold', None), blades=(0.82, 0.095, 'gold'), studs=None,
+                  back=([-56, -18, 20, 58], [0.62, 1.0, 1.0, 0.62], 0.14, ['gold', 'deepgold']), gems=('amber', 0.15), tendrils=6),
     # R — acier : moulure sobre, deux lames et un cabochon par coin, un fleuron au milieu de chaque bord.
     'rare': dict(band=0.3, frame='steel', lip='steellip', vines=[], amp=0, vine_r=0, thorn=None,
                  spiral=None, blades=(0.55, 0.075, 'steellip'), studs=(0.3, 'steellip'), back=None, gems=('steellip', 0.11), tendrils=0),
@@ -356,7 +368,25 @@ def outside(reach=0.9):
 def build_fx(rarity):
     random.seed(29)
     white = glow('White', (1, 1, 1), 1.0)
-    if rarity == 'rare':
+    if rarity == 'common':
+        grey = glow('Grey', (0.7, 0.75, 0.85), 1.0)
+        for sx, sy in ((-1, 1), (1, -1)):  # deux reflets discrets, rien de plus
+            star(sx * (W - 0.1), sy * (H - 0.1), 0.2, grey, 0.2)
+    elif rarity == 'ultra':
+        gold = glow('Gold', (1, 0.82, 0.3), 1.0)
+        amber = glow('Amber', (1, 0.55, 0.1), 1.0)
+        for i in range(18):
+            x, y, _ = outside(0.9)
+            star(x, y, random.uniform(0.14, 0.46), (white, gold, amber)[i % 3], random.uniform(0, 0.6))
+        for sx, sy in CORNERS:  # un grand rayon doré sur chaque coin
+            streak(sx * (W - 0.1), sy * (H - 0.1), math.atan2(sy, sx) + math.pi / 2, 2.2, 0.045, gold)
+        for i in range(8):  # filets d'or qui s'échappent du cadre
+            x, y, a = outside(0.2)
+            thorn(x, y, a + random.uniform(-0.8, 0.8), random.uniform(0.45, 0.85), 0.035, random.choice((-0.6, 0.6)), gold, z=0.6)
+        for i in range(14):
+            x, y, _ = outside(1.0)
+            ember(x, y, random.uniform(0.03, 0.065), gold if i % 2 else amber)
+    elif rarity == 'rare':
         blue = glow('Blue', (0.5, 0.75, 1), 1.0)
         for sx, sy in CORNERS:
             star(sx * (W + 0.2), sy * (H + 0.2), 0.42, white, 0.2)
@@ -455,7 +485,7 @@ def studio(accent):
     scene.view_settings.look = 'None'
 
 
-ACCENT = {'rare': (0.3, 0.6, 1), 'epic': (0.6, 0.3, 1), 'legend': (1, 0.5, 0.8), 'rift': (1, 0.05, 0.12)}
+ACCENT = {'common': (0.6, 0.6, 0.7), 'ultra': (1, 0.6, 0.15), 'rare': (0.3, 0.6, 1), 'epic': (0.6, 0.3, 1), 'legend': (1, 0.5, 0.8), 'rift': (1, 0.05, 0.12)}
 
 os.makedirs(OUT, exist_ok=True)
 for rarity in ONLY or list(RECIPES):

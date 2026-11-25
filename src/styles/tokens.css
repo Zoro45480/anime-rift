@@ -20,9 +20,11 @@
   --ember: #9b7bff;        /* accent d'action (violet de faille) */
   --rift: linear-gradient(120deg, #9b7bff, #5ee6ff);
 
+  --r-common: #a9afc4;
   --r-rare: #7fb4ff;
   --r-epic: #b993ff;
-  --r-legend: #ffd56b;
+  --r-ultra: #ffc531;
+  --r-legend: #ff8fd0;
   --r-rift: #ff4d6a;
 
   --a-fire: #ff7a52;

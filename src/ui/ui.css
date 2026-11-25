@@ -85,6 +85,9 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 .card--rift .card__frame { filter: drop-shadow(0 0 3cqw rgba(255, 30, 60, 0.75)) drop-shadow(0 1.5cqw 2.5cqw rgba(0, 0, 0, 0.6)); }
 /* Effets lumineux autour du cadre (rendus dans Blender), animés ici : ils scintillent, pulsent ou crépitent */
 .card__fx { position: absolute; left: -22%; top: -15.71%; width: 144%; height: 131.43%; max-width: none; pointer-events: none; z-index: 3; mix-blend-mode: screen; animation-delay: var(--delay, 0s); }
+.card--common .card__fx { opacity: 0.7; }
+.card--ultra .card__fx { filter: drop-shadow(0 0 2cqw #ffc531) drop-shadow(0 0 4cqw #ff9a1a); animation: fx-pulse 2.2s ease-in-out infinite; animation-delay: var(--delay, 0s); }
+.card--ultra .card__frame { filter: drop-shadow(0 0 2.5cqw rgba(255, 197, 49, 0.6)) drop-shadow(0 1.5cqw 2.5cqw rgba(0, 0, 0, 0.6)); }
 .card--rare .card__fx { filter: drop-shadow(0 0 1.5cqw #7fb4ff); animation: fx-twinkle 3.4s ease-in-out infinite; animation-delay: var(--delay, 0s); }
 .card--epic .card__fx { filter: drop-shadow(0 0 2cqw #a47bff) drop-shadow(0 0 4cqw #7a45ff); animation: fx-pulse 2.6s ease-in-out infinite; animation-delay: var(--delay, 0s); }
 .card--legend .card__fx { animation: fx-prism 5s linear infinite; animation-delay: var(--delay, 0s); }
@@ -134,17 +137,28 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 .card__name i { display: block; font-size: 0.5em; font-weight: 700; letter-spacing: 0.03em; opacity: 0.9; margin-top: 0.8cqw; }
 .card__world { font-size: 4.2cqw; font-weight: 600; color: rgba(255, 255, 255, 0.62); margin-top: 1cqw; }
 .card__rule { position: relative; width: 100%; height: 0.35cqw; margin: 3cqw 0 2.6cqw; background: linear-gradient(90deg, var(--rc), transparent); opacity: 0.85; }
-.card__stats { display: flex; align-items: baseline; gap: 5cqw; width: 100%; font-family: var(--font-display); font-weight: 700; font-size: 8cqw; line-height: 1; color: #fff; font-variant-numeric: tabular-nums; }
-.card__stats b { font-weight: 700; display: flex; align-items: baseline; gap: 1.4cqw; }
-.card__stats small { font-family: var(--font); font-weight: 800; font-size: 3.3cqw; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.55); }
+.card__stats { display: flex; align-items: flex-end; gap: 5cqw; width: 100%; font-family: var(--font-display); font-weight: 700; font-size: 8cqw; line-height: 1; color: #fff; font-variant-numeric: tabular-nums; }
+.card__stats b { font-weight: 700; display: grid; gap: 0.6cqw; line-height: 1; }
+.card__stats small { font-family: var(--font); font-weight: 800; font-size: 3cqw; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); }
 .card__stats em { margin-left: auto; font-family: var(--font); font-style: normal; font-weight: 600; font-size: 2.9cqw; letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.45); white-space: nowrap; }
+
+/* --- N : carte commune, sobre --- */
+.card--common .card__mono { font-size: 19cqw; }
+.card--common .card__rays { opacity: 0.3; }
+
+/* --- SSR : or massif, holographie dorée --- */
+.card--ultra { --foil: 0.6; --sparkle: 0.7; --rc: #ffc531; }
+.card--ultra .card__mono { font-size: 22cqw; left: -4cqw; top: -5cqw; letter-spacing: -0.03em; -webkit-text-stroke-color: #4a2c00; color: #4a2c00; text-shadow: 0 0 3cqw #ffc531, 1cqw 1cqw 0 #1a0f00; }
+.card--ultra .card__mono::after { background-image: linear-gradient(180deg, #fffbe6 10%, #ffd56b 45%, #fff3bf 55%, #c8921c 100%); }
+.card--ultra .card__name { background: linear-gradient(180deg, #fffbe6 25%, #ffd56b 70%, #e0a52a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.card--ultra .card__rule { background: linear-gradient(90deg, #ffd56b, #fff3bf, transparent); }
 
 /* --- SR : métal violet anodisé, reflet léger --- */
 .card--epic { --foil: 0.35; --sparkle: 0.25; }
 .card--epic .card__mono { font-size: 23cqw; }
 
 /* --- LR : feuille holographique arc-en-ciel --- */
-.card--legend { --foil: 0.85; --sparkle: 0.9; --rc: #ffd56b; }
+.card--legend { --foil: 0.85; --sparkle: 0.9; --rc: #ff8fd0; }
 .card--legend .card__mono { font-size: 27cqw; left: -3cqw; top: -6cqw; -webkit-text-stroke-color: #ffffff; color: #fff; text-shadow: 0 0 1.2cqw #0a0b1a, 0 0 4cqw rgba(255, 122, 195, 0.9); }
 .card--legend .card__mono::after { background-image: linear-gradient(100deg, #f5b800, #ff4fa8 35%, #8a5bff 60%, #2fb0f0 85%, #2fd07a); }
 .card--legend .card__rule { background: linear-gradient(90deg, #ffe27a, #ff7ac3, #7ad7ff, transparent); }
@@ -170,7 +184,7 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 .card--legend .card__count, .card--rift .card__count { left: 12.5cqw; top: 43cqw; }
 .card--legend .card__plate, .card--rift .card__plate { padding: 24cqw 14cqw 13.5cqw; }
 .card--legend .card__name, .card--rift .card__name { font-size: 11.5cqw; }
-.card--legend .card__stats, .card--rift .card__stats { font-size: 7cqw; gap: 3.6cqw; }
+.card--legend .card__stats, .card--rift .card__stats { font-size: 7cqw; gap: 4cqw; }
 
 .card.is-locked { animation: none; filter: grayscale(1) brightness(0.4); }
 .card.is-locked .card__shine, .card.is-locked .card__glitter, .card.is-locked .card__glare, 
@@ -221,21 +235,21 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 
 /* Console d'invocation */
 .console { padding: 18px; background: linear-gradient(180deg, var(--ink-3), var(--ink-2)); clip-path: polygon(22px 0, 100% 0, 100% calc(100% - 22px), calc(100% - 22px) 100%, 0 100%, 0 22px); }
-.console__top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; align-items: center; }
+.console__top { display: grid; grid-template-columns: minmax(0, 1fr); }
 .pay { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .pay button { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 14px; border: 1.5px solid var(--line); text-align: left; opacity: 0.6; transition: opacity var(--mid), border-color var(--mid), background var(--mid); }
 .pay span { display: grid; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); }
 .pay b { font-family: var(--font-display); font-weight: 700; font-size: 24px; line-height: 1; letter-spacing: 0; color: var(--cream); font-variant-numeric: tabular-nums; }
 .pay button:hover { opacity: 0.9; }
 .pay .is-active { opacity: 1; border-color: var(--gold); background: rgba(246, 207, 99, 0.08); }
-.dial { position: relative; width: 84px; height: 84px; flex: none; }
-.dial svg { width: 100%; height: 100%; rotate: -90deg; }
-.dial circle { fill: none; stroke-width: 6; }
-.dial__track { stroke: rgba(190, 200, 255, 0.14); }
-.dial__fill { stroke: var(--gold); stroke-linecap: round; transition: stroke-dashoffset var(--slow) var(--ease-out); }
-.dial__num { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
-.dial__num b { font-family: var(--font-display); font-weight: 700; font-size: 26px; line-height: 0.9; color: var(--cream); font-variant-numeric: tabular-nums; }
-.dial__num span { font-size: 8.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-dim); }
+.pity { margin-top: 14px; display: grid; gap: 6px; }
+.pity__row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.pity__label { font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
+.pity__count { font-family: var(--font-display); font-weight: 700; font-size: 22px; line-height: 1; color: var(--cream); font-variant-numeric: tabular-nums; }
+.pity__count i { font-style: normal; font-size: 14px; color: var(--text-dim); }
+.pity__track { height: 12px; background: rgba(190, 200, 255, 0.14); clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); overflow: hidden; }
+.pity__track i { display: block; height: 100%; min-width: 3px; background: linear-gradient(90deg, #c8921c, var(--gold) 60%, #fff3bf); box-shadow: 0 0 12px var(--gold); transition: width var(--slow) var(--ease-out); }
+.pity__note { font-size: 12px; color: var(--text-dim); }
 .console__pulls { display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 4px; margin-top: 16px; }
 .pull { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70px; background: #262a55; clip-path: polygon(var(--skew) 0, 100% 0, calc(100% - var(--skew)) 100%, 0 100%); color: var(--cream); transition: transform var(--fast) var(--ease-out), filter var(--mid); }
 .pull b { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: 32px; line-height: 1; }
@@ -285,6 +299,20 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 @keyframes deal { from { opacity: 0; transform: translateY(40px) rotateY(80deg) scale(0.8); } }
 .result .btn { max-width: 320px; }
 
+/* ===== Index de la bannière : toutes les cartes et leur taux ===== */
+.modal__box.index { width: min(100%, 760px); max-height: calc(100vh - 32px); overflow-y: auto; }
+.index__group { display: grid; gap: 4px; padding-top: 6px; border-top: 1px solid var(--line); }
+.index__head { display: flex; align-items: baseline; gap: 10px; font-weight: 800; }
+.index__head b { font-family: var(--font-display); font-style: italic; font-size: 26px; min-width: 46px; }
+.index__head span { font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; }
+.index__head em { margin-left: auto; font-style: normal; font-family: var(--font-display); font-size: 22px; color: var(--cream); font-variant-numeric: tabular-nums; }
+.index__cards { display: flex; flex-wrap: wrap; gap: 14px 34px; padding: 28px 22px 10px; }
+.index__card { margin: 0; width: 104px; display: grid; gap: 22px; }
+.index__card figcaption { display: grid; justify-items: center; text-align: center; line-height: 1.25; }
+.index__card figcaption span { font-size: 13px; font-weight: 800; color: var(--cream); }
+.index__card figcaption b { font-family: var(--font-display); font-size: 19px; color: var(--gold); font-variant-numeric: tabular-nums; }
+.index__card figcaption small { font-size: 11px; color: var(--text-dim); }
+
 /* ===== Cinématique d'invocation ===== */
 .sc { --sc: var(--cyan); --sc2: #fff; position: fixed; inset: 0; z-index: 50; background: #03040a; overflow: hidden; animation: fade 350ms both; }
 .sc__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
@@ -322,14 +350,16 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 @keyframes burst-spin { to { rotate: 360deg; } }
 .sc__bigcard { position: relative; width: min(54vw, 36vh, 300px); margin-top: -6vh; animation: card-slam 520ms cubic-bezier(0.2, 1.5, 0.4, 1) both; }
 @keyframes card-slam { 0% { opacity: 0; transform: scale(0.15) rotate(-16deg); filter: brightness(6) blur(6px); } 55% { opacity: 1; filter: brightness(2.2) blur(0); } 100% { transform: scale(1) rotate(0); filter: brightness(1); } }
-.sc--legend .sc__bigcard, .sc--rift .sc__bigcard { width: min(62vw, 42vh, 340px); animation-duration: 700ms; }
+.sc--ultra .sc__bigcard, .sc--legend .sc__bigcard, .sc--rift .sc__bigcard { width: min(62vw, 42vh, 340px); animation-duration: 700ms; }
 
 /* Petite rangée de suivi : une case par carte du tirage */
 .sc__tray { position: absolute; left: 0; right: 0; top: calc(9vh + 14px); display: flex; justify-content: center; gap: 5px; pointer-events: none; }
 .sc__chip { display: grid; place-items: center; width: 26px; height: 34px; font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: 13px; color: #0a0b1a; background: rgba(190, 200, 255, 0.14); clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%); transition: background var(--mid), transform var(--mid) var(--ease-out); }
 .sc__chip.is-current { transform: translateY(-4px) scale(1.15); background: rgba(255, 255, 255, 0.45); }
 .sc__chip.is-on { background: var(--r-rare); }
+.sc__chip.is-on.sc__chip--common { background: var(--r-common); }
 .sc__chip--epic.is-on { background: var(--r-epic); }
+.sc__chip--ultra.is-on { background: linear-gradient(120deg, #fff3bf, #ffc531); }
 .sc__chip--legend.is-on { background: linear-gradient(120deg, #ffe27a, #ff7ac3, #7ad7ff); }
 .sc__chip--rift.is-on { background: linear-gradient(120deg, #fff, #ff2e4f); }
 
@@ -360,7 +390,7 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 @keyframes letter-in { from { opacity: 0; transform: translateY(0.5em) scale(1.6) rotate(8deg); filter: blur(10px); } }
 .sc__title { position: relative; font-size: clamp(13px, 2.2vw, 18px); font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text); animation: screen-in 500ms var(--ease-out) 500ms both; }
 .sc__continue { position: relative; width: min(100%, 300px); margin-top: 16px; animation: screen-in 500ms var(--ease-out) 700ms both; }
-.sc--legend .sc__name, .sc--rift .sc__name { background: linear-gradient(100deg, #fff 20%, var(--sc2) 40%, #fff 50%, var(--sc) 75%, #fff); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; filter: drop-shadow(0 0 26px var(--sc)) drop-shadow(5px 5px 0 rgba(3, 4, 10, 0.8)); animation: sweep 3.5s linear 1s infinite; }
+.sc--ultra .sc__name, .sc--legend .sc__name, .sc--rift .sc__name { background: linear-gradient(100deg, #fff 20%, var(--sc2) 40%, #fff 50%, var(--sc) 75%, #fff); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; filter: drop-shadow(0 0 26px var(--sc)) drop-shadow(5px 5px 0 rgba(3, 4, 10, 0.8)); animation: sweep 3.5s linear 1s infinite; }
 @keyframes sweep { to { background-position: -250% 0; } }
 
 /* Résultats d'un tirage multiple, par-dessus la scène */

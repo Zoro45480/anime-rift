@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { BANNERS, PITY_MAX } from '../data/banners'
-import { RARITIES } from '../data/rarities'
-import { pullMany, pullOne } from './gacha'
+import { HEROES } from '../data/heroes'
+import { isPityRarity, RARITIES, RARITY_ORDER } from '../data/rarities'
+import { cardRate, pullMany, pullOne } from './gacha'
 
 const seeded = (seed: number) => () => {
   seed = (seed * 1664525 + 1013904223) % 4294967296
@@ -9,33 +10,67 @@ const seeded = (seed: number) => () => {
 }
 
 describe('gacha', () => {
+  it('compte six raretés, dont chacune a au moins une carte', () => {
+    expect(RARITY_ORDER).toHaveLength(6)
+    for (const id of RARITY_ORDER) expect(HEROES.some((h) => h.rarity === id)).toBe(true)
+  })
+
   it('les taux affichés totalisent 100 %', () => {
     const sum = Object.values(RARITIES).reduce((s, r) => s + r.rate, 0)
     expect(sum).toBeCloseTo(1, 10)
   })
 
+  it('plus une rareté est haute, plus elle est difficile à obtenir', () => {
+    const rates = RARITY_ORDER.map((id) => RARITIES[id].rate) // de la plus rare à la plus courante
+    for (let i = 1; i < rates.length; i++) expect(rates[i]).toBeGreaterThan(rates[i - 1])
+  })
+
   it('les taux observés correspondent aux taux affichés (hors garantie)', () => {
     const rng = seeded(42)
-    const n = 400000
+    const n = 2_000_000
     const seen: Record<string, number> = {}
     for (let i = 0; i < n; i++) {
       const { hero } = pullOne(BANNERS[0], 0, rng) // compteur à 0 : la garantie n'intervient pas
       seen[hero.rarity] = (seen[hero.rarity] ?? 0) + 1
     }
-    for (const r of Object.values(RARITIES)) expect(seen[r.id] / n).toBeCloseTo(r.rate, 2)
+    for (const r of Object.values(RARITIES)) {
+      const observed = (seen[r.id] ?? 0) / n
+      expect(Math.abs(observed - r.rate)).toBeLessThan(0.0015 + r.rate * 0.1) // marge statistique, même pour 0,05 %
+    }
   })
 
-  it('garantit une LR ou MR au plus tard à la 50e invocation', () => {
+  it('le taux par carte de l\'index totalise 100 % et correspond aux tirages réels', () => {
+    for (const banner of BANNERS) {
+      const sum = HEROES.reduce((s, h) => s + cardRate(banner, h), 0)
+      expect(sum).toBeCloseTo(1, 10)
+    }
+    const banner = BANNERS[0]
+    const rng = seeded(9)
+    const n = 1_000_000
+    const seen: Record<string, number> = {}
+    for (let i = 0; i < n; i++) {
+      const { hero } = pullOne(banner, 0, rng)
+      seen[hero.id] = (seen[hero.id] ?? 0) + 1
+    }
+    for (const h of HEROES) {
+      const expected = cardRate(banner, h)
+      expect(Math.abs((seen[h.id] ?? 0) / n - expected)).toBeLessThan(0.0015 + expected * 0.1)
+    }
+  })
+
+  it('garantit une SSR, LR ou MR au plus tard à la 50e invocation', () => {
     const rng = seeded(7)
     let pity = 0
     let streak = 0
-    for (let i = 0; i < 200000; i++) {
+    let longest = 0
+    for (let i = 0; i < 300000; i++) {
       const r = pullOne(BANNERS[1], pity, rng)
       pity = r.pity
-      const top = r.hero.rarity === 'legend' || r.hero.rarity === 'rift'
-      streak = top ? 0 : streak + 1
+      streak = isPityRarity(r.hero.rarity) ? 0 : streak + 1
+      longest = Math.max(longest, streak)
       expect(streak).toBeLessThan(PITY_MAX)
     }
+    expect(longest).toBe(PITY_MAX - 1) // la garantie sert vraiment : sans elle, des séries plus longues existeraient
   })
 
   it('une multi ×10 rend 10 cartes et fait avancer le compteur', () => {

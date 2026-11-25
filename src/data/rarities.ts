@@ -1,13 +1,21 @@
-export type RarityId = 'rare' | 'epic' | 'legend' | 'rift'
+export type RarityId = 'common' | 'rare' | 'epic' | 'ultra' | 'legend' | 'rift'
 
-// `rate` = probabilité d'obtention par invocation (somme = 1). Affichée telle quelle au joueur.
+// Les six raretés du jeu, de la plus courante à la plus rare.
+// `rate` = probabilité d'obtention par invocation (la somme fait 1). Affichée telle quelle au joueur dans l'index.
 export type Rarity = { id: RarityId; label: string; short: string; stars: number; color: string; rate: number }
 
 export const RARITIES: Record<RarityId, Rarity> = {
-  rare: { id: 'rare', label: 'Rare', short: 'R', stars: 3, color: 'var(--r-rare)', rate: 0.785 },
-  epic: { id: 'epic', label: 'Épique', short: 'SR', stars: 4, color: 'var(--r-epic)', rate: 0.18 },
-  legend: { id: 'legend', label: 'Légendaire', short: 'LR', stars: 5, color: 'var(--r-legend)', rate: 0.03 },
-  rift: { id: 'rift', label: 'Faille', short: 'MR', stars: 6, color: 'var(--r-rift)', rate: 0.005 },
+  common: { id: 'common', label: 'Commune', short: 'N', stars: 1, color: 'var(--r-common)', rate: 0.6 },
+  rare: { id: 'rare', label: 'Rare', short: 'R', stars: 2, color: 'var(--r-rare)', rate: 0.285 },
+  epic: { id: 'epic', label: 'Super rare', short: 'SR', stars: 3, color: 'var(--r-epic)', rate: 0.09 },
+  ultra: { id: 'ultra', label: 'Ultra rare', short: 'SSR', stars: 4, color: 'var(--r-ultra)', rate: 0.02 },
+  legend: { id: 'legend', label: 'Légendaire', short: 'LR', stars: 5, color: 'var(--r-legend)', rate: 0.0045 },
+  rift: { id: 'rift', label: 'Mythique', short: 'MR', stars: 6, color: 'var(--r-rift)', rate: 0.0005 },
 }
 
-export const RARITY_ORDER: RarityId[] = ['rift', 'legend', 'epic', 'rare']
+// De la plus rare à la plus courante.
+export const RARITY_ORDER: RarityId[] = ['rift', 'legend', 'ultra', 'epic', 'rare', 'common']
+
+// Raretés couvertes par la garantie (pity) : au bout de PITY_MAX invocations sans l'une d'elles, la suivante en est une.
+export const PITY_RARITIES: RarityId[] = ['ultra', 'legend', 'rift']
+export const isPityRarity = (id: RarityId) => PITY_RARITIES.includes(id)

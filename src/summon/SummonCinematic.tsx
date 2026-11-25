@@ -18,8 +18,8 @@ import type { Quality, SummonStage } from './SummonStage'
 //   4. Bilan      — la carte seule en grand, ou la grille de toutes les cartes.
 
 const QUALITY_KEY = 'anime-rift-fx'
-const CARD_MS: Record<RarityId, number> = { rare: 650, epic: 850, legend: 1600, rift: 2000 }
-const CUTIN_MS: Partial<Record<RarityId, number>> = { legend: 1250, rift: 1650 } // seules ces raretés ont un plan d'annonce
+const CARD_MS: Record<RarityId, number> = { common: 520, rare: 620, epic: 800, ultra: 1300, legend: 1700, rift: 2100 }
+const CUTIN_MS: Partial<Record<RarityId, number>> = { ultra: 1100, legend: 1300, rift: 1650 } // seules ces raretés ont un plan d'annonce
 
 const readQuality = (): Quality => {
   try {

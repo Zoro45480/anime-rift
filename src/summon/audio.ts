@@ -64,7 +64,7 @@ export const primeAudio = () => {
   }
 }
 
-const POWER: Record<RarityId, number> = { rare: 0.6, epic: 0.75, legend: 0.9, rift: 1 }
+const POWER: Record<RarityId, number> = { common: 0.5, rare: 0.6, epic: 0.72, ultra: 0.85, legend: 0.95, rift: 1 }
 
 export class SummonAudio {
   private live: { src: AudioBufferSourceNode; gain: GainNode }[] = []
@@ -104,7 +104,7 @@ export class SummonAudio {
       this.play('charge', t0 + s.hush - charge.duration / rate, 0.5 * power, rate)
     }
     this.play('burst', t0 + s.burst, 0.8 * power)
-    if (rarity === 'legend') this.play('legend', t0 + s.burst + 0.25, 0.6)
+    if (rarity === 'ultra' || rarity === 'legend') this.play('legend', t0 + s.burst + 0.25, rarity === 'legend' ? 0.7 : 0.5)
     if (rarity === 'rift') this.play('mythic', t0 + s.burst - 0.15, 0.85)
   }
 
@@ -113,7 +113,7 @@ export class SummonAudio {
     if (!ctx) return
     const now = ctx.currentTime + 0.01
     this.play('pop', now, 0.6, 1 + Math.min(step, 9) * 0.035)
-    if (rarity === 'legend') this.play('legend', now + 0.05, 0.6)
+    if (rarity === 'ultra' || rarity === 'legend') this.play('legend', now + 0.05, rarity === 'legend' ? 0.7 : 0.5, rarity === 'legend' ? 1 : 1.12)
     if (rarity === 'rift') this.play('burst', now, 0.6, 0.85)
   }
 
