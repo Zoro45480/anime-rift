@@ -52,7 +52,7 @@ export const Banners = () => {
   const star = heroById(banner.star)
   const left = useCountdown(banner.endsAt)
   const pity = store.pity[banner.id]
-  const coin = currency === 'ticket' ? 'ticket' : 'gem'
+  const coin = currency === 'ticket' ? 'seal' : 'soul'
   const price = (n: number) => n * (currency === 'ticket' ? COST.ticket : COST.gems)
   const turn = (step: number) => setIndex((i) => (i + step + BANNERS.length) % BANNERS.length)
   const summon = (n: number) => {
@@ -115,10 +115,10 @@ export const Banners = () => {
         <div className="console__top">
           <div className="pay" role="radiogroup" aria-label="Moyen d'invocation">
             <button role="radio" aria-checked={currency === 'ticket'} className={currency === 'ticket' ? 'is-active' : ''} onClick={() => setCurrency('ticket')}>
-              <Coin name="ticket" size={40} /><span>Tickets<b>{store.tickets}</b></span>
+              <Coin name="seal" size={40} /><span>Sceaux<b>{store.tickets}</b></span>
             </button>
             <button role="radio" aria-checked={currency === 'gems'} className={currency === 'gems' ? 'is-active' : ''} onClick={() => setCurrency('gems')}>
-              <Coin name="gem" size={40} /><span>Gemmes<b>{store.gems}</b></span>
+              <Coin name="soul" size={40} /><span>Âmes<b>{store.gems}</b></span>
             </button>
           </div>
           <PityDial value={pity} />

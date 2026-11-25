@@ -2,7 +2,7 @@ import { useRef, type CSSProperties, type PointerEvent } from 'react'
 import { AFFINITIES } from '../data/affinities'
 import type { Hero } from '../data/heroes'
 import { RARITIES } from '../data/rarities'
-import { frameArt, heroArt } from '../assets/manifest'
+import { frameArt, frameFx, heroArt } from '../assets/manifest'
 import { useStore } from '../state/store'
 import { AffinityIcon } from './AffinityIcon'
 
@@ -64,6 +64,7 @@ export const Card = ({ hero, count, locked, className = '', style }: Props) => {
           </div>
         </div>
         <img className="card__frame" src={frameArt(hero.rarity)} alt="" />
+        <img className="card__fx" src={frameFx(hero.rarity)} alt="" />
         <span className="card__mono" data-t={rarity.short} aria-label={rarity.label}>{rarity.short}</span>
       </div>
     </div>

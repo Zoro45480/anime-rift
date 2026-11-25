@@ -83,6 +83,17 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 .card--epic .card__frame { filter: drop-shadow(0 0 2cqw rgba(164, 123, 255, 0.55)) drop-shadow(0 1.5cqw 2.5cqw rgba(0, 0, 0, 0.6)); }
 .card--legend .card__frame { filter: drop-shadow(0 0 2.5cqw rgba(255, 150, 220, 0.6)) drop-shadow(0 1.5cqw 2.5cqw rgba(0, 0, 0, 0.6)); }
 .card--rift .card__frame { filter: drop-shadow(0 0 3cqw rgba(255, 30, 60, 0.75)) drop-shadow(0 1.5cqw 2.5cqw rgba(0, 0, 0, 0.6)); }
+/* Effets lumineux autour du cadre (rendus dans Blender), animés ici : ils scintillent, pulsent ou crépitent */
+.card__fx { position: absolute; left: -22%; top: -15.71%; width: 144%; height: 131.43%; max-width: none; pointer-events: none; z-index: 3; mix-blend-mode: screen; animation-delay: var(--delay, 0s); }
+.card--rare .card__fx { filter: drop-shadow(0 0 1.5cqw #7fb4ff); animation: fx-twinkle 3.4s ease-in-out infinite; animation-delay: var(--delay, 0s); }
+.card--epic .card__fx { filter: drop-shadow(0 0 2cqw #a47bff) drop-shadow(0 0 4cqw #7a45ff); animation: fx-pulse 2.6s ease-in-out infinite; animation-delay: var(--delay, 0s); }
+.card--legend .card__fx { animation: fx-prism 5s linear infinite; animation-delay: var(--delay, 0s); }
+.card--rift .card__fx { filter: drop-shadow(0 0 1.5cqw #ff2e4f) drop-shadow(0 0 4cqw #ff0030); animation: fx-crackle 1.7s steps(1) infinite; animation-delay: var(--delay, 0s); }
+@keyframes fx-twinkle { 50% { opacity: 0.35; scale: 0.985; } }
+@keyframes fx-pulse { 50% { opacity: 0.5; scale: 1.02; } }
+@keyframes fx-prism { 0% { filter: drop-shadow(0 0 2cqw #fff) hue-rotate(0deg); opacity: 1; } 50% { filter: drop-shadow(0 0 3cqw #fff) hue-rotate(180deg); opacity: 0.65; } 100% { filter: drop-shadow(0 0 2cqw #fff) hue-rotate(360deg); opacity: 1; } }
+@keyframes fx-crackle { 0%, 100% { opacity: 1; scale: 1; } 12% { opacity: 0.35; } 20% { opacity: 1; scale: 1.015; } 46% { opacity: 0.75; } 54% { opacity: 0.2; } 60% { opacity: 1; scale: 0.99; } 82% { opacity: 0.6; } }
+.card.is-locked .card__fx { display: none; }
 .card.is-live .card__tilt { transition: none; }
 .card__face { position: relative; width: 100%; height: 100%; border-radius: 4cqw; overflow: hidden; isolation: isolate; background: #0b0c1c; box-shadow: inset 0 0 0 0.4cqw rgba(7, 8, 18, 0.7); }
 

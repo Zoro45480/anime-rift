@@ -10,7 +10,8 @@ export const heroArt = (model: string, kind: ArtKind): string => files[`./art/${
 
 const icons = import.meta.glob('./icons/*.png', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 
-export type IconName = 'gem' | 'ticket' | 'bolt'
+// seal = Sceau d'invocation (talisman), soul = Flamme d'âme (la monnaie), bolt = énergie. Dessinées dans Blender (tools/blender/build_icons.py).
+export type IconName = 'soul' | 'seal' | 'bolt'
 
 export const iconArt = (name: IconName): string => icons[`./icons/${name}.png`] ?? ''
 
@@ -23,3 +24,6 @@ const frames = import.meta.glob('./frames/*.png', { eager: true, query: '?url', 
 
 // Cadre d'une rareté, rendu avec Blender (tools/blender/build_frames.py). L'image déborde de la carte : voir .card__frame.
 export const frameArt = (rarity: string): string => frames[`./frames/${rarity}.png`] ?? ''
+
+// Effets lumineux du même cadre (étoiles, arcs, flammes), rendus à part pour que le jeu puisse les animer.
+export const frameFx = (rarity: string): string => frames[`./frames/${rarity}-fx.png`] ?? ''

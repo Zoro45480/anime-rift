@@ -279,6 +279,128 @@ def build(rarity, mats):
         spiral(px + nx * 0.3, py + ny * 0.3, a + math.pi, random.choice((-1, 1)), random.uniform(0.14, 0.24), 0.035, mats[r['vines'][-1] if r['vines'] else r['frame']], z=0.3)
 
 
+# --- effets lumineux autour du cadre (seconde image, que le jeu anime par-dessus le cadre) -------------------------
+def glow(name, color, strength):
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    nt.nodes.clear()
+    e = nt.nodes.new('ShaderNodeEmission')
+    e.inputs[0].default_value = (*color, 1)
+    e.inputs[1].default_value = strength
+    out = nt.nodes.new('ShaderNodeOutputMaterial')
+    nt.links.new(e.outputs[0], out.inputs[0])
+    return m
+
+
+def flat_mesh(name, pts, mat, z=0.6):
+    me = bpy.data.meshes.new(name)
+    me.from_pydata([(x, y, z) for x, y in pts], [], [tuple(range(len(pts)))])
+    obj = bpy.data.objects.new(name, me)
+    bpy.context.scene.collection.objects.link(obj)
+    obj.data.materials.append(mat)
+    return obj
+
+
+def star(x, y, size, mat, angle=0.0):
+    """Étoile à quatre branches, comme un éclat de lumière."""
+    pts = []
+    for i in range(8):
+        a = angle + i * math.pi / 4
+        r = size if i % 2 == 0 else size * 0.16
+        pts.append((x + math.cos(a) * r, y + math.sin(a) * r))
+    return flat_mesh('Star', pts, mat)
+
+
+def streak(x, y, angle, length, width, mat):
+    """Trait de lumière effilé aux deux bouts."""
+    dx, dy = math.cos(angle), math.sin(angle)
+    px, py = -dy, dx
+    return flat_mesh('Streak', [(x - dx * length / 2, y - dy * length / 2), (x + px * width, y + py * width), (x + dx * length / 2, y + dy * length / 2), (x - px * width, y - py * width)], mat)
+
+
+def lightning(a, b, mat, jitter=0.22, radius=0.022):
+    """Arc électrique : une ligne brisée entre deux points, avec une petite branche."""
+    pts = []
+    n = 9
+    for i in range(n + 1):
+        k = i / n
+        j = 0 if i in (0, n) else jitter
+        pts.append((a[0] + (b[0] - a[0]) * k + random.uniform(-j, j), a[1] + (b[1] - a[1]) * k + random.uniform(-j, j), 0.6))
+    data = bpy.data.curves.new('Arc', 'CURVE')
+    data.dimensions = '3D'
+    data.bevel_depth = radius
+    for line in (pts, [pts[4], (pts[4][0] + random.uniform(-0.5, 0.5), pts[4][1] + random.uniform(-0.5, 0.5), 0.6)]):
+        sp = data.splines.new('POLY')
+        sp.points.add(len(line) - 1)
+        for p, co in zip(sp.points, line):
+            p.co = (*co, 1)
+    obj = bpy.data.objects.new('Arc', data)
+    bpy.context.scene.collection.objects.link(obj)
+    obj.data.materials.append(mat)
+    return obj
+
+
+def ember(x, y, r, mat):
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=r, location=(x, y, 0.6))
+    bpy.context.object.data.materials.append(mat)
+
+
+def outside(reach=0.9):
+    """Un point au hasard autour du cadre, à l'extérieur de la carte."""
+    (x, y), (nx, ny) = rim(random.random(), W, H)
+    d = random.uniform(0.05, reach)
+    return x + nx * d, y + ny * d, math.atan2(ny, nx)
+
+
+def build_fx(rarity):
+    random.seed(29)
+    white = glow('White', (1, 1, 1), 1.0)
+    if rarity == 'rare':
+        blue = glow('Blue', (0.5, 0.75, 1), 1.0)
+        for sx, sy in CORNERS:
+            star(sx * (W + 0.2), sy * (H + 0.2), 0.42, white, 0.2)
+            star(sx * (W - 0.4), sy * (H + 0.45), 0.2, blue)
+    elif rarity == 'epic':
+        violet = glow('Violet', (0.7, 0.4, 1), 1.0)
+        for i in range(14):
+            x, y, _ = outside(0.8)
+            star(x, y, random.uniform(0.14, 0.4), white if i % 3 == 0 else violet, random.uniform(0, 0.6))
+        for i in range(10):  # filets d'énergie qui s'échappent du cadre
+            x, y, a = outside(0.2)
+            thorn(x, y, a + random.uniform(-0.9, 0.9), random.uniform(0.5, 0.95), 0.035, random.choice((-0.6, 0.6)), violet, z=0.6)
+    elif rarity == 'legend':
+        tints = [glow('Pink', (1, 0.45, 0.8), 1.0), glow('Cyan', (0.4, 0.9, 1), 1.0), glow('Gold', (1, 0.85, 0.35), 1.0), glow('Mint', (0.5, 1, 0.7), 1.0), white]
+        for i in range(22):
+            x, y, _ = outside(0.95)
+            star(x, y, random.uniform(0.14, 0.5), tints[i % 5], random.uniform(0, 0.7))
+        for sx, sy in CORNERS:  # grands traits de lumière en croix sur chaque coin
+            for k, (length, tilt) in enumerate(((2.6, 0.0), (1.7, 0.5), (1.5, -0.5))):
+                streak(sx * (W - 0.1), sy * (H - 0.1), math.atan2(sy, sx) + math.pi / 2 + tilt, length, 0.045, tints[(k + (sx > 0)) % 5])
+        for i in range(18):
+            x, y, _ = outside(1.0)
+            ember(x, y, random.uniform(0.03, 0.07), tints[i % 5])
+    else:
+        red = glow('Red', (1, 0.05, 0.1), 1.0)
+        hot = glow('Hot', (1, 0.55, 0.45), 1.0)
+        orange = glow('Orange', (1, 0.4, 0.05), 1.0)
+        corners = [(sx * (W + 0.05), sy * (H + 0.05)) for sx, sy in CORNERS]
+        for i in range(4):  # arcs électriques qui courent d'un coin à l'autre, juste hors du cadre
+            a, b = corners[i], corners[(i + 1) % 4]
+            mid = ((a[0] + b[0]) / 2 * 1.16, (a[1] + b[1]) / 2 * 1.1)
+            lightning(a, mid, hot if i % 2 else white)
+            lightning(mid, b, red, jitter=0.3, radius=0.03)
+        for i in range(16):  # flammes qui montent du cadre
+            x, y, a = outside(0.15)
+            thorn(x, y, a * 0.35 + math.pi / 2 * 0.65 + random.uniform(-0.4, 0.4), random.uniform(0.45, 1.0), 0.05, random.choice((-0.7, 0.7)), red if i % 3 else orange, z=0.6)
+        for i in range(26):
+            x, y, _ = outside(1.0)
+            ember(x, y, random.uniform(0.025, 0.07), orange if i % 2 else red)
+        for i in range(10):
+            x, y, _ = outside(0.9)
+            star(x, y, random.uniform(0.16, 0.44), white if i % 2 else hot, random.uniform(0, 0.6))
+
+
 # --- studio et rendu -------------------------------------------------------------------------------------------
 def studio(accent):
     scene = bpy.context.scene
@@ -350,3 +472,19 @@ for rarity in ONLY or list(RECIPES):
         bpy.context.scene.cycles.samples = 160
         bpy.ops.render.render(write_still=True)
     print(f'Blender {bpy.app.version_string} — cadre {rarity} : {os.path.getsize(path) / 1024:.0f} Ko')
+
+    # seconde passe : les effets seuls, sans éclairage (ils émettent leur propre lumière)
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    materials()  # recrée les matières partagées dont `thorn` a besoin
+    build_fx(rarity)
+    studio(ACCENT[rarity])
+    scene = bpy.context.scene
+    for obj in [o for o in scene.objects if o.name.startswith('Plane')]:
+        bpy.data.objects.remove(obj)  # pas de panneaux lumineux pour cette passe
+    scene.world.node_tree.nodes['Background'].inputs[1].default_value = 0
+    scene.cycles.samples = 12
+    scene.cycles.use_denoising = False
+    fx_path = os.path.join(OUT, f'{rarity}-fx.png')
+    scene.render.filepath = fx_path
+    bpy.ops.render.render(write_still=True)
+    print(f'Blender {bpy.app.version_string} — effets {rarity} : {os.path.getsize(fx_path) / 1024:.0f} Ko')

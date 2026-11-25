@@ -22,8 +22,8 @@ export const TopBar = () => {
         <Logo />
         <div className="wallet" aria-label="Vos ressources">
           <span title="Énergie"><Coin name="bolt" size={24} /><b>10<small>/10</small></b></span>
-          <span title="Gemmes"><Coin name="gem" size={24} /><b>{gems}</b></span>
-          <span title="Tickets d'invocation"><Coin name="ticket" size={24} /><b>{tickets}</b></span>
+          <span title="Flammes d'âme"><Coin name="soul" size={24} /><b>{gems}</b></span>
+          <span title="Sceaux d'invocation"><Coin name="seal" size={24} /><b>{tickets}</b></span>
         </div>
       </div>
     </header>
