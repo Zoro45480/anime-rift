@@ -1,9 +1,10 @@
 import { useState, type FormEvent } from 'react'
-import { HEROES, type Hero } from '../data/heroes'
+import { heroById, HEROES, type Hero } from '../data/heroes'
 import { AFFINITY_LIST, type AffinityId } from '../data/affinities'
 import { RARITIES, RARITY_ORDER, type RarityId } from '../data/rarities'
 import { fileToCardImage } from '../state/customArt'
-import { useStore } from '../state/store'
+import { SCROLL_IDS, SCROLLS } from '../game/progression'
+import { SHOWCASE_MAX, useStore } from '../state/store'
 import { AffinityIcon } from '../ui/AffinityIcon'
 import { Card } from '../ui/Card'
 
@@ -86,8 +87,8 @@ const Ring = ({ value, total }: { value: number; total: number }) => {
   )
 }
 
-type OwnedFilter = 'all' | 'owned' | 'missing'
-const OWNED_LABELS: Record<OwnedFilter, string> = { all: 'Toutes', owned: 'Obtenues', missing: 'Manquantes' }
+type OwnedFilter = 'all' | 'owned' | 'missing' | 'wish'
+const OWNED_LABELS: Record<OwnedFilter, string> = { all: 'Toutes', owned: 'Obtenues', missing: 'Manquantes', wish: '♥ Envies' }
 
 // Ignore la casse et les accents, pour que « celestine » trouve « Célestine ».
 const fold = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
@@ -95,7 +96,7 @@ const fold = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g,
 const toggle = <T,>(list: T[], item: T): T[] => (list.includes(item) ? list.filter((x) => x !== item) : [...list, item])
 
 export const Collection = ({ onSummon }: { onSummon: () => void }) => {
-  const { owned } = useStore()
+  const { owned, wish, pinned, scrolls } = useStore()
   const [query, setQuery] = useState('')
   const [rarities, setRarities] = useState<RarityId[]>([]) // vide = toutes
   const [affinities, setAffinities] = useState<AffinityId[]>([]) // vide = toutes
@@ -106,7 +107,7 @@ export const Collection = ({ onSummon }: { onSummon: () => void }) => {
   const visible = HEROES.filter((h) =>
     (rarities.length === 0 || rarities.includes(h.rarity)) &&
     (affinities.length === 0 || affinities.includes(h.affinity)) &&
-    (ownedFilter === 'all' || (ownedFilter === 'owned') === Boolean(owned[h.id])) &&
+    (ownedFilter === 'all' || (ownedFilter === 'wish' ? wish.includes(h.id) : (ownedFilter === 'owned') === Boolean(owned[h.id]))) &&
     (q === '' || fold(`${h.name} ${h.title} ${h.world} ${h.role}`).includes(q)))
   const filtering = q !== '' || rarities.length > 0 || affinities.length > 0 || ownedFilter !== 'all'
   const reset = () => { setQuery(''); setRarities([]); setAffinities([]); setOwnedFilter('all') }
@@ -125,6 +126,15 @@ export const Collection = ({ onSummon }: { onSummon: () => void }) => {
         </div>
         <Ring value={have} total={HEROES.length} />
       </header>
+
+      <section className="vitrine" aria-label="Ma vitrine">
+        <header><h2>Ma vitrine</h2><em>{pinned.length} / {SHOWCASE_MAX}</em>
+          <p className="vitrine__scrolls" aria-label="Parchemins d'XP en réserve">Parchemins : {SCROLL_IDS.map((id) => <span key={id} title={SCROLLS[id].label}><i className={`cd-scroll cd-scroll--${id}`} />{scrolls[id]}</span>)}</p>
+        </header>
+        {pinned.length === 0
+          ? <p className="vitrine__empty">Ouvrez une carte obtenue, puis « En savoir plus » → « Épingler dans ma vitrine » pour l'exposer ici.</p>
+          : <div className="vitrine__row">{pinned.map((id) => <Card key={id} hero={heroById(id)} />)}</div>}
+      </section>
 
       <section className="filters" aria-label="Filtres de la collection">
         <div className="filters__search">

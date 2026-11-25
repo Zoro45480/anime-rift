@@ -3,6 +3,7 @@ import { AFFINITIES } from '../data/affinities'
 import { frameOf } from '../data/banners'
 import type { Hero } from '../data/heroes'
 import { RARITIES } from '../data/rarities'
+import { cardState } from '../game/progression'
 import { frameArt, frameFx, heroArt } from '../assets/manifest'
 import { useStore } from '../state/store'
 import { AffinityIcon } from './AffinityIcon'
@@ -19,7 +20,9 @@ export const Card = ({ hero, count, locked, inert, className = '', style }: Prop
   const openable = !inert && viewer !== null
   const ref = useRef<HTMLDivElement>(null)
   const rarity = RARITIES[hero.rarity]
-  const custom = useStore().customArt[hero.id]
+  const { customArt, xp, owned, wish } = useStore()
+  const custom = customArt[hero.id]
+  const state = cardState(hero, xp, owned) // niveau et statistiques réels de la carte chez le joueur
   const art = custom ?? heroArt(hero.model, 'full')
 
   const onMove = (e: PointerEvent<HTMLDivElement>) => {
@@ -63,14 +66,16 @@ export const Card = ({ hero, count, locked, inert, className = '', style }: Prop
           {art && <span className="card__kana" lang="ja">{hero.kana}</span>}
           <span className="card__affinity"><AffinityIcon id={hero.affinity} size={14} /></span>
           {count !== undefined && count > 1 && <span className="card__count">×{count}</span>}
+          {owned[hero.id] > 0 && state.level > 1 && <span className="card__level">Nv {state.level}</span>}
+          {wish.includes(hero.id) && <span className="card__wish" aria-label="Dans mes envies">♥</span>}
 
           <div className="card__plate">
             <span className="card__name">{hero.name} <i>({hero.title})</i></span>
             <span className="card__world">{hero.world}</span>
             <span className="card__rule" />
             <span className="card__stats">
-              <b><small>Dégâts</small>{hero.atk.toLocaleString('fr-FR')}</b>
-              <b><small>Défense</small>{hero.def.toLocaleString('fr-FR')}</b>
+              <b><small>Dégâts</small>{state.stats.atk.toLocaleString('fr-FR')}</b>
+              <b><small>Défense</small>{state.stats.def.toLocaleString('fr-FR')}</b>
               <em>N° {String(hero.no).padStart(4, '0')}</em>
             </span>
           </div>
