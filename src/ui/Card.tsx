@@ -51,16 +51,15 @@ export const Card = ({ hero, count, locked, className = '', style }: Props) => {
           <div className="card__glitter" />
           <div className="card__glare" />
 
-          <div className="card__top">
-            <span className="card__rarity"><b>{rarity.short}</b></span>
-            <span className="card__affinity"><AffinityIcon id={hero.affinity} size={14} /></span>
-          </div>
+          <span className="card__brand">RIFT</span>
+          <span className="card__kana" lang="ja">{hero.kana}</span>
+          <span className="card__affinity"><AffinityIcon id={hero.affinity} size={14} /></span>
           {count !== undefined && count > 1 && <span className="card__count">×{count}</span>}
 
           <div className="card__plate">
-            <span className="card__name">{hero.name}</span>
-            <span className="card__title">{hero.title}</span>
-            <span className="card__rule"><i /></span>
+            <span className="card__name">{hero.name} <i>({hero.title})</i></span>
+            <span className="card__world">{hero.world}</span>
+            <span className="card__rule" />
             <span className="card__stats">
               <b><small>ATK</small>{hero.atk.toLocaleString('fr-FR')}</b>
               <b><small>DEF</small>{hero.def.toLocaleString('fr-FR')}</b>
@@ -70,6 +69,7 @@ export const Card = ({ hero, count, locked, className = '', style }: Props) => {
           <CardOrnaments rarity={hero.rarity} />
         </div>
         <CardBurst rarity={hero.rarity} layer="front" />
+        <span className="card__mono" data-t={rarity.short} aria-label={rarity.label}>{rarity.short}</span>
       </div>
     </div>
   )

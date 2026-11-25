@@ -66,7 +66,7 @@ export const CardBurst = ({ rarity, layer }: { rarity: RarityId; layer: 'back' |
     <svg className={`card__burst card__burst--${layer} card__burst--${rarity}`} viewBox="0 0 100 140" aria-hidden="true">
       <defs>
         <linearGradient id={`${id}a`} x1="0" y1="0" x2="1" y2="1"><stop offset="0" className="b-a" /><stop offset="0.5" className="b-b" /><stop offset="1" className="b-c" /></linearGradient>
-        <linearGradient id={`${id}b`} x1="1" y1="0" x2="0" y2="1"><stop offset="0" className="b-d" /><stop offset="0.5" className="b-b" /><stop offset="1" className="b-e" /></linearGradient>
+        <linearGradient id={`${id}b`} x1="1" y1="0" x2="0" y2="1"><stop offset="0" className="b-d" /><stop offset="0.5" className="b-f" /><stop offset="1" className="b-e" /></linearGradient>
       </defs>
       {feathers.map((ft, i) => (
         <g key={i}>
