@@ -10,6 +10,18 @@ const seeded = (seed: number) => () => {
 }
 
 describe('gacha', () => {
+  it('chaque bannière donne 30 cartes : 3 MR, 4 LR, 5 SSR, 6 SR, 6 R, 6 N', () => {
+    const expected = { rift: 3, legend: 4, ultra: 5, epic: 6, rare: 6, common: 6 }
+    expect(BANNERS).toHaveLength(7)
+    for (const banner of BANNERS) {
+      const pool = bannerPool(banner)
+      expect(pool).toHaveLength(30)
+      for (const [rarity, count] of Object.entries(expected)) expect(pool.filter((h) => h.rarity === rarity)).toHaveLength(count)
+      for (const id of banner.featured) expect(pool.find((h) => h.id === id)?.rarity).toBe('rift')
+    }
+    expect(new Set(HEROES.map((h) => h.id)).size).toBe(HEROES.length)
+  })
+
   it('la première bannière donne 30 personnages de Naruto, et eux seuls', () => {
     const pool = bannerPool(BANNERS[0])
     expect(pool).toHaveLength(30)
