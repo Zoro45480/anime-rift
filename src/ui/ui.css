@@ -136,7 +136,10 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 .card__vein { fill: none; stroke: rgba(255, 255, 255, 0.75); stroke-width: 0.35; stroke-linecap: round; }
 .card__vein--chrome { stroke: rgba(255, 255, 255, 0.95); stroke-width: 0.5; }
 .card__vein--dark { stroke: rgba(255, 255, 255, 0.35); stroke-width: 0.3; }
-.card__curl { fill: none; stroke-width: 0.8; stroke-linecap: round; }
+.card__vein--pearl, .card__vein--steel { stroke: rgba(255, 255, 255, 0.95); stroke-width: 0.45; }
+.card__burst--rare { filter: drop-shadow(0 0 1cqw rgba(127, 180, 255, 0.5)); }
+.card__burst--epic { filter: drop-shadow(0 0 1.5cqw rgba(164, 123, 255, 0.7)); }
+.card__burst--epic.card__burst--back { --b1: #6a45d0; --b2: #3a2480; --b3: #a47bff; filter: none; }
 .card__spark { fill: #fff; transform-box: fill-box; transform-origin: center; animation: spark 2.8s ease-in-out infinite; }
 @keyframes spark { 0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); } 50% { opacity: 1; transform: scale(1) rotate(45deg); } }
 .card__burst .b-a { stop-color: var(--b1); } .card__burst .b-b { stop-color: var(--b2); } .card__burst .b-c { stop-color: var(--b3); }
@@ -159,8 +162,8 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 .card--legend .card__mono::after { background-image: linear-gradient(100deg, #f5b800, #ff4fa8 35%, #8a5bff 60%, #2fb0f0 85%, #2fd07a); }
 .card--legend .card__rule { background: linear-gradient(90deg, #ffe27a, #ff7ac3, #7ad7ff, transparent); }
 .card--legend .card__orn .o-a { stop-color: #ffe27a; } .card--legend .card__orn .o-b { stop-color: #ff7ac3; } .card--legend .card__orn .o-c { stop-color: #7ad7ff; }
-.card__burst--legend { --b1: #ffe27a; --b2: #ff7ac3; --b3: #b79bff; --b4: #8dffb0; --b6: #7ad7ff; --b5: #b79bff; filter: drop-shadow(0 0 1.5cqw rgba(255, 255, 255, 0.7)); }
-.card__burst--legend.card__burst--back { --b1: #c9a23a; --b2: #d0508f; --b3: #6a4fd0; --b4: #3aa8d8; --b6: #4fc48a; --b5: #8a5fe0; filter: none; }
+.card__burst--legend { --b1: #ffe27a; --b2: #ff7ac3; --b3: #b79bff; --b4: #8dffb0; --b6: #7ad7ff; --b5: #b79bff; filter: drop-shadow(0 0 1.8cqw rgba(255, 150, 220, 0.75)); }
+.card__burst--legend.card__burst--back { --b1: #ffc93a; --b2: #ff4fa8; --b3: #7a4fe0; --b4: #2fb0f0; --b6: #2fd07a; --b5: #8a5fe0; filter: drop-shadow(0 0 2cqw rgba(122, 215, 255, 0.6)); }
 
 /* --- MR : chrome et rouge sang, la carte la plus rare --- */
 .card--rift { --foil: 0.55; --sparkle: 1; --edge: 4.4cqw; --rc: #ff2e4f; }
