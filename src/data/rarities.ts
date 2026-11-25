@@ -5,12 +5,12 @@ export type RarityId = 'common' | 'rare' | 'epic' | 'ultra' | 'legend' | 'rift'
 export type Rarity = { id: RarityId; label: string; short: string; stars: number; color: string; rate: number }
 
 export const RARITIES: Record<RarityId, Rarity> = {
-  common: { id: 'common', label: 'Commune', short: 'N', stars: 1, color: 'var(--r-common)', rate: 0.6 },
-  rare: { id: 'rare', label: 'Rare', short: 'R', stars: 2, color: 'var(--r-rare)', rate: 0.285 },
-  epic: { id: 'epic', label: 'Super rare', short: 'SR', stars: 3, color: 'var(--r-epic)', rate: 0.09 },
-  ultra: { id: 'ultra', label: 'Ultra rare', short: 'SSR', stars: 4, color: 'var(--r-ultra)', rate: 0.02 },
-  legend: { id: 'legend', label: 'Légendaire', short: 'LR', stars: 5, color: 'var(--r-legend)', rate: 0.0045 },
-  rift: { id: 'rift', label: 'Mythique', short: 'MR', stars: 6, color: 'var(--r-rift)', rate: 0.0005 },
+  common: { id: 'common', label: 'Commune', short: 'N', stars: 1, color: 'var(--r-common)', rate: 0.6009 },
+  rare: { id: 'rare', label: 'Rare', short: 'R', stars: 2, color: 'var(--r-rare)', rate: 0.3 },
+  epic: { id: 'epic', label: 'Super rare', short: 'SR', stars: 3, color: 'var(--r-epic)', rate: 0.085 },
+  ultra: { id: 'ultra', label: 'Ultra rare', short: 'SSR', stars: 4, color: 'var(--r-ultra)', rate: 0.01 },
+  legend: { id: 'legend', label: 'Légendaire', short: 'LR', stars: 5, color: 'var(--r-legend)', rate: 0.004 },
+  rift: { id: 'rift', label: 'Mythique', short: 'MR', stars: 6, color: 'var(--r-rift)', rate: 0.0001 },
 }
 
 // De la plus rare à la plus courante.
