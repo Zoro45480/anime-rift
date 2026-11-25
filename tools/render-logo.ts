@@ -88,40 +88,67 @@ const shard = (x: number, y: number, z: number, len: number, rot: number, mat: T
   logo.add(m)
 }
 
-// Emblème : losange de métal sombre cerclé de chrome, traversé par une fissure lumineuse.
+const ANGLE = -0.16 // pente de la faille, commune au mot RIFT et à l'emblème
+const NORMAL = new THREE.Vector3(Math.sin(ANGLE), Math.cos(ANGLE), 0)
+
+// Emblème : un cristal taillé, fendu en deux par la faille, au cœur lumineux, cerclé de deux anneaux comme un portail.
 const emblem = (cx: number, cy: number, r: number) => {
-  const g = new THREE.Group()
-  const rhombus = (size: number) => {
-    const s = new THREE.Shape()
-    s.moveTo(0, size)
-    s.lineTo(size * 0.82, 0)
-    s.lineTo(0, -size)
-    s.lineTo(-size * 0.82, 0)
-    s.closePath()
-    return s
+  const center = new THREE.Vector3(cx, cy, 0.5)
+  const facets = new THREE.OctahedronGeometry(r, 0)
+  const half = (sign: 1 | -1, color: number, emissive: number) => {
+    const shift = new THREE.Vector3(Math.cos(ANGLE), Math.sin(ANGLE), 0).multiplyScalar(sign * 0.3 * (r / 2))
+    const pos = center.clone().add(shift)
+    const plane = new THREE.Plane(NORMAL.clone().multiplyScalar(sign), -sign * NORMAL.dot(pos) - 0.1 * (r / 2))
+    const mat = new THREE.MeshPhysicalMaterial({ color, emissive, emissiveIntensity: 0.55, metalness: 0.35, roughness: 0.08, clearcoat: 1, flatShading: true, clippingPlanes: [plane], side: THREE.DoubleSide })
+    const m = new THREE.Mesh(facets, mat)
+    m.scale.set(0.74, 1.22, 0.6)
+    m.rotation.y = 0.42
+    m.position.copy(pos)
+    logo.add(m)
   }
-  const rim = new THREE.Mesh(new THREE.ExtrudeGeometry(rhombus(r), { depth: 0.3, bevelEnabled: true, bevelThickness: 0.12, bevelSize: 0.1, bevelSegments: 6 }), metal(0xffffff, 0.05))
-  const core = new THREE.Mesh(new THREE.ExtrudeGeometry(rhombus(r * 0.8), { depth: 0.42, bevelEnabled: true, bevelThickness: 0.1, bevelSize: 0.08, bevelSegments: 5 }), metal(0x1a1d48, 0.22, { clearcoat: 1 }))
-  core.position.z = 0.06
-  // fissure en zigzag (la même que sur l'icône du jeu), en relief et lumineuse
-  const pts: [number, number][] = [[0.2, 0.86], [-0.2, 0.14], [0.16, -0.08], [-0.26, -0.84]]
-  const w = 0.085
-  const crack = new THREE.Shape()
-  pts.forEach(([x, y], i) => (i ? crack.lineTo((x + w) * r, y * r) : crack.moveTo((x + w) * r, y * r)))
-  ;[...pts].reverse().forEach(([x, y]) => crack.lineTo((x - w) * r, y * r))
-  crack.closePath()
-  const bolt = new THREE.Mesh(new THREE.ExtrudeGeometry(crack, { depth: 0.2, bevelEnabled: true, bevelThickness: 0.04, bevelSize: 0.03, bevelSegments: 3 }), glow(0xeafcff, 0x5ee6ff, 2.2))
-  bolt.position.z = 0.36
-  g.add(rim, core, bolt)
-  g.position.set(cx, cy, 0)
-  logo.add(g)
+  half(1, 0xbff4ff, 0x2fb8e8) // moitié haute : cyan clair
+  half(-1, 0x9a6bff, 0x5a22d8) // moitié basse : violet
+  // cœur de lumière visible dans la fente
+  const core = new THREE.Mesh(new THREE.OctahedronGeometry(r * 0.42), new THREE.MeshBasicMaterial({ color: 0xffffff }))
+  core.scale.set(1.5, 0.5, 0.6)
+  core.rotation.z = ANGLE
+  core.position.copy(center)
+  logo.add(core)
+  // grand anneau chromé, serti de quatre éclats
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(r * 1.2, r * 0.075, 20, 120), metal(0xffffff, 0.04))
+  ring.position.copy(center)
+  ring.rotation.set(0.55, -0.5, 0.2)
+  for (let i = 0; i < 4; i++) {
+    const a = (i / 4) * Math.PI * 2 + 0.4
+    const stud = new THREE.Mesh(new THREE.OctahedronGeometry(r * 0.13), glow(i % 2 ? 0xb48bff : 0x8fe9ff, i % 2 ? 0x6a2be0 : 0x1f8fd0, 1.2))
+    stud.position.set(Math.cos(a) * r * 1.2, Math.sin(a) * r * 1.2, 0)
+    stud.scale.set(1, 1.7, 1)
+    stud.rotation.z = a - Math.PI / 2
+    ring.add(stud)
+  }
+  // second anneau, fin et lumineux, sur une autre orbite
+  const orbit = new THREE.Mesh(new THREE.TorusGeometry(r * 0.98, r * 0.03, 12, 120), new THREE.MeshBasicMaterial({ color: 0x8fe9ff }))
+  orbit.position.copy(center)
+  orbit.rotation.set(-1.0, 0.55, 0)
+  logo.add(ring, orbit)
+}
+
+// Lame de lumière le long de la faille, centrée au point `t` de la droite, de longueur `len`.
+const lightBlade = (t: number, len: number) => {
+  const at = new THREE.Vector3(Math.cos(ANGLE) * t, Math.sin(ANGLE) * t, 0)
+  const blade = new THREE.Mesh(new THREE.BoxGeometry(len, 0.085, 1.5), new THREE.MeshBasicMaterial({ color: 0xffffff }))
+  blade.rotation.z = ANGLE
+  blade.position.copy(at).setZ(0.45)
+  const halo = new THREE.Mesh(new THREE.BoxGeometry(len * 0.96, 0.3, 1.3), new THREE.MeshBasicMaterial({ color: 0x5ee6ff, transparent: true, opacity: 0.5 }))
+  halo.rotation.z = ANGLE
+  halo.position.copy(at).setZ(0.4)
+  logo.add(halo, blade)
 }
 
 const build = (heavy: Font, bold: Font) => {
   if (variant === 'emblem') {
-    emblem(0, 0, 2.3)
-    shard(-2.15, 1.5, 0.3, 0.5, 0.4, glow(0xb48bff, 0x6a2be0, 0.9))
-    shard(2.1, -1.45, 0.3, 0.42, 1.4, glow(0x8fe9ff, 0x1f8fd0, 0.9))
+    emblem(0, 0, 1.75)
+    lightBlade(0, 4.7)
     return new THREE.Vector3(0, 0, 0)
   }
 
@@ -130,8 +157,8 @@ const build = (heavy: Font, bold: Font) => {
   const bb = rift.boundingBox!
   rift.translate(-(bb.min.x + bb.max.x) / 2, -(bb.min.y + bb.max.y) / 2, 0)
   paintGradient(rift, new THREE.Color(0x8a5bff), new THREE.Color(0x6fe9ff), new THREE.Color(0xffffff))
-  const angle = -0.16 // pente de la faille
-  const normal = new THREE.Vector3(Math.sin(angle), Math.cos(angle), 0)
+  const angle = ANGLE
+  const normal = NORMAL
   const gap = 0.12
   const half = (sign: 1 | -1) => {
     const plane = new THREE.Plane(normal.clone().multiplyScalar(sign), -gap)
@@ -151,15 +178,10 @@ const build = (heavy: Font, bold: Font) => {
   half(1)
   half(-1)
 
-  // la faille elle-même : une lame de lumière entre les deux moitiés
+  // la faille elle-même : une lame de lumière qui traverse l'emblème puis le mot
   const width = bb.max.x - bb.min.x
-  const blade = new THREE.Mesh(new THREE.BoxGeometry(width * 1.2, 0.085, 1.5), new THREE.MeshBasicMaterial({ color: 0xffffff }))
-  blade.rotation.z = angle
-  blade.position.z = 0.45
-  const halo = new THREE.Mesh(new THREE.BoxGeometry(width * 1.14, 0.3, 1.3), new THREE.MeshBasicMaterial({ color: 0x5ee6ff, transparent: true, opacity: 0.5 }))
-  halo.rotation.z = angle
-  halo.position.z = 0.4
-  logo.add(halo, blade)
+  const emblemX = -width / 2 - 2.35
+  lightBlade(-1.75, width * 1.2 + 3.9)
 
   // ANIME : chrome, lettres espacées, posé au-dessus
   const anime = text(bold, 'ANIME', 1.3, 0.3, 0.035, 0.42)
@@ -172,7 +194,7 @@ const build = (heavy: Font, bold: Font) => {
   rule.position.set(-width / 2 + 0.25 + rowW + 0.45 + (width - rowW - 0.9) / 2, 2.5, 0.3)
   logo.add(rule)
 
-  emblem(-width / 2 - 2.25, 0.35, 2.0)
+  emblem(emblemX, Math.tan(ANGLE) * emblemX, 1.55)
 
   const violet = glow(0xb48bff, 0x6a2be0, 0.9)
   const cyan = glow(0x8fe9ff, 0x1f8fd0, 0.9)
@@ -180,10 +202,8 @@ const build = (heavy: Font, bold: Font) => {
   shard(width / 2 + 0.75, 0.75, 0.5, 0.62, 0.5, cyan)
   shard(width / 2 + 1.35, -0.25, 0.2, 0.36, 1.3, violet)
   shard(width / 2 + 0.55, -1.25, 0.6, 0.3, 2.1, white)
-  shard(-width / 2 - 4.35, 1.75, 0.3, 0.4, 0.9, violet)
-  shard(-width / 2 - 4.5, -0.95, 0.4, 0.3, 1.9, cyan)
   shard(-0.6, -2.25, 0.8, 0.26, 0.4, cyan)
-  return new THREE.Vector3(-1.45, 0.35, 0)
+  return new THREE.Vector3(-1.95, 0.45, 0)
 }
 
 const load = async (url: string) => opentype.parse(await (await fetch(url)).arrayBuffer())
@@ -193,7 +213,7 @@ Promise.all([load(heavyUrl), load(boldUrl)]).then(([heavy, bold]) => {
   const aspect = innerWidth / innerHeight
   const camera = new THREE.PerspectiveCamera(variant === 'emblem' ? 24 : 21, aspect, 0.1, 100)
   // vue légèrement de côté et par en dessous, pour montrer l'épaisseur
-  const dist = variant === 'emblem' ? 13 : 16.6
+  const dist = variant === 'emblem' ? 13 : 17.6
   camera.position.set(center.x - dist * 0.16, center.y - dist * 0.13, dist)
   camera.lookAt(center)
   renderer.render(scene, camera)
