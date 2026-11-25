@@ -260,27 +260,6 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 .pull--gold { color: #2b1c00; background: linear-gradient(100deg, #ffe89a 0%, var(--gold) 45%, var(--gold-deep) 100%); }
 .pull--gold b { font-size: 38px; }
 
-/* ===== Nexus (modes de jeu) ===== */
-.nexus__head { padding: 10px 0 26px; }
-.nexus__head h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(34px, 7vw, 58px); line-height: 0.98; text-transform: uppercase; color: var(--cream); margin-top: 8px; }
-.gates { display: grid; gap: 30px 26px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); }
-.gate { --hue: var(--violet); position: relative; height: 178px; }
-.gate__panel { position: absolute; inset: 20px 0 0 0; overflow: hidden; display: flex; align-items: center; padding: 0 42% 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%);
-  background: linear-gradient(100deg, var(--ink-2) 25%, color-mix(in srgb, var(--hue) 75%, #10122a) 100%); }
-.gate__panel::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--hue); }
-.gate__numeral { position: absolute; right: 30%; bottom: -44px; font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: 200px; line-height: 1; color: rgba(255, 255, 255, 0.08); user-select: none; }
-.gate__text { position: relative; display: grid; gap: 4px; justify-items: start; }
-.gate__text h2 { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: 36px; line-height: 1; text-transform: uppercase; color: var(--cream); }
-.gate__text p { font-size: 13px; color: var(--text); opacity: 0.85; }
-.gate__lock { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); padding: 4px 14px 4px 10px; background: rgba(7, 8, 18, 0.7); clip-path: polygon(7px 0, 100% 0, calc(100% - 7px) 100%, 0 100%); }
-.gate__lock svg { width: 14px; height: 14px; }
-.gate__art { position: absolute; right: 8%; bottom: 0; width: 150px; height: 178px; max-width: none; object-fit: cover; object-position: top; filter: drop-shadow(-6px 0 0 rgba(7, 8, 18, 0.6)); pointer-events: none; }
-.gate--flip .gate__panel { padding: 0 20px 0 42%; clip-path: polygon(36px 0, 100% 0, 100% 100%, 0 100%); background: linear-gradient(260deg, var(--ink-2) 25%, color-mix(in srgb, var(--hue) 75%, #10122a) 100%); }
-.gate--flip .gate__panel::after { left: auto; right: 0; }
-.gate--flip .gate__numeral { right: auto; left: 30%; }
-.gate--flip .gate__art { right: auto; left: 8%; filter: drop-shadow(6px 0 0 rgba(7, 8, 18, 0.6)); }
-.nexus__note { margin-top: 22px; font-size: 13px; color: var(--text-faint); }
-
 /* ===== Fenêtres ===== */
 .modal { position: fixed; inset: 0; z-index: 40; display: grid; justify-items: center; align-content: safe center; padding: 16px; background: rgba(5, 4, 7, 0.86); backdrop-filter: blur(8px); animation: fade var(--mid) both; overflow-y: auto; }
 @keyframes fade { from { opacity: 0; } }
@@ -396,11 +375,7 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 /* Résultats d'un tirage multiple, par-dessus la scène */
 .sc__multi { position: absolute; inset: 0; display: grid; justify-items: center; align-content: safe center; padding: 16px; overflow-y: auto; background: rgba(3, 4, 10, 0.72); backdrop-filter: blur(3px); animation: fade 500ms both; }
 
-/* ===== Collection ===== */
-.collection { padding-top: 10px; }
-.collection__grid { display: grid; gap: 50px 46px; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); padding: 30px 26px 0; }
-.collection__hint { font-size: 13px; color: var(--text-dim); margin-bottom: 18px; }
-.collection__item { display: grid; gap: 40px; align-content: start; }
+/* ===== Bouton « Mon image » ===== */
 .artpick { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .artpick__input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .artpick__btn { cursor: pointer; font-size: 12px; font-weight: 800; padding: 7px 12px; border-radius: 99px; border: 1px solid var(--line-strong); color: var(--cream); transition: border-color var(--mid), background var(--mid); }
@@ -408,7 +383,6 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 .artpick__input:focus-visible + .artpick__btn, .artpick__btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .artpick__btn--ghost { color: var(--text-dim); border-color: var(--line); }
 .artpick__error { flex-basis: 100%; text-align: center; font-size: 12px; color: var(--ember); }
-.collection__cta { max-width: 360px; margin: 28px auto 0; }
 
 /* ===== Grand écran : l'affiche s'élargit, la console passe à côté des cartes ===== */
 @media (min-width: 900px) {
@@ -427,10 +401,6 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
   .logo__emblem { display: block; }
   .wallet span { padding: 5px 12px 5px 9px; }
   .result__grid { gap: 22px 12px; padding: 16px 8px; }
-  .gate__panel { padding-right: 40%; }
-  .gate--flip .gate__panel { padding-left: 40%; }
-  .gate__art { right: 4%; width: 130px; }
-  .gate--flip .gate__art { left: 4%; }
 }
 
 /* =====================================================================================================================
@@ -441,10 +411,10 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
    Les plaques et le cadre sont étirés par leurs bords : les coins gardent leurs détails, le centre est uni.
    ===================================================================================================================== */
 
-/* Fond des menus : l'illustration, assombrie vers le bas pour que les textes restent lisibles */
-body { background: linear-gradient(180deg, rgba(5, 6, 18, 0.2) 0%, rgba(5, 6, 18, 0.5) 50%, rgba(5, 6, 18, 0.88) 100%), var(--ui-bg) center top / cover no-repeat fixed, var(--ink); }
+/* Fond des menus : noir uni */
+body { background: #000; }
 .screen, .topbar, .splash { position: relative; z-index: 1; }
-.topbar { position: sticky; background: linear-gradient(180deg, rgba(5, 6, 18, 0.9) 45%, transparent); }
+.topbar { position: sticky; background: linear-gradient(180deg, #000 55%, transparent); }
 .splash { background: none; }
 
 /* Titres : nets, avec une lueur douce plutôt qu'un contour */
@@ -500,7 +470,68 @@ body { background: linear-gradient(180deg, rgba(5, 6, 18, 0.2) 0%, rgba(5, 6, 18
 .poster { clip-path: none; border-radius: 20px 20px 20px 54px; box-shadow: inset 0 0 0 1px rgba(210, 220, 255, 0.28), 0 22px 44px rgba(0, 0, 0, 0.55); }
 .poster__nav { clip-path: none; border-radius: 12px; background: rgba(8, 9, 28, 0.6); box-shadow: inset 0 0 0 1px rgba(210, 220, 255, 0.25); width: 38px; height: 46px; backdrop-filter: blur(6px); }
 .poster__nav--prev { left: 8px; } .poster__nav--next { right: 8px; }
-.gate__panel { clip-path: none; border-radius: 16px 44px 16px 16px; box-shadow: inset 0 0 0 1px rgba(210, 220, 255, 0.22), 0 16px 32px rgba(0, 0, 0, 0.5); }
-.gate--flip .gate__panel { clip-path: none; border-radius: 44px 16px 16px 16px; }
-.gate__lock { clip-path: none; border-radius: 99px; }
 .lineup__own { padding: 4px 12px; border-radius: 99px; background: rgba(8, 9, 28, 0.6); }
+
+/* ===== Nexus : un grand panneau pour la première porte, trois plus petits dessous ===== */
+.nx { display: grid; gap: 14px; }
+.nx__head { padding: 10px 0 10px; }
+.nx__head h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(32px, 6.5vw, 54px); line-height: 1; text-transform: uppercase; color: var(--cream); margin-top: 8px; letter-spacing: 0.02em; }
+.nx__row { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); }
+.nx__note { font-size: 13px; color: var(--text-faint); margin-top: 6px; }
+.nx-gate { --hue: var(--violet); position: relative; isolation: isolate; overflow: hidden; min-height: 190px; display: flex; align-items: flex-end; padding: 18px; border-radius: 18px;
+  background: radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--hue) 34%, transparent), transparent 62%), linear-gradient(180deg, #0c0d14, #050508);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.14); transition: box-shadow var(--mid), transform var(--mid) var(--ease-out); }
+.nx-gate::before { content: ''; position: absolute; left: 0; top: 18px; bottom: 18px; width: 3px; border-radius: 0 3px 3px 0; background: var(--hue); box-shadow: 0 0 14px var(--hue); }
+.nx-gate:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hue) 55%, transparent), 0 14px 34px color-mix(in srgb, var(--hue) 18%, transparent); }
+.nx-gate__art { position: absolute; z-index: -1; right: -4%; top: 6%; height: 150%; width: auto; max-width: none; opacity: 0.92; pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, #000 38%, transparent 78%); mask-image: linear-gradient(180deg, #000 38%, transparent 78%); }
+.nx-gate__numeral { position: absolute; z-index: -1; right: 14px; top: 4px; font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: 76px; line-height: 1; color: transparent; -webkit-text-stroke: 1px color-mix(in srgb, var(--hue) 60%, transparent); opacity: 0.55; }
+.nx-gate__text { display: grid; gap: 3px; justify-items: start; max-width: 62%; padding-left: 8px; }
+.nx-gate__kicker { font-size: 10.5px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: var(--hue); }
+.nx-gate__text h2 { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: 30px; line-height: 1; text-transform: uppercase; color: var(--cream); }
+.nx-gate__desc { font-size: 13px; color: var(--text-dim); }
+.nx-gate__lock { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); padding: 5px 12px 5px 9px; border-radius: 99px; background: rgba(255, 255, 255, 0.05); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1); }
+.nx-gate__lock svg { width: 13px; height: 13px; }
+.nx-gate::after { content: ''; position: absolute; z-index: -1; inset: 0; background: linear-gradient(90deg, rgba(5, 5, 8, 0.92) 0%, rgba(5, 5, 8, 0.6) 45%, transparent 75%); pointer-events: none; }
+.nx-gate__art { z-index: -2; }
+.nx-gate__numeral { z-index: -2; }
+.nx-gate--hero { min-height: clamp(250px, 38vh, 340px); padding: 26px; }
+.nx-gate--hero .nx-gate__art { right: 2%; top: 2%; height: 165%; }
+.nx-gate--hero .nx-gate__numeral { font-size: 130px; right: 22px; }
+.nx-gate--hero .nx-gate__text h2 { font-size: clamp(40px, 8vw, 62px); }
+.nx-gate--hero .nx-gate__desc { font-size: 15px; }
+
+/* ===== Collection : en-tête avec anneau de progression, décompte par rareté, cartes rangées par rareté ===== */
+.col { display: grid; gap: 18px; padding-top: 6px; }
+.col__head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 22px; border-radius: 18px; background: radial-gradient(90% 120% at 100% 0%, rgba(155, 123, 255, 0.2), transparent 60%), linear-gradient(180deg, #0c0d14, #050508); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.14); }
+.section__head-title { font-family: var(--font-display); font-weight: 800; font-style: italic; line-height: 0.9; margin-top: 6px; }
+.section__head-title b { font-weight: 800; font-size: clamp(60px, 14vw, 92px); background: var(--rift); -webkit-background-clip: text; background-clip: text; color: transparent; padding-right: 0.06em; }
+.section__head-title i { font-size: clamp(24px, 6vw, 36px); color: var(--text-faint); }
+.section__head-sub { font-size: 14px; color: var(--text-dim); margin-top: 6px; }
+.col-ring { position: relative; flex: none; width: clamp(84px, 22vw, 116px); aspect-ratio: 1; }
+.col-ring svg { width: 100%; height: 100%; rotate: -90deg; }
+.col-ring circle { fill: none; stroke-width: 7; }
+.col-ring__track { stroke: rgba(255, 255, 255, 0.08); }
+.col-ring__fill { stroke-linecap: round; transition: stroke-dashoffset var(--slow) var(--ease-out); filter: drop-shadow(0 0 6px rgba(94, 230, 255, 0.6)); }
+.col-ring b { position: absolute; inset: 0; display: grid; place-content: center; grid-auto-flow: column; align-items: baseline; font-family: var(--font-display); font-weight: 700; font-size: clamp(24px, 6vw, 32px); color: var(--cream); font-variant-numeric: tabular-nums; }
+.col-ring b i { font-style: normal; font-size: 0.5em; color: var(--text-dim); margin-left: 2px; }
+.col__tally { display: flex; flex-wrap: wrap; gap: 6px; }
+.col__tally span { display: flex; align-items: baseline; gap: 8px; padding: 6px 14px 6px 10px; border-radius: 10px; font-size: 13px; font-weight: 800; color: var(--text); background: #0a0b10; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.09), inset 3px 0 0 var(--rc); font-variant-numeric: tabular-nums; }
+.col__tally b { font-family: var(--font-display); font-style: italic; font-size: 17px; color: var(--rc); }
+.col__hint { font-size: 13px; color: var(--text-dim); }
+.col__groups { display: flex; flex-wrap: wrap; gap: 22px 18px; }
+/* chaque rareté occupe juste la largeur de ses cartes : les petites se rangent côte à côte */
+.col-group { display: grid; gap: 4px; flex: 0 1 auto; min-width: 0; }
+.col-group__head { display: flex; align-items: baseline; gap: 10px; }
+.col-group__head b { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: 30px; line-height: 1; color: var(--rc); text-shadow: 0 0 18px color-mix(in srgb, var(--rc) 55%, transparent); }
+.col-group__head span { font-size: 12px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text); }
+.col-group__head i { flex: 1; height: 1px; align-self: center; background: linear-gradient(90deg, color-mix(in srgb, var(--rc) 60%, transparent), transparent); }
+.col-group__head em { font-style: normal; font-family: var(--font-display); font-size: 18px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.col-group__grid { display: flex; flex-wrap: wrap; gap: 46px 44px; padding: 34px 28px 18px; }
+.col-item { display: grid; gap: 38px; align-content: start; width: clamp(108px, 27vw, 160px); }
+.col__cta { max-width: 360px; margin: 10px auto 0; }
+@media (max-width: 560px) {
+  .nx-gate--hero .nx-gate__art { right: -22%; }
+  .nx-gate__art { right: -12%; }
+  .nx-gate__text { max-width: 66%; }
+}
