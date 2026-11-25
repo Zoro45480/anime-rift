@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import { iconArt } from '../assets/manifest'
+import { extraArt, iconArt } from '../assets/manifest'
 import { AFFINITIES } from '../data/affinities'
+import { frameOf } from '../data/banners'
 import { HEROES, roleKind, type Hero } from '../data/heroes'
 import { RARITIES, RARITY_ORDER } from '../data/rarities'
 import { cardRate } from '../game/gacha'
-import { MARKET_BASE, marketFloor, STAT_SCALE, AWAKEN_COST, AWAKEN_STAT, LEVEL_CAP, baseRank, baseStats, cardState, kitOf, MAX_GROUPS, STAT_LABEL, MAX_LEVEL, MERGE_XP, SCROLL_IDS, SCROLLS, type Collectif } from '../game/progression'
+import { titleRank, TITLE_RULES, TITLES, MARKET_BASE, marketFloor, STAT_SCALE, AWAKEN_COST, AWAKEN_STAT, LEVEL_CAP, baseRank, baseStats, cardState, kitOf, MAX_GROUPS, STAT_LABEL, MAX_LEVEL, MERGE_XP, SCROLL_IDS, SCROLLS, type Collectif } from '../game/progression'
 import { SHOWCASE_MAX, useStore } from '../state/store'
 import { AffinityIcon } from './AffinityIcon'
 import { Card, LazyCard } from './Card'
@@ -24,17 +25,17 @@ const Section = ({ title, aside, children, closed, hue }: { title: string; aside
   </details>
 )
 
-const Group = ({ group, owned, current, onOpen }: { group: Collectif; owned: Record<string, number>; current: Hero; onOpen: (h: Hero) => void }) => (
+const Group = ({ group, owned, team, current, onOpen }: { group: Collectif; owned: Record<string, number>; team: string[]; current: Hero; onOpen: (h: Hero) => void }) => (
   <div className={`cd-group ${group.counted ? 'is-active' : ''}`}>
     <header>
-      <b>{group.name}</b><em>{group.have} / {group.members.length}</em>
+      <b>{group.name}</b><em>{group.stat === 'all' ? `${group.have} / ${group.members.length}` : `${group.have} dans l’équipe`}</em>
       <strong>{group.stat === 'all' ? `+${group.bonus} %` : `+${group.pct} % ${STAT_LABEL[group.stat]}`}</strong>
     </header>
     <p>{group.rule}. {group.stat === 'all' ? '' : group.counted ? 'Actif.' : group.active ? `Actif, mais seuls les ${MAX_GROUPS} plus forts comptent.` : 'Pas encore actif.'}</p>
     {group.stat === 'all' && <div className="cd-bar"><i style={{ width: `${(group.have / group.members.length) * 100}%` }} /></div>}
     <ul className="cd-members">
       {group.members.map((m) => (
-        <li key={m.id}><button className={`${owned[m.id] ? 'is-owned' : ''} ${m.id === current.id ? 'is-current' : ''}`} style={{ ['--rc' as string]: RARITIES[m.rarity].color }} onClick={() => onOpen(m)}>
+        <li key={m.id}><button className={`${owned[m.id] ? 'is-owned' : ''} ${m.id === current.id ? 'is-current' : ''} ${group.stat !== 'all' && team.includes(m.id) ? 'is-team' : ''}`} style={{ ['--rc' as string]: RARITIES[m.rarity].color }} onClick={() => onOpen(m)}>
           <b>{RARITIES[m.rarity].short}</b>{m.name}</button></li>
       ))}
     </ul>
@@ -42,7 +43,7 @@ const Group = ({ group, owned, current, onOpen }: { group: Collectif; owned: Rec
 )
 
 export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () => void; onOpen: (hero: Hero) => void }) => {
-  const { remoteFans, awakened, shards, awaken, rebirths, owned, xp, scrolls, wish, pinned, log, merge, useScroll, toggleWish, togglePin } = useStore()
+  const { remoteSeiyu, teamNow, arcHeroes, remoteFans, awakened, shards, awaken, rebirths, owned, xp, scrolls, wish, pinned, log, merge, useScroll, toggleWish, togglePin } = useStore()
   const [notice, setNotice] = useState('')
   const top = useRef<HTMLDivElement>(null)
   const rarity = RARITIES[hero.rarity]
@@ -50,8 +51,9 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
   const rate = banner ? cardRate(banner, hero) : 0
   const copies = owned[hero.id] ?? 0
   const has = copies > 0
-  const state = cardState(hero, xp, owned, rebirths, awakened)
+  const state = cardState(hero, xp, owned, rebirths, awakened, teamNow)
   const base = baseStats(hero)
+  const rank = titleRank(state.level, state.freed, Boolean(arcHeroes[hero.id]))
   const maxed = state.level >= state.cap
   const cost = AWAKEN_COST[hero.rarity]
   const wished = wish.includes(hero.id)
@@ -143,8 +145,8 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
         </Section>
 
         <Section hue="#4be3a4" title="Collectifs" aside={`${state.groups.filter((g) => g.counted).length} actif${state.groups.filter((g) => g.counted).length > 1 ? 's' : ''} sur ${state.groups.length}`}>
-          <p className="cd-note">Un collectif s'active quand tu possèdes cette carte et au moins un autre membre. {MAX_GROUPS} collectifs au plus comptent pour une carte : les plus forts.</p>
-          {state.groups.map((g) => <Group key={g.id} group={g} owned={owned} current={hero} onOpen={onOpen} />)}
+          <p className="cd-note">Un collectif s'active quand cette carte est dans ton équipe de La Saga avec au moins un autre membre (les noms entourés de vert sont dans l'équipe). {MAX_GROUPS} collectifs au plus comptent pour une carte : les plus forts.</p>
+          {state.groups.map((g) => <Group key={g.id} group={g} owned={owned} team={teamNow} current={hero} onOpen={onOpen} />)}
         </Section>
 
         {has && <Section hue="#ffc94d" title="Amélioration" aside={`${n(scrolls.small + scrolls.medium + scrolls.large)} parchemin${scrolls.small + scrolls.medium + scrolls.large > 1 ? 's' : ''}`}>
@@ -179,6 +181,18 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
           )}
         </Section>}
 
+        <Section hue="#ffc94d" title="Titres" aside={has && rank >= 0 ? (TITLES[hero.world] as string[])[rank] : 'Aucun'}>
+          <ol className="cd-titles">
+            {TITLES[hero.world].map((name, i) => (
+              <li key={name} className={`cd-titles--${i < 2 ? 'bronze' : i < 4 ? 'silver' : 'gold'} ${has && (i === 3 ? Boolean(arcHeroes[hero.id]) : i <= rank && (i < 3 || state.freed)) ? 'is-earned' : ''} ${has && i === rank ? 'is-worn' : ''}`}>
+                <span className={`cd-titles__ribbon card__title--${frameOf(hero.world)}`}><img src={extraArt(`ribbon-${frameOf(hero.world)}`)} alt="" /><b>{name}</b></span>
+                <small>{TITLE_RULES[i]}</small>
+              </li>
+            ))}
+          </ol>
+          <p className="cd-note">Les titres de l'univers {hero.world}. La carte porte le plus haut qu'elle a mérité.</p>
+        </Section>
+
         <Section hue="#b78bff" title="Cote de la carte" aside="Marché">
           <div className="cd-market">
             <div><small>Médiane 7 j</small><b>—</b></div>
@@ -201,6 +215,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
             <div><dt>Bannière</dt><dd>{banner ? banner.world : 'Hors bannière'}</dd></div>
             <div><dt>Chance par invocation</dt><dd>{rate ? `${pct(rate)} · 1 sur ${n(Math.round(1 / rate))}` : '—'}</dd></div>
             <div><dt>Exemplaires</dt><dd>{copies}</dd></div>
+            <div><dt><img className="cd-mic" src={extraArt('mic')} alt="" />Seiyū (voix japonaise)</dt><dd>{remoteSeiyu[hero.id] ?? '—'}</dd></div>
             <div><dt>Popularité</dt><dd>{remoteFans[hero.id] ? `♥ ${n(remoteFans[hero.id])} fans sur AniList` : '—'}</dd></div>
             <div><dt>Première obtention</dt><dd>{first ? when(first.t) : '—'}</dd></div>
           </dl>

@@ -23,12 +23,12 @@ export const bannerOf = (hero: Hero) => BANNERS.find((b) => b.pool.includes(hero
 
 const Sheet = ({ hero, onClose, onMore }: { hero: Hero; onClose: () => void; onMore: () => void }) => {
   const [flipped, setFlipped] = useState(false)
-  const { owned, xp, wish, toggleWish, rebirths, awakened } = useStore()
+  const { owned, xp, wish, toggleWish, rebirths, awakened, teamNow } = useStore()
   const rarity = RARITIES[hero.rarity]
   const banner = bannerOf(hero)
   const rate = banner ? cardRate(banner, hero) : 0
   const copies = owned[hero.id] ?? 0
-  const state = cardState(hero, xp, owned, rebirths, awakened)
+  const state = cardState(hero, xp, owned, rebirths, awakened, teamNow)
   const wished = wish.includes(hero.id)
 
   useEffect(() => {

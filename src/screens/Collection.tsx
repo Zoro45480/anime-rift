@@ -8,6 +8,7 @@ import { SCROLL_IDS, SCROLLS } from '../game/progression'
 import { SHOWCASE_MAX, useStore } from '../state/store'
 import { AffinityIcon } from '../ui/AffinityIcon'
 import { Card, LazyCard } from '../ui/Card'
+import { Guide } from '../ui/Guide'
 import { Inventory, Rebirth } from './Rebirth'
 
 // Vérifie qu'un lien mène bien à une image que le navigateur peut afficher.
@@ -246,5 +247,6 @@ export const Collection = ({ onSummon, tab, onTab }: { onSummon: () => void; tab
     {tab === 'cards' && <Cards onSummon={onSummon} />}
     {tab === 'inventory' && <Inventory />}
     {tab === 'rebirth' && <Rebirth />}
+    <Guide id="collection" />
   </div>
 )

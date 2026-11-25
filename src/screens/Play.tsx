@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { gateArt } from '../assets/manifest'
-import { ENERGY_MAX, ENERGY_REGEN_MS, accountLevel, REBIRTH_KEEP, REBIRTH_LEVEL, REBIRTH_STAT, REBIRTH_XP } from '../game/progression'
+import { ENERGY_OVER, ENERGY_REFILL, ENERGY_REFILL_COST, ENERGY_MAX, ENERGY_REGEN_MS, accountLevel, REBIRTH_KEEP, REBIRTH_LEVEL, REBIRTH_STAT, REBIRTH_XP } from '../game/progression'
 import { useStore } from '../state/store'
+import { Guide } from '../ui/Guide'
 import { Avatar } from '../ui/Settings'
 import { Saga } from './Saga'
 import { Coin } from '../ui/Coin'
@@ -38,7 +39,7 @@ const GateTile = ({ gate, featured, playable, onOpen }: { gate: Gate; featured?:
 )
 
 export const Play = ({ onRebirth }: { onRebirth: () => void }) => {
-  const { accountXp, rebirths, energyLeft, profile } = useStore()
+  const { accountXp, rebirths, energyLeft, profile, gems, buyEnergy } = useStore()
   const [open, setOpen] = useState<Gate | null>(null)
   const [saga, setSaga] = useState(false)
   const acc = accountLevel(accountXp, rebirths)
@@ -50,8 +51,10 @@ export const Play = ({ onRebirth }: { onRebirth: () => void }) => {
           <Coin name="bolt" size={34} />
           <b>{energyLeft}<i>/{ENERGY_MAX}</i></b>
           <span className="energy__pips">{Array.from({ length: ENERGY_MAX }, (_, i) => <i key={i} className={i < energyLeft ? 'is-on' : ''} />)}</span>
+          <button className="energy__plus" onClick={buyEnergy} disabled={gems < ENERGY_REFILL_COST || energyLeft + ENERGY_REFILL > ENERGY_OVER} aria-label={`Recharger ${ENERGY_REFILL} éclairs pour ${ENERGY_REFILL_COST} âmes`}>+</button>
         </div>
-        <p>Un éclair par combat · +1 toutes les {ENERGY_REGEN_MS / 60000} minutes. {energyLeft >= ENERGY_MAX ? 'Énergie pleine.' : 'Elle remonte toute seule.'} Elle se dépense dans La Saga.</p>
+        {energyLeft > ENERGY_MAX && <p className="energy__bonus">Bonus : <b>+{energyLeft - ENERGY_MAX}</b> au-delà du maximum</p>}
+        <p>Un éclair par combat · +1 toutes les {ENERGY_REGEN_MS / 60000} minutes. {energyLeft >= ENERGY_MAX ? 'Énergie pleine.' : 'Elle remonte toute seule.'} Elle se dépense dans La Saga. Le bouton + rend {ENERGY_REFILL} éclairs pour {ENERGY_REFILL_COST} âmes (jusqu'à {ENERGY_OVER} en réserve).</p>
       </section>
       <header className="nx__head">
         <p className="eyebrow">Le Nexus</p>
@@ -83,6 +86,7 @@ export const Play = ({ onRebirth }: { onRebirth: () => void }) => {
         <button className="nx-rebirth__btn" onClick={onRebirth}>Voir la Renaissance {acc.level >= REBIRTH_LEVEL ? '(tu es prêt)' : `(niveau ${REBIRTH_LEVEL} requis, tu es niveau ${acc.level})`}</button>
       </section>
 
+      <Guide id="play" />
       {open && createPortal(
         <div className="modal" role="dialog" aria-modal="true" aria-label={open.title} onClick={() => setOpen(null)}>
           <div className="modal__box gate-sheet" style={{ ['--hue' as string]: open.hue }} onClick={(e) => e.stopPropagation()}>

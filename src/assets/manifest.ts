@@ -54,3 +54,8 @@ const digits = import.meta.glob('./digits/**/*.webp', { eager: true, query: '?ur
 // Chiffres 3D dorés du niveau de compte, et le sigle « NV » (tools/blender/build_digits.py).
 // Six styles : t0 acier, t1 or, t2 braise, t3 plasma, t4 légende, r arc-en-ciel (après une Renaissance).
 export const digitArt = (style: string, glyph: string): string => digits[`./digits/${style}/${glyph}.webp`] ?? ''
+
+const extras = import.meta.glob('./extras/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
+
+// Bandeaux de titre (un par univers, inspiré de son animé), Kiri (planche de 16 images, 4×4) et micro du seiyū — rendus Blender (tools/blender/build_extras.py).
+export const extraArt = (name: `ribbon-${string}` | 'guide' | 'mic'): string => extras[`./extras/${name}.webp`] ?? ''

@@ -3,7 +3,7 @@ import { BANNERS, COST, type Banner } from '../data/banners'
 import { heroById, type Hero } from '../data/heroes'
 import { isPityRarity, RARITIES } from '../data/rarities'
 import { pullMany } from '../game/gacha'
-import { cardState, power, ENERGY_MAX, ENERGY_REGEN_MS, energyNow, ACCOUNT_XP, accountLevel, AWAKEN_COST, LEVEL_CAP, REBIRTH_SHARDS, levelFromXp, MAX_LEVEL, MERGE_XP, REBIRTH_KEEP, REBIRTH_LEVEL, REBIRTH_REFUND, REBIRTH_SEALS, REBIRTH_XP, SCROLLS, type ScrollId } from '../game/progression'
+import { ENERGY_OVER, ENERGY_REFILL, ENERGY_REFILL_COST, cardState, power, ENERGY_MAX, ENERGY_REGEN_MS, energyNow, ACCOUNT_XP, accountLevel, AWAKEN_COST, LEVEL_CAP, REBIRTH_SHARDS, levelFromXp, MAX_LEVEL, MERGE_XP, REBIRTH_KEEP, REBIRTH_LEVEL, REBIRTH_REFUND, REBIRTH_SEALS, REBIRTH_XP, SCROLLS, type ScrollId } from '../game/progression'
 import { makeUnit, simulate, type BattleEvent, type Unit } from '../game/battle'
 import { foeUnits, isUnlocked, rollDrops, SOULS_PER_STAR, stageById, starsFor, TEAM_SIZE, type Stage } from '../game/saga'
 import { loadAllArt, removeArt, saveArt } from './customArt'
@@ -34,6 +34,8 @@ type State = {
   team: string[] // équipe de combat (3 cartes au plus)
   notifs: Notif[] // les plus récentes d'abord
   profile: { name: string; avatar: string } // pseudo et photo de profil (image réduite ou lien), gardés sur cet appareil
+  arcHeroes: Record<string, boolean> // cartes qui étaient dans l'équipe quand le boss de leur arc est tombé (titre d'arc)
+  tutorialSeen: string[] // écrans dont l'explication de Kiri a déjà été lue
   awakened: string[] // cartes libérées (niveau maximum 100)
 }
 
@@ -48,6 +50,9 @@ export type FightResult = {
 }
 
 type Store = State & {
+  buyEnergy: () => boolean // recharge d'éclairs contre des âmes
+  seeTutorial: (id: string) => void
+  resetTutorial: () => void
   setProfile: (profile: { name?: string; avatar?: string }) => void
   resetGame: () => void // efface toute la progression
   readNotifs: () => void // tout marquer comme lu
@@ -67,6 +72,7 @@ type Store = State & {
   rebirth: (keep: string[]) => boolean // Renaissance : repart du niveau 1 en gardant ces cartes
   remoteArt: Record<string, string> // adresses des portraits officiels sur AniList, par identifiant de personnage
   remoteStatus: RemoteStatus
+  remoteSeiyu: Record<string, string> // voix japonaise de chaque personnage, d'après AniList
   remoteFans: Record<string, number> // popularité de chaque personnage sur AniList (nombre de favoris)
   customArt: Record<string, string> // images personnelles du joueur, par identifiant de personnage
   setCustomArt: (heroId: string, dataUrl: string) => Promise<boolean> // false = affichée mais non enregistrée
@@ -79,7 +85,7 @@ const LOG_MAX = 30
 // Dotation de départ du compte.
 export const START_GEMS = 600
 const START: State = {
-  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '' },
+  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '' }, arcHeroes: {}, tutorialSeen: [],
   tickets: 20, gems: START_GEMS, pity: Object.fromEntries(BANNERS.map((b) => [b.id, 0])), owned: {},
   xp: {}, scrolls: { small: 0, medium: 0, large: 0 }, wish: [], pinned: [], log: {},
 }
@@ -108,11 +114,12 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
 
   const [remoteArt, setRemote] = useState<Record<string, string>>({})
   const [remoteFans, setFans] = useState<Record<string, number>>({})
+  const [remoteSeiyu, setSeiyu] = useState<Record<string, string>>({})
   const [remoteStatus, setRemoteStatus] = useState<RemoteStatus>('loading')
 
   useEffect(() => {
     void loadAllArt().then(setArt)
-    void loadRemoteArt((urls, fans) => { setRemote(urls); setFans(fans) }).then(setRemoteStatus)
+    void loadRemoteArt((urls, fans, seiyu) => { setRemote(urls); setFans(fans); setSeiyu(seiyu) }).then(setRemoteStatus)
   }, [])
   useEffect(() => save(state), [state])
   const [now, setNow] = useState(Date.now()) // fait remonter l'énergie à l'écran
@@ -140,7 +147,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     const readNotifs = () => { if (state.notifs.some((x) => !x.read)) setState({ ...state, notifs: state.notifs.map((x) => ({ ...x, read: true })) }) }
     const clearNotifs = () => setState({ ...state, notifs: [] })
     const setProfile = (profile: { name?: string; avatar?: string }) => setState({ ...state, profile: { ...state.profile, ...profile } })
-    const resetGame = () => setState({ ...START, profile: state.profile })
+    const resetGame = () => setState({ ...START, profile: state.profile, tutorialSeen: state.tutorialSeen })
 
     const summon = (banner: Banner, currency: Currency, count: number) => {
       if (!canAfford(currency, count)) return null
@@ -219,7 +226,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       const stage = stageById(stageId)
       const left = energyNow(state.energy, state.energyAt, Date.now())
       if (!stage || !isUnlocked(stage, state.saga) || left < 1 || teamNow.length === 0) return null
-      const allies = teamNow.map((id, i) => makeUnit(heroById(id), cardState(heroById(id), state.xp, state.owned, state.rebirths, state.awakened).stats, 0, i))
+      const allies = teamNow.map((id, i) => makeUnit(heroById(id), cardState(heroById(id), state.xp, state.owned, state.rebirths, state.awakened, teamNow).stats, 0, i))
       const foes = foeUnits(stage)
       const { events, win, fallen } = simulate(allies, foes, Math.random)
       const energy = { energy: left - 1, energyAt: left >= ENERGY_MAX ? Date.now() : state.energyAt + (left - state.energy) * ENERGY_REGEN_MS }
@@ -238,6 +245,8 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setState({
         ...state, ...energy, scrolls, xp,
         saga: { ...state.saga, [stage.id]: Math.max(stars, state.saga[stage.id] ?? 0) },
+        // titre d'arc : les cartes de cet univers présentes dans l'équipe quand son boss tombe
+        arcHeroes: stage.boss ? { ...state.arcHeroes, ...Object.fromEntries(teamNow.filter((id) => heroById(id).world === stage.world).map((id) => [id, true])) } : state.arcHeroes,
         gems: state.gems + newStars * SOULS_PER_STAR,
         accountXp: state.accountXp + stage.accountXp,
         notifs: notify(state.notifs, [
@@ -249,6 +258,14 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       return { stage, allies, foes, events, win, stars, newStars, souls: newStars * SOULS_PER_STAR, accountXp: stage.accountXp, cardXp, scrolls: drops }
     }
 
+    const buyEnergy = () => {
+      const left = energyNow(state.energy, state.energyAt, Date.now())
+      if (state.gems < ENERGY_REFILL_COST || left + ENERGY_REFILL > ENERGY_OVER) return false
+      setState({ ...state, gems: state.gems - ENERGY_REFILL_COST, gemsSpent: state.gemsSpent + ENERGY_REFILL_COST, energy: left + ENERGY_REFILL, energyAt: Date.now() })
+      return true
+    }
+    const seeTutorial = (id: string) => { if (!state.tutorialSeen.includes(id)) setState({ ...state, tutorialSeen: [...state.tutorialSeen, id] }) }
+    const resetTutorial = () => setState({ ...state, tutorialSeen: [] })
     const awaken = (heroId: string) => {
       const cost = AWAKEN_COST[heroById(heroId).rarity]
       if (state.rebirths < 1 || !state.owned[heroId] || state.awakened.includes(heroId) || state.shards < cost) return false
@@ -261,7 +278,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       const only = <T,>(rec: Record<string, T>) => Object.fromEntries(Object.entries(rec).filter(([id]) => kept.includes(id)))
       setState({
         ...state, // sceaux, parchemins, envies et pity sont conservés
-        owned: only(state.owned), xp: only(state.xp), log: only(state.log), pinned: state.pinned.filter((id) => kept.includes(id)), awakened: state.awakened.filter((id) => kept.includes(id)),
+        owned: only(state.owned), xp: only(state.xp), log: only(state.log), arcHeroes: only(state.arcHeroes), pinned: state.pinned.filter((id) => kept.includes(id)), awakened: state.awakened.filter((id) => kept.includes(id)),
         shards: state.shards + REBIRTH_SHARDS,
         accountXp: 0, rebirths: state.rebirths + 1, gemsSpent: 0, saga: {}, team: state.team.filter((id) => kept.includes(id)),
         gems: START_GEMS + Math.floor(state.gemsSpent * REBIRTH_REFUND),
@@ -279,8 +296,8 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setArt((a) => Object.fromEntries(Object.entries(a).filter(([k]) => k !== heroId)))
       void removeArt(heroId)
     }
-    return { ...state, canAfford, summon, merge, useScroll, toggleWish, togglePin, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, customArt, setCustomArt, clearCustomArt }
-  }, [state, customArt, remoteArt, remoteStatus, remoteFans, now])
+    return { ...state, canAfford, summon, merge, useScroll, toggleWish, togglePin, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, customArt, setCustomArt, clearCustomArt }
+  }, [state, customArt, remoteArt, remoteStatus, remoteFans, remoteSeiyu, now])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>
 }

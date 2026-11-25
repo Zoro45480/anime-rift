@@ -17,3 +17,9 @@ export const setGraphics = (mode: GraphicsMode) => {
   try { if (mode === 'auto') localStorage.removeItem(KEY); else localStorage.setItem(KEY, mode) } catch { /* non enregistré */ }
   applyGraphics()
 }
+
+// Titres des cartes : 'all' = le ruban s'affiche partout, 'big' = seulement sur la carte ouverte en grand et sa fiche.
+export type TitleMode = 'all' | 'big'
+const TITLE_KEY = 'anime-rift-titles'
+export const getTitleMode = (): TitleMode => { try { return localStorage.getItem(TITLE_KEY) === 'big' ? 'big' : 'all' } catch { return 'all' } }
+export const setTitleMode = (mode: TitleMode) => { try { localStorage.setItem(TITLE_KEY, mode) } catch { /* non enregistré */ } }

@@ -8,6 +8,7 @@ import { HEROES } from '../data/heroes'
 import { isPityRarity } from '../data/rarities'
 import { LEVEL_CAP, MAX_LEVEL } from '../game/progression'
 import { bannerPool, cardRate } from '../game/gacha'
+import { Guide } from '../ui/Guide'
 import { useStore, type Currency } from '../state/store'
 import { Card, LazyCard } from '../ui/Card'
 import { IconChevron, IconInfo } from '../ui/icons'
@@ -315,6 +316,7 @@ export const Banners = ({ onRebirth }: { onRebirth: () => void }) => {
         document.body,
       )}
 
+      <Guide id="banners" />
       {results && createPortal(<SummonCinematic heroes={results} onClose={() => setResults(null)} />, document.body)}
     </div>
   )

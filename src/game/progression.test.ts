@@ -3,7 +3,7 @@ import { HEROES } from '../data/heroes'
 import { MOVES } from '../data/moves'
 import { GROUPS } from '../data/collectifs'
 import { RARITY_ORDER } from '../data/rarities'
-import { MAX_GROUPS, ENERGY_MAX, ENERGY_REGEN_MS, energyNow, AWAKEN_STAT, LEVEL_CAP, accountLevel, accountNeed, rebirthTitle, REBIRTH_LEVEL, power, baseRank, baseStats, cardState, collectifs, kitOf, levelFromXp, MAX_LEVEL, statsAt, xpToNext } from './progression'
+import { titleOf, TITLES, MAX_GROUPS, ENERGY_MAX, ENERGY_REGEN_MS, energyNow, AWAKEN_STAT, LEVEL_CAP, accountLevel, accountNeed, rebirthTitle, REBIRTH_LEVEL, power, baseRank, baseStats, cardState, collectifs, kitOf, levelFromXp, MAX_LEVEL, statsAt, xpToNext } from './progression'
 
 describe('progression des cartes', () => {
   it('monte de niveau au bon nombre de points', () => {
@@ -32,22 +32,22 @@ describe('progression des cartes', () => {
     expect(cardState(h, {}, { ...all, [h.id]: 0 }).bonus).toBe(0) // pas de bonus pour une carte non possédée
   })
 
-  it('les groupes d’univers s’activent à deux membres, renforcent leur statistique, six au plus', () => {
+  it('les groupes d’univers s’activent à deux membres dans l’équipe, renforcent leur statistique, six au plus', () => {
     for (const g of GROUPS) {
       expect(g.members.length).toBeGreaterThanOrEqual(2)
       for (const id of g.members) expect(HEROES.find((x) => x.id === id)?.world).toBe(g.world)
     }
     for (const h of HEROES) expect(collectifs(h, {}).length).toBeGreaterThanOrEqual(2) // chaque carte a au moins un groupe
     const naruto = HEROES.find((x) => x.id === 'naruto')!
-    const alone = cardState(naruto, {}, { naruto: 1 })
-    const duo = cardState(naruto, {}, { naruto: 1, sasuke: 1 }) // Équipe 7 (+15 % ATK) et Quatrième Grande Guerre (+10 % ATK)
+    const alone = cardState(naruto, {}, { naruto: 1, sasuke: 1 }, 0, [], ['naruto'])
+    const duo = cardState(naruto, {}, { naruto: 1, sasuke: 1 }, 0, [], ['naruto', 'sasuke']) // Équipe 7 (+15 % ATK) et Quatrième Grande Guerre (+10 % ATK)
     expect(alone.extra.atk).toBe(0)
     expect(duo.extra.atk).toBe(25)
     expect(duo.stats.atk).toBe(Math.round(naruto.atk * 1.25))
     expect(duo.stats.def).toBe(naruto.def)
-    expect(cardState(naruto, {}, { sasuke: 1, sakura: 1 }).extra.atk).toBe(0) // il faut posséder la carte elle-même
+    expect(cardState(naruto, {}, { naruto: 1, sasuke: 1, sakura: 1 }, 0, [], ['sasuke', 'sakura']).extra.atk).toBe(0) // la carte doit être dans l'équipe
     const all = Object.fromEntries(HEROES.map((x) => [x.id, 1]))
-    for (const h of HEROES) expect(collectifs(h, all).filter((c) => c.stat !== 'all' && c.counted).length).toBeLessThanOrEqual(MAX_GROUPS)
+    for (const h of HEROES) expect(collectifs(h, all, HEROES.map((x) => x.id)).filter((c) => c.stat !== 'all' && c.counted).length).toBeLessThanOrEqual(MAX_GROUPS)
   })
 
   it('classe chaque carte de 1 à 210 et donne un kit à chaque rôle', () => {
@@ -119,5 +119,18 @@ describe('progression des cartes', () => {
     expect(energyNow(3, 0, ENERGY_REGEN_MS * 2)).toBe(5)
     expect(energyNow(3, 0, ENERGY_REGEN_MS * 100)).toBe(ENERGY_MAX)
     expect(energyNow(ENERGY_MAX, 0, 1e12)).toBe(ENERGY_MAX)
+  })
+
+  it('chaque univers a ses six titres, et une carte porte le plus haut qu’elle a mérité', () => {
+    for (const world of new Set(HEROES.map((h) => h.world))) expect(TITLES[world]).toHaveLength(6)
+    const naruto = HEROES.find((x) => x.id === 'naruto')!
+    expect(titleOf(naruto, 9, false, false)).toBeNull()
+    expect(titleOf(naruto, 10, false, false)?.name).toBe('Genin')
+    expect(titleOf(naruto, 30, false, false)?.name).toBe('Chûnin')
+    expect(titleOf(naruto, 50, false, false)).toMatchObject({ name: 'Jônin', tier: 'silver' })
+    expect(titleOf(naruto, 12, false, true)?.name).toBe('Héros de Konoha')
+    expect(titleOf(naruto, 60, true, false)?.name).toBe('Sannin légendaire')
+    expect(titleOf(naruto, 100, true, true)).toMatchObject({ name: 'Hokage', tier: 'gold' })
+    expect(titleOf(HEROES.find((x) => x.id === 'gojo')!, 100, true, true)?.name).toBe('Le plus fort')
   })
 })

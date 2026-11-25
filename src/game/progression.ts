@@ -52,15 +52,15 @@ export const STAT_LABEL: Record<GroupStat | 'all', string> = { all: 'toutes stat
 export type Collectif = { id: string; name: string; rule: string; members: Hero[]; have: number; bonus: number; stat: GroupStat | 'all'; pct: number; active: boolean; counted: boolean }
 
 const BY_ID = new Map(HEROES.map((h) => [h.id, h]))
-export const collectifs = (hero: Hero, owned: Record<string, number>): Collectif[] => {
+export const collectifs = (hero: Hero, owned: Record<string, number>, team: string[] = []): Collectif[] => {
   const world = HEROES.filter((h) => h.world === hero.world)
   const count = (list: Hero[]) => list.filter((h) => owned[h.id]).length
   const worldBonus = Math.min(12, Math.floor(count(world) / 5) * 2)
   const groups: Collectif[] = GROUPS.filter((g) => g.members.includes(hero.id)).map((g) => {
     const members = g.members.map((id) => BY_ID.get(id)!)
-    const have = count(members)
-    const active = Boolean(owned[hero.id]) && have >= 2
-    return { id: g.name, name: g.name, rule: 'Actif avec au moins 2 membres possédés, dont cette carte', members, have, stat: g.stat, pct: g.pct, active, counted: false, bonus: 0 }
+    const have = members.filter((m) => team.includes(m.id)).length // membres présents dans l'équipe
+    const active = team.includes(hero.id) && have >= 2
+    return { id: g.name, name: g.name, rule: 'Actif avec au moins 2 membres dans l’équipe, dont cette carte', members, have, stat: g.stat, pct: g.pct, active, counted: false, bonus: 0 }
   })
   for (const g of [...groups].filter((x) => x.active).sort((x, y) => y.pct - x.pct).slice(0, MAX_GROUPS)) { g.counted = true; g.bonus = g.pct }
   return [
@@ -78,11 +78,11 @@ export const statsAt = (hero: Hero, level: number, bonusPct: number): Stats => {
 export const power = (s: Stats) => Math.round(s.atk * 0.6 + s.def * 0.4 + s.hp * 0.1 + s.speed * 3)
 
 // État complet d'une carte chez le joueur.
-export const cardState = (hero: Hero, xp: Record<string, number>, owned: Record<string, number>, rebirths = 0, awakened: string[] = []) => {
+export const cardState = (hero: Hero, xp: Record<string, number>, owned: Record<string, number>, rebirths = 0, awakened: string[] = [], team: string[] = []) => {
   const freed = awakened.includes(hero.id)
   const cap = freed ? MAX_LEVEL : LEVEL_CAP
   const lv = levelFromXp(xp[hero.id] ?? 0, cap)
-  const groups = collectifs(hero, owned)
+  const groups = collectifs(hero, owned, team)
   // les bonus (collectifs + Renaissances + Libération) ne valent que pour une carte possédée
   const bonus = owned[hero.id] ? groups[0].bonus + rebirths * REBIRTH_STAT + (freed ? AWAKEN_STAT : 0) : 0
   const extra: Record<GroupStat, number> = { atk: 0, def: 0, hp: 0, speed: 0 } // bonus des groupes, par statistique
@@ -97,6 +97,9 @@ export const cardState = (hero: Hero, xp: Record<string, number>, owned: Record<
 // Chaque combat coûtera un éclair. L'énergie remonte toute seule : un éclair toutes les 6 minutes, jusqu'au maximum.
 export const ENERGY_MAX = 10
 export const ENERGY_REGEN_MS = 6 * 60 * 1000
+export const ENERGY_REFILL = 5 // éclairs rendus par une recharge
+export const ENERGY_REFILL_COST = 20 // âmes
+export const ENERGY_OVER = ENERGY_MAX * 2 // on peut dépasser le maximum en rechargeant, jusqu'à cette limite
 export const energyNow = (energy: number, at: number, now: number) =>
   energy >= ENERGY_MAX ? energy : Math.min(ENERGY_MAX, energy + Math.floor(Math.max(0, now - at) / ENERGY_REGEN_MS))
 
@@ -196,3 +199,26 @@ export const marketFloor = (rarity: RarityId) => MARKET_BASE[rarity] / 2
 
 // Plus grande valeur de base de chaque statistique dans tout le jeu : sert d'échelle aux barres de la fiche.
 export const STAT_SCALE: Stats = HEROES.map(baseStats).reduce((m, s) => ({ hp: Math.max(m.hp, s.hp), atk: Math.max(m.atk, s.atk), def: Math.max(m.def, s.def), speed: Math.max(m.speed, s.speed) }))
+
+// ───── Titres ─────
+// Chaque univers a son échelle de six titres, tirés de son animé. Une carte porte le plus haut qu'elle a mérité :
+// niveau 10, niveau 25, niveau 50, boss de son arc vaincu avec elle dans l'équipe, carte libérée, carte libérée au niveau 100.
+export const TITLES: Record<string, [string, string, string, string, string, string]> = {
+  Naruto: ['Genin', 'Chûnin', 'Jônin', 'Héros de Konoha', 'Sannin légendaire', 'Hokage'],
+  'One Piece': ['Moussaillon', 'Pirate primé', 'Supernova', 'Grand Corsaire', 'Empereur des mers', 'Roi des Pirates'],
+  'Dragon Ball': ['Élève de la Tortue', 'Guerrier Z', 'Super Saiyan', 'Champion du Tenkaichi', 'Super Saiyan Blue', 'Ultra Instinct'],
+  Bleach: ['Âme errante', 'Shinigami', 'Lieutenant', 'Héros de la Soul Society', 'Capitaine', 'Capitaine-Commandant'],
+  'Demon Slayer': ['Mizunoto', 'Kanoe', 'Kinoe', 'Tueur de Lune', 'Pilier', 'Marque du pourfendeur'],
+  'Jujutsu Kaisen': ['Classe 4', 'Classe 2', 'Classe 1', 'Survivant de Shibuya', 'Classe spéciale', 'Le plus fort'],
+  'Hunter x Hunter': ['Candidat Hunter', 'Hunter', 'Hunter une étoile', 'Vainqueur de Greed Island', 'Hunter deux étoiles', 'Hunter trois étoiles'],
+}
+export const TITLE_RULES = ['Niveau 10', 'Niveau 25', 'Niveau 50', 'Boss de son arc vaincu avec elle', 'Carte libérée', 'Carte libérée au niveau 100']
+export type TitleTier = 'bronze' | 'silver' | 'gold'
+const TITLE_TIER: TitleTier[] = ['bronze', 'bronze', 'silver', 'silver', 'gold', 'gold']
+// Rang de titre atteint (-1 = aucun).
+export const titleRank = (level: number, freed: boolean, arcDone: boolean) =>
+  freed && level >= MAX_LEVEL ? 5 : freed ? 4 : arcDone ? 3 : level >= 50 ? 2 : level >= 25 ? 1 : level >= 10 ? 0 : -1
+export const titleOf = (hero: Hero, level: number, freed: boolean, arcDone: boolean): { name: string; tier: TitleTier; rank: number } | null => {
+  const rank = titleRank(level, freed, arcDone)
+  return rank < 0 ? null : { name: (TITLES[hero.world] as string[])[rank], tier: TITLE_TIER[rank], rank }
+}

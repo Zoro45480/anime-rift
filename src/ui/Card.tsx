@@ -3,8 +3,9 @@ import { AFFINITIES } from '../data/affinities'
 import { frameOf } from '../data/banners'
 import { roleKind, type Hero } from '../data/heroes'
 import { RARITIES } from '../data/rarities'
-import { cardState } from '../game/progression'
-import { frameArt, frameFx, heroArt } from '../assets/manifest'
+import { cardState, titleOf } from '../game/progression'
+import { getTitleMode } from './graphics'
+import { extraArt, frameArt, frameFx, heroArt } from '../assets/manifest'
 import { useStore } from '../state/store'
 import { AffinityIcon } from './AffinityIcon'
 import { useCardViewer } from './CardViewer'
@@ -21,9 +22,10 @@ export const Card = ({ hero, count, locked, inert, hd, className = '', style }: 
   const openable = !inert && viewer !== null
   const ref = useRef<HTMLDivElement>(null)
   const rarity = RARITIES[hero.rarity]
-  const { customArt, remoteArt, xp, owned, wish, rebirths, awakened } = useStore()
+  const { customArt, remoteArt, xp, owned, wish, rebirths, awakened, teamNow, arcHeroes } = useStore()
   const custom = customArt[hero.id]
-  const state = cardState(hero, xp, owned, rebirths, awakened) // niveau et statistiques réels de la carte chez le joueur
+  const state = cardState(hero, xp, owned, rebirths, awakened, teamNow) // niveau et statistiques réels de la carte chez le joueur
+  const title = owned[hero.id] && (hd || getTitleMode() === 'all') ? titleOf(hero, state.level, state.freed, Boolean(arcHeroes[hero.id])) : null
   const [failed, setFailed] = useState('') // adresse AniList qui n'a pas pu s'afficher
   const remote = remoteArt[hero.id] && remoteArt[hero.id] !== failed ? remoteArt[hero.id] : undefined
   // ordre : l'image choisie par le joueur, puis le portrait officiel chargé depuis AniList, sinon le portrait de remplacement
@@ -86,6 +88,7 @@ export const Card = ({ hero, count, locked, inert, hd, className = '', style }: 
         </div>
         <img className="card__frame" src={frameArt(hero.rarity, frameOf(hero.world), hd)} alt="" decoding="async" />
         <img className={`card__fx ${frameOf(hero.world) === 'naruto' ? '' : 'card__fx--own'}`} src={frameFx(hero.rarity, frameOf(hero.world), hd)} alt="" decoding="async" />
+        {title && <span className={`card__title card__title--${title.tier} card__title--${frameOf(hero.world)}`}><img src={extraArt(`ribbon-${frameOf(hero.world)}`)} alt="" /><b>{title.name}</b></span>}
         <span className="card__mono" data-t={rarity.short} aria-label={rarity.label}>{rarity.short}</span>
       </div>
     </div>

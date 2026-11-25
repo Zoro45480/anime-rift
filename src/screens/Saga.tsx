@@ -4,8 +4,9 @@ import { gateArt, iconArt } from '../assets/manifest'
 import { HEROES, roleKind } from '../data/heroes'
 import { RARITIES } from '../data/rarities'
 import type { Unit } from '../game/battle'
-import { cardState, ENERGY_MAX, power, SCROLL_IDS, SCROLLS } from '../game/progression'
+import { ENERGY_OVER, ENERGY_REFILL, ENERGY_REFILL_COST, cardState, ENERGY_MAX, power, SCROLL_IDS, SCROLLS, STAT_LABEL } from '../game/progression'
 import { foeUnits, isUnlocked, SOULS_PER_STAR, STAGES, STAGES_PER_ARC, TEAM_SIZE } from '../game/saga'
+import { Guide } from '../ui/Guide'
 import { useStore, type FightResult } from '../state/store'
 import { Coin } from '../ui/Coin'
 
@@ -106,11 +107,12 @@ export const Saga = ({ onBack }: { onBack: () => void }) => {
   const [result, setResult] = useState<FightResult | null>(null)
   const stage = STAGES.find((s) => s.id === openId)!
   const foes = foeUnits(stage)
-  const owned = HEROES.filter((h) => store.owned[h.id]).map((h) => ({ hero: h, state: cardState(h, store.xp, store.owned, store.rebirths, store.awakened) }))
+  const owned = HEROES.filter((h) => store.owned[h.id]).map((h) => ({ hero: h, state: cardState(h, store.xp, store.owned, store.rebirths, store.awakened, store.teamNow) }))
     .sort((a, b) => b.state.power - a.state.power)
   const team = store.teamNow
   const teamPower = team.reduce((s, id) => s + (owned.find((o) => o.hero.id === id)?.state.power ?? 0), 0)
   const foePower = foes.reduce((s, u) => s + power(u), 0)
+  const activeGroups = [...new Map(owned.filter((o) => team.includes(o.hero.id)).flatMap((o) => o.state.groups.filter((g) => g.counted && g.stat !== 'all')).map((g) => [g.name, g])).values()]
   const totalStars = Object.values(store.saga).reduce((a, b) => a + b, 0)
   const toggle = (id: string) => store.setTeam(team.includes(id) ? team.filter((x) => x !== id) : team.length < TEAM_SIZE ? [...team, id] : team)
   const start = () => { const r = store.fight(stage.id); if (r) setResult(r) }
@@ -139,6 +141,7 @@ export const Saga = ({ onBack }: { onBack: () => void }) => {
             })}
           </ul>
         )}
+        {owned.length > 0 && <p className="sg-team__groups">{activeGroups.length === 0 ? 'Aucun collectif actif : mets ensemble deux membres d’un même collectif pour gagner un bonus.' : <>Collectifs actifs : {activeGroups.map((g) => <b key={g.name}>{g.name} +{g.pct} % {STAT_LABEL[g.stat]}</b>)}</>}</p>}
         {picking && (
           <ul className="sg-pick">
             {owned.map((o) => (
@@ -183,6 +186,7 @@ export const Saga = ({ onBack }: { onBack: () => void }) => {
                   <ul className="sg-drops">
                     {SCROLL_IDS.map((id) => <li key={id}><img src={iconArt(`scroll-${id}`)} alt="" /><span>{SCROLLS[id].label}</span><b>{pct(stage.drops[id])}</b></li>)}
                   </ul>
+                  {store.energyLeft < 1 && <button className="cd-btn cd-btn--small" disabled={store.gems < ENERGY_REFILL_COST || store.energyLeft + ENERGY_REFILL > ENERGY_OVER} onClick={store.buyEnergy}>Recharger {ENERGY_REFILL} éclairs · {ENERGY_REFILL_COST} âmes</button>}
                   <button className="btn btn--gold" disabled={store.energyLeft < 1 || team.length === 0} onClick={start}>
                     {team.length === 0 ? 'Il faut au moins une carte' : store.energyLeft < 1 ? 'Plus d’énergie : elle remonte toute seule' : <>Combattre · 1 <Coin name="bolt" size={20} /></>}
                   </button>
@@ -192,6 +196,7 @@ export const Saga = ({ onBack }: { onBack: () => void }) => {
           )
         })}
       </div>
+      <Guide id="saga" />
       {result && <Battle result={result} onClose={() => { setResult(null); const next = STAGES[STAGES.indexOf(result.stage) + 1]; if (result.win && next && result.newStars === result.stars) setOpenId(next.id) }} />}
     </div>
   )

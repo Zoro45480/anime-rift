@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom'
 import { accountLevel } from '../game/progression'
 import { useStore } from '../state/store'
 import { getVolume, isSoundOn, setSoundOn, setVolume } from '../summon/audio'
-import { effectiveGraphics, getGraphics, setGraphics, type GraphicsMode } from './graphics'
+import { effectiveGraphics, getGraphics, getTitleMode, setGraphics, setTitleMode, type GraphicsMode } from './graphics'
+import { Kiri } from './Guide'
 import { LevelBadge } from './LevelBadge'
 
 // Réduit une image choisie par le joueur à une petite photo de profil carrée (gardée dans la sauvegarde).
@@ -40,6 +41,8 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
   const [volume, setVol] = useState(getVolume())
   const [sound, setSound] = useState(isSoundOn())
   const [graphics, setGfx] = useState(getGraphics())
+  const [titles, setTitles] = useState(getTitleMode())
+  const [replay, setReplay] = useState(false)
   const [armed, setArmed] = useState(false)
   const acc = accountLevel(store.accountXp, store.rebirths)
 
@@ -125,6 +128,22 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
         <section>
           <h3>Doublons</h3>
           <p className="set__note">Tes doublons restent dans ta collection. À toi de choisir quand les fusionner, depuis la fiche d'une carte.</p>
+        </section>
+
+        <section>
+          <h3>Titres des cartes</h3>
+          <div className="set__seg set__seg--two" role="radiogroup" aria-label="Affichage des titres">
+            <button role="radio" aria-checked={titles === 'all'} className={titles === 'all' ? 'is-on' : ''} onClick={() => { setTitleMode('all'); setTitles('all') }}><b>Partout</b><small>Par défaut</small></button>
+            <button role="radio" aria-checked={titles === 'big'} className={titles === 'big' ? 'is-on' : ''} onClick={() => { setTitleMode('big'); setTitles('big') }}><b>Carte ouverte</b><small>Mini-cartes épurées</small></button>
+          </div>
+          <p className="set__note">Le ruban du titre gagné s'affiche sur la carte. « Carte ouverte » le retire des petites cartes des grilles.</p>
+        </section>
+
+        <section>
+          <h3>Didacticiel</h3>
+          <button className="set__replay" onClick={() => { store.resetTutorial(); setReplay(true) }}>
+            <Kiri size={64} /><span><b>Revoir les explications de Kiri</b><small>{replay ? 'C’est noté : Kiri réexpliquera chaque écran.' : 'Kiri réexplique chaque écran la prochaine fois que tu l’ouvres.'}</small></span>
+          </button>
         </section>
 
         <section className="set__danger">

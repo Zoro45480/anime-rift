@@ -1230,3 +1230,56 @@ body { background: #000; }
 :root[data-fx='low'] .card__fx, :root[data-fx='low'] .card__glitter, :root[data-fx='low'] .card__rays { display: none; }
 :root[data-fx='low'] .card__frame { filter: none !important; }
 @media (max-width: 400px) { .bell { width: 28px; height: 28px; margin-left: 1px; } .wallet span, .wallet__energy { padding: 4px 8px 5px 6px !important; } }
+
+/* ───────── Titres : ruban 3D (Blender) ───────── */
+.card__title { position: absolute; z-index: 4; left: 50%; bottom: -9cqw; width: 92cqw; transform: translateX(-50%); display: grid; place-items: center; pointer-events: none; filter: drop-shadow(0 1cqw 2cqw rgba(0, 0, 0, 0.7)); }
+.card__title img { grid-area: 1 / 1; width: 100%; display: block; }
+.card__title b { grid-area: 1 / 1; margin-top: -4.5cqw; max-width: 70cqw; font-family: var(--font-display); font-style: italic; font-size: 6.4cqw; line-height: 1; letter-spacing: 0.02em; text-transform: uppercase; white-space: nowrap; color: #fff; text-shadow: 0 0.4cqw 0 rgba(0, 0, 0, 0.55), 0 0 2cqw rgba(0, 0, 0, 0.5); }
+.card__title--gold { animation: title-shine 3.2s ease-in-out infinite; }
+@keyframes title-shine { 50% { filter: drop-shadow(0 1cqw 2cqw rgba(0, 0, 0, 0.7)) drop-shadow(0 0 3cqw rgba(255, 200, 90, 0.9)) brightness(1.15); } }
+.cd-titles { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 6px 14px; list-style: none; padding: 0; }
+.cd-titles li { display: grid; gap: 0; justify-items: center; padding: 4px 6px 12px; border-radius: 12px; opacity: 0.38; filter: grayscale(0.9); }
+.cd-titles li.is-earned { opacity: 1; filter: none; }
+.cd-titles li.is-worn { background: rgba(255, 201, 77, 0.1); box-shadow: inset 0 0 0 1.5px #ffc94d; }
+.cd-titles__ribbon { display: grid; place-items: center; width: min(100%, 290px); }
+.cd-titles__ribbon img { grid-area: 1 / 1; width: 100%; }
+.cd-titles__ribbon b { grid-area: 1 / 1; margin-top: -14px; font-family: var(--font-display); font-style: italic; font-size: 19px; text-transform: uppercase; white-space: nowrap; color: #fff; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6); }
+.cd-titles small { margin-top: -6px; font-size: 12px; color: var(--text-dim); }
+.cd-members button.is-team { box-shadow: inset 0 0 0 2px #4be3a4; color: #fff; }
+.cd-mic { width: 22px; height: 22px; vertical-align: -5px; margin-right: 6px; }
+
+/* ───────── Kiri et le didacticiel ───────── */
+.kiri { display: inline-block; flex: none; background-size: 400% 400%; animation: kiri-x 0.32s steps(4) infinite, kiri-y 1.28s steps(4) infinite; filter: drop-shadow(0 0 14px rgba(110, 190, 255, 0.7)); }
+@keyframes kiri-x { from { background-position-x: 0%; } to { background-position-x: 133.333%; } }
+@keyframes kiri-y { from { background-position-y: 0%; } to { background-position-y: 133.333%; } }
+.guide { position: fixed; z-index: 60; left: 50%; bottom: calc(108px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); width: min(560px, calc(100vw - 20px)); display: grid; grid-template-columns: auto 1fr; align-items: end; gap: 4px; animation: guide-in 420ms var(--ease-out) both; }
+.guide .kiri { margin-bottom: -6px; }
+.guide__bubble { position: relative; display: grid; gap: 8px; padding: 14px 16px 12px; border-radius: 18px 18px 18px 4px; background: linear-gradient(180deg, #141a2e, #0a0d18); box-shadow: inset 0 0 0 1.5px #5aa8ff, 0 18px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(90, 168, 255, 0.3); }
+.guide__bubble small { font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #7fd0ff; }
+.guide__bubble p { font-size: 15px; line-height: 1.45; color: #fff; animation: fade 260ms both; }
+.guide__actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.guide__next { min-height: 44px; padding: 8px 20px; border-radius: 12px; font-weight: 800; font-size: 14.5px; color: #04121f; background: linear-gradient(100deg, #9ff3ff, #5aa8ff); box-shadow: 0 0 18px rgba(90, 168, 255, 0.5); }
+.guide__next:hover { filter: brightness(1.1); }
+@keyframes guide-in { from { opacity: 0; transform: translate(-50%, 30px) scale(0.96); } }
+@media (max-width: 480px) { .guide .kiri { width: 84px !important; height: 84px !important; } .guide__bubble p { font-size: 14px; } }
+:root[data-fx='low'] .kiri { animation: kiri-x 0.32s steps(4) infinite, kiri-y 1.28s steps(4) infinite !important; }
+.set__seg--two { grid-template-columns: 1fr 1fr; }
+.set__replay { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 14px; text-align: left; background: #000; box-shadow: inset 0 0 0 1px rgba(90, 168, 255, 0.5); }
+.set__replay b { display: block; font-family: var(--font-display); font-size: 19px; text-transform: uppercase; color: #fff; }
+.set__replay small { font-size: 13px; color: var(--text-dim); }
+
+/* ───────── Énergie : recharge ───────── */
+.energy__plus { flex: none; width: 44px; height: 44px; border-radius: 12px; font-size: 26px; font-weight: 800; line-height: 1; color: #2a1800; background: linear-gradient(180deg, #ffe07a, #ffab2e); box-shadow: 0 0 14px rgba(255, 190, 70, 0.5); }
+.energy__plus:disabled { color: #777; background: #1c1c22; box-shadow: none; cursor: not-allowed; }
+.energy__bonus { font-size: 13.5px !important; color: var(--text) !important; }
+.energy__bonus b { color: #ffd24d; }
+.sg-team__groups { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; color: var(--text-dim); }
+.sg-team__groups b { padding: 4px 10px; border-radius: 99px; font-size: 12.5px; color: #06281a; background: #4be3a4; }
+
+/* Bandeaux par univers : position et couleur du texte selon le bandeau */
+.card__title b { margin-top: -2cqw; }
+.cd-titles__ribbon b { margin-top: -6px; }
+.card__title--naruto b, .cd-titles__ribbon.card__title--naruto b { color: #141a33; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5); margin-top: -7cqw; }
+.cd-titles__ribbon.card__title--naruto b { margin-top: -22px; }
+.cd-titles li:nth-child(n+3) .cd-titles__ribbon { filter: drop-shadow(0 0 6px rgba(160, 200, 255, 0.5)); }
+.cd-titles li:nth-child(n+5) .cd-titles__ribbon { filter: drop-shadow(0 0 9px rgba(255, 200, 90, 0.85)); }
