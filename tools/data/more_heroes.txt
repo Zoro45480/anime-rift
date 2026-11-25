@@ -1,0 +1,331 @@
+# idAniList (ou -:カナ)|Nom|Titre|rareté|affinité|rôle|attaque|technique|ultime|passif|collectif
+@Naruto
+7407|Kurama|Le Renard à neuf queues|SSR|fire|T|Coup de queue|Rugissement|Bijû-Dama|Chakra infini|Démons à queues:def:15
+11813|Shukaku|Le Tanuki à une queue|SR|earth|T|Griffe de sable|Balle d’air|Bijû-Dama de sable|Sceau maudit|Démons à queues
+55293|Gyûki|Le Taureau à huit queues|SR|water|T|Coup de tentacule|Encre aveuglante|Bijû-Dama|Huit tentacules|Démons à queues
+15362|Yugito Nii|L’Hôte de Matatabi|R|fire|D|Griffes de chat|Souris de feu|Bijû-Dama de flammes bleues|Flammes de Matatabi|Démons à queues
+23219|Utakata|L’Hôte de Saiken|R|water|D|Bulles explosives|Bulles acides|Bijû-Dama de bulles|Pipe à bulles|Démons à queues
+23220|Fû|L’Hôte de Chômei|R|wind|D|Coup d’aile|Poudre aveuglante|Bijû-Dama ailé|Vol|Démons à queues
+23222|Yagura|Le Quatrième Mizukage|R|water|T|Bâton crochu|Miroir d’eau|Bijû-Dama de corail|Hôte d’Isobu|Les cinq Kage
+65135|Gengetsu Hôzuki|Le Deuxième Mizukage|SR|water|D|Pistolet à eau|Palourde géante|Technique du Clone explosif à vapeur|Corps liquide|Les cinq Kage
+197843|Indra Ôtsutsuki|L’Aîné de l’Ermite|LR|thunder|DT|Flèche de foudre|Susanoo parfait|Jugement d’Indra|Premier Sharingan|Clan Ôtsutsuki:atk:20
+57883|Hagoromo Ôtsutsuki|L’Ermite des Six Chemins|LR|light|TS|Bâton de l’Ermite|Création de toute chose|Chibaku Tensei des Six Chemins|Père du ninshû|Clan Ôtsutsuki
+165868|Hamura Ôtsutsuki|Le Frère de l’Ermite|SSR|light|D|Poing souple|Tenseigan|Sceau de la Lune|Byakugan originel|Clan Ôtsutsuki
+3438|Kimimaro Kaguya|Le Dernier des Kaguya|SR|earth|D|Danse du Camélia|Danse de la Clématite|Danse de la Fougère|Shikotsumyaku|Quartet du Son:speed:10
+3052|Tayuya|La Flûtiste du Son|N|dark|D|Mélodie maudite|Trois Doki|Chaînes de la mélodie fantôme|Sceau maudit|Quartet du Son
+1903|Suigetsu Hôzuki|Le Second Démon de Kiri|R|water|D|Kubikiribôchô|Pistolet à eau|Grande Vague démoniaque|Corps liquide|Taka:atk:10
+3152|Jûgo|L’Origine du Sceau maudit|SR|earth|T|Poing transformé|Piston|Canon de chakra|Énergie naturelle|Taka
+3150|Zetsu|L’Espion de l’Akatsuki|SR|earth|D|Racines|Spores parasites|Armée de Zetsu blancs|Fusion avec le sol|Akatsuki
+23050|Yahiko|Le Fondateur de l’Akatsuki|R|water|D|Kunai|Balle d’eau|Charge de l’espoir|Rêve de paix|Akatsuki
+23418|Chôjûrô|L’Épéiste de Kiri|R|water|D|Hiramekarei|Marteau de chakra|Hiramekarei libérée|Sept Épéistes|Démons de Kiri
+23476|Darui|Le Cinquième Raikage|SR|thunder|D|Sabre large|Foudre noire : Panthère|Ranton : Cirque laser|Tempête|Village de Kumo:atk:10
+22873|Samui|La Kunoichi imperturbable|N|thunder|D|Tantô|Nuage dissimulateur|Coupe éclair|Sang-froid|Village de Kumo
+22872|Omoi|L’Épéiste anxieux|N|thunder|D|Sabre|Croissant de lune|Kenjutsu de foudre|Sucette|Village de Kumo
+22874|Karui|L’Épéiste impétueuse|N|thunder|D|Sabre long|Entaille éclair|Enchaînement de Kumo|Tempérament|Village de Kumo
+23474|Kurotsuchi|La Quatrième Tsuchikage|R|earth|D|Chaux vive|Lave en fusion|Yôton : Ciment|Petite-fille d’Ônoki|Les cinq Kage
+63791|Pakura|L’Héroïne de Suna|R|fire|D|Kunai brûlant|Shakuton : Sphère|Vapeur meurtrière|Shakuton|Fratrie du Sable
+12676|Chiyo|La Marionnettiste légendaire|SR|wind|S|Marionnettes Père et Mère|Dix marionnettes de Chikamatsu|Transfert de vie|Sacrifice|Fratrie du Sable
+4223|Gamabunta|Le Chef des crapauds|SR|water|T|Sabre dosu|Balle d’eau|Bombe à l’huile enflammée|Peau de crapaud|Invocations:hp:15
+16999|Gamakichi|Le Crapaud de Naruto|N|water|D|Coup de langue|Balle d’eau|Pistolet à eau|Fils de Gamabunta|Invocations
+24486|Fukasaku|Le Sage du mont Myôboku|R|wind|D|Lame de vent|Chant du crapaud|Genjutsu des Crapauds|Senjutsu|Invocations
+7608|Katsuyu|La Limace de Tsunade|SR|water|S|Jet d’acide|Division|Grande Guérison|Corps divisible|Invocations
+2766|Pakkun|Le Chien ninja|N|earth|D|Morsure|Pistage|Meute de chiens ninjas|Flair infaillible|Invocations
+4799|Akamaru|Le Compagnon de Kiba|N|earth|D|Morsure|Marquage dynamique|Croc lacérant|Fidélité|Village de Konoha:hp:10
+809|Anko Mitarashi|L’Élève d’Orochimaru|R|dark|D|Kunai|Main aux serpents|Double serpent mortel|Sceau maudit|Village de Konoha
+3735|Genma Shiranui|Le Jônin au senbon|N|wind|D|Senbon craché|Lancer de kunais|Formation des Trois|Garde du Hokage|Village de Konoha
+12563|Hanabi Hyûga|L’Héritière des Hyûga|N|light|D|Poing souple|Tourbillon divin|64 Poings|Byakugan|Clan Hyûga
+14082|Rin Nohara|La Coéquipière de Kakashi|N|water|S|Kunai|Paume mystique|Soins d’urgence|Ninja médecin|Maîtres et élèves
+18056|Shikaku Nara|Le Stratège de Konoha|R|dark|T|Manipulation des ombres|Couture des ombres|Étreinte mortelle de l’ombre|Génie tactique|Village de Konoha
+7738|Hayate Gekkô|L’Arbitre à la toux|N|wind|D|Sabre|Danse du croissant de lune|Clones d’ombre|Kenjutsu|Village de Konoha
+15045|Yûgao Uzuki|L’ANBU au sabre|N|dark|D|Katana|Danse du croissant de lune|Assaut de l’ANBU|Masque de chat|Village de Konoha
+16304|Kotetsu Hagane|Le Gardien de la porte|N|earth|D|Masse géante|Coquille de conque|Assaut jumelé|Duo avec Izumo|Village de Konoha
+14032|Izumo Kamizuki|Le Gardien de la porte|N|water|D|Kunai|Champ de sirop|Assaut jumelé|Duo avec Kotetsu|Village de Konoha
+10791|Ebisu|Le Précepteur d’élite|N|earth|D|Coup de pied|Leçon accélérée|Barrière de protection|Jônin spécial|Village de Konoha
+20894|Sakumo Hatake|Le Croc blanc de Konoha|SR|light|D|Sabre de chakra blanc|Entaille éclair|Croc blanc|Légende de Konoha|Maîtres et élèves
+149716|Daï Maito|Le Genin éternel|R|fire|D|Tornade de Konoha|Coup de pied dynamique|Les Huit Portes|Règle personnelle|Élèves de Gaï
+22923|Ibiki Morino|Le Maître interrogateur|N|dark|T|Coup de poing|Salle de torture invoquée|Chaînes d’interrogatoire|Volonté de fer|Village de Konoha
+10697|Shibi Aburame|Le Chef du clan Aburame|N|earth|D|Nuée d’insectes|Insectes parasites|Prison d’insectes|Kikaichû|Village de Konoha
+15073|Hana Inuzuka|La Vétérinaire|N|earth|D|Croc|Trois chiens Haimaru|Crocs tourbillonnants|Clan Inuzuka|Village de Konoha
+20013|Guren|La Maîtresse du cristal|R|light|D|Shurikens de cristal|Prison de cristal|Dragon de cristal|Shôton|Les Sannin
+@One Piece
+4884|Monkey D. Dragon|Le Révolutionnaire|LR|wind|DT|Rafale|Tempête|Ouragan de la révolution|L’homme le plus recherché|Armée révolutionnaire
+146411|Rocks D. Xebec|Le Capitaine des Rocks|LR|dark|DT|Lame noire|Haki des Rois|Tempête de God Valley|Ambition démesurée|Les Empereurs
+13018|Sengoku|Le Bouddha|SSR|light|T|Paume de Bouddha|Onde de choc|Impact du Grand Bouddha|Forme de Bouddha|La Marine
+4882|Ben Beckman|Le Second de Shanks|SSR|fire|D|Tir de fusil|Coup de crosse|Tir au Haki|Sang-froid|Pirates du Roux:atk:15
+18827|Killer|Le Soldat du massacre|SR|wind|D|Punishers|Sonic Scythe|Kamaa Sonic|Rire forcé|Pire Génération
+20295|Jewelry Bonney|La Gloutonne|SR|light|D|Coup de pied|Distorsion d’âge|Nika Punch|Toshi Toshi no Mi|Pire Génération
+20292|Capone Bege|Le Parrain|R|dark|T|Tir de canon|Rook|Big Father|Forteresse humaine|Pire Génération
+120536|Donquixote Rosinante|Corazon|R|wind|T|Tir de pistolet|Calm|Silent|Cœur d’or|Famille Donquixote:atk:10
+141930|Señor Pink|Le Dur à cuire|N|water|T|Nage au sol|Baby Buster|Suplex du bébé|Hard-boiled|Famille Donquixote
+75422|Baby 5|La Femme-arme|N|fire|D|Bras mitrailleuse|Missile Girl|Espadon géant|Buki Buki no Mi|Famille Donquixote
+59641|Monet|La Harpie des neiges|N|water|D|Yuki Rabi|Kamakura|Morsure glacée|Yuki Yuki no Mi|Famille Donquixote
+85557|Viola|La Danseuse de Dressrosa|N|light|D|Coup de pied flamenco|Œil scrutateur|Baleines de larmes|Giro Giro no Mi|Colisée de Dressrosa
+85651|Rebecca|La Gladiatrice invaincue|N|water|D|Esquive|Danse de l’eau arrière|Projection hors du ring|Haki de l’Observation|Colisée de Dressrosa
+126109|Kyros|Le Soldat-jouet|SR|fire|D|Entaille unijambiste|Trueno Bastardo|Coup du champion|3000 victoires|Colisée de Dressrosa
+61603|Caesar Clown|Le Savant fou|R|dark|D|Gastille|Gastanet|Shinokuni|Gasu Gasu no Mi|Ennemis de Grand Line
+4887|Arlong|La Scie|R|water|D|Dents de requin|Shark on Darts|Kiribachi|Homme-poisson|Ennemis de Grand Line
+6183|Kaku|La Girafe du CP9|R|wind|D|Rankyaku|Shigan de nez|Amane Dachi|Style à quatre sabres|Ennemis de Grand Line
+4875|Bon Clay|Mr. 2|R|light|D|Okama Kenpô|Swan Arabesque|Bombardier Arabesque|Mane Mane no Mi|Armée révolutionnaire
+43093|Koala|L’Instructrice|N|water|D|Karaté des Hommes-Poissons|Coup de paume|Brise de mille tuiles|Ancienne esclave|Armée révolutionnaire
+21809|Fisher Tiger|Le Libérateur|SR|water|T|Poing de l’homme-poisson|Jet d’eau|Charge du Soleil|Marque du Soleil|Pirates du Soleil:hp:15
+4889|Octo|Le Sabreur à six sabres|N|water|D|Encre|Six sabres|Rokutôryû : Valse|Takoyaki|Pirates du Soleil
+35286|Izo|Le Tireur en kimono|R|fire|D|Tir de pistolets|Double détonation|Rafale au Haki|Fourreau rouge|Équipage de Barbe Blanche
+67345|Kin’emon|Le Renard de feu|SR|fire|D|Kitsunebi-ryû|Entaille de flammes|Homura Saki|Fuku Fuku no Mi|Fourreaux rouges:atk:15
+127913|Kikunojô|La plus belle épée de Wano|R|water|D|Sabre des neiges|Entaille glacée|Coup du Fourreau|Okiku|Fourreaux rouges
+126181|Chavipère|Le Souverain de la nuit|SR|thunder|T|Griffes|Electro|Forme Sulong|Mink|Fourreaux rouges
+126180|Pedro|Le Jaguar|R|thunder|D|Sabre|Electro|Sacrifice explosif|Promesse tenue|Fourreaux rouges
+126184|Kozuki Momonosuke|Le Futur Shogun|R|fire|T|Morsure|Boro Breath|Nuages de flammes|Dragon rose|Wano
+127908|Tama|La Kunoichi aux dango|N|light|S|Petit coup|Kibi Dango|Armée des Gifters|Kibi Kibi no Mi|Wano
+17178|Ryûma|Le Dieu du sabre|SSR|dark|D|Yakkodori|Hanauta Sanchô Yahazu Giri|Entaille du dragon|Shusui|Thriller Bark
+172135|Ulti|La Tobi Roppo|R|earth|D|Coup de tête|Ul-Zugan|Ul-Meteor Mortar|Pachycéphalosaure|Pirates aux cent bêtes
+134006|Charlotte Pudding|La Fille au troisième œil|N|dark|S|Pistolet|Mémoire effacée|Gâteau de mariage|Memo Memo no Mi|Pirates de Big Mom
+270493|Uta|La Diva du monde|SR|light|S|Chant|Monde des chants|Tot Musica|Uta Uta no Mi|Pirates du Roux
+17492|Bepo|Le Navigateur des Heart|N|thunder|D|Coup de pied|Electro|Forme Sulong|Ours polaire|Pire Génération
+40273|Shirahoshi|La Princesse sirène|R|water|S|Larmes|Appel des rois des mers|Poséidon|Arme antique|Pirates du Soleil
+9098|Pell|Le Faucon d’Alabasta|N|wind|D|Tobizume|Piqué du faucon|Sacrifice du gardien|Tori Tori no Mi|Alabasta
+10444|Zeff|Zeff aux jambes rouges|R|fire|D|Coup de pied|Jambe rouge|Coup de pied dévastateur|Maître de Sanji|Famille Vinsmoke
+4393|Dr Kureha|La Sorcière de Drum|N|light|S|Lancer d’armes|Remède de sorcière|Traitement de choc|139 ans|Chapeaux de paille
+8503|Paulie|Le Charpentier aux cordes|N|earth|D|Rope Action|Half Knot|Top Knot|Galley-La|Ennemis de Grand Line
+20091|Hina|La Cage noire|N|dark|T|Awase Baori|Barreaux noirs|Cage noire|Ori Ori no Mi|La Marine
+348142|Loki|Le Prince d’Elbaf|SSR|thunder|D|Marteau|Foudre d’Elbaf|Ragnarök|Prince maudit|Les Empereurs
+20178|Shakky|L’Ancienne impératrice|R|dark|D|Coup de poing|Haki des Rois|Arnaque|Bar de l’arnaque|Grands Corsaires
+290688|Lilith|Le Mal de Vegapunk|N|thunder|D|Pistolet laser|Sea Beast Weapon|Canon à bulles|Satellite|Chapeaux de paille
+17190|Calgara|Le Grand Guerrier de Shandora|R|earth|D|Lance|Charge du guerrier|Cloche d’or|Serment d’amitié|Ennemis de Grand Line
+5750|Icebarg|Le Maire de Water Seven|N|water|T|Coup de marteau|Plans du Pluton|Galley-La au complet|Élève de Tom|Chapeaux de paille
+131435|Kozuki Hiyori|La Fille d’Oden|N|light|S|Shamisen|Chanson de Wano|Sceau de pierre marine|Komurasaki|Wano
+21443|Marguerite|La Guerrière d’Amazon Lily|N|wind|D|Flèche au Haki|Tir du serpent|Pluie de flèches|Kuja|Grands Corsaires
+18784|Dugong Kung-Fu|Le Disciple de Luffy|N|water|D|Coup de patte|Kung-fu|Coup du maître|Code d’honneur|Alabasta
+@Dragon Ball
+127217|Grand Prêtre|Le Père des anges|LR|light|TS|Geste de la main|Barrière absolue|Arrêt du temps|Ultra Instinct naturel|Dieux et anges
+146259|Zeno|Le Roi de Tout|LR|light|DT|Petit geste|Effacement|Destruction d’un univers|Roi de Tout|Dieux et anges
+6127|Shenron|Le Dragon sacré|SSR|light|S|Rugissement|Vœu exaucé|Résurrection|Dragon des Dragon Balls|Dragons sacrés:hp:20
+9766|Porunga|Le Dragon de Namek|SSR|earth|S|Rugissement|Trois vœux|Téléportation de masse|Dragon du rêve|Dragons sacrés
+220662|Super Shenron|Le Dieu dragon|LR|light|TS|Souffle divin|Vœu sans limite|Restauration des univers|Super Dragon Balls|Dragons sacrés
+3168|Pan|La Petite-fille de Goku|R|light|D|Coup de pied|Kamehameha|Maiden Burst|Sang Saiyan|Famille Son
+2102|Chi-Chi|L’Épouse de Goku|N|fire|D|Casque à lame|Rayon du casque|Colère de Chi-Chi|Mère poule|Famille Son
+2104|Son Gohan l’Ancien|Le Grand-père de Goku|R|earth|D|Poing de l’ivresse|Jan Ken|Kamehameha|Masque de renard|Famille Son
+132370|Gine|La Mère de Goku|N|light|S|Petit coup|Repas réconfortant|Capsule de survie|Douceur Saiyan|Famille Son
+2733|Bra|La Fille de Vegeta|N|light|D|Gifle|Caprice|Super Saiyan|Princesse Saiyan|Saiyans
+9393|Roi Vegeta|Le Roi des Saiyans|R|dark|D|Execution Beam|Orga Blaster|Charge royale|Fierté du roi|Saiyans
+127219|Cabba|Le Saiyan de l’Univers 6|R|light|D|Galick Cannon|Final Flash|Super Saiyan 2|Élève de Vegeta|Saiyans de l’Univers 6
+132369|Cheelai|L’Amie de Broly|N|wind|D|Tir de blaster|Vol de télécommande|Vœu à Shenron|Ancienne soldate|Armée de Freezer
+5225|Zarbon|Le Bras droit élégant|R|water|D|Elegant Blaster|Forme monstrueuse|Bloody Dance|Beauté|Armée de Freezer
+6150|Recoome|Le Colosse du commando|R|earth|T|Recoome Kick|Recoome Elbow|Recoome Eraser Gun|Poses|Armée de Freezer
+6147|Burter|L’Ouragan bleu|N|wind|D|Blue Impulse|Mach Punch|Purple Comet|Le plus rapide de l’univers|Armée de Freezer
+6149|Jeice|Le Magma rouge|N|fire|D|Crusher Ball|Fire Crusher|Purple Comet|Duo avec Burter|Armée de Freezer
+6868|Nail|Le Guerrier de Namek|R|earth|T|Coup de main|Régénération|Mystic Flasher|Fusion namek|Namek:def:15
+6108|Kami-sama|Le Dieu de la Terre|R|light|S|Rayon des yeux|Mafûba|Création des Dragon Balls|Moitié de Piccolo|Namek
+6106|Mr. Popo|Le Serviteur du Palais|R|dark|T|Esquive|Tapis volant|Leçon de combat|Entraîneur des dieux|Namek
+7309|Maître Karin|L’Ermite chat|N|light|S|Coup de bâton|Eau sacrée|Senzu|800 ans|Guerriers Z
+6293|Vieux Kaiôshin|L’Ancêtre des dieux|R|light|S|Danse rituelle|Éveil du potentiel|Don de vie|15 générations|Dieux et anges
+4850|Kaio du Nord|Le Maître de Goku|R|light|S|Blague|Télépathie|Leçon du Kaioken|Maître du Genkidama|Dieux et anges
+9770|Paikuhan|Le Champion de l’Ouest|SR|fire|D|Thunder Flash|Hyper Tornado|Burning Shoot|Guerrier de l’au-delà|Guerriers Z
+2131|Tao Pai Pai|L’Assassin n° 1|R|dark|D|Coup de langue|Dodonpa|Super Dodonpa|Pilier volant|Armée du Ruban rouge:atk:10
+2146|Dr Gero|Le Créateur des cyborgs|R|dark|D|Rayon des yeux|Absorption d’énergie|Photon Wave|Génie fou|Cyborgs du Dr Gero
+2098|C-8|Le Cyborg au grand cœur|N|earth|T|Coup de poing|Bouclier|Colère pour Suno|Pacifiste|Armée du Ruban rouge
+2138|Général Blue|L’Officier télépathe|N|water|D|Coup de pied|Regard paralysant|Télékinésie|Perfectionniste|Armée du Ruban rouge
+9781|Colonel Violet|L’Officier du Ruban rouge|N|wind|D|Tir de fusil|Embuscade|Fuite en avion|Opportuniste|Armée du Ruban rouge
+2139|Officier Black|Le Chef d’état-major|N|dark|D|Tir de pistolet|Battle Jacket|Bombe nucléaire|Ambition|Armée du Ruban rouge
+6114|Garlic Junior|Le Démon immortel|R|dark|D|Griffes|Death Impact|Dead Zone|Immortalité|Grands ennemis
+3182|Aralé Norimaki|La Petite androïde|SR|thunder|D|Coup de tête|N’cha Cannon|Fente de la Terre|Force absurde|Guerriers Z
+135959|Jaco|Le Patrouilleur galactique|N|light|D|Tir de pistolet|Super Elite Combo|Bombe d’extinction|Élite autoproclamée|Tournoi du Pouvoir
+2141|Pilaf|L’Empereur raté|N|dark|D|Robot Pilaf|Missiles|Fusion des robots|Rêve de conquête|Bande de Pilaf:speed:10
+2143|Mai|La Soldate de Pilaf|N|dark|D|Tir de pistolet|Grenade|Tir de précision|Sang-froid|Bande de Pilaf
+2133|Shu|Le Ninja de Pilaf|N|wind|D|Katana|Shuriken|Robot de combat|Chien ninja|Bande de Pilaf
+2094|Gyûmaô|Le Roi Bœuf|R|fire|T|Hache géante|Charge|Lancer de hache|Élève de Tortue Géniale|Famille Son
+2110|Baba la Voyante|La Sœur de Tortue Géniale|N|dark|S|Boule de cristal|Retour d’un jour|Cinq guerriers|Voyance|Guerriers Z
+2120|Nam|Le Combattant du désert|N|earth|D|Coup de poing|Saut céleste|Tenku Peke Ji Ken|Sauveur de son village|Guerriers Z
+2096|Upa|Le Fils de Bora|N|earth|D|Lance|Jet de pierre|Courage de Karin|Gardien de la tour|Guerriers Z
+2101|Bora|Le Gardien de la tour Karin|N|earth|T|Lance|Projection|Défense de la terre sacrée|Géant|Guerriers Z
+2105|Lunch|La Fille aux deux visages|N|fire|D|Mitraillette|Éternuement|Rafale furieuse|Double personnalité|Guerriers Z
+678|Bulma|Le Génie de Capsule Corp|N|thunder|S|Pistolet|Capsules|Radar et invention|Génie scientifique|Guerriers Z
+2108|Oolong|Le Cochon métamorphe|N|earth|D|Fuite|Métamorphose|Vœu volé|Cinq minutes|Guerriers Z
+677|Puar|Le Compagnon de Yamcha|N|wind|D|Coup de queue|Métamorphose|Ciseaux géants|Fidélité|Guerriers Z
+197720|Kusu|L’Ange de l’Univers 10|SR|light|S|Coup de sceptre|Barrière|Restauration|L’aînée des anges|Dieux et anges
+237871|Marcarita|L’Ange de l’Univers 11|SR|light|S|Coup de sceptre|Danse angélique|Restauration|Ange de Belmod|Dieux et anges
+180813|Helles|La Déesse de la Destruction|SSR|light|D|Flèche de destruction|Sphère de destruction|Hakai|Déesse de l’amour|Dieux et anges
+13663|Suppaman|Le Héros du village Pingouin|N|wind|D|Lancer de prune|Planche à roulettes|Grenade|Héros peureux|Guerriers Z
+2106|Marron|La Fille de Krilin|N|light|S|Câlin|Encouragement|Sourire|Enfant chérie|Guerriers Z
+9777|Li Shenron|Le Dragon à une étoile|SSR|dark|D|Whirlwind Spin|Dragon Thunder|Minus Energy Power Ball|Énergie négative|Dragons sacrés
+40489|Fermier|L’Homme au fusil|N|earth|D|Tir de fusil|Coup de fourche|Niveau de combat 5|Courage ordinaire|Guerriers Z
+9785|Bubbles|Le Singe de Kaio|N|earth|D|Esquive|Course-poursuite|Gravité ×10|Insaisissable|Dieux et anges
+2118|Ranfan|La Combattante séductrice|N|wind|D|Coup de pied|Larmes|Charme déloyal|Ruse|Guerriers Z
+2112|Umigame|La Tortue de mer|N|water|T|Carapace|Nage|Charge lente|Mille ans|Guerriers Z
+@Bleach
+911|Zangetsu|L’Esprit du sabre|SSR|dark|D|Getsuga Tenshô|Getsuga Jûjishô|Tensa Zangetsu|Le Vieil homme|Zanpakutô:atk:15
+25881|Hyôrinmaru|Le Dragon de glace|SR|water|D|Souffle glacé|Ryûsenka|Hyôten Hyakkasô|Esprit du sabre|Zanpakutô
+27387|Senbonzakura|Le Samouraï masqué|SR|wind|D|Lames-pétales|Gôkei|Senkei|Esprit du sabre|Zanpakutô
+24524|Sode no Shirayuki|La Dame de neige|R|water|D|Tsukishiro|Hakuren|Shirafune|Esprit du sabre|Zanpakutô
+24525|Katen Kyôkotsu|La Courtisane|R|dark|D|Jeu d’ombre|Irooni|Dangyo|Esprit du sabre|Zanpakutô
+24771|Haineko|La Chatte de cendres|N|wind|D|Griffes|Nuage de cendres|Tornade|Esprit du sabre|Zanpakutô
+24526|Kazeshini|La Faucheuse|N|wind|D|Faux|Chaînes|Moisson|Esprit du sabre|Zanpakutô
+74361|Senjumaru Shutara|La Grande Tisserande|SSR|dark|D|Aiguilles|Bras tisseurs|Shatatsu Karagara Shigarami no Tsuji|Garde royale|Garde royale et Roi des Quincy
+75654|Ôetsu Nimaiya|Le Dieu du sabre|SSR|water|D|Sayafushi|Entaille parfaite|Lame sans fourreau|Créateur des Zanpakutô|Garde royale et Roi des Quincy
+74357|Kirio Hikifune|La Reine des céréales|SR|earth|S|Coup de louche|Festin de reiatsu|Cage de vie|Garde royale|Garde royale et Roi des Quincy
+75068|Tenjirô Kirinji|Le Démon des sources|SR|water|S|Kinpika|Source du sang|Source des os|Garde royale|Garde royale et Roi des Quincy
+910|Yachiru Kusajishi|La Lieutenante rose|R|light|D|Sanpo Kenjû|Monstres jumeaux|Charge sur l’épaule|Sens de l’orientation|11e Division
+3911|Yumichika Ayasegawa|Le Cinquième siège|R|light|D|Fuji Kujaku|Lames multiples|Ruri’iro Kujaku|Beauté avant tout|11e Division
+3100|Nemu Kurotsuchi|La Fille artificielle|R|dark|T|Coup de poing|Perceuse|Gikon Jûrin|Corps modifié|Lieutenants
+3095|Nanao Ise|La Lieutenante du Kidô|R|light|T|Kidô|Hakudan Keppeki|Shinken Hakkyôken|Héritière des Ise|Lieutenants
+5176|Kiyone Kotetsu|Le Troisième siège|N|water|S|Coup de sabre|Kaidô|Soin de la 13e|Dévouée à Ukitake|4e Division
+2344|Kensei Muguruma|Le Vizard du vent|SR|wind|D|Tachikaze|Bakudantsuki|Tekken Tachikaze|Masque de Hollow|Vizards
+2343|Lisa Yadômaru|La Vizard à la lance|R|wind|D|Haguro Tonbo|Coup de lance|Masque de Hollow|Curiosité|Vizards
+1158|Hiyori Sarugaki|La Vizard coléreuse|R|fire|D|Kubikiri Orochi|Coup de sandale|Cero|Masque de Hollow|Vizards
+2342|Mashiro Kuna|La Vizard aux coups de pied|R|wind|D|Mashiro Kick|Super Kick|Cero au pied|15 heures de masque|Vizards
+2341|Rôjûrô Otoribashi|Rose|R|light|D|Kinshara|Sonate n° 11|Kinshara Butôdan|Musicien|Vizards
+2345|Hachigen Ushôda|Le Maître des barrières|R|earth|T|Barrière|Shijû no Saimon|Ryûbi no Jômon|Kidô de Hollow|Vizards
+2340|Love Aikawa|Le Vizard au gourdin|R|fire|D|Tengumaru|Hifuki no Kozuchi|Cero|Amateur de mangas|Vizards
+3211|Szayelaporro Granz|L’Octava Espada|SR|dark|D|Clones|Poupée vaudou|Gabriel|Fornicarás|Espada
+1082|Wonderweiss Margela|L’Arrancar modifié|SR|light|T|Coup de poing|Centurión|Extinguir|Scelle les flammes|Espada
+1152|Luppi Antenor|Le Remplaçant|N|earth|D|Tentacule|Huit tentacules|Trepadora|Arrogance|Espada
+14351|Lilynette Gingerbuck|La Moitié de Starrk|N|dark|D|Cero|Pistolets|Meute de loups|Âme partagée|Espada
+7426|Pesche Guatiche|La Fracción de Nel|N|water|D|Infinite Slick|Ultima|Cero Sincrético|Bave glissante|Espada
+8021|Dondochakka Birstanne|La Fracción de Nel|N|earth|T|Kanabô|Bawabawa|Cero Sincrético|Ventre réservoir|Espada
+7429|Cirucci Sanderwicci|La Privaron Espada|R|wind|D|Yo-yo|Lames-ailes|Golondrina|Ancienne Espada|Espada
+17960|Emilou Apacci|La Fracción cerf|N|fire|D|Chakram|Cierva|Quimera Parca|Tres Bestias|Fracción de Harribel:atk:10
+21700|Franceska Mila Rose|La Fracción lionne|N|earth|D|Épée large|Leona|Quimera Parca|Tres Bestias|Fracción de Harribel
+17150|Cyan Sung-Sun|La Fracción serpent|N|water|D|Sai|Anaconda|Quimera Parca|Tres Bestias|Fracción de Harribel
+16573|Ggio Vega|La Fracción tigre|N|wind|D|Lame|Tigre Estoque|Tigre Estoque El Sable|Fracción de Barragan|Fracción de Harribel
+16042|Loly Aivirrne|La Jalouse|N|dark|D|Dague|Escolopendra|Poison|Dévotion à Aizen|Traîtres de la Soul Society
+64511|Bambietta Basterbine|The Explode|SR|fire|D|Lame|Bombes de reishi|Vollständig|Tout explose|Quincy
+64663|As Nodt|The Fear|SR|dark|D|Épines de peur|Tatar Foras|Vollständig|Terreur pure|Quincy
+87085|Askin Nakk Le Vaar|The Deathdealing|SSR|dark|D|Dose létale|Gift Ball|Gift Bereich|Immunité|Quincy
+189753|Candice Catnipp|The Thunderbolt|R|thunder|D|Galvano Blast|Galvano Javelin|Electrocution|Vollständig|Quincy
+291188|Meninas McAllon|The Power|R|earth|T|Coup de poing|Projection|Force brute|Vollständig|Quincy
+239946|Lille Barro|The X-Axis|SSR|light|D|Tir perforant|Jilliel|Trompete|Second Vollständig|Quincy
+87081|Mask De Masculine|The Superstar|SR|light|T|Star Punch|Star Eagle Kick|Star Flash Supernova|Acclamations|Quincy
+1083|Ryûken Ishida|Le Dernier Quincy pur|SR|light|D|Heilig Pfeil|Seele Schneider|Flèche d’argent|Directeur d’hôpital|Quincy
+41052|Shûkurô Tsukishima|Le Maître du passé|SR|dark|D|Book of the End|Passé inséré|Piège du souvenir|Fullbring|Xcution:atk:15
+39609|Riruka Dokugamine|La Fille aux boîtes|R|light|D|Love Gun|Dollhouse|Addiction Shot|Fullbring|Xcution
+41126|Yukio Hans Vorarlberna|Le Joueur|R|dark|T|Invaders Must Die|Digital Radial Invaders|Sauvegarde|Fullbring|Xcution
+1893|Kaien Shiba|L’Ancien lieutenant|SR|water|D|Nejibana|Vague tourbillonnante|Trident des flots|Cœur légué|Clan Shiba:hp:15
+1090|Kûkaku Shiba|L’Artificière|R|fire|D|Raikôhô|Feu d’artifice|Canon Kakaku|Bras unique|Clan Shiba
+1091|Ganju Shiba|Le Chef de gang|N|earth|D|Seppa|Feu d’artifice|Charge de Bonnie|Sanglier|Clan Shiba
+22849|Masaki Kurosaki|La Mère d’Ichigo|R|light|D|Heilig Pfeil|Blut Vene|Flèche du sacrifice|Quincy pure|Amis de Karakura
+4018|Karin Kurosaki|La Sœur footballeuse|N|fire|D|Tir de ballon|Coup de pied|Frappe spirituelle|Voit les esprits|Amis de Karakura
+3528|Ururu Tsumugiya|L’Employée de la boutique|N|earth|D|Senren Bakusaihô|Mode génocide|Canon multiple|Timide|Boutique Urahara
+8018|Jinta Hanakari|L’Employé de la boutique|N|fire|D|Muteki Tekkon|Home run|Batte de fer|Turbulent|Boutique Urahara
+9062|Don Kan’onji|Le Héros de la télé|N|light|D|Kan’onji Cannon|Golden Cannon Ball|Esprits, soyez guidés !|Bohahaha|Amis de Karakura
+@Demon Slayer
+137808|Kagaya Ubuyashiki|Le Maître de l’Armée|R|light|S|Voix apaisante|Clairvoyance|Sacrifice du domaine|Voix qui guide|Maison Ubuyashiki:hp:15
+139460|Kiriya Ubuyashiki|Le Nouveau maître|N|light|S|Ordre|Stratégie|Commandement de la forteresse|Héritier|Maison Ubuyashiki
+221375|Amane Ubuyashiki|L’Épouse du maître|N|light|S|Prière|Soins|Message aux piliers|Prêtresse|Maison Ubuyashiki
+138990|Hotaru Haganezuka|Le Forgeron furieux|N|fire|D|Couteaux de cuisine|Poursuite|Lame polie|Masque de hyottoko|Village des forgerons:def:10
+171768|Kotetsu|Le Petit forgeron|N|earth|D|Jet de pierre|Yoriichi Type Zéro|Entraînement mécanique|Analyse|Village des forgerons
+206331|Kozô Kanamori|Le Forgeron d’Inosuke|N|earth|D|Marteau|Lame affûtée|Sabres jumeaux|Forgeron|Village des forgerons
+250555|Suma|L’Épouse de Tengen|N|water|D|Kunai|Bombe fumigène|Assaut des trois|Kunoichi|Épouses d’Uzui:speed:15
+250554|Makio|L’Épouse de Tengen|N|fire|D|Kunai|Lancer explosif|Assaut des trois|Kunoichi|Épouses d’Uzui
+250556|Hinatsuru|L’Épouse de Tengen|N|wind|D|Kunai|Arbalète à glycine|Pluie de kunais|Kunoichi|Épouses d’Uzui
+206330|Tanjurô Kamado|Le Père de Tanjirô|R|fire|D|Hache|Danse du Dieu du Feu|Monde transparent|Souffle constant|Famille Kamado
+193379|Shinjurô Rengoku|L’Ancien pilier de la Flamme|R|fire|D|Souffle de la Flamme : Feu inconnu|Soleil levant|Tigre de flammes|Ancien pilier|Les Piliers
+193380|Senjurô Rengoku|Le Frère de Kyôjurô|N|fire|S|Coup de sabre|Chronique de la Flamme|Encouragement|Cœur ardent|Compagnons de Tanjirô
+269650|Yûichirô Tokitô|Le Jumeau de Muichirô|N|wind|D|Hache|Coup protecteur|Dernier souffle|Frère aîné|Les Piliers
+207949|Gotô|Le Kakushi|N|earth|S|Transport|Premiers secours|Évacuation|Travail de l’ombre|Domaine des Papillons
+145286|Naho Takada|L’Aide du Domaine|N|light|S|Bandage|Remède|Rééducation|Trio des Papillons|Domaine des Papillons
+145287|Kiyo Terauchi|L’Aide du Domaine|N|light|S|Bandage|Remède|Rééducation|Trio des Papillons|Domaine des Papillons
+145289|Sumi Nakahara|L’Aide du Domaine|N|light|S|Bandage|Remède|Rééducation|Trio des Papillons|Domaine des Papillons
+141692|Mère araignée|La Démone aux fils|N|dark|D|Fils de marionnette|Pourfendeurs manipulés|Poupée sans tête|Famille de Rui|Famille araignée:atk:10
+141690|Sœur araignée|La Démone au cocon|N|dark|D|Fils|Cocon dissolvant|Prison de soie|Famille de Rui|Famille araignée
+139740|Frère araignée|Le Démon au poison|N|dark|D|Crachat|Poison araignée|Nuée d’araignées|Famille de Rui|Famille araignée
+141693|Père araignée|Le Colosse araignée|R|earth|T|Coup de poing|Mue|Charge du colosse|Peau d’acier|Famille araignée
+138988|Démon aux mains|Le Démon de la sélection|R|earth|T|Mains multiples|Mains souterraines|Étreinte des cent mains|47 ans de prison|Démons d’Asakusa
+138812|Démon du marais|Le Démon aux trois corps|N|water|D|Griffes|Marais d’ombre|Assaut des trois|Trois corps|Démons d’Asakusa
+207959|Mukago|La Lune inférieure 4|N|dark|D|Griffes|Fuite|Supplique|Lune inférieure|Lunes inférieures
+207958|Kamanue|La Lune inférieure 6|N|dark|D|Griffes|Charge|Dernière tentative|Lune inférieure|Lunes inférieures
+207961|Rokuro|La Lune inférieure 2|N|dark|D|Griffes|Assaut|Promesse de servir|Lune inférieure|Lunes inférieures
+306224|Wakuraba|La Lune inférieure 3|N|dark|D|Griffes|Fuite éclair|Évasion|Lune inférieure|Lunes inférieures
+302101|Sumiyoshi|L’Ancêtre des Kamado|N|fire|D|Hache|Souvenir de Yoriichi|Danse transmise|Mémoire héritée|Famille Kamado
+161211|Kotoha Hashibira|La Mère d’Inosuke|N|light|S|Berceuse|Étreinte|Sacrifice d’une mère|Amour maternel|Compagnons de Tanjirô
+-:ハカ|Hakuji|L’Homme qu’était Akaza|SR|fire|D|Poing Soryû|Enchaînement|Feu d’artifice final|Poings pour protéger|Lunes supérieures
+-:ウタ|Uta la Chanteuse|L’Épouse de Yoriichi|N|light|S|Chanson|Réconfort|Souvenir heureux|Bonheur simple|Frères Tsugikuni
+-:ハイ|Ancien pilier de l’Eau|Le Maître d’autrefois|R|water|D|Souffle de l’Eau : Tranchant de surface|Roue d’eau|Dragon des flots|Tradition|Élèves d’Urokodaki
+@Jujutsu Kaisen
+203015|Riko Amanai|Le Plasma stellaire|N|light|S|Gifle|Sourire|Vœu de vivre|Réceptacle de Tengen|Les Intouchables:atk:15
+255175|Misato Kuroi|La Gardienne de Riko|N|earth|T|Balai|Arts martiaux|Protection|Dévouement|Les Intouchables
+281725|Yû Haibara|Le Camarade de Nanami|N|light|D|Coup de poing|Charge|Élan d’optimisme|Bonne humeur|Enseignants et staff
+217291|Tengen|Le Maître des barrières|SSR|earth|T|Barrière|Dissimulation|Barrières du Japon|Immortalité|Enseignants et staff
+217290|Ui Ui|Le Frère de Mei Mei|R|wind|S|Coup de pied|Téléportation|Échange d’âmes|Dévoué à sa sœur|Enseignants et staff
+210846|Akari Nitta|L’Assistante de Kyoto|N|light|S|Rideau|Rapport|Évacuation|Assistante|Enseignants et staff
+320325|Arata Nitta|Le Soigneur de première année|N|light|S|Petit coup|Blessures figées|Stabilisation|Arrête l’aggravation|École de Kyoto
+209694|Haruta Shigemo|Le Maudit chanceux|N|dark|D|Épée à main|Coup en traître|Miracles accumulés|Miracles|Camp de Getô:atk:10
+228986|Mimiko Hasaba|La Jumelle à la poupée|N|dark|D|Poupée|Corde|Pendaison maudite|Fidèle à Getô|Camp de Getô
+228987|Nanako Hasaba|La Jumelle au téléphone|N|dark|D|Photo|Capture|Cliché maudit|Fidèle à Getô|Camp de Getô
+268297|Larue|Le Partisan de Getô|N|light|D|Cœur|Capture|Emprise|Fidèle à Getô|Camp de Getô
+210831|Esô|Le Deuxième frère|R|dark|D|Ailes de sang|Sang corrosif|Pourriture|Fresque de la mort|Manipulation du sang
+210832|Kechizu|Le Troisième frère|N|dark|D|Crachat|Sang corrosif|Pourriture|Fresque de la mort|Manipulation du sang
+207988|Jûzô Kumiya|L’Artisan maudit|N|dark|D|Lame|Outil maudit|Collection macabre|Artisan|Camp de Getô
+306253|Jirô Awasaka|Le Maudit inversé|R|earth|T|Coup de poing|Inversion|Force renversée|Plus c’est fort, moins ça blesse|Camp de Getô
+306252|Ogami|La Médium|R|dark|D|Incantation|Invocation|Descente de l’âme de Tôji|Séance de médium|Camp de Getô
+303313|Shiu Kong|L’Intermédiaire|N|dark|D|Pistolet|Contrat|Prime sur la tête|Courtier|Les Intouchables
+311131|Fléau réservoir|L’Arsenal de Tôji|N|dark|T|Morsure|Stockage|Arsenal recraché|Estomac sans fond|Les Intouchables
+193479|Tsumiki Fushiguro|La Sœur de Megumi|N|light|S|Sourire|Réconfort|Vœu de bonheur|Bienveillance|Première année de Tokyo
+194074|Wasuke Itadori|Le Grand-père de Yûji|N|earth|D|Coup de canne|Leçon de vie|Dernières paroles|« Aide les gens »|Première année de Tokyo
+196503|Noritoshi Kamo l’Ancien|Le Pire exorciste|SR|dark|D|Sang|Expérience maudite|Fresques de la mort|Corps de Kenjaku|Manipulation du sang
+-:ヨロ|Yorozu|L’Exorciste de Heian|SSR|earth|D|Métal liquide|Armure d’insecte|Sphère parfaite|Construction|Jeu de massacre
+-:ウロ|Takako Uro|La Capitaine de l’escouade du Soleil|SR|wind|D|Ciel saisi|Espace courbé|Surface fine comme la glace|Manipulation du ciel|Jeu de massacre
+-:リュ|Ryû Ishigori|Le Canon de Sendai|SSR|fire|D|Tir d’énergie|Décharge|Granite Blast|Puissance de feu maximale|Jeu de massacre
+-:レジ|Reggie Star|Le Stratège aux reçus|R|dark|D|Reçu|Contrat recréé|Maison effondrée|Recréation de contrats|Jeu de massacre
+-:タカ|Fumihiko Takaba|Le Comédien|SR|light|T|Blague|Sketch|Comédien : tout devient réel|Ce qui le fait rire existe|Jeu de massacre
+-:ハナ|Hana Kurusu|L’Ange|SSR|light|S|Aile|Annulation de technique|Échelle de Jacob|Efface tout sort|Jeu de massacre
+-:チャ|Charles Bernard|Le Mangaka|R|light|D|G-Pen|Lecture du futur|Case suivante|Voit une seconde plus loin|Jeu de massacre
+-:ドル|Dhruv Lakdawalla|Le Vainqueur de deux incarnations|SR|earth|D|Shikigami|Territoire tracé|Domaine autonome|Traces de shikigami|Jeu de massacre
+-:ハゼ|Hazenoki|Le Kamikaze|R|fire|D|Dent explosive|Œil explosif|Corps explosif|Régénère ce qu’il fait exploser|Jeu de massacre
+-:アマ|Amai Rin|Le Guetteur|N|light|D|Coup de poing|Sucre|Rapport au chef|Technique sucrée|Jeu de massacre
+-:ジン|Jin Itadori|Le Père de Yûji|N|light|D|Coup de poing|Volonté|Promesse|Sang d’exception|Première année de Tokyo
+-:ツル|Tsurugi Okkotsu|Le Lointain cousin|R|wind|D|Sabre|Assaut|Technique héritée|Sang des Sugawara|Deuxième année de Tokyo
+-:オギ|Ogi Zen’in|Le Père de Maki|R|fire|D|Katana|Lame enflammée|Flamme dévorante|Rancœur|Clan Zen’in
+-:ジン|Jinichi Zen’in|Le Chef des Hei|R|earth|D|Poing géant|Poings de pierre|Pluie de poings|Clan Zen’in|Clan Zen’in
+-:ランタ|Ranta Zen’in|L’Œil entravant|N|dark|T|Regard|Paralysie|Œil géant|Clan Zen’in|Clan Zen’in
+@Hunter x Hunter
+52425|Alluka Zoldyck|La Sœur de Kirua|R|light|S|Demande|Câlin|Guérison par un vœu|Trois requêtes|Famille Zoldyck
+33375|Miruki Zoldyck|Le Génie informatique|N|dark|D|Coup de fouet|Bombe miniature|Piratage|Inventeur|Famille Zoldyck
+59457|Kikyô Zoldyck|La Mère des Zoldyck|R|dark|D|Éventail|Ordre|Visière de surveillance|Mère possessive|Famille Zoldyck
+35894|Canary|L’Apprentie majordome|N|wind|D|Coup de canne|Garde|Frappe éclair|Loyauté|Famille Zoldyck
+5829|Kortopi|Le Copieur|N|light|D|Coup|Gallery Fake|Cinquante copies|Copies de 24 heures|Brigade fantôme
+55071|Pariston Hill|Le Rat du Zodiaque|SR|light|D|Sourire|Manipulation|Cinq mille cocons|Vice-président|Zodiaque:hp:15
+55725|Mizaistom Nana|Le Bœuf du Zodiaque|R|earth|T|Carte bleue|Carte jaune|Carte rouge : Cross Game|Juge|Zodiaque
+55075|Kanzai|Le Tigre du Zodiaque|R|fire|D|Griffes|Charge|Poing du tigre|Impulsif|Zodiaque
+55077|Piyon|Le Lapin du Zodiaque|N|light|D|Téléphone|Traduction|Piratage|Linguiste|Zodiaque
+55087|Cluck|Le Coq du Zodiaque|N|wind|D|Coup de bec|Envol|Nuée d’oiseaux|Dresseuse|Zodiaque
+55085|Gel|Le Serpent du Zodiaque|R|dark|S|Bras-serpents|Poison|Antidote|Empoisonneuse|Zodiaque
+6088|Menchi|L’Examinatrice gourmet|R|fire|D|Couteaux de cuisine|Jonglage|Découpe éclair|Hunter gourmet|287e examen
+22519|Satotz|L’Examinateur|R|wind|D|Marche rapide|Cartes tranchantes|Assaut du Hunter|Sans bouche|287e examen
+10535|Leroute|La Parieuse|N|dark|D|Pari|Provocation|Mise totale|Psychologue|287e examen
+52497|Majitani|Le Faux araignée|N|earth|D|Coup de poing|Intimidation|Bluff|Tatouage|287e examen
+57757|Bodoro|Le Vieux combattant|N|earth|D|Coup de paume|Arts martiaux|Dernier assaut|Honneur|287e examen
+12515|Senritsu|La Musicienne|R|wind|S|Flûte|Écoute des cœurs|Mélodie apaisante|Ouïe absolue|Gardes Nostrade:def:15
+33380|Basho|Le Poète|N|fire|D|Coup de poing|Haïku|Grand Haïku|Ce qu’il écrit se réalise|Gardes Nostrade
+33379|Squala|Le Maître-chien|N|earth|D|Morsure|Meute|Ordre aux chiens|Manipulateur|Gardes Nostrade
+33382|Dalzollene|Le Chef des gardes|N|dark|D|Sabre|Garde|Assaut|Devoir|Gardes Nostrade
+33378|Baise|L’Envoûteuse|N|light|D|Baiser|180 Minute Love|Esclave d’amour|Manipulation|Gardes Nostrade
+17564|Neon Nostrade|La Voyante|N|light|S|Stylo|Lovely Ghostwriter|Prophétie en quatrains|Voyance|Gardes Nostrade
+66481|Izunavi|Le Maître de Kurapika|R|earth|D|Chaîne|Leçon de Nen|Mise en garde|Matérialisation|Gardes Nostrade
+63099|Kastro|Le Combattant de la Tour|R|wind|D|Tiger Bite Fist|Double|Double Tiger Bite|Dédoublement|Tour céleste
+33285|Tsezguerra|Le Chasseur de primes|R|earth|D|Saut|Travail d’équipe|Tir de ballon|Hunter une étoile|Greed Island
+33299|Goreinu|Le Maître des gorilles|R|earth|D|Gorille blanc|Gorille noir|Échange de place|Deux gorilles|Greed Island
+33347|Binolt|Le Coupeur de cheveux|N|dark|D|Ciseaux|Scissor Hands|Analyse par les cheveux|Cannibale|Greed Island
+33308|Dwun|Le Maître du jeu|N|earth|T|Coup|Règles du jeu|Sorts du jeu|Créateur|Greed Island
+33352|Eeta|La Maîtresse du jeu|N|light|S|Accueil|Enregistrement|Sort de soin|Créatrice|Greed Island
+33351|Elena|La Maîtresse du jeu|N|light|S|Accueil|Sortie du jeu|Sort de retour|Créatrice|Greed Island
+33353|List|Le Maître du jeu|N|wind|D|Coup|Sort Eliminate|Expulsion|Créateur|Greed Island
+83199|Colt|Le Capitaine fidèle|R|wind|D|Serres|Piqué|Vol protecteur|Loyauté à la Reine|Fourmis-Chimères
+83201|Zazan|La Reine autoproclamée|R|dark|D|Dard|Queen’s Shot|Forme monstrueuse|Transformation|Fourmis-Chimères
+83203|Welfin|Le Loup méfiant|N|dark|D|Griffes|Missileman|Interrogatoire-missile|Paranoïa|Fourmis-Chimères
+83211|Rammot|Le Premier éveillé|N|wind|D|Plumes|Griffes|Rage du Nen|Haine|Fourmis-Chimères
+83377|Peggy|Le Conseiller pingouin|N|water|D|Coup de bec|Analyse|Conseil|Érudit|Fourmis-Chimères
+83375|Bloster|Le Homard|N|water|T|Pince|Carapace|Tir d’aura|Sens de l’honneur|Fourmis-Chimères
+163022|Gyro|Le Roi de NGL|SR|dark|D|Ordre|Volonté|Renaissance en fourmi|Haine du monde|Fourmis-Chimères
+14313|Komugi|La Championne de Gungi|N|light|S|Coup de Gungi|Stratégie|Kokoriko|Génie du Gungi|Gardes royaux
+82861|Spinner Clow|La Hunter amateur|N|wind|D|Tir|Pistage|Capture|Chasseuse d’animaux|Chasseurs de fourmis
+82859|Banana Kavaro|Le Hunter amateur|N|earth|D|Coup|Pistage|Capture|Chasseur d’animaux|Chasseurs de fourmis
+82867|Stick Dinner|Le Hunter amateur|N|fire|D|Coup|Pistage|Capture|Chasseur d’animaux|Chasseurs de fourmis
+83205|Kurt|Le Garçon devenu Colt|N|light|D|Lance-pierre|Course|Protéger Reina|Grand frère|Chasseurs de fourmis
+20678|Mito Freecss|La Tante de Gon|N|light|S|Réprimande|Repas|Bénédiction|Mère adoptive|Père et fils
+61955|Kiriko|Les Bêtes magiques|N|wind|D|Griffes|Métamorphose|Vol|Navigateurs|287e examen
+49757|Capitaine|Le Capitaine du navire|N|water|T|Barre|Tempête|Épreuve de la mer|Examinateur caché|287e examen
+70621|Zepile|Le Faussaire|N|earth|D|Coup|Expertise|Faux parfait|Œil d’expert|Père et fils
+58907|Zebro|Le Gardien de la porte|N|earth|T|Poussée|Porte des épreuves|Entraînement au poids|Portier|Famille Zoldyck
+53271|Beans|Le Secrétaire de Netero|N|light|S|Annonce|Organisation|Message du président|Fidélité|Zodiaque
+172921|Amane|La Majordome|N|wind|D|Coup de pied|Poursuite|Garde rapprochée|Majordome|Famille Zoldyck
+73493|Pairo|L’Ami de Kurapika|N|light|S|Encouragement|Mensonge bienveillant|Souvenir du clan|Clan Kurta|Quatuor de l’examen
+-:ギド|Gido|Le Maître des toupies|N|wind|D|Toupie de combat|Danse des toupies|Tornado Top|Nen de la Tour|Tour céleste

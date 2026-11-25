@@ -329,3 +329,326 @@ leol|D|Coup de griffe|Rental Pod|TUBE|Emprunt de pouvoirs
 cheadle|S|Analyse|Diagnostic|Traitement d’urgence|Médecin trois étoiles
 hanzo|D|Lame cachée|Clé de bras|Hanzo Skill 4|Bavard
 tonpa|D|Croche-pied|Jus laxatif|Abandon stratégique|35 examens
+kurama|T|Coup de queue|Rugissement|Bijû-Dama|Chakra infini
+shukaku|T|Griffe de sable|Balle d’air|Bijû-Dama de sable|Sceau maudit
+gyuki|T|Coup de tentacule|Encre aveuglante|Bijû-Dama|Huit tentacules
+yugito_nii|D|Griffes de chat|Souris de feu|Bijû-Dama de flammes bleues|Flammes de Matatabi
+utakata|D|Bulles explosives|Bulles acides|Bijû-Dama de bulles|Pipe à bulles
+fu|D|Coup d’aile|Poudre aveuglante|Bijû-Dama ailé|Vol
+yagura|T|Bâton crochu|Miroir d’eau|Bijû-Dama de corail|Hôte d’Isobu
+gengetsu_hozuki|D|Pistolet à eau|Palourde géante|Technique du Clone explosif à vapeur|Corps liquide
+indra_otsutsuki|DT|Flèche de foudre|Susanoo parfait|Jugement d’Indra|Premier Sharingan
+hagoromo_otsutsuki|TS|Bâton de l’Ermite|Création de toute chose|Chibaku Tensei des Six Chemins|Père du ninshû
+hamura_otsutsuki|D|Poing souple|Tenseigan|Sceau de la Lune|Byakugan originel
+kimimaro_kaguya|D|Danse du Camélia|Danse de la Clématite|Danse de la Fougère|Shikotsumyaku
+tayuya|D|Mélodie maudite|Trois Doki|Chaînes de la mélodie fantôme|Sceau maudit
+suigetsu_hozuki|D|Kubikiribôchô|Pistolet à eau|Grande Vague démoniaque|Corps liquide
+jugo|T|Poing transformé|Piston|Canon de chakra|Énergie naturelle
+zetsu|D|Racines|Spores parasites|Armée de Zetsu blancs|Fusion avec le sol
+yahiko|D|Kunai|Balle d’eau|Charge de l’espoir|Rêve de paix
+chojuro|D|Hiramekarei|Marteau de chakra|Hiramekarei libérée|Sept Épéistes
+darui|D|Sabre large|Foudre noire : Panthère|Ranton : Cirque laser|Tempête
+samui|D|Tantô|Nuage dissimulateur|Coupe éclair|Sang-froid
+omoi|D|Sabre|Croissant de lune|Kenjutsu de foudre|Sucette
+karui|D|Sabre long|Entaille éclair|Enchaînement de Kumo|Tempérament
+kurotsuchi|D|Chaux vive|Lave en fusion|Yôton : Ciment|Petite-fille d’Ônoki
+pakura|D|Kunai brûlant|Shakuton : Sphère|Vapeur meurtrière|Shakuton
+chiyo|S|Marionnettes Père et Mère|Dix marionnettes de Chikamatsu|Transfert de vie|Sacrifice
+gamabunta|T|Sabre dosu|Balle d’eau|Bombe à l’huile enflammée|Peau de crapaud
+gamakichi|D|Coup de langue|Balle d’eau|Pistolet à eau|Fils de Gamabunta
+fukasaku|D|Lame de vent|Chant du crapaud|Genjutsu des Crapauds|Senjutsu
+katsuyu|S|Jet d’acide|Division|Grande Guérison|Corps divisible
+pakkun|D|Morsure|Pistage|Meute de chiens ninjas|Flair infaillible
+akamaru|D|Morsure|Marquage dynamique|Croc lacérant|Fidélité
+anko_mitarashi|D|Kunai|Main aux serpents|Double serpent mortel|Sceau maudit
+genma_shiranui|D|Senbon craché|Lancer de kunais|Formation des Trois|Garde du Hokage
+hanabi_hyuga|D|Poing souple|Tourbillon divin|64 Poings|Byakugan
+rin_nohara|S|Kunai|Paume mystique|Soins d’urgence|Ninja médecin
+shikaku_nara|T|Manipulation des ombres|Couture des ombres|Étreinte mortelle de l’ombre|Génie tactique
+hayate_gekko|D|Sabre|Danse du croissant de lune|Clones d’ombre|Kenjutsu
+yugao_uzuki|D|Katana|Danse du croissant de lune|Assaut de l’ANBU|Masque de chat
+kotetsu_hagane|D|Masse géante|Coquille de conque|Assaut jumelé|Duo avec Izumo
+izumo_kamizuki|D|Kunai|Champ de sirop|Assaut jumelé|Duo avec Kotetsu
+ebisu|D|Coup de pied|Leçon accélérée|Barrière de protection|Jônin spécial
+sakumo_hatake|D|Sabre de chakra blanc|Entaille éclair|Croc blanc|Légende de Konoha
+dai_maito|D|Tornade de Konoha|Coup de pied dynamique|Les Huit Portes|Règle personnelle
+ibiki_morino|T|Coup de poing|Salle de torture invoquée|Chaînes d’interrogatoire|Volonté de fer
+shibi_aburame|D|Nuée d’insectes|Insectes parasites|Prison d’insectes|Kikaichû
+hana_inuzuka|D|Croc|Trois chiens Haimaru|Crocs tourbillonnants|Clan Inuzuka
+guren|D|Shurikens de cristal|Prison de cristal|Dragon de cristal|Shôton
+monkey_d_dragon|DT|Rafale|Tempête|Ouragan de la révolution|L’homme le plus recherché
+rocks_d_xebec|DT|Lame noire|Haki des Rois|Tempête de God Valley|Ambition démesurée
+sengoku|T|Paume de Bouddha|Onde de choc|Impact du Grand Bouddha|Forme de Bouddha
+ben_beckman|D|Tir de fusil|Coup de crosse|Tir au Haki|Sang-froid
+killer|D|Punishers|Sonic Scythe|Kamaa Sonic|Rire forcé
+jewelry_bonney|D|Coup de pied|Distorsion d’âge|Nika Punch|Toshi Toshi no Mi
+capone_bege|T|Tir de canon|Rook|Big Father|Forteresse humaine
+donquixote_rosinante|T|Tir de pistolet|Calm|Silent|Cœur d’or
+senor_pink|T|Nage au sol|Baby Buster|Suplex du bébé|Hard-boiled
+baby_5|D|Bras mitrailleuse|Missile Girl|Espadon géant|Buki Buki no Mi
+monet|D|Yuki Rabi|Kamakura|Morsure glacée|Yuki Yuki no Mi
+viola|D|Coup de pied flamenco|Œil scrutateur|Baleines de larmes|Giro Giro no Mi
+rebecca|D|Esquive|Danse de l’eau arrière|Projection hors du ring|Haki de l’Observation
+kyros|D|Entaille unijambiste|Trueno Bastardo|Coup du champion|3000 victoires
+caesar_clown|D|Gastille|Gastanet|Shinokuni|Gasu Gasu no Mi
+arlong|D|Dents de requin|Shark on Darts|Kiribachi|Homme-poisson
+kaku|D|Rankyaku|Shigan de nez|Amane Dachi|Style à quatre sabres
+bon_clay|D|Okama Kenpô|Swan Arabesque|Bombardier Arabesque|Mane Mane no Mi
+koala|D|Karaté des Hommes-Poissons|Coup de paume|Brise de mille tuiles|Ancienne esclave
+fisher_tiger|T|Poing de l’homme-poisson|Jet d’eau|Charge du Soleil|Marque du Soleil
+octo|D|Encre|Six sabres|Rokutôryû : Valse|Takoyaki
+izo|D|Tir de pistolets|Double détonation|Rafale au Haki|Fourreau rouge
+kinemon|D|Kitsunebi-ryû|Entaille de flammes|Homura Saki|Fuku Fuku no Mi
+kikunojo|D|Sabre des neiges|Entaille glacée|Coup du Fourreau|Okiku
+chavipere|T|Griffes|Electro|Forme Sulong|Mink
+pedro|D|Sabre|Electro|Sacrifice explosif|Promesse tenue
+kozuki_momonosuke|T|Morsure|Boro Breath|Nuages de flammes|Dragon rose
+tama|S|Petit coup|Kibi Dango|Armée des Gifters|Kibi Kibi no Mi
+ryuma|D|Yakkodori|Hanauta Sanchô Yahazu Giri|Entaille du dragon|Shusui
+ulti|D|Coup de tête|Ul-Zugan|Ul-Meteor Mortar|Pachycéphalosaure
+charlotte_pudding|S|Pistolet|Mémoire effacée|Gâteau de mariage|Memo Memo no Mi
+uta|S|Chant|Monde des chants|Tot Musica|Uta Uta no Mi
+bepo|D|Coup de pied|Electro|Forme Sulong|Ours polaire
+shirahoshi|S|Larmes|Appel des rois des mers|Poséidon|Arme antique
+pell|D|Tobizume|Piqué du faucon|Sacrifice du gardien|Tori Tori no Mi
+zeff|D|Coup de pied|Jambe rouge|Coup de pied dévastateur|Maître de Sanji
+dr_kureha|S|Lancer d’armes|Remède de sorcière|Traitement de choc|139 ans
+paulie|D|Rope Action|Half Knot|Top Knot|Galley-La
+hina|T|Awase Baori|Barreaux noirs|Cage noire|Ori Ori no Mi
+loki|D|Marteau|Foudre d’Elbaf|Ragnarök|Prince maudit
+shakky|D|Coup de poing|Haki des Rois|Arnaque|Bar de l’arnaque
+lilith|D|Pistolet laser|Sea Beast Weapon|Canon à bulles|Satellite
+calgara|D|Lance|Charge du guerrier|Cloche d’or|Serment d’amitié
+icebarg|T|Coup de marteau|Plans du Pluton|Galley-La au complet|Élève de Tom
+kozuki_hiyori|S|Shamisen|Chanson de Wano|Sceau de pierre marine|Komurasaki
+marguerite|D|Flèche au Haki|Tir du serpent|Pluie de flèches|Kuja
+dugong_kung_fu|D|Coup de patte|Kung-fu|Coup du maître|Code d’honneur
+grand_pretre|TS|Geste de la main|Barrière absolue|Arrêt du temps|Ultra Instinct naturel
+zeno_dr|DT|Petit geste|Effacement|Destruction d’un univers|Roi de Tout
+shenron|S|Rugissement|Vœu exaucé|Résurrection|Dragon des Dragon Balls
+porunga|S|Rugissement|Trois vœux|Téléportation de masse|Dragon du rêve
+super_shenron|TS|Souffle divin|Vœu sans limite|Restauration des univers|Super Dragon Balls
+pan|D|Coup de pied|Kamehameha|Maiden Burst|Sang Saiyan
+chi_chi|D|Casque à lame|Rayon du casque|Colère de Chi-Chi|Mère poule
+son_gohan_lancien|D|Poing de l’ivresse|Jan Ken|Kamehameha|Masque de renard
+gine|S|Petit coup|Repas réconfortant|Capsule de survie|Douceur Saiyan
+bra|D|Gifle|Caprice|Super Saiyan|Princesse Saiyan
+roi_vegeta|D|Execution Beam|Orga Blaster|Charge royale|Fierté du roi
+cabba|D|Galick Cannon|Final Flash|Super Saiyan 2|Élève de Vegeta
+cheelai|D|Tir de blaster|Vol de télécommande|Vœu à Shenron|Ancienne soldate
+zarbon|D|Elegant Blaster|Forme monstrueuse|Bloody Dance|Beauté
+recoome|T|Recoome Kick|Recoome Elbow|Recoome Eraser Gun|Poses
+burter|D|Blue Impulse|Mach Punch|Purple Comet|Le plus rapide de l’univers
+jeice|D|Crusher Ball|Fire Crusher|Purple Comet|Duo avec Burter
+nail|T|Coup de main|Régénération|Mystic Flasher|Fusion namek
+kami_sama|S|Rayon des yeux|Mafûba|Création des Dragon Balls|Moitié de Piccolo
+mr_popo|T|Esquive|Tapis volant|Leçon de combat|Entraîneur des dieux
+maitre_karin|S|Coup de bâton|Eau sacrée|Senzu|800 ans
+vieux_kaioshin|S|Danse rituelle|Éveil du potentiel|Don de vie|15 générations
+kaio_du_nord|S|Blague|Télépathie|Leçon du Kaioken|Maître du Genkidama
+paikuhan|D|Thunder Flash|Hyper Tornado|Burning Shoot|Guerrier de l’au-delà
+tao_pai_pai|D|Coup de langue|Dodonpa|Super Dodonpa|Pilier volant
+dr_gero|D|Rayon des yeux|Absorption d’énergie|Photon Wave|Génie fou
+c_8|T|Coup de poing|Bouclier|Colère pour Suno|Pacifiste
+general_blue|D|Coup de pied|Regard paralysant|Télékinésie|Perfectionniste
+colonel_violet|D|Tir de fusil|Embuscade|Fuite en avion|Opportuniste
+officier_black|D|Tir de pistolet|Battle Jacket|Bombe nucléaire|Ambition
+garlic_junior|D|Griffes|Death Impact|Dead Zone|Immortalité
+arale_norimaki|D|Coup de tête|N’cha Cannon|Fente de la Terre|Force absurde
+jaco|D|Tir de pistolet|Super Elite Combo|Bombe d’extinction|Élite autoproclamée
+pilaf|D|Robot Pilaf|Missiles|Fusion des robots|Rêve de conquête
+mai_dr|D|Tir de pistolet|Grenade|Tir de précision|Sang-froid
+shu|D|Katana|Shuriken|Robot de combat|Chien ninja
+gyumao|T|Hache géante|Charge|Lancer de hache|Élève de Tortue Géniale
+baba_la_voyante|S|Boule de cristal|Retour d’un jour|Cinq guerriers|Voyance
+nam|D|Coup de poing|Saut céleste|Tenku Peke Ji Ken|Sauveur de son village
+upa|D|Lance|Jet de pierre|Courage de Karin|Gardien de la tour
+bora|T|Lance|Projection|Défense de la terre sacrée|Géant
+lunch|D|Mitraillette|Éternuement|Rafale furieuse|Double personnalité
+bulma|S|Pistolet|Capsules|Radar et invention|Génie scientifique
+oolong|D|Fuite|Métamorphose|Vœu volé|Cinq minutes
+puar|D|Coup de queue|Métamorphose|Ciseaux géants|Fidélité
+kusu|S|Coup de sceptre|Barrière|Restauration|L’aînée des anges
+marcarita|S|Coup de sceptre|Danse angélique|Restauration|Ange de Belmod
+helles|D|Flèche de destruction|Sphère de destruction|Hakai|Déesse de l’amour
+suppaman|D|Lancer de prune|Planche à roulettes|Grenade|Héros peureux
+marron|S|Câlin|Encouragement|Sourire|Enfant chérie
+li_shenron|D|Whirlwind Spin|Dragon Thunder|Minus Energy Power Ball|Énergie négative
+fermier|D|Tir de fusil|Coup de fourche|Niveau de combat 5|Courage ordinaire
+bubbles|D|Esquive|Course-poursuite|Gravité ×10|Insaisissable
+ranfan|D|Coup de pied|Larmes|Charme déloyal|Ruse
+umigame|T|Carapace|Nage|Charge lente|Mille ans
+zangetsu|D|Getsuga Tenshô|Getsuga Jûjishô|Tensa Zangetsu|Le Vieil homme
+hyorinmaru|D|Souffle glacé|Ryûsenka|Hyôten Hyakkasô|Esprit du sabre
+senbonzakura|D|Lames-pétales|Gôkei|Senkei|Esprit du sabre
+sode_no_shirayuki|D|Tsukishiro|Hakuren|Shirafune|Esprit du sabre
+katen_kyokotsu|D|Jeu d’ombre|Irooni|Dangyo|Esprit du sabre
+haineko|D|Griffes|Nuage de cendres|Tornade|Esprit du sabre
+kazeshini|D|Faux|Chaînes|Moisson|Esprit du sabre
+senjumaru_shutara|D|Aiguilles|Bras tisseurs|Shatatsu Karagara Shigarami no Tsuji|Garde royale
+oetsu_nimaiya|D|Sayafushi|Entaille parfaite|Lame sans fourreau|Créateur des Zanpakutô
+kirio_hikifune|S|Coup de louche|Festin de reiatsu|Cage de vie|Garde royale
+tenjiro_kirinji|S|Kinpika|Source du sang|Source des os|Garde royale
+yachiru_kusajishi|D|Sanpo Kenjû|Monstres jumeaux|Charge sur l’épaule|Sens de l’orientation
+yumichika_ayasegawa|D|Fuji Kujaku|Lames multiples|Ruri’iro Kujaku|Beauté avant tout
+nemu_kurotsuchi|T|Coup de poing|Perceuse|Gikon Jûrin|Corps modifié
+nanao_ise|T|Kidô|Hakudan Keppeki|Shinken Hakkyôken|Héritière des Ise
+kiyone_kotetsu|S|Coup de sabre|Kaidô|Soin de la 13e|Dévouée à Ukitake
+kensei_muguruma|D|Tachikaze|Bakudantsuki|Tekken Tachikaze|Masque de Hollow
+lisa_yadomaru|D|Haguro Tonbo|Coup de lance|Masque de Hollow|Curiosité
+hiyori_sarugaki|D|Kubikiri Orochi|Coup de sandale|Cero|Masque de Hollow
+mashiro_kuna|D|Mashiro Kick|Super Kick|Cero au pied|15 heures de masque
+rojuro_otoribashi|D|Kinshara|Sonate n° 11|Kinshara Butôdan|Musicien
+hachigen_ushoda|T|Barrière|Shijû no Saimon|Ryûbi no Jômon|Kidô de Hollow
+love_aikawa|D|Tengumaru|Hifuki no Kozuchi|Cero|Amateur de mangas
+szayelaporro_granz|D|Clones|Poupée vaudou|Gabriel|Fornicarás
+wonderweiss_margela|T|Coup de poing|Centurión|Extinguir|Scelle les flammes
+luppi_antenor|D|Tentacule|Huit tentacules|Trepadora|Arrogance
+lilynette_gingerbuck|D|Cero|Pistolets|Meute de loups|Âme partagée
+pesche_guatiche|D|Infinite Slick|Ultima|Cero Sincrético|Bave glissante
+dondochakka_birstanne|T|Kanabô|Bawabawa|Cero Sincrético|Ventre réservoir
+cirucci_sanderwicci|D|Yo-yo|Lames-ailes|Golondrina|Ancienne Espada
+emilou_apacci|D|Chakram|Cierva|Quimera Parca|Tres Bestias
+franceska_mila_rose|D|Épée large|Leona|Quimera Parca|Tres Bestias
+cyan_sung_sun|D|Sai|Anaconda|Quimera Parca|Tres Bestias
+ggio_vega|D|Lame|Tigre Estoque|Tigre Estoque El Sable|Fracción de Barragan
+loly_aivirrne|D|Dague|Escolopendra|Poison|Dévotion à Aizen
+bambietta_basterbine|D|Lame|Bombes de reishi|Vollständig|Tout explose
+as_nodt|D|Épines de peur|Tatar Foras|Vollständig|Terreur pure
+askin_nakk_le_vaar|D|Dose létale|Gift Ball|Gift Bereich|Immunité
+candice_catnipp|D|Galvano Blast|Galvano Javelin|Electrocution|Vollständig
+meninas_mcallon|T|Coup de poing|Projection|Force brute|Vollständig
+lille_barro|D|Tir perforant|Jilliel|Trompete|Second Vollständig
+mask_de_masculine|T|Star Punch|Star Eagle Kick|Star Flash Supernova|Acclamations
+ryuken_ishida|D|Heilig Pfeil|Seele Schneider|Flèche d’argent|Directeur d’hôpital
+shukuro_tsukishima|D|Book of the End|Passé inséré|Piège du souvenir|Fullbring
+riruka_dokugamine|D|Love Gun|Dollhouse|Addiction Shot|Fullbring
+yukio_hans_vorarlberna|T|Invaders Must Die|Digital Radial Invaders|Sauvegarde|Fullbring
+kaien_shiba|D|Nejibana|Vague tourbillonnante|Trident des flots|Cœur légué
+kukaku_shiba|D|Raikôhô|Feu d’artifice|Canon Kakaku|Bras unique
+ganju_shiba|D|Seppa|Feu d’artifice|Charge de Bonnie|Sanglier
+masaki_kurosaki|D|Heilig Pfeil|Blut Vene|Flèche du sacrifice|Quincy pure
+karin_kurosaki|D|Tir de ballon|Coup de pied|Frappe spirituelle|Voit les esprits
+ururu_tsumugiya|D|Senren Bakusaihô|Mode génocide|Canon multiple|Timide
+jinta_hanakari|D|Muteki Tekkon|Home run|Batte de fer|Turbulent
+don_kanonji|D|Kan’onji Cannon|Golden Cannon Ball|Esprits, soyez guidés !|Bohahaha
+kagaya_ubuyashiki|S|Voix apaisante|Clairvoyance|Sacrifice du domaine|Voix qui guide
+kiriya_ubuyashiki|S|Ordre|Stratégie|Commandement de la forteresse|Héritier
+amane_ubuyashiki|S|Prière|Soins|Message aux piliers|Prêtresse
+hotaru_haganezuka|D|Couteaux de cuisine|Poursuite|Lame polie|Masque de hyottoko
+kotetsu|D|Jet de pierre|Yoriichi Type Zéro|Entraînement mécanique|Analyse
+kozo_kanamori|D|Marteau|Lame affûtée|Sabres jumeaux|Forgeron
+suma|D|Kunai|Bombe fumigène|Assaut des trois|Kunoichi
+makio|D|Kunai|Lancer explosif|Assaut des trois|Kunoichi
+hinatsuru|D|Kunai|Arbalète à glycine|Pluie de kunais|Kunoichi
+tanjuro_kamado|D|Hache|Danse du Dieu du Feu|Monde transparent|Souffle constant
+shinjuro_rengoku|D|Souffle de la Flamme : Feu inconnu|Soleil levant|Tigre de flammes|Ancien pilier
+senjuro_rengoku|S|Coup de sabre|Chronique de la Flamme|Encouragement|Cœur ardent
+yuichiro_tokito|D|Hache|Coup protecteur|Dernier souffle|Frère aîné
+goto|S|Transport|Premiers secours|Évacuation|Travail de l’ombre
+naho_takada|S|Bandage|Remède|Rééducation|Trio des Papillons
+kiyo_terauchi|S|Bandage|Remède|Rééducation|Trio des Papillons
+sumi_nakahara|S|Bandage|Remède|Rééducation|Trio des Papillons
+mere_araignee|D|Fils de marionnette|Pourfendeurs manipulés|Poupée sans tête|Famille de Rui
+sur_araignee|D|Fils|Cocon dissolvant|Prison de soie|Famille de Rui
+frere_araignee|D|Crachat|Poison araignée|Nuée d’araignées|Famille de Rui
+pere_araignee|T|Coup de poing|Mue|Charge du colosse|Peau d’acier
+demon_aux_mains|T|Mains multiples|Mains souterraines|Étreinte des cent mains|47 ans de prison
+demon_du_marais|D|Griffes|Marais d’ombre|Assaut des trois|Trois corps
+mukago|D|Griffes|Fuite|Supplique|Lune inférieure
+kamanue|D|Griffes|Charge|Dernière tentative|Lune inférieure
+rokuro|D|Griffes|Assaut|Promesse de servir|Lune inférieure
+wakuraba|D|Griffes|Fuite éclair|Évasion|Lune inférieure
+sumiyoshi|D|Hache|Souvenir de Yoriichi|Danse transmise|Mémoire héritée
+kotoha_hashibira|S|Berceuse|Étreinte|Sacrifice d’une mère|Amour maternel
+hakuji|D|Poing Soryû|Enchaînement|Feu d’artifice final|Poings pour protéger
+uta_la_chanteuse|S|Chanson|Réconfort|Souvenir heureux|Bonheur simple
+ancien_pilier_de_leau|D|Souffle de l’Eau : Tranchant de surface|Roue d’eau|Dragon des flots|Tradition
+riko_amanai|S|Gifle|Sourire|Vœu de vivre|Réceptacle de Tengen
+misato_kuroi|T|Balai|Arts martiaux|Protection|Dévouement
+yu_haibara|D|Coup de poing|Charge|Élan d’optimisme|Bonne humeur
+tengen_ju|T|Barrière|Dissimulation|Barrières du Japon|Immortalité
+ui_ui|S|Coup de pied|Téléportation|Échange d’âmes|Dévoué à sa sœur
+akari_nitta|S|Rideau|Rapport|Évacuation|Assistante
+arata_nitta|S|Petit coup|Blessures figées|Stabilisation|Arrête l’aggravation
+haruta_shigemo|D|Épée à main|Coup en traître|Miracles accumulés|Miracles
+mimiko_hasaba|D|Poupée|Corde|Pendaison maudite|Fidèle à Getô
+nanako_hasaba|D|Photo|Capture|Cliché maudit|Fidèle à Getô
+larue|D|Cœur|Capture|Emprise|Fidèle à Getô
+eso|D|Ailes de sang|Sang corrosif|Pourriture|Fresque de la mort
+kechizu|D|Crachat|Sang corrosif|Pourriture|Fresque de la mort
+juzo_kumiya|D|Lame|Outil maudit|Collection macabre|Artisan
+jiro_awasaka|T|Coup de poing|Inversion|Force renversée|Plus c’est fort, moins ça blesse
+ogami|D|Incantation|Invocation|Descente de l’âme de Tôji|Séance de médium
+shiu_kong|D|Pistolet|Contrat|Prime sur la tête|Courtier
+fleau_reservoir|T|Morsure|Stockage|Arsenal recraché|Estomac sans fond
+tsumiki_fushiguro|S|Sourire|Réconfort|Vœu de bonheur|Bienveillance
+wasuke_itadori|D|Coup de canne|Leçon de vie|Dernières paroles|« Aide les gens »
+noritoshi_kamo_lancien|D|Sang|Expérience maudite|Fresques de la mort|Corps de Kenjaku
+yorozu|D|Métal liquide|Armure d’insecte|Sphère parfaite|Construction
+takako_uro|D|Ciel saisi|Espace courbé|Surface fine comme la glace|Manipulation du ciel
+ryu_ishigori|D|Tir d’énergie|Décharge|Granite Blast|Puissance de feu maximale
+reggie_star|D|Reçu|Contrat recréé|Maison effondrée|Recréation de contrats
+fumihiko_takaba|T|Blague|Sketch|Comédien : tout devient réel|Ce qui le fait rire existe
+hana_kurusu|S|Aile|Annulation de technique|Échelle de Jacob|Efface tout sort
+charles_bernard|D|G-Pen|Lecture du futur|Case suivante|Voit une seconde plus loin
+dhruv_lakdawalla|D|Shikigami|Territoire tracé|Domaine autonome|Traces de shikigami
+hazenoki|D|Dent explosive|Œil explosif|Corps explosif|Régénère ce qu’il fait exploser
+amai_rin|D|Coup de poing|Sucre|Rapport au chef|Technique sucrée
+jin_itadori|D|Coup de poing|Volonté|Promesse|Sang d’exception
+tsurugi_okkotsu|D|Sabre|Assaut|Technique héritée|Sang des Sugawara
+ogi_zenin|D|Katana|Lame enflammée|Flamme dévorante|Rancœur
+jinichi_zenin|D|Poing géant|Poings de pierre|Pluie de poings|Clan Zen’in
+ranta_zenin|T|Regard|Paralysie|Œil géant|Clan Zen’in
+alluka_zoldyck|S|Demande|Câlin|Guérison par un vœu|Trois requêtes
+miruki_zoldyck|D|Coup de fouet|Bombe miniature|Piratage|Inventeur
+kikyo_zoldyck|D|Éventail|Ordre|Visière de surveillance|Mère possessive
+canary|D|Coup de canne|Garde|Frappe éclair|Loyauté
+kortopi|D|Coup|Gallery Fake|Cinquante copies|Copies de 24 heures
+pariston_hill|D|Sourire|Manipulation|Cinq mille cocons|Vice-président
+mizaistom_nana|T|Carte bleue|Carte jaune|Carte rouge : Cross Game|Juge
+kanzai|D|Griffes|Charge|Poing du tigre|Impulsif
+piyon|D|Téléphone|Traduction|Piratage|Linguiste
+cluck|D|Coup de bec|Envol|Nuée d’oiseaux|Dresseuse
+gel|S|Bras-serpents|Poison|Antidote|Empoisonneuse
+menchi|D|Couteaux de cuisine|Jonglage|Découpe éclair|Hunter gourmet
+satotz|D|Marche rapide|Cartes tranchantes|Assaut du Hunter|Sans bouche
+leroute|D|Pari|Provocation|Mise totale|Psychologue
+majitani|D|Coup de poing|Intimidation|Bluff|Tatouage
+bodoro|D|Coup de paume|Arts martiaux|Dernier assaut|Honneur
+senritsu|S|Flûte|Écoute des cœurs|Mélodie apaisante|Ouïe absolue
+basho|D|Coup de poing|Haïku|Grand Haïku|Ce qu’il écrit se réalise
+squala|D|Morsure|Meute|Ordre aux chiens|Manipulateur
+dalzollene|D|Sabre|Garde|Assaut|Devoir
+baise|D|Baiser|180 Minute Love|Esclave d’amour|Manipulation
+neon_nostrade|S|Stylo|Lovely Ghostwriter|Prophétie en quatrains|Voyance
+izunavi|D|Chaîne|Leçon de Nen|Mise en garde|Matérialisation
+kastro|D|Tiger Bite Fist|Double|Double Tiger Bite|Dédoublement
+tsezguerra|D|Saut|Travail d’équipe|Tir de ballon|Hunter une étoile
+goreinu|D|Gorille blanc|Gorille noir|Échange de place|Deux gorilles
+binolt|D|Ciseaux|Scissor Hands|Analyse par les cheveux|Cannibale
+dwun|T|Coup|Règles du jeu|Sorts du jeu|Créateur
+eeta|S|Accueil|Enregistrement|Sort de soin|Créatrice
+elena|S|Accueil|Sortie du jeu|Sort de retour|Créatrice
+list|D|Coup|Sort Eliminate|Expulsion|Créateur
+colt|D|Serres|Piqué|Vol protecteur|Loyauté à la Reine
+zazan|D|Dard|Queen’s Shot|Forme monstrueuse|Transformation
+welfin|D|Griffes|Missileman|Interrogatoire-missile|Paranoïa
+rammot|D|Plumes|Griffes|Rage du Nen|Haine
+peggy|D|Coup de bec|Analyse|Conseil|Érudit
+bloster|T|Pince|Carapace|Tir d’aura|Sens de l’honneur
+gyro|D|Ordre|Volonté|Renaissance en fourmi|Haine du monde
+komugi|S|Coup de Gungi|Stratégie|Kokoriko|Génie du Gungi
+spinner_clow|D|Tir|Pistage|Capture|Chasseuse d’animaux
+banana_kavaro|D|Coup|Pistage|Capture|Chasseur d’animaux
+stick_dinner|D|Coup|Pistage|Capture|Chasseur d’animaux
+kurt|D|Lance-pierre|Course|Protéger Reina|Grand frère
+mito_freecss|S|Réprimande|Repas|Bénédiction|Mère adoptive
+kiriko|D|Griffes|Métamorphose|Vol|Navigateurs
+capitaine|T|Barre|Tempête|Épreuve de la mer|Examinateur caché
+zepile|D|Coup|Expertise|Faux parfait|Œil d’expert
+zebro|T|Poussée|Porte des épreuves|Entraînement au poids|Portier
+beans|S|Annonce|Organisation|Message du président|Fidélité
+amane|D|Coup de pied|Poursuite|Garde rapprochée|Majordome
+pairo|S|Encouragement|Mensonge bienveillant|Souvenir du clan|Clan Kurta
+gido|D|Toupie de combat|Danse des toupies|Tornado Top|Nen de la Tour
