@@ -177,7 +177,152 @@ const braid = (waves: number, amp: number, radius: number, a: THREE.Material, b:
   }
 }
 
-if (rarity === 'rare') {
+// ---------------------------------------------------------------------------------------------
+// Styles « organiques » proposés pour les cartes LR et MR (paramètre ?style=a|b|c|d).
+// Même géométrie pour les deux raretés ; seule la palette change (chrome et rouge / irisé et prismes).
+// ---------------------------------------------------------------------------------------------
+const style = new URLSearchParams(location.search).get('style')
+
+let seed = 11
+const rnd = () => {
+  seed = (seed * 1664525 + 1013904223) % 4294967296
+  return seed / 4294967296
+}
+
+// Point, normale sortante et tangente à la position t (0..1) du pourtour (rectangle de demi-côtés w, h).
+const rim = (t: number, w = 2.3, h = 3.3) => {
+  const per = 4 * (w + h)
+  let d = (((t % 1) + 1) % 1) * per
+  if (d < 2 * w) return { x: -w + d, y: h, nx: 0, ny: 1 }
+  d -= 2 * w
+  if (d < 2 * h) return { x: w, y: h - d, nx: 1, ny: 0 }
+  d -= 2 * h
+  if (d < 2 * w) return { x: w - d, y: -h, nx: 0, ny: -1 }
+  d -= 2 * w
+  return { x: -w, y: -h + d, nx: -1, ny: 0 }
+}
+const CORNER_T = [0, 4.6 / 22.4, 11.2 / 22.4, 15.8 / 22.4] // haut-gauche, haut-droit, bas-droit, bas-gauche
+
+// Griffe : un cône lisse et courbé (comme une corne), base à l'origine, dirigé selon `angle`.
+const claw = (x: number, y: number, angle: number, len: number, rad: number, bend: number, mat: THREE.Material, z = 0.25) => {
+  const g = new THREE.ConeGeometry(rad, len, 10, 14)
+  g.translate(0, len / 2, 0)
+  const pos = g.getAttribute('position')
+  for (let i = 0; i < pos.count; i++) {
+    const k = pos.getY(i) / len
+    pos.setX(i, pos.getX(i) + bend * len * k * k)
+  }
+  g.computeVertexNormals()
+  const m = new THREE.Mesh(g, mat)
+  m.scale.z = 0.7
+  m.position.set(x, y, z)
+  m.rotation.z = angle - Math.PI / 2
+  scene.add(m)
+}
+
+// Liane métallique qui serpente tout autour du cadre ; peut porter des épines.
+const vine = (waves: number, amp: number, radius: number, mat: THREE.Material, phase: number, thorns: { every: number; len: number; mat: THREE.Material } | null = null) => {
+  const pts: THREE.Vector3[] = []
+  const n = 520
+  for (let i = 0; i < n; i++) {
+    const t = i / n
+    const { x, y, nx, ny } = rim(t)
+    const a = t * waves * Math.PI * 2 + phase
+    const wob = Math.sin(a) * amp + Math.sin(a * 2.7 + 1) * amp * 0.3
+    pts.push(new THREE.Vector3(x + nx * wob, y + ny * wob, 0.3 + Math.cos(a) * 0.17))
+    if (thorns && i % thorns.every === 0) {
+      const out = Math.atan2(ny, nx) + (rnd() - 0.5) * 1.5
+      const len = thorns.len * (0.6 + rnd() * 0.8)
+      claw(x + nx * wob, y + ny * wob, out, len, 0.05 + len * 0.07, (rnd() - 0.5) * 0.5, thorns.mat, 0.32)
+    }
+  }
+  scene.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true), 900, radius, 10, true), mat))
+}
+
+const smooth = (color: number, emissive: number, glow = 0.6) =>
+  new THREE.MeshPhysicalMaterial({ color, emissive, emissiveIntensity: glow, metalness: 0.65, roughness: 0.14, clearcoat: 1 })
+
+const buildStyle = (s: string) => {
+  const rift = rarity === 'rift'
+  // Palette : chrome et rouge sang pour MR, métal irisé et prismes pour LR.
+  const main = rift ? metal(0xffffff, 0.04) : metal(0xffffff, 0.14, { map: rainbow() })
+  const dark = rift ? metal(0x2a2b38, 0.14) : metal(0xffcf5c, 0.1)
+  const lip = rift ? metal(0xff2e4f, 0.18, { emissive: 0x9a0018, emissiveIntensity: 0.9 }) : metal(0xffcf5c, 0.1)
+  const accents = rift
+    ? [smooth(0xff2343, 0xb0001c, 0.8), smooth(0xff5a6e, 0xd0102a, 0.9)]
+    : [smooth(0xff9ad5, 0xd0308a), smooth(0x8fe0ff, 0x1f7fd0), smooth(0xffe27a, 0xd09010), smooth(0x9dffc9, 0x18a868), smooth(0xc9a8ff, 0x6a30e0)]
+  const accent = (i: number) => accents[i % accents.length]
+  const corner = (i: number) => {
+    const { x, y } = rim(CORNER_T[i])
+    const sx = Math.sign(x)
+    const sy = Math.sign(y)
+    return { x, y, sx, sy, diag: Math.atan2(sy, sx) }
+  }
+
+  if (s === 'a') {
+    // A — Ronces : lianes chromées couvertes d'épines, trois griffes à chaque coin.
+    scene.add(molding(2.5, 3.5, 0.42, main), molding(2.1, 3.1, 0.09, lip, 0.14))
+    vine(13, 0.2, 0.06, dark, 0, { every: 13, len: 0.5, mat: main })
+    vine(13, 0.2, 0.045, main, Math.PI, { every: 17, len: 0.42, mat: accent(0) })
+    for (let i = 0; i < 4; i++) {
+      const c = corner(i)
+      claw(c.x, c.y, c.diag, 1.5, 0.2, 0.22 * c.sx * c.sy, accent(i), 0.4)
+      claw(c.x, c.y, c.diag + deg(42), 1.05, 0.15, -0.3, main, 0.3)
+      claw(c.x, c.y, c.diag - deg(42), 1.05, 0.15, 0.3, main, 0.3)
+    }
+  } else if (s === 'b') {
+    // B — Griffes : cadre épais et nu, de grandes cornes qui s'enroulent depuis les coins.
+    scene.add(molding(2.5, 3.5, 0.5, main), molding(2.3, 3.3, 0.1, dark, 0.2), molding(2.02, 3.02, 0.1, lip, 0.15))
+    for (let i = 0; i < 4; i++) {
+      const c = corner(i)
+      // deux grandes cornes qui longent chaque bord en se recourbant vers l'extérieur
+      claw(c.x, c.y, c.sy > 0 ? deg(90) : deg(-90), 1.7, 0.26, 0.42 * c.sx * c.sy, accent(i), 0.42)
+      claw(c.x, c.y, c.sx > 0 ? deg(0) : deg(180), 1.35, 0.22, -0.42 * c.sx * c.sy, accent(i + 1), 0.38)
+      claw(c.x, c.y, c.diag, 1.15, 0.14, 0, main, 0.5)
+      claw(c.x - c.sx * 0.9, c.y, c.sy > 0 ? deg(90) : deg(-90), 0.6, 0.11, 0.3 * c.sx * c.sy, main, 0.3)
+      claw(c.x, c.y - c.sy * 1.1, c.sx > 0 ? deg(0) : deg(180), 0.6, 0.11, -0.3 * c.sx * c.sy, main, 0.3)
+    }
+    for (const sy of [1, -1]) {
+      claw(-0.22, sy * 3.36, deg(90 * sy), 0.85, 0.14, -0.35 * sy, accent(0), 0.4)
+      claw(0.22, sy * 3.36, deg(90 * sy), 0.85, 0.14, 0.35 * sy, accent(1), 0.4)
+    }
+  } else if (s === 'c') {
+    // C — Brasier : des langues de flamme tout autour, toutes couchées dans le même sens.
+    scene.add(molding(2.5, 3.5, 0.4, dark), molding(2.12, 3.12, 0.1, lip, 0.14))
+    const count = 86
+    for (let i = 0; i < count; i++) {
+      const t = (i + rnd() * 0.6) / count
+      const { x, y, nx, ny } = rim(t, 2.36, 3.36)
+      const near = Math.min(...CORNER_T.map((c) => Math.min(Math.abs(t - c), 1 - Math.abs(t - c))))
+      const len = (0.45 + rnd() * 0.75) * (near < 0.05 ? 1.6 : 1)
+      const mat = i % 3 === 0 ? main : accent(i)
+      claw(x, y, Math.atan2(ny, nx) - deg(38), len, 0.07 + len * 0.1, -0.45, mat, 0.2 + rnd() * 0.25)
+    }
+  } else {
+    // D — Barbelés : deux fils torsadés autour du cadre, hérissés de pointes en croix.
+    scene.add(molding(2.5, 3.5, 0.34, main), molding(2.18, 3.18, 0.09, lip, 0.13))
+    vine(26, 0.15, 0.05, dark, 0)
+    vine(26, 0.15, 0.05, main, Math.PI)
+    const barbs = 52
+    for (let i = 0; i < barbs; i++) {
+      const { x, y, nx, ny } = rim(i / barbs, 2.33, 3.33)
+      const out = Math.atan2(ny, nx)
+      const mat = i % 4 === 0 ? accent(i) : main
+      claw(x, y, out + deg(38), 0.5, 0.055, 0, mat, 0.36)
+      claw(x, y, out - deg(38), 0.5, 0.055, 0, mat, 0.36)
+    }
+    for (let i = 0; i < 4; i++) {
+      const c = corner(i)
+      claw(c.x, c.y, c.diag, 1.3, 0.17, 0.25 * c.sx * c.sy, accent(i), 0.45)
+      claw(c.x, c.y, c.diag + deg(35), 0.8, 0.12, -0.2, accent(i + 1), 0.4)
+      claw(c.x, c.y, c.diag - deg(35), 0.8, 0.12, 0.2, accent(i + 1), 0.4)
+    }
+  }
+}
+
+if (style && (rarity === 'legend' || rarity === 'rift')) {
+  buildStyle(style)
+} else if (rarity === 'rare') {
   const steel = metal(0x9fb6e6, 0.16)
   scene.add(molding(2.5, 3.5, 0.38, steel), molding(2.14, 3.14, 0.09, metal(0xf2f6ff, 0.08), 0.12))
   cornerStuds(0.17, crystal(0xbcd6ff, 0x2a5fc0, 0.4), steel)
