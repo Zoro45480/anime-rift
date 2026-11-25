@@ -6,7 +6,8 @@ const files = import.meta.glob('./art/*.webp', { eager: true, query: '?url', imp
 
 export type ArtKind = 'full' | 'bust'
 
-export const heroArt = (model: string, kind: ArtKind): string => files[`./art/${model}-${kind}.webp`] ?? ''
+// Renvoie '' pour un personnage sans illustration fournie (pas de `model`).
+export const heroArt = (model: string | undefined, kind: ArtKind): string => (model ? files[`./art/${model}-${kind}.webp`] ?? '' : '')
 
 const icons = import.meta.glob('./icons/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 

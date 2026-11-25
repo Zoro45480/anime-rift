@@ -27,13 +27,16 @@ const rollRarity = (rng: Rng, pity: number): RarityId => {
 
 const pick = <T,>(rng: Rng, list: T[]): T => list[Math.floor(rng() * list.length)]
 
-const poolOf = (rarity: RarityId) => HEROES.filter((h) => h.rarity === rarity)
+// Les cartes qu'une bannière peut donner.
+export const bannerPool = (banner: Banner): Hero[] => HEROES.filter((h) => banner.pool.includes(h.world))
+
+const poolOf = (banner: Banner, rarity: RarityId) => bannerPool(banner).filter((h) => h.rarity === rarity)
 
 // Une invocation. Fonction pure : mêmes entrées = même résultat (testable, et rejouable côté serveur plus tard).
 // Quand une rareté sort : 1 fois sur 2 on choisit parmi les cartes à l'affiche de cette rareté, sinon parmi toutes.
 export const pullOne = (banner: Banner, pity: number, rng: Rng): PullResult => {
   const rarity = rollRarity(rng, pity)
-  const pool = poolOf(rarity)
+  const pool = poolOf(banner, rarity)
   const featured = pool.filter((h) => banner.featured.includes(h.id))
   const hero = featured.length > 0 && (featured.length === pool.length || rng() < 0.5) ? pick(rng, featured) : pick(rng, pool)
   return { hero, pity: isPityRarity(rarity) ? 0 : pity + 1 }
@@ -52,7 +55,8 @@ export const pullMany = (banner: Banner, pity: number, count: number, rng: Rng):
 // Probabilité exacte d'obtenir CETTE carte en une invocation sur cette bannière (hors garantie).
 // C'est le chiffre affiché dans l'index ; il découle directement de la règle de tirage ci-dessus.
 export const cardRate = (banner: Banner, hero: Hero): number => {
-  const pool = poolOf(hero.rarity)
+  if (!banner.pool.includes(hero.world)) return 0
+  const pool = poolOf(banner, hero.rarity)
   const featured = pool.filter((h) => banner.featured.includes(h.id))
   const rate = RARITIES[hero.rarity].rate
   if (featured.length === 0 || featured.length === pool.length) return rate / pool.length

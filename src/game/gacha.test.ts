@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { BANNERS, PITY_MAX } from '../data/banners'
 import { HEROES } from '../data/heroes'
 import { isPityRarity, RARITIES, RARITY_ORDER } from '../data/rarities'
-import { cardRate, pullMany, pullOne } from './gacha'
+import { bannerPool, cardRate, pullMany, pullOne } from './gacha'
 
 const seeded = (seed: number) => () => {
   seed = (seed * 1664525 + 1013904223) % 4294967296
@@ -10,9 +10,17 @@ const seeded = (seed: number) => () => {
 }
 
 describe('gacha', () => {
-  it('compte six raretés, dont chacune a au moins une carte', () => {
+  it('la première bannière donne 30 personnages de Naruto, et eux seuls', () => {
+    const pool = bannerPool(BANNERS[0])
+    expect(pool).toHaveLength(30)
+    expect(pool.every((h) => h.world === 'Naruto')).toBe(true)
+    const rng = seeded(5)
+    for (let i = 0; i < 20000; i++) expect(pullOne(BANNERS[0], 0, rng).hero.world).toBe('Naruto')
+  })
+
+  it('compte six raretés, dont chacune a au moins une carte dans chaque bannière', () => {
     expect(RARITY_ORDER).toHaveLength(6)
-    for (const id of RARITY_ORDER) expect(HEROES.some((h) => h.rarity === id)).toBe(true)
+    for (const banner of BANNERS) for (const id of RARITY_ORDER) expect(bannerPool(banner).some((h) => h.rarity === id)).toBe(true)
   })
 
   it('les taux affichés totalisent 100 %', () => {
@@ -52,7 +60,7 @@ describe('gacha', () => {
       const { hero } = pullOne(banner, 0, rng)
       seen[hero.id] = (seen[hero.id] ?? 0) + 1
     }
-    for (const h of HEROES) {
+    for (const h of bannerPool(banner)) {
       const expected = cardRate(banner, h)
       expect(Math.abs((seen[h.id] ?? 0) / n - expected)).toBeLessThan(0.0015 + expected * 0.1)
     }

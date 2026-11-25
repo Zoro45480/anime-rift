@@ -556,3 +556,9 @@ body { background: #000; }
 .artpick__link label { font-size: 11px; color: var(--text-dim); }
 .artpick__link input { width: 100%; min-height: 40px; padding: 0 10px; font: inherit; font-size: 16px; color: var(--cream); background: #000; border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 10px; }
 .artpick__link input:focus-visible { outline: 2px solid var(--cyan); outline-offset: 1px; }
+
+/* Carte sans illustration : le nom en japonais, à la verticale, sert d'image */
+.card__blank { position: absolute; left: 50%; top: 9%; translate: -50% 0; writing-mode: vertical-rl; font-weight: 800; line-height: 1; letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.92); text-shadow: 0 0 6cqw var(--ac), 0 0 2cqw rgba(0, 0, 0, 0.6); white-space: nowrap; }
+.rail__glyph { flex: none; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; font-style: normal; font-size: 22px; font-weight: 800; color: #fff; background: color-mix(in srgb, var(--hue) 55%, #000); box-shadow: 0 0 0 1.5px var(--hue), 0 0 12px color-mix(in srgb, var(--hue) 50%, transparent); }
+.poster__art--custom { right: 0; bottom: 0; height: 100%; width: 62%; object-fit: cover; -webkit-mask-image: linear-gradient(90deg, transparent, #000 45%); mask-image: linear-gradient(90deg, transparent, #000 45%); filter: none; }
+.cutin__kana { position: absolute; right: 6%; top: 50%; translate: 0 -50%; transform: skewY(9deg); font-weight: 800; font-size: clamp(60px, 16vw, 170px); line-height: 1; color: #fff; text-shadow: 0 0 40px var(--sc), 6px 6px 0 rgba(3, 4, 10, 0.6); white-space: nowrap; animation: hero-slide 1.4s cubic-bezier(0.1, 0.8, 0.2, 1) 150ms both; }

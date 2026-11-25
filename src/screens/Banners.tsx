@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { BANNERS, COST, PITY_MAX } from '../data/banners'
-import { HEROES, heroById, type Hero } from '../data/heroes'
+import { heroById, type Hero } from '../data/heroes'
 import { RARITIES, RARITY_ORDER } from '../data/rarities'
 import { heroArt } from '../assets/manifest'
-import { cardRate } from '../game/gacha'
+import { bannerPool, cardRate } from '../game/gacha'
 import { useStore, type Currency } from '../state/store'
 import { Card } from '../ui/Card'
 import { IconChevron, IconInfo } from '../ui/icons'
@@ -48,6 +48,7 @@ export const Banners = () => {
   const [showIndex, setShowIndex] = useState(false)
   const banner = BANNERS[index]
   const star = heroById(banner.star)
+  const starArt = store.customArt[star.id] ?? heroArt(star.model, 'full')
   const left = useCountdown(banner.endsAt)
   const pity = store.pity[banner.id]
   const coin = currency === 'ticket' ? 'seal' : 'soul'
@@ -65,7 +66,7 @@ export const Banners = () => {
       <section className="poster" key={banner.id}>
         <div className="poster__slash" aria-hidden="true" />
         <span className="poster__glyph" aria-hidden="true">{banner.glyph}</span>
-        <img className="poster__art" src={store.customArt[star.id] ?? heroArt(star.model, 'full')} alt={star.name} />
+        {starArt && <img className={`poster__art ${store.customArt[star.id] ? 'poster__art--custom' : ''}`} src={starArt} alt={star.name} />}
         <div className="poster__text">
           <p className="poster__count"><b>{two(index + 1)}</b> / {two(BANNERS.length)} · Faille ouverte</p>
           <h1 className="poster__title">{banner.world}</h1>
@@ -85,7 +86,7 @@ export const Banners = () => {
           const have = b.featured.filter((id) => store.owned[id]).length
           return (
             <button key={b.id} role="tab" aria-selected={i === index} className={`rail__item ${i === index ? 'is-active' : ''}`} style={{ ['--hue' as string]: b.hue }} onClick={() => setIndex(i)}>
-              <img src={heroArt(heroById(b.star).model, 'bust')} alt="" />
+              {heroArt(heroById(b.star).model, 'bust') ? <img src={heroArt(heroById(b.star).model, 'bust')} alt="" /> : <i className="rail__glyph" lang="ja">{b.glyph}</i>}
               <span><b>{b.world}</b><small>{have}/{b.featured.length} cartes · pity {store.pity[b.id]}/{PITY_MAX}</small></span>
             </button>
           )
@@ -137,7 +138,8 @@ export const Banners = () => {
             <h2 className="modal__title">Index — {banner.world}</h2>
             <p className="modal__note">Toutes les cartes que cette bannière peut donner, avec la chance exacte d'obtenir chacune en une invocation. Les cartes marquées ★ sont à l'affiche : elles sortent plus souvent que les autres cartes de leur rareté. Une carte SSR, LR ou MR est garantie au plus tard à la {PITY_MAX}e invocation.</p>
             {RARITY_ORDER.map((rid) => {
-              const cards = HEROES.filter((h) => h.rarity === rid)
+              const cards = bannerPool(banner).filter((h) => h.rarity === rid)
+              if (cards.length === 0) return null
               return (
                 <section key={rid} className="index__group">
                   <header className="index__head" style={{ color: RARITIES[rid].color }}>

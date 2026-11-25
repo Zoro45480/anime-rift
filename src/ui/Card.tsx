@@ -15,6 +15,7 @@ export const Card = ({ hero, count, locked, className = '', style }: Props) => {
   const ref = useRef<HTMLDivElement>(null)
   const rarity = RARITIES[hero.rarity]
   const custom = useStore().customArt[hero.id]
+  const art = custom ?? heroArt(hero.model, 'full')
 
   const onMove = (e: PointerEvent<HTMLDivElement>) => {
     const el = ref.current!
@@ -42,13 +43,18 @@ export const Card = ({ hero, count, locked, className = '', style }: Props) => {
         <div className="card__face">
           <div className="card__bg" />
           <div className="card__rays" />
-          <img className={`card__art ${custom ? 'card__art--custom' : ''}`} src={custom ?? heroArt(hero.model, 'full')} alt="" loading="lazy" />
+          {art ? (
+            <img className={`card__art ${custom ? 'card__art--custom' : ''}`} src={art} alt="" loading="lazy" />
+          ) : (
+            // pas d'illustration : le nom en japonais, en grand, tient lieu d'image
+            <span className="card__blank" lang="ja" style={{ fontSize: `${Math.min(20, 56 / hero.kana.length)}cqw` }}>{hero.kana}</span>
+          )}
           <div className="card__shine" />
           <div className="card__glitter" />
           <div className="card__glare" />
 
           <span className="card__brand">RIFT</span>
-          <span className="card__kana" lang="ja">{hero.kana}</span>
+          {art && <span className="card__kana" lang="ja">{hero.kana}</span>}
           <span className="card__affinity"><AffinityIcon id={hero.affinity} size={14} /></span>
           {count !== undefined && count > 1 && <span className="card__count">×{count}</span>}
 
