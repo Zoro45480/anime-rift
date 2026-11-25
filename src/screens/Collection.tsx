@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { iconArt } from '../assets/manifest'
 import { heroById, HEROES, type Hero } from '../data/heroes'
 import { AFFINITY_LIST, type AffinityId } from '../data/affinities'
 import { RARITIES, RARITY_ORDER, type RarityId } from '../data/rarities'
@@ -129,7 +130,7 @@ export const Collection = ({ onSummon }: { onSummon: () => void }) => {
 
       <section className="vitrine" aria-label="Ma vitrine">
         <header><h2>Ma vitrine</h2><em>{pinned.length} / {SHOWCASE_MAX}</em>
-          <p className="vitrine__scrolls" aria-label="Parchemins d'XP en réserve">Parchemins : {SCROLL_IDS.map((id) => <span key={id} title={SCROLLS[id].label}><i className={`cd-scroll cd-scroll--${id}`} />{scrolls[id]}</span>)}</p>
+          <p className="vitrine__scrolls" aria-label="Parchemins d'XP en réserve">Parchemins : {SCROLL_IDS.map((id) => <span key={id} title={SCROLLS[id].label}><img className="cd-scroll" src={iconArt(`scroll-${id}`)} alt="" />{scrolls[id]}</span>)}</p>
         </header>
         {pinned.length === 0
           ? <p className="vitrine__empty">Ouvrez une carte obtenue, puis « En savoir plus » → « Épingler dans ma vitrine » pour l'exposer ici.</p>

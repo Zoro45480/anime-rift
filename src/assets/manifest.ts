@@ -12,7 +12,7 @@ export const heroArt = (model: string | undefined, kind: ArtKind): string => (mo
 const icons = import.meta.glob('./icons/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 
 // seal = Sceau d'invocation (talisman), soul = Flamme d'âme (la monnaie), bolt = énergie. Dessinées dans Blender (tools/blender/build_icons.py).
-export type IconName = 'soul' | 'seal' | 'bolt'
+export type IconName = 'soul' | 'seal' | 'bolt' | 'scroll-small' | 'scroll-medium' | 'scroll-large' // parchemins : tools/blender/build_scrolls.py
 
 export const iconArt = (name: IconName): string => icons[`./icons/${name}.webp`] ?? ''
 

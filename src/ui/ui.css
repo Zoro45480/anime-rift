@@ -728,9 +728,12 @@ body { background: #000; }
 .cd-scrolls li { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 12px; background: #000; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1); }
 .cd-scrolls b { display: block; font-size: 15px; color: var(--cream); }
 .cd-scrolls small { font-size: 12.5px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
-.cd-scroll { --sc: #8fa3c8; display: inline-block; width: 26px; height: 34px; border-radius: 4px; background: linear-gradient(90deg, rgba(0, 0, 0, 0.35), transparent 22%, transparent 78%, rgba(0, 0, 0, 0.35)), repeating-linear-gradient(180deg, transparent 0 6px, rgba(0, 0, 0, 0.22) 6px 7px), linear-gradient(180deg, #f2e6c8, #cdb98a); box-shadow: 0 -3px 0 var(--sc), 0 3px 0 var(--sc), 0 0 10px color-mix(in srgb, var(--sc) 55%, transparent); }
-.cd-scroll--medium { --sc: #9b7bff; }
+.cd-scroll { --sc: #4fb8ff; width: 78px; height: 78px; margin: -8px -4px; object-fit: contain; filter: drop-shadow(0 0 10px color-mix(in srgb, var(--sc) 60%, transparent)); }
+.cd-scroll--medium { --sc: #a56bff; }
 .cd-scroll--large { --sc: #ffc94d; }
+.cd-scrolls li:nth-child(1) { --sc: #4fb8ff; } .cd-scrolls li:nth-child(2) { --sc: #a56bff; } .cd-scrolls li:nth-child(3) { --sc: #ffc94d; }
+.cd-scrolls li { background: linear-gradient(90deg, color-mix(in srgb, var(--sc) 16%, #000), #000 70%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sc) 40%, transparent); }
+.cd-scrolls li .cd-btn--small:not(:disabled) { box-shadow: inset 0 0 0 1.5px var(--sc); color: #fff; background: color-mix(in srgb, var(--sc) 24%, #07080c); }
 
 .cd-log { display: grid; gap: 6px; list-style: none; padding: 0; max-height: 300px; overflow-y: auto; }
 .cd-log li { display: grid; grid-template-columns: 118px 1fr; gap: 10px; padding: 9px 12px; border-radius: 10px; background: #000; font-size: 13px; box-shadow: inset 3px 0 0 var(--rc); }
@@ -763,7 +766,28 @@ body { background: #000; }
 .vitrine header em { font-style: normal; font-size: 13px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
 .vitrine__scrolls { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
 .vitrine__scrolls span { display: inline-flex; align-items: center; gap: 6px; color: var(--cream); font-weight: 800; }
-.vitrine__scrolls .cd-scroll { width: 13px; height: 17px; border-radius: 2px; box-shadow: 0 -2px 0 var(--sc), 0 2px 0 var(--sc); }
+.vitrine__scrolls .cd-scroll { width: 30px; height: 30px; filter: none; }
 .vitrine__empty { font-size: 13px; color: var(--text-dim); }
 .vitrine__row { display: flex; gap: 44px; overflow-x: auto; padding: 30px 28px 26px; margin: 0 -18px; }
 .vitrine__row > .card { flex: none; width: clamp(108px, 27vw, 150px); }
+
+/* ───────── Fiche de carte : couleurs ───────── */
+.cd-sec { --sh: var(--rc); background: radial-gradient(60% 120px at 0% 0%, color-mix(in srgb, var(--sh) 17%, transparent), transparent 75%), linear-gradient(180deg, #0b0c12, #050508); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sh) 26%, rgba(255, 255, 255, 0.06)), inset 0 2px 0 color-mix(in srgb, var(--sh) 70%, transparent); }
+.cd-sec > summary span { display: inline-flex; align-items: center; gap: 10px; }
+.cd-sec > summary span::before { content: ''; width: 10px; height: 10px; transform: rotate(45deg); background: var(--sh); box-shadow: 0 0 12px var(--sh); }
+.cd-sec > summary em { color: var(--sh); }
+.cd-sec .cd-bar i { background: linear-gradient(90deg, var(--sh), color-mix(in srgb, var(--sh) 55%, #fff)); box-shadow: 0 0 10px var(--sh); }
+.cd-stat { --sc: var(--rc); background: linear-gradient(160deg, color-mix(in srgb, var(--sc) 20%, #000), #000 65%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sc) 42%, transparent); }
+.cd-stat small { color: var(--sc); }
+.cd-stat--power { --sc: var(--rc); box-shadow: inset 0 0 0 1.5px var(--rc), 0 0 18px color-mix(in srgb, var(--rc) 30%, transparent); }
+.cd-kit li { --kc: #b78bff; background: linear-gradient(160deg, color-mix(in srgb, var(--kc) 18%, #000), #000 60%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--kc) 40%, transparent), inset 3px 0 0 var(--kc); }
+.cd-kit small { color: var(--kc); }
+.cd-kit--a { --kc: #ff5d7a; } .cd-kit--t { --kc: #5aa8ff; } .cd-kit--u { --kc: #ffc94d; }
+.cd-group { background: linear-gradient(160deg, color-mix(in srgb, var(--sh) 12%, #000), #000 60%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sh) 32%, transparent); }
+.cd-group header strong { color: var(--sh); text-shadow: 0 0 14px color-mix(in srgb, var(--sh) 60%, transparent); }
+.cd-info dd { color: #fff; }
+.cd-info > div { border-bottom-color: color-mix(in srgb, var(--sh) 22%, transparent); }
+.cd__chips li { background: color-mix(in srgb, var(--rc) 14%, #0b0c12); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rc) 45%, transparent); color: #fff; }
+.cd__id h1 { text-shadow: 0 0 28px color-mix(in srgb, var(--rc) 55%, transparent); }
+.cd { background: radial-gradient(80% 520px at 50% 0%, color-mix(in srgb, var(--rc) 26%, transparent), transparent 70%), radial-gradient(50% 400px at 100% 40%, rgba(94, 230, 255, 0.07), transparent 70%), radial-gradient(50% 400px at 0% 70%, rgba(183, 139, 255, 0.08), transparent 70%), #000; }
+.vitrine { background: radial-gradient(80% 140% at 0% 0%, rgba(255, 201, 77, 0.2), transparent 60%), radial-gradient(60% 140% at 100% 100%, rgba(155, 123, 255, 0.16), transparent 60%), #08090d; box-shadow: inset 0 0 0 1px rgba(255, 201, 77, 0.28), inset 0 2px 0 rgba(255, 201, 77, 0.6); }
