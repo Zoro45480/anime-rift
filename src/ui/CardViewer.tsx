@@ -1,0 +1,83 @@
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
+import { AFFINITIES } from '../data/affinities'
+import { BANNERS } from '../data/banners'
+import type { Hero } from '../data/heroes'
+import { RARITIES } from '../data/rarities'
+import { cardRate } from '../game/gacha'
+import { useStore } from '../state/store'
+import { AffinityIcon } from './AffinityIcon'
+import { Card } from './Card'
+
+// Visionneuse de carte : un clic sur n'importe quelle carte du jeu l'ouvre en grand ;
+// un clic sur la carte la retourne et montre sa fiche (uniquement des données réelles du jeu).
+
+type Viewer = { open: (hero: Hero) => void }
+const Ctx = createContext<Viewer | null>(null)
+export const useCardViewer = () => useContext(Ctx)
+
+const pct = (x: number) => `${(x * 100).toLocaleString('fr-FR', { maximumFractionDigits: 3 })} %`
+
+const Sheet = ({ hero, onClose }: { hero: Hero; onClose: () => void }) => {
+  const [flipped, setFlipped] = useState(false)
+  const { owned } = useStore()
+  const rarity = RARITIES[hero.rarity]
+  const banner = BANNERS.find((b) => b.pool.includes(hero.world))
+  const rate = banner ? cardRate(banner, hero) : 0
+  const copies = owned[hero.id] ?? 0
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { e.stopPropagation(); onClose() }
+    }
+    window.addEventListener('keydown', onKey, true)
+    return () => window.removeEventListener('keydown', onKey, true)
+  }, [onClose])
+
+  return createPortal(
+    <div className="cv" role="dialog" aria-modal="true" aria-label={`Carte ${hero.name}`} onClick={onClose}>
+      <button className="cv__close" onClick={onClose} aria-label="Fermer">×</button>
+      <div className="cv__stage" onClick={(e) => e.stopPropagation()}>
+        <button className={`cv__flip ${flipped ? 'is-flipped' : ''}`} onClick={() => setFlipped(!flipped)}
+          aria-label={flipped ? 'Revoir la carte' : 'Retourner la carte pour voir sa fiche'} autoFocus>
+          <span className="cv__face cv__face--front"><Card hero={hero} inert /></span>
+          <span className="cv__face cv__face--back" style={{ ['--rc' as string]: rarity.color }}>
+            <span className="cv__head"><b>{rarity.short}</b><i>N° {String(hero.no).padStart(4, '0')}</i></span>
+            <span className="cv__name">{hero.name}</span>
+            <span className="cv__kana" lang="ja">{hero.kana}</span>
+            <span className="cv__world">{hero.title} · {hero.world}</span>
+            <span className="cv__tags">
+              <span>{hero.role}</span>
+              <span><AffinityIcon id={hero.affinity} size={13} />{AFFINITIES[hero.affinity].label}</span>
+              <span>{rarity.label}</span>
+            </span>
+            <span className="cv__boxes">
+              <span><small>Exemplaires possédés</small><b>{copies}</b></span>
+              <span><small>Chance par invocation</small><b>{rate ? pct(rate) : '—'}</b></span>
+            </span>
+            <span className="cv__stats">
+              <span><small>Dégâts</small><b>{hero.atk.toLocaleString('fr-FR')}</b></span>
+              <span><small>Défense</small><b>{hero.def.toLocaleString('fr-FR')}</b></span>
+              <span><small>Étoiles</small><b>{rarity.stars}</b></span>
+            </span>
+            <span className="cv__source">{banner ? `Bannière ${banner.world}` : 'Hors bannière'}{rate ? ` · 1 chance sur ${Math.round(1 / rate).toLocaleString('fr-FR')}` : ''}</span>
+            <span className="cv__again">Revoir la carte ↻</span>
+          </span>
+        </button>
+        <p className="cv__hint">{flipped ? 'Touche la fiche pour revoir la carte' : 'Touche la carte pour la retourner'}</p>
+      </div>
+    </div>,
+    document.body,
+  )
+}
+
+export const CardViewerProvider = ({ children }: { children: ReactNode }) => {
+  const [hero, setHero] = useState<Hero | null>(null)
+  const viewer = useMemo<Viewer>(() => ({ open: setHero }), [])
+  return (
+    <Ctx.Provider value={viewer}>
+      {children}
+      {hero && <Sheet key={hero.id} hero={hero} onClose={() => setHero(null)} />}
+    </Ctx.Provider>
+  )
+}

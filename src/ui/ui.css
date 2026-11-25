@@ -584,3 +584,43 @@ body { background: #000; }
 .show__stats > div { display: grid; grid-template-columns: 1fr auto; gap: 8px; color: var(--text-dim); font-size: 15px; }
 .show__stats b { color: var(--cream); font-variant-numeric: tabular-nums; }
 .show__stats .bar { grid-column: 1 / -1; height: 5px; border: 0; }
+
+/* ===== Visionneuse de carte : la carte en grand, qui se retourne sur sa fiche ===== */
+.card[role='button'] { cursor: pointer; }
+.card[role='button']:focus-visible { outline: 2px solid var(--cyan); outline-offset: 6px; border-radius: 12px; }
+.cv { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 16px; background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(8px); animation: fade 200ms both; overflow-y: auto; }
+.cv__close { position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); top: calc(16px + env(safe-area-inset-top, 0px)); width: 46px; height: 46px; border-radius: 50%; font-size: 26px; line-height: 1; color: var(--cream); background: #0c0d14; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25); }
+.cv__close:hover { background: #1a1c2a; }
+.cv__stage { display: grid; justify-items: center; gap: 30px; perspective: 1400px; }
+.cv__flip { position: relative; width: min(74vw, 46vh, 360px); aspect-ratio: 5 / 7; margin: 9% 0 4%; transform-style: preserve-3d; transition: transform 650ms var(--ease-out); animation: cv-in 420ms var(--ease-out) both; text-align: left; }
+@keyframes cv-in { from { opacity: 0; scale: 0.7; } }
+.cv__flip.is-flipped { transform: rotateY(180deg); }
+.cv__flip:focus-visible { outline: none; }
+.cv__face { position: absolute; inset: 0; display: block; }
+.cv__face--back { --rc: var(--violet); transform: rotateY(180deg); inset: -6% -10%; display: flex; flex-direction: column; gap: 7px; padding: 22px 22px 18px; border-radius: 22px; overflow: hidden; color: var(--text);
+  background: radial-gradient(110% 70% at 100% 0%, color-mix(in srgb, var(--rc) 30%, transparent), transparent 65%), linear-gradient(180deg, #14121f, #08080d); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--rc) 70%, #000), 0 0 34px color-mix(in srgb, var(--rc) 28%, transparent); }
+.cv__head { display: flex; justify-content: space-between; align-items: baseline; }
+.cv__head b { font-family: var(--font-display); font-style: italic; font-size: 24px; color: var(--rc); }
+.cv__head i { font-style: normal; font-size: 13px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+.cv__name { font-weight: 800; font-size: clamp(22px, 6vw, 30px); line-height: 1.05; color: var(--cream); text-transform: uppercase; }
+.cv__kana { font-size: 18px; color: var(--text-dim); }
+.cv__world { font-size: 14px; color: var(--text-dim); }
+.cv__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.cv__tags > span { display: inline-flex; align-items: center; gap: 4px; padding: 5px 11px; border-radius: 9px; font-size: 13px; background: rgba(255, 255, 255, 0.07); }
+.cv__tags .affinity { background: none; width: auto !important; height: auto !important; }
+.cv__boxes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+.cv__boxes > span { display: grid; gap: 4px; padding: 10px 12px; border-radius: 12px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12); }
+.cv small { font-size: 11px; color: var(--text-dim); }
+.cv__boxes b { font-size: 17px; color: var(--cream); font-variant-numeric: tabular-nums; }
+.cv__stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px 0; border-block: 1px solid rgba(255, 255, 255, 0.1); }
+.cv__stats > span { display: grid; gap: 2px; }
+.cv__stats b { font-size: 20px; color: var(--cream); font-variant-numeric: tabular-nums; }
+.cv__source { font-size: 12.5px; color: var(--text-dim); }
+.cv__again { margin-top: auto; text-align: center; font-size: 14px; color: var(--text-dim); }
+.cv__hint { font-size: 14px; color: var(--text-dim); text-align: center; }
+@media (prefers-reduced-motion: reduce) { .cv__flip { transition: none; } }
+/* la face qui passe derrière est masquée à mi-rotation (plus fiable que backface-visibility avec les cartes en 3D) */
+.cv__face { transition: visibility 0s 300ms; }
+.cv__face--back { visibility: hidden; }
+.cv__flip.is-flipped .cv__face--front { visibility: hidden; }
+.cv__flip.is-flipped .cv__face--back { visibility: visible; }

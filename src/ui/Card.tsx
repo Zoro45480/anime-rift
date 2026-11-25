@@ -1,4 +1,4 @@
-import { useRef, type CSSProperties, type PointerEvent } from 'react'
+import { useRef, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react'
 import { AFFINITIES } from '../data/affinities'
 import { frameOf } from '../data/banners'
 import type { Hero } from '../data/heroes'
@@ -6,13 +6,17 @@ import { RARITIES } from '../data/rarities'
 import { frameArt, frameFx, heroArt } from '../assets/manifest'
 import { useStore } from '../state/store'
 import { AffinityIcon } from './AffinityIcon'
+import { useCardViewer } from './CardViewer'
 
-type Props = { hero: Hero; count?: number; locked?: boolean; className?: string; style?: CSSProperties }
+// `inert` : la carte ne s'ouvre pas au clic (c'est le cas dans la visionneuse elle-même).
+type Props = { hero: Hero; count?: number; locked?: boolean; inert?: boolean; className?: string; style?: CSSProperties }
 
 // La carte de personnage. Tout l'effet « feuille holographique » est piloté par deux variables :
 // --px / --py = position du reflet (en %). Au repos elles se promènent toutes seules (voir ui.css) ;
 // sous le doigt ou la souris, c'est le pointeur qui les commande et la carte s'incline.
-export const Card = ({ hero, count, locked, className = '', style }: Props) => {
+export const Card = ({ hero, count, locked, inert, className = '', style }: Props) => {
+  const viewer = useCardViewer()
+  const openable = !inert && viewer !== null
   const ref = useRef<HTMLDivElement>(null)
   const rarity = RARITIES[hero.rarity]
   const custom = useStore().customArt[hero.id]
@@ -39,6 +43,7 @@ export const Card = ({ hero, count, locked, className = '', style }: Props) => {
   return (
     <div ref={ref} className={`card card--${hero.rarity} ${locked ? 'is-locked' : ''} ${className}`}
       style={{ ['--rc' as string]: rarity.color, ['--ac' as string]: AFFINITIES[hero.affinity].color, ['--delay' as string]: `${-hero.no * 0.9}s`, ...style }}
+      {...(openable ? { role: 'button', tabIndex: 0, 'aria-label': `Voir la carte ${hero.name}`, onClick: () => viewer.open(hero), onKeyDown: (e: KeyboardEvent<HTMLDivElement>) => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); viewer.open(hero) } } } : {})}
       onPointerMove={locked ? undefined : onMove} onPointerLeave={onLeave} onPointerCancel={onLeave}>
       <div className="card__tilt">
         <div className="card__face">

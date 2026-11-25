@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { StoreProvider } from './state/store'
 import { Dock, TopBar, type TabId } from './ui/Chrome'
+import { CardViewerProvider } from './ui/CardViewer'
 import { Splash } from './screens/Splash'
 import { Banners } from './screens/Banners'
 import { Play } from './screens/Play'
@@ -13,6 +14,7 @@ export const App = () => {
   if (!entered) return <Splash onEnter={() => setEntered(true)} />
   return (
     <StoreProvider>
+      <CardViewerProvider>
       <TopBar />
       <main className="screen" key={tab}>
         {tab === 'banners' && <Banners />}
@@ -20,6 +22,7 @@ export const App = () => {
         {tab === 'collection' && <Collection onSummon={() => go('banners')} />}
       </main>
       <Dock tab={tab} onTab={go} />
+      </CardViewerProvider>
     </StoreProvider>
   )
 }
