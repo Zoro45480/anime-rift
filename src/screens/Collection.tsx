@@ -8,6 +8,7 @@ import { SCROLL_IDS, SCROLLS } from '../game/progression'
 import { SHOWCASE_MAX, useStore } from '../state/store'
 import { AffinityIcon } from '../ui/AffinityIcon'
 import { Card } from '../ui/Card'
+import { Inventory, Rebirth } from './Rebirth'
 
 // Vérifie qu'un lien mène bien à une image que le navigateur peut afficher.
 const canLoad = (url: string) =>
@@ -96,7 +97,7 @@ const fold = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g,
 
 const toggle = <T,>(list: T[], item: T): T[] => (list.includes(item) ? list.filter((x) => x !== item) : [...list, item])
 
-export const Collection = ({ onSummon }: { onSummon: () => void }) => {
+const Cards = ({ onSummon }: { onSummon: () => void }) => {
   const { owned, wish, pinned, scrolls } = useStore()
   const [query, setQuery] = useState('')
   const [rarities, setRarities] = useState<RarityId[]>([]) // vide = toutes
@@ -227,3 +228,18 @@ export const Collection = ({ onSummon }: { onSummon: () => void }) => {
     </div>
   )
 }
+
+export type CollectionTab = 'cards' | 'inventory' | 'rebirth'
+const TABS: [CollectionTab, string][] = [['cards', 'Cartes'], ['inventory', 'Inventaire'], ['rebirth', 'Renaissance']]
+
+// La Collection et ses onglets : les cartes, la réserve d'objets et la Renaissance.
+export const Collection = ({ onSummon, tab, onTab }: { onSummon: () => void; tab: CollectionTab; onTab: (t: CollectionTab) => void }) => (
+  <div className="coltabs">
+    <div className="coltabs__bar" role="tablist" aria-label="Sections de la collection">
+      {TABS.map(([id, label]) => <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => onTab(id)}>{label}</button>)}
+    </div>
+    {tab === 'cards' && <Cards onSummon={onSummon} />}
+    {tab === 'inventory' && <Inventory />}
+    {tab === 'rebirth' && <Rebirth />}
+  </div>
+)

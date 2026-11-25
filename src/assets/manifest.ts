@@ -12,7 +12,7 @@ export const heroArt = (model: string | undefined, kind: ArtKind): string => (mo
 const icons = import.meta.glob('./icons/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 
 // seal = Sceau d'invocation (talisman), soul = Flamme d'âme (la monnaie), bolt = énergie. Dessinées dans Blender (tools/blender/build_icons.py).
-export type IconName = 'soul' | 'seal' | 'bolt' | 'scroll-small' | 'scroll-medium' | 'scroll-large' // parchemins : tools/blender/build_scrolls.py
+export type IconName = 'soul' | 'seal' | 'bolt' | 'scroll-small' | 'scroll-medium' | 'scroll-large' | 'shard' // shard = Fragment d'âme (tools/blender/build_shard.py) ; parchemins : tools/blender/build_scrolls.py
 
 export const iconArt = (name: IconName): string => icons[`./icons/${name}.webp`] ?? ''
 
@@ -35,3 +35,8 @@ const ui = import.meta.glob('./ui/*.webp', { eager: true, query: '?url', import:
 // Habillage de l'interface en style anime, dessiné dans Blender (tools/blender/build_ui.py).
 export type UiName = 'bg' | 'btn-gold' | 'btn-pink' | 'btn-indigo' | 'btn-ghost' | 'panel' | 'nav-nexus' | 'nav-summon' | 'nav-cards'
 export const uiArt = (name: UiName): string => ui[`./ui/${name}.webp`] ?? ''
+
+const gates = import.meta.glob('./gates/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
+
+// Illustrations 3D des portes du Nexus et de la Renaissance (tools/blender/build_gates.py).
+export const gateArt = (name: 'saga' | 'raids' | 'spire' | 'arena' | 'rebirth'): string => gates[`./gates/${name}.webp`] ?? ''

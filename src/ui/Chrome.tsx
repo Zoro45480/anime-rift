@@ -1,3 +1,4 @@
+import { accountLevel } from '../game/progression'
 import { useStore } from '../state/store'
 import { Coin } from './Coin'
 import { logoArt, uiArt } from '../assets/manifest'
@@ -14,13 +15,13 @@ export const Logo = () => (
 
 // Barre du haut : logo et ressources du joueur, chaque ressource dans sa plaquette en biais.
 export const TopBar = () => {
-  const { tickets, gems } = useStore()
+  const { tickets, gems, accountXp, rebirths } = useStore()
   return (
     <header className="topbar">
       <div className="topbar__in">
         <Logo />
         <div className="wallet" aria-label="Vos ressources">
-          <span title="Énergie"><Coin name="bolt" size={24} /><b>10<small>/10</small></b></span>
+          <span title="Niveau de compte"><Coin name="bolt" size={24} /><b><small>Nv </small>{accountLevel(accountXp, rebirths).level}</b></span>
           <span title="Flammes d'âme"><Coin name="soul" size={24} /><b>{gems}</b></span>
           <span title="Sceaux d'invocation"><Coin name="seal" size={24} /><b>{tickets}</b></span>
         </div>

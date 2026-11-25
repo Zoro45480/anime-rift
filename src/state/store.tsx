@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { BANNERS, COST, type Banner } from '../data/banners'
 import { heroById, type Hero } from '../data/heroes'
 import { pullMany } from '../game/gacha'
-import { levelFromXp, MAX_LEVEL, MERGE_XP, scrollDrop, SCROLLS, type ScrollId } from '../game/progression'
+import { ACCOUNT_XP, accountLevel, AWAKEN_COST, LEVEL_CAP, REBIRTH_SHARDS, levelFromXp, MAX_LEVEL, MERGE_XP, REBIRTH_KEEP, REBIRTH_LEVEL, REBIRTH_REFUND, REBIRTH_SEALS, REBIRTH_XP, scrollDrop, SCROLLS, type ScrollId } from '../game/progression'
 import { loadAllArt, removeArt, saveArt } from './customArt'
 
 export type Currency = 'ticket' | 'gems'
@@ -20,6 +20,11 @@ type State = {
   wish: string[] // liste d'envies
   pinned: string[] // cartes épinglées dans la vitrine
   log: Record<string, LogEntry[]> // historique de chaque carte, du plus récent au plus ancien
+  accountXp: number // XP du compte depuis la dernière Renaissance
+  rebirths: number // nombre de Renaissances
+  gemsSpent: number // âmes dépensées depuis la dernière Renaissance
+  shards: number // Fragments d'âme
+  awakened: string[] // cartes libérées (niveau maximum 100)
 }
 
 type Store = State & {
@@ -29,6 +34,8 @@ type Store = State & {
   useScroll: (heroId: string, scroll: ScrollId) => boolean
   toggleWish: (heroId: string) => void
   togglePin: (heroId: string) => boolean // false = vitrine pleine
+  awaken: (heroId: string) => boolean // Libération d'une carte contre des Fragments d'âme
+  rebirth: (keep: string[]) => boolean // Renaissance : repart du niveau 1 en gardant ces cartes
   customArt: Record<string, string> // images personnelles du joueur, par identifiant de personnage
   setCustomArt: (heroId: string, dataUrl: string) => Promise<boolean> // false = affichée mais non enregistrée
   clearCustomArt: (heroId: string) => void
@@ -38,8 +45,10 @@ export const SHOWCASE_MAX = 5
 const LOG_MAX = 30
 
 // Dotation de départ du compte.
+export const START_GEMS = 600
 const START: State = {
-  tickets: 20, gems: 600, pity: Object.fromEntries(BANNERS.map((b) => [b.id, 0])), owned: {},
+  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [],
+  tickets: 20, gems: START_GEMS, pity: Object.fromEntries(BANNERS.map((b) => [b.id, 0])), owned: {},
   xp: {}, scrolls: { small: 0, medium: 0, large: 0 }, wish: [], pinned: [], log: {},
 }
 
@@ -82,7 +91,9 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       const owned = { ...state.owned }
       const scrolls = { ...state.scrolls }
       let log = state.log
+      let accountXp = state.accountXp
       for (const h of heroes) {
+        accountXp += ACCOUNT_XP[h.rarity]
         owned[h.id] = (owned[h.id] ?? 0) + 1
         scrolls[scrollDrop(h.rarity)]++ // chaque carte invoquée apporte un parchemin
         log = withLog(log, h.id, { k: 'pull', note: `Obtenue · bannière ${banner.world}` })
@@ -92,19 +103,22 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         tickets: state.tickets - (currency === 'ticket' ? price(currency, count) : 0),
         gems: state.gems - (currency === 'gems' ? price(currency, count) : 0),
         pity: { ...state.pity, [banner.id]: pity },
-        owned, scrolls, log,
+        owned, scrolls, log, accountXp,
+        gemsSpent: state.gemsSpent + (currency === 'gems' ? price(currency, count) : 0),
       })
       return heroes
     }
 
-    const gain = (heroId: string, amount: number, entry: Omit<LogEntry, 't' | 'note'>, label: string, extra: Partial<State>) => {
-      const before = levelFromXp(state.xp[heroId] ?? 0).level
+    const gain = (heroId: string, baseAmount: number, entry: Omit<LogEntry, 't' | 'note'>, label: string, extra: Partial<State>) => {
+      const amount = Math.round(baseAmount * (1 + (state.rebirths * REBIRTH_XP) / 100)) // bonus des Renaissances
+      const before = levelFromXp(state.xp[heroId] ?? 0, capOf(heroId)).level
       const xp = (state.xp[heroId] ?? 0) + amount
-      const after = levelFromXp(xp).level
+      const after = levelFromXp(xp, capOf(heroId)).level
       const note = `${label} · +${amount.toLocaleString('fr-FR')} XP${after > before ? ` · niveau ${after}` : ''}`
-      setState({ ...state, ...extra, xp: { ...state.xp, [heroId]: xp }, log: withLog(state.log, heroId, { ...entry, note }) })
+      setState({ ...state, ...extra, accountXp: state.accountXp + Math.round(amount / 10), xp: { ...state.xp, [heroId]: xp }, log: withLog(state.log, heroId, { ...entry, note }) })
     }
-    const maxed = (heroId: string) => levelFromXp(state.xp[heroId] ?? 0).level >= MAX_LEVEL
+    const capOf = (heroId: string) => (state.awakened.includes(heroId) ? MAX_LEVEL : LEVEL_CAP)
+    const maxed = (heroId: string) => levelFromXp(state.xp[heroId] ?? 0, capOf(heroId)).level >= capOf(heroId)
 
     const merge = (heroId: string) => {
       const hero = heroById(heroId)
@@ -126,6 +140,27 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       return true
     }
 
+    const awaken = (heroId: string) => {
+      const cost = AWAKEN_COST[heroById(heroId).rarity]
+      if (state.rebirths < 1 || !state.owned[heroId] || state.awakened.includes(heroId) || state.shards < cost) return false
+      setState({ ...state, shards: state.shards - cost, awakened: [...state.awakened, heroId], log: withLog(state.log, heroId, { k: 'merge', note: `Libération · niveau maximum 100 · ${cost} fragments` }) })
+      return true
+    }
+    const rebirth = (keep: string[]) => {
+      const kept = [...new Set(keep)].filter((id) => state.owned[id])
+      if (accountLevel(state.accountXp, state.rebirths).level < REBIRTH_LEVEL || kept.length > REBIRTH_KEEP) return false
+      const only = <T,>(rec: Record<string, T>) => Object.fromEntries(Object.entries(rec).filter(([id]) => kept.includes(id)))
+      setState({
+        ...state, // sceaux, parchemins, envies et pity sont conservés
+        owned: only(state.owned), xp: only(state.xp), log: only(state.log), pinned: state.pinned.filter((id) => kept.includes(id)), awakened: state.awakened.filter((id) => kept.includes(id)),
+        shards: state.shards + REBIRTH_SHARDS,
+        accountXp: 0, rebirths: state.rebirths + 1, gemsSpent: 0,
+        gems: START_GEMS + Math.floor(state.gemsSpent * REBIRTH_REFUND),
+        tickets: state.tickets + REBIRTH_SEALS,
+      })
+      return true
+    }
+
     const setCustomArt = async (heroId: string, dataUrl: string) => {
       setArt((a) => ({ ...a, [heroId]: dataUrl }))
       return saveArt(heroId, dataUrl)
@@ -134,7 +169,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setArt((a) => Object.fromEntries(Object.entries(a).filter(([k]) => k !== heroId)))
       void removeArt(heroId)
     }
-    return { ...state, canAfford, summon, merge, useScroll, toggleWish, togglePin, customArt, setCustomArt, clearCustomArt }
+    return { ...state, canAfford, summon, merge, useScroll, toggleWish, togglePin, awaken, rebirth, customArt, setCustomArt, clearCustomArt }
   }, [state, customArt])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>

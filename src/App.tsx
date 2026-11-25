@@ -5,11 +5,12 @@ import { CardViewerProvider } from './ui/CardViewer'
 import { Splash } from './screens/Splash'
 import { Banners } from './screens/Banners'
 import { Play } from './screens/Play'
-import { Collection } from './screens/Collection'
+import { Collection, type CollectionTab } from './screens/Collection'
 
 export const App = () => {
   const [entered, setEntered] = useState(false)
   const [tab, setTab] = useState<TabId>('banners')
+  const [colTab, setColTab] = useState<CollectionTab>('cards')
   const go = (t: TabId) => { setTab(t); window.scrollTo(0, 0) }
   if (!entered) return <Splash onEnter={() => setEntered(true)} />
   return (
@@ -18,8 +19,8 @@ export const App = () => {
       <TopBar />
       <main className="screen" key={tab}>
         {tab === 'banners' && <Banners />}
-        {tab === 'play' && <Play />}
-        {tab === 'collection' && <Collection onSummon={() => go('banners')} />}
+        {tab === 'play' && <Play onRebirth={() => { setColTab('rebirth'); go('collection') }} />}
+        {tab === 'collection' && <Collection onSummon={() => go('banners')} tab={colTab} onTab={setColTab} />}
       </main>
       <Dock tab={tab} onTab={go} />
       </CardViewerProvider>

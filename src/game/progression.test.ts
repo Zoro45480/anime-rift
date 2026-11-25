@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { HEROES } from '../data/heroes'
 import { MOVES } from '../data/moves'
 import { RARITY_ORDER } from '../data/rarities'
-import { power, baseRank, baseStats, cardState, collectifs, kitOf, levelFromXp, MAX_LEVEL, statsAt, xpToNext } from './progression'
+import { AWAKEN_STAT, LEVEL_CAP, accountLevel, accountNeed, rebirthTitle, REBIRTH_LEVEL, power, baseRank, baseStats, cardState, collectifs, kitOf, levelFromXp, MAX_LEVEL, statsAt, xpToNext } from './progression'
 
 describe('progression des cartes', () => {
   it('monte de niveau au bon nombre de points', () => {
@@ -64,5 +64,37 @@ describe('progression des cartes', () => {
     const h = HEROES.find((x) => x.role === 'DPS')!
     expect(kitOf(h)[2].text).toContain(Math.round(h.atk * 3.5).toLocaleString('fr-FR'))
     expect(kitOf(h, statsAt(h, 11, 0))[2].text).toContain(Math.round(Math.round(h.atk * 1.2) * 3.5).toLocaleString('fr-FR'))
+  })
+
+  it('le compte monte jusqu’au niveau 100, deux fois plus lentement après chaque Renaissance', () => {
+    expect(accountLevel(0, 0)).toEqual({ level: 1, into: 0, need: 120 })
+    expect(accountLevel(120, 0).level).toBe(2)
+    expect(accountLevel(120, 1).level).toBe(1)
+    let total = 0
+    for (let l = 1; l < REBIRTH_LEVEL; l++) total += accountNeed(l, 0)
+    expect(accountLevel(total - 1, 0).level).toBe(99)
+    expect(accountLevel(total, 0)).toEqual({ level: 100, into: 0, need: 0 })
+    expect(accountLevel(total, 1).level).toBeLessThan(100)
+  })
+
+  it('chaque Renaissance ajoute 6 % aux cartes possédées et donne des titres', () => {
+    const h = HEROES[0]
+    const own = { [h.id]: 1 }
+    expect(cardState(h, {}, own, 2).bonus - cardState(h, {}, own, 0).bonus).toBe(12)
+    expect(cardState(h, {}, own, 1).stats.atk).toBeGreaterThan(cardState(h, {}, own, 0).stats.atk)
+    expect(cardState(h, {}, {}, 3).bonus).toBe(0)
+    expect([0, 1, 4, 10].map(rebirthTitle)).toEqual(['', 'Revenant', 'Marcheur des failles', 'Maître du cycle'])
+  })
+
+  it('une carte reste bloquée au niveau 50 tant qu’elle n’est pas libérée, puis monte jusqu’à 100 avec +15 %', () => {
+    const h = HEROES[0]
+    const own = { [h.id]: 1 }
+    const xp = { [h.id]: 1e9 }
+    const locked = cardState(h, xp, own)
+    const freed = cardState(h, xp, own, 0, [h.id])
+    expect(locked.level).toBe(LEVEL_CAP)
+    expect(freed.level).toBe(MAX_LEVEL)
+    expect(freed.bonus - locked.bonus).toBe(AWAKEN_STAT)
+    expect(freed.stats.hp).toBeGreaterThan(locked.stats.hp)
   })
 })

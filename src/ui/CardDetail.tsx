@@ -5,7 +5,7 @@ import { AFFINITIES } from '../data/affinities'
 import { HEROES, roleKind, type Hero } from '../data/heroes'
 import { RARITIES, RARITY_ORDER } from '../data/rarities'
 import { cardRate } from '../game/gacha'
-import { baseRank, baseStats, cardState, kitOf, MAX_LEVEL, MERGE_XP, SCROLL_IDS, SCROLLS, type Collectif } from '../game/progression'
+import { AWAKEN_COST, AWAKEN_STAT, LEVEL_CAP, baseRank, baseStats, cardState, kitOf, MAX_LEVEL, MERGE_XP, SCROLL_IDS, SCROLLS, type Collectif } from '../game/progression'
 import { SHOWCASE_MAX, useStore } from '../state/store'
 import { AffinityIcon } from './AffinityIcon'
 import { Card } from './Card'
@@ -39,7 +39,7 @@ const Group = ({ group, owned, current, onOpen }: { group: Collectif; owned: Rec
 )
 
 export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () => void; onOpen: (hero: Hero) => void }) => {
-  const { owned, xp, scrolls, wish, pinned, log, merge, useScroll, toggleWish, togglePin } = useStore()
+  const { awakened, shards, awaken, rebirths, owned, xp, scrolls, wish, pinned, log, merge, useScroll, toggleWish, togglePin } = useStore()
   const [notice, setNotice] = useState('')
   const top = useRef<HTMLDivElement>(null)
   const rarity = RARITIES[hero.rarity]
@@ -47,9 +47,10 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
   const rate = banner ? cardRate(banner, hero) : 0
   const copies = owned[hero.id] ?? 0
   const has = copies > 0
-  const state = cardState(hero, xp, owned)
+  const state = cardState(hero, xp, owned, rebirths, awakened)
   const base = baseStats(hero)
-  const maxed = state.level >= MAX_LEVEL
+  const maxed = state.level >= state.cap
+  const cost = AWAKEN_COST[hero.rarity]
   const wished = wish.includes(hero.id)
   const isPinned = pinned.includes(hero.id)
   const kit = kitOf(hero, state.stats)
@@ -119,8 +120,8 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
         {has && <>
         <Section hue="#ff5d7a" title="Statistiques" aside={`Puissance ${n(state.power)}`}>
           <div className="cd-level">
-            <b>Niveau {state.level}<i> / {MAX_LEVEL}</i></b>
-            <span>{maxed ? 'Niveau maximum atteint' : `${n(state.into)} / ${n(state.need)} XP`}</span>
+            <b>Niveau {state.level}<i> / {state.cap}</i></b>
+            <span>{maxed ? (state.freed ? 'Niveau maximum atteint' : `Bloquée au niveau ${LEVEL_CAP} : libère-la pour continuer`) : `${n(state.into)} / ${n(state.need)} XP`}</span>
             <div className="cd-bar"><i style={{ width: maxed ? '100%' : `${(state.into / state.need) * 100}%` }} /></div>
           </div>
           <div className="cd-stats">
@@ -131,7 +132,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
             <div className="cd-stat cd-stat--power"><small>Puissance</small><b>{n(state.power)}</b></div>
             <div className="cd-stat" style={{ ['--sc' as string]: '#b78bff' }}><small>Classement de base</small><b>{baseRank(hero)}<i> / {HEROES.length}</i></b></div>
           </div>
-          <p className="cd-note">Chaque niveau ajoute 2 % aux PV, à l’attaque et à la défense.{state.bonus > 0 ? ` Vos collectifs ajoutent ${state.bonus} %.` : ''}{!has ? ' Valeurs de base : vous ne possédez pas encore cette carte.' : ''}</p>
+          <p className="cd-note">Chaque niveau ajoute 2 % aux PV, à l’attaque et à la défense.{state.bonus > 0 ? ` Vos collectifs${rebirths ? ' et vos Renaissances' : ''} ajoutent ${state.bonus} %.` : ''}{!has ? ' Valeurs de base : vous ne possédez pas encore cette carte.' : ''}</p>
         </Section>
 
         <Section hue="#ff9a3d" title="Techniques" aside={hero.role}>
@@ -157,6 +158,17 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
               </li>
             ))}
           </ul>
+          <div className={`cd-free ${state.freed ? 'is-free' : ''}`}>
+            <img src={iconArt('shard')} alt="" />
+            <div>
+              <small lang="ja">解放 · Libération</small>
+              <b>{state.freed ? 'Carte libérée' : 'Libérer cette carte'}</b>
+              <p>+{AWAKEN_STAT} % de PV, d'attaque et de défense, et niveau maximum {MAX_LEVEL} au lieu de {LEVEL_CAP}. Définitif pour cette carte.</p>
+              <p className="cd-free__cost">{state.freed ? 'Bonus actif.' : rebirths < 1 ? `Disponible après ta première Renaissance. Coût : ${cost} Fragments d'âme.` : `Coût : ${cost} Fragments d'âme · tu en as ${n(shards)}.`}</p>
+            </div>
+            {!state.freed && <button className="cd-btn cd-btn--small" disabled={rebirths < 1 || shards < cost} onClick={() => { if (awaken(hero.id)) setNotice('Carte libérée : niveau maximum 100.') }}>Libérer</button>}
+          </div>
+          <p className="cd-note">Les Fragments d'âme se gagneront dans La Spire (pas encore jouable) ; chaque Renaissance en offre aussi quelques-uns.</p>
           <p className="cd-note">Chaque carte invoquée donne un parchemin : petit pour N et R, moyen pour SR, grand pour SSR, LR et MR.{!has ? ' Il faut posséder la carte pour l’améliorer.' : ''}</p>
         </Section>
 

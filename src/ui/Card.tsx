@@ -20,9 +20,9 @@ export const Card = ({ hero, count, locked, inert, className = '', style }: Prop
   const openable = !inert && viewer !== null
   const ref = useRef<HTMLDivElement>(null)
   const rarity = RARITIES[hero.rarity]
-  const { customArt, xp, owned, wish } = useStore()
+  const { customArt, xp, owned, wish, rebirths, awakened } = useStore()
   const custom = customArt[hero.id]
-  const state = cardState(hero, xp, owned) // niveau et statistiques réels de la carte chez le joueur
+  const state = cardState(hero, xp, owned, rebirths, awakened) // niveau et statistiques réels de la carte chez le joueur
   const art = custom ?? heroArt(hero.model, 'full')
 
   const onMove = (e: PointerEvent<HTMLDivElement>) => {
@@ -66,7 +66,7 @@ export const Card = ({ hero, count, locked, inert, className = '', style }: Prop
           {art && <span className="card__kana" lang="ja">{hero.kana}</span>}
           <span className="card__affinity"><AffinityIcon id={hero.affinity} size={14} /></span>
           {count !== undefined && count > 1 && <span className="card__count">×{count}</span>}
-          {owned[hero.id] > 0 && state.level > 1 && <span className="card__level">Nv {state.level}</span>}
+          {owned[hero.id] > 0 && (state.level > 1 || state.freed) && <span className={`card__level ${state.freed ? 'card__level--free' : ''}`}>{state.freed ? '✦ ' : ''}Nv {state.level}</span>}
           {wish.includes(hero.id) && <span className="card__wish" aria-label="Dans mes envies">♥</span>}
 
           <div className="card__plate">

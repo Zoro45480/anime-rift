@@ -5,18 +5,20 @@ import type { RarityId } from '../data/rarities'
 // Progression des cartes : niveaux, statistiques, puissance, collectifs, techniques.
 // Fonctions pures, testées dans progression.test.ts.
 
-export const MAX_LEVEL = 99
+// Une carte s'arrête au niveau 50. Une fois « libérée » (voir Libération plus bas), elle peut monter jusqu'à 100.
+export const LEVEL_CAP = 50
+export const MAX_LEVEL = 100
 // XP nécessaire pour passer du niveau `level` au suivant.
 export const xpToNext = (level: number) => 60 + 40 * level
 
-export const levelFromXp = (xp: number): { level: number; into: number; need: number } => {
+export const levelFromXp = (xp: number, cap = MAX_LEVEL): { level: number; into: number; need: number } => {
   let level = 1
   let rest = xp
-  while (level < MAX_LEVEL && rest >= xpToNext(level)) {
+  while (level < cap && rest >= xpToNext(level)) {
     rest -= xpToNext(level)
     level++
   }
-  return level >= MAX_LEVEL ? { level, into: 0, need: 0 } : { level, into: rest, need: xpToNext(level) }
+  return level >= cap ? { level, into: 0, need: 0 } : { level, into: rest, need: xpToNext(level) }
 }
 
 // Fusionner un doublon : l'exemplaire en trop est consommé et donne de l'XP à la carte.
@@ -62,13 +64,48 @@ export const statsAt = (hero: Hero, level: number, bonusPct: number): Stats => {
 export const power = (s: Stats) => Math.round(s.atk * 0.6 + s.def * 0.4 + s.hp * 0.1 + s.speed * 3)
 
 // État complet d'une carte chez le joueur.
-export const cardState = (hero: Hero, xp: Record<string, number>, owned: Record<string, number>) => {
-  const lv = levelFromXp(xp[hero.id] ?? 0)
+export const cardState = (hero: Hero, xp: Record<string, number>, owned: Record<string, number>, rebirths = 0, awakened: string[] = []) => {
+  const freed = awakened.includes(hero.id)
+  const cap = freed ? MAX_LEVEL : LEVEL_CAP
+  const lv = levelFromXp(xp[hero.id] ?? 0, cap)
   const groups = collectifs(hero, owned)
-  const bonus = owned[hero.id] ? groups.reduce((s, g) => s + g.bonus, 0) : 0 // les bonus ne valent que pour une carte possédée
+  // les bonus (collectifs + Renaissances + Libération) ne valent que pour une carte possédée
+  const bonus = owned[hero.id] ? groups.reduce((s, g) => s + g.bonus, 0) + rebirths * REBIRTH_STAT + (freed ? AWAKEN_STAT : 0) : 0
   const stats = statsAt(hero, lv.level, bonus)
-  return { ...lv, groups, bonus, stats, power: power(stats) }
+  return { ...lv, cap, freed, groups, bonus, stats, power: power(stats) }
 }
+
+// ───── Compte du joueur et Renaissance ─────
+// Le compte gagne de l'XP à chaque carte invoquée et à chaque amélioration de carte. Au niveau 100, le joueur peut
+// « renaître » : il repart du niveau 1 avec 5 cartes de son choix et garde pour toujours les bonus ci-dessous.
+export const REBIRTH_LEVEL = 100
+export const REBIRTH_KEEP = 5 // cartes conservées
+export const REBIRTH_STAT = 6 // % de PV, d'attaque et de défense en plus sur toutes les cartes, par Renaissance
+export const REBIRTH_XP = 50 // % d'XP en plus des parchemins et des fusions, par Renaissance
+export const REBIRTH_SEALS = 10 // sceaux d'invocation offerts
+export const REBIRTH_REFUND = 0.25 // part des âmes dépensées qui est rendue
+export const ACCOUNT_XP: Record<RarityId, number> = { common: 20, rare: 30, epic: 60, ultra: 150, legend: 400, rift: 2000 }
+// XP de compte pour passer au niveau suivant : deux fois plus à chaque Renaissance.
+export const accountNeed = (level: number, rebirths: number) => (100 + 20 * level) * 2 ** rebirths
+export const accountLevel = (xp: number, rebirths: number): { level: number; into: number; need: number } => {
+  let level = 1
+  let rest = xp
+  while (level < REBIRTH_LEVEL && rest >= accountNeed(level, rebirths)) {
+    rest -= accountNeed(level, rebirths)
+    level++
+  }
+  return level >= REBIRTH_LEVEL ? { level, into: 0, need: 0 } : { level, into: rest, need: accountNeed(level, rebirths) }
+}
+export const REBIRTH_TITLES: [number, string][] = [[1, 'Revenant'], [2, 'Deux fois né'], [3, 'Marcheur des failles'], [5, 'Éternel'], [7, 'Sans âge'], [10, 'Maître du cycle']]
+export const rebirthTitle = (rebirths: number) => REBIRTH_TITLES.filter(([n]) => rebirths >= n).at(-1)?.[1] ?? ''
+export const nextRebirthTitle = (rebirths: number) => REBIRTH_TITLES.find(([n]) => n > rebirths)
+
+// ───── Libération (解放) ─────
+// Après une première Renaissance, une carte peut être « libérée » contre des Fragments d'âme : elle gagne
+// +15 % de PV, d'attaque et de défense, et son niveau maximum passe de 50 à 100. Définitif pour cette carte.
+export const AWAKEN_STAT = 15
+export const AWAKEN_COST: Record<RarityId, number> = { common: 20, rare: 30, epic: 50, ultra: 80, legend: 120, rift: 200 }
+export const REBIRTH_SHARDS = 30 // fragments offerts à chaque Renaissance
 
 // Classement de la carte par puissance de base, parmi toutes les cartes du jeu (1 = la plus puissante).
 const BASE_POWER = new Map(HEROES.map((h) => [h.id, power(baseStats(h))]))
