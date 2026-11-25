@@ -1,3 +1,3 @@
-import { StyleShowcase } from './screens/StyleShowcase'
+import { Home } from './screens/Home'
 
-export const App = () => <StyleShowcase />
+export const App = () => <Home />

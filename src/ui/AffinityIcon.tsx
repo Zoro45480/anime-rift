@@ -17,7 +17,7 @@ export const AffinityIcon = ({ id, size = 22 }: { id: AffinityId; size?: number 
   const stroked = STROKED.includes(id)
   const color = AFFINITIES[id].color
   return (
-    <span className="affinity" style={{ color, width: size + 14, height: size + 14 }} title={AFFINITIES[id].label}>
+    <span className="affinity" style={{ color, width: size + 12, height: size + 12 }} title={AFFINITIES[id].label}>
       <svg viewBox="0 0 24 24" width={size} height={size} aria-label={AFFINITIES[id].label} role="img"
         fill={stroked ? 'none' : 'currentColor'} stroke={stroked ? 'currentColor' : 'none'}
         strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">

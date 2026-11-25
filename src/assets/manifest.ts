@@ -1,10 +1,9 @@
-// Registre central des ressources graphiques.
-// Pour remplacer une illustration temporaire : déposer l'image dans public/art/
-// puis ajouter une ligne ici, ex.  'hero.kael.card': '/art/kael-card.webp'
-// Tant qu'une clé est absente, le jeu dessine l'illustration temporaire générée.
+// Registre central des illustrations.
+// Chaque personnage a deux images dans src/assets/art/ :  <Modèle>-full.png (corps entier)  et  <Modèle>-bust.png (portrait).
+// Pour remplacer une illustration : déposer un fichier du même nom dans ce dossier. Rien d'autre à modifier.
 
-export type AssetKey = string
+const files = import.meta.glob('./art/*.png', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 
-const IMAGES: Record<AssetKey, string> = {}
+export type ArtKind = 'full' | 'bust'
 
-export const resolveImage = (key: AssetKey): string | undefined => IMAGES[key]
+export const heroArt = (model: string, kind: ArtKind): string => files[`./art/${model}-${kind}.png`] ?? ''

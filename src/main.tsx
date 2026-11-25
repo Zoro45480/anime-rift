@@ -1,7 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import '@fontsource/chakra-petch/500.css'
-import '@fontsource/chakra-petch/700.css'
+import '@fontsource/sora/300.css'
 import '@fontsource/sora/400.css'
 import '@fontsource/sora/600.css'
 import './styles/tokens.css'

@@ -1,54 +1,51 @@
-/* ANIME RIFT — jetons de design. Toute couleur, taille ou durée du jeu vient d'ici. */
+/* ANIME RIFT — jetons de design (v2, style épuré). Toute couleur, taille ou durée du jeu vient d'ici. */
 :root {
   color-scheme: dark;
-  /* Fonds */
-  --abyss: #04050d;
-  --night: #0a0d24;
-  --night-2: #121638;
-  --veil: rgba(140, 150, 255, 0.07);
 
-  /* Énergie */
-  --violet: #8b5cff;
-  --violet-deep: #4a1fb8;
-  --cyan: #3ef0ff;
-  --cyan-soft: #8ff7ff;
-  --silver: #c9d2ee;
-  --white: #f6f8ff;
-  --gold: #ffd77a;
-  --gold-deep: #c78a2c;
-  --danger: #ff4d6d;
-  --heal: #5dffb0;
+  /* Fonds */
+  --abyss: #05060e;
+  --night: #0b0e22;
+  --night-2: #141834;
+
+  /* Surfaces : verre sombre, liseré très fin */
+  --glass: rgba(18, 22, 48, 0.55);
+  --glass-strong: rgba(14, 17, 38, 0.82);
+  --line: rgba(255, 255, 255, 0.09);
+  --line-strong: rgba(255, 255, 255, 0.22);
+
+  /* Accents */
+  --violet: #8f6bff;
+  --cyan: #5ee6ff;
+  --silver: #c7cee6;
+  --white: #f7f8ff;
+  --gold: #f2cf8d;
 
   /* Texte */
-  --text: #e9ecff;
-  --text-dim: #9aa2cf;
-  --text-faint: #5f678f;
+  --text: #eef0ff;
+  --text-dim: #a2a8c9;
+  --text-faint: #6a7096;
 
   /* Raretés */
-  --r-rare: #5aa9ff;
-  --r-epic: #b06bff;
-  --r-legend: #ffd77a;
-  --r-rift: #3ef0ff;
+  --r-rare: #6fb1ff;
+  --r-epic: #b48cff;
+  --r-legend: #f2cf8d;
+  --r-rift: #5ee6ff;
 
   /* Affinités */
-  --a-fire: #ff6b3d;
-  --a-water: #3d9bff;
-  --a-thunder: #ffe14d;
-  --a-wind: #6dffb8;
-  --a-earth: #c9925a;
-  --a-light: #fff4c2;
-  --a-dark: #9a4dff;
-  --a-rift: #3ef0ff;
+  --a-fire: #ff7a52;
+  --a-water: #55a8ff;
+  --a-thunder: #ffe066;
+  --a-wind: #7df0c0;
+  --a-earth: #d3a06c;
+  --a-light: #fff2bf;
+  --a-dark: #a56bff;
+  --a-rift: #5ee6ff;
 
-  /* Typo */
-  --font-display: 'Chakra Petch', 'Segoe UI', sans-serif;
-  --font-body: 'Sora', 'Segoe UI', sans-serif;
+  --font: 'Sora', 'Segoe UI', system-ui, sans-serif;
 
-  /* Formes : l'angle coupé est la signature du jeu */
-  --cut: 14px;
-  --cut-lg: 26px;
+  --radius: 14px;
+  --radius-sm: 9px;
 
-  /* Mouvement */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --fast: 140ms;
   --mid: 320ms;
