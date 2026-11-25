@@ -5,7 +5,7 @@ import { ENERGY_MAX, ENERGY_REGEN_MS, accountLevel, REBIRTH_KEEP, REBIRTH_LEVEL,
 import { useStore } from '../state/store'
 import { Coin } from '../ui/Coin'
 import { IconLock } from '../ui/icons'
-import { LevelBadge } from '../ui/LevelBadge'
+import { LEVEL_STYLE_NAME, LevelBadge, levelStyle } from '../ui/LevelBadge'
 
 // Les portes du Nexus. Aucune n'est encore ouverte : chaque fiche dit ce que le mode contiendra.
 const GATES = [
@@ -52,7 +52,7 @@ export const Play = ({ onRebirth }: { onRebirth: () => void }) => {
       <header className="nx__head">
         <p className="eyebrow">Le Nexus</p>
         <h1>Choisis ta porte.</h1>
-        <p className="nx__level"><LevelBadge level={acc.level} size={40} /><span>{acc.need ? `${acc.into.toLocaleString('fr-FR')} / ${acc.need.toLocaleString('fr-FR')} XP de compte` : 'Niveau maximum'}</span></p>
+        <p className="nx__level"><LevelBadge level={acc.level} rebirths={rebirths} size={40} /><span>Style {LEVEL_STYLE_NAME[levelStyle(acc.level, rebirths)]} · {acc.need ? `${acc.into.toLocaleString('fr-FR')} / ${acc.need.toLocaleString('fr-FR')} XP de compte` : 'Niveau maximum'}</span></p>
       </header>
       <GateTile gate={GATES[0]} featured onOpen={() => setOpen(GATES[0])} />
       <div className="nx__row">

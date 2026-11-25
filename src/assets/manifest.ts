@@ -25,10 +25,18 @@ const frames = import.meta.glob('./frames/**/*.webp', { eager: true, query: '?ur
 
 // Cadre d'une rareté, rendu avec Blender (tools/blender/build_frames.py). L'image déborde de la carte : voir .card__frame.
 // `theme` = famille de cadres de la bannière ; à défaut, on retombe sur les cadres d'origine.
-export const frameArt = (rarity: string, theme = 'naruto'): string => frames[`./frames/${theme}/${rarity}.webp`] ?? frames[`./frames/${rarity}.webp`] ?? ''
+const framesSm = import.meta.glob('./frames-sm/**/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
+// `hd` : le grand cadre, réservé à la carte affichée en grand. Partout ailleurs, la petite version (tools/make_small_frames.py),
+// six fois plus légère en mémoire : indispensable sur téléphone quand des dizaines de cartes sont à l'écran.
+const pick = (name: string, theme: string, hd: boolean) => {
+  const set = hd ? frames : framesSm
+  const dir = hd ? './frames' : './frames-sm'
+  return set[`${dir}/${theme}/${name}.webp`] ?? set[`${dir}/${name}.webp`] ?? ''
+}
+export const frameArt = (rarity: string, theme = 'naruto', hd = false): string => pick(rarity, theme, hd)
 
 // Effets lumineux du même cadre (étoiles, arcs, flammes), rendus à part pour que le jeu puisse les animer.
-export const frameFx = (rarity: string, theme = 'naruto'): string => frames[`./frames/${theme}/${rarity}-fx.webp`] ?? frames[`./frames/${rarity}-fx.webp`] ?? ''
+export const frameFx = (rarity: string, theme = 'naruto', hd = false): string => pick(`${rarity}-fx`, theme, hd)
 
 const ui = import.meta.glob('./ui/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 
@@ -41,7 +49,8 @@ const gates = import.meta.glob('./gates/*.webp', { eager: true, query: '?url', i
 // Illustrations 3D des portes du Nexus et de la Renaissance (tools/blender/build_gates.py).
 export const gateArt = (name: 'saga' | 'raids' | 'spire' | 'arena' | 'rebirth'): string => gates[`./gates/${name}.webp`] ?? ''
 
-const digits = import.meta.glob('./digits/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
+const digits = import.meta.glob('./digits/**/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 
 // Chiffres 3D dorés du niveau de compte, et le sigle « NV » (tools/blender/build_digits.py).
-export const digitArt = (glyph: string): string => digits[`./digits/${glyph}.webp`] ?? ''
+// Six styles : t0 acier, t1 or, t2 braise, t3 plasma, t4 légende, r arc-en-ciel (après une Renaissance).
+export const digitArt = (style: string, glyph: string): string => digits[`./digits/${style}/${glyph}.webp`] ?? ''

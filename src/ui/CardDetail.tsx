@@ -5,10 +5,10 @@ import { AFFINITIES } from '../data/affinities'
 import { HEROES, roleKind, type Hero } from '../data/heroes'
 import { RARITIES, RARITY_ORDER } from '../data/rarities'
 import { cardRate } from '../game/gacha'
-import { AWAKEN_COST, AWAKEN_STAT, LEVEL_CAP, baseRank, baseStats, cardState, kitOf, MAX_LEVEL, MERGE_XP, SCROLL_IDS, SCROLLS, type Collectif } from '../game/progression'
+import { AWAKEN_COST, AWAKEN_STAT, LEVEL_CAP, baseRank, baseStats, cardState, kitOf, MAX_GROUPS, STAT_LABEL, MAX_LEVEL, MERGE_XP, SCROLL_IDS, SCROLLS, type Collectif } from '../game/progression'
 import { SHOWCASE_MAX, useStore } from '../state/store'
 import { AffinityIcon } from './AffinityIcon'
-import { Card } from './Card'
+import { Card, LazyCard } from './Card'
 import { bannerOf, pct } from './CardViewer'
 
 // Page complète d'une carte. Tout ce qui s'y affiche vient de l'état réel de la partie :
@@ -25,10 +25,13 @@ const Section = ({ title, aside, children, closed, hue }: { title: string; aside
 )
 
 const Group = ({ group, owned, current, onOpen }: { group: Collectif; owned: Record<string, number>; current: Hero; onOpen: (h: Hero) => void }) => (
-  <div className="cd-group">
-    <header><b>{group.name}</b><em>{group.have} / {group.members.length}</em><strong>+{group.bonus} %</strong></header>
-    <p>{group.rule}</p>
-    <div className="cd-bar"><i style={{ width: `${(group.have / group.members.length) * 100}%` }} /></div>
+  <div className={`cd-group ${group.counted ? 'is-active' : ''}`}>
+    <header>
+      <b>{group.name}</b><em>{group.have} / {group.members.length}</em>
+      <strong>{group.stat === 'all' ? `+${group.bonus} %` : `+${group.pct} % ${STAT_LABEL[group.stat]}`}</strong>
+    </header>
+    <p>{group.rule}. {group.stat === 'all' ? '' : group.counted ? 'Actif.' : group.active ? `Actif, mais seuls les ${MAX_GROUPS} plus forts comptent.` : 'Pas encore actif.'}</p>
+    {group.stat === 'all' && <div className="cd-bar"><i style={{ width: `${(group.have / group.members.length) * 100}%` }} /></div>}
     <ul className="cd-members">
       {group.members.map((m) => (
         <li key={m.id}><button className={`${owned[m.id] ? 'is-owned' : ''} ${m.id === current.id ? 'is-current' : ''}`} style={{ ['--rc' as string]: RARITIES[m.rarity].color }} onClick={() => onOpen(m)}>
@@ -84,7 +87,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
         </nav>
 
         <header className="cd__hero">
-          <div className="cd__card"><Card hero={hero} inert locked={!has} /></div>
+          <div className="cd__card"><Card hero={hero} inert hd locked={!has} /></div>
           <div className="cd__id">
             <p className="cd__rar"><b>{rarity.short}</b>{rarity.label} · N° {String(hero.no).padStart(4, '0')}</p>
             <h1>{hero.name}</h1>
@@ -132,7 +135,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
             <div className="cd-stat cd-stat--power"><small>Puissance</small><b>{n(state.power)}</b></div>
             <div className="cd-stat" style={{ ['--sc' as string]: '#b78bff' }}><small>Classement de base</small><b>{baseRank(hero)}<i> / {HEROES.length}</i></b></div>
           </div>
-          <p className="cd-note">Chaque niveau ajoute 2 % aux PV, à l’attaque et à la défense.{state.bonus > 0 ? ` Vos collectifs${rebirths ? ' et vos Renaissances' : ''} ajoutent ${state.bonus} %.` : ''}{!has ? ' Valeurs de base : vous ne possédez pas encore cette carte.' : ''}</p>
+          <p className="cd-note">Chaque niveau ajoute 2 % aux PV, à l’attaque et à la défense.{state.bonus > 0 ? ` Univers, Renaissances et Libération ajoutent ${state.bonus} % à tout.` : ''} Les collectifs actifs s'ajoutent par statistique.{!has ? ' Valeurs de base : vous ne possédez pas encore cette carte.' : ''}</p>
         </Section>
 
         <Section hue="#ff9a3d" title="Techniques" aside={hero.role}>
@@ -144,7 +147,8 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
           <p className="cd-note">Les chiffres sont calculés sur les statistiques actuelles de la carte : ils montent avec son niveau. Les techniques serviront quand les combats ouvriront.</p>
         </Section>
 
-        <Section hue="#4be3a4" title="Collectifs" aside={`+${state.groups.reduce((s, g) => s + g.bonus, 0)} %`}>
+        <Section hue="#4be3a4" title="Collectifs" aside={`${state.groups.filter((g) => g.counted).length} actif${state.groups.filter((g) => g.counted).length > 1 ? 's' : ''} sur ${state.groups.length}`}>
+          <p className="cd-note">Un collectif s'active quand tu possèdes cette carte et au moins un autre membre. {MAX_GROUPS} collectifs au plus comptent pour une carte : les plus forts.</p>
           {state.groups.map((g) => <Group key={g.id} group={g} owned={owned} current={hero} onOpen={onOpen} />)}
         </Section>
 
@@ -198,7 +202,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
 
         <Section hue="#b78bff" title="Dans le même univers" aside={`${same.filter((h) => owned[h.id]).length} / ${same.length}`}>
           <div className="cd-same">
-            {same.map((h) => <button key={h.id} className="cd-same__item" onClick={() => onOpen(h)} aria-label={`Voir la fiche de ${h.name}`}><Card hero={h} inert locked={!owned[h.id]} /></button>)}
+            {same.map((h) => <button key={h.id} className="cd-same__item" onClick={() => onOpen(h)} aria-label={`Voir la fiche de ${h.name}`}><LazyCard hero={h} inert locked={!owned[h.id]} /></button>)}
           </div>
         </Section>
 

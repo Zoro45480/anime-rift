@@ -22,7 +22,7 @@ export const TopBar = ({ onPlay }: { onPlay: () => void }) => {
       <div className="topbar__in">
         <Logo />
         <div className="wallet" aria-label="Vos ressources">
-          <LevelBadge level={accountLevel(accountXp, rebirths).level} />
+          <LevelBadge level={accountLevel(accountXp, rebirths).level} rebirths={rebirths} />
           <button className="wallet__energy" onClick={onPlay} aria-label={`Énergie : ${energyLeft} sur ${ENERGY_MAX}. Aller au Nexus`}><Coin name="bolt" size={24} /><b>{energyLeft}<small>/{ENERGY_MAX}</small></b></button>
           <span title="Flammes d'âme"><Coin name="soul" size={24} /><b>{gems}</b></span>
           <span title="Sceaux d'invocation"><Coin name="seal" size={24} /><b>{tickets}</b></span>

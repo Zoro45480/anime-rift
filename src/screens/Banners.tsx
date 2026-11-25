@@ -9,7 +9,7 @@ import { isPityRarity } from '../data/rarities'
 import { LEVEL_CAP, MAX_LEVEL } from '../game/progression'
 import { bannerPool, cardRate } from '../game/gacha'
 import { useStore, type Currency } from '../state/store'
-import { Card } from '../ui/Card'
+import { Card, LazyCard } from '../ui/Card'
 import { IconChevron, IconInfo } from '../ui/icons'
 import { Coin } from '../ui/Coin'
 import { SummonCinematic } from '../summon/SummonCinematic'
@@ -258,7 +258,7 @@ export const Banners = ({ onRebirth }: { onRebirth: () => void }) => {
                   <div className="index__cards">
                     {cards.map((h) => (
                       <figure key={h.id} className="index__card">
-                        <Card hero={h} />
+                        <LazyCard hero={h} />
                         <figcaption>
                           <span>{banner.featured.includes(h.id) ? '★ ' : ''}{h.name}</span>
                           <b>{pct(cardRate(banner, h))}</b>

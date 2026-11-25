@@ -2,8 +2,8 @@
 import re, sys
 root = '/home/user/anime-rift/src/data/'
 ROLE = {'D': 'DPS', 'T': 'Tank', 'S': 'Soigneur', 'DT': 'DPS / Tank', 'DS': 'DPS / Soigneur', 'TS': 'Tank / Soigneur'}
-BUDGET = {'common': 1000, 'rare': 1400, 'epic': 1900, 'ultra': 2500, 'legend': 3200, 'rift': 4000}
-PROFILE = {'D': (1.25, 0.70, 2.6), 'T': (0.70, 1.25, 4.2), 'S': (0.80, 0.90, 3.4), 'DT': (1.20, 1.15, 3.9), 'DS': (1.20, 0.90, 3.3), 'TS': (0.85, 1.20, 4.2)}
+BUDGET = {'common': 600, 'rare': 840, 'epic': 1140, 'ultra': 1500, 'legend': 1920, 'rift': 2400}
+PROFILE = {'D': (1.25, 0.70, 2.0), 'T': (0.70, 1.25, 3.2), 'S': (0.80, 0.90, 2.6), 'DT': (1.20, 1.15, 3.0), 'DS': (1.20, 0.90, 2.5), 'TS': (0.85, 1.20, 3.2)}
 moves = {}
 for line in open(sys.argv[1], encoding='utf8'):
     i, r, a, s, u, p = line.rstrip('\n').split('|')

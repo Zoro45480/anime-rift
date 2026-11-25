@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { HEROES } from '../data/heroes'
 import { MOVES } from '../data/moves'
+import { GROUPS } from '../data/collectifs'
 import { RARITY_ORDER } from '../data/rarities'
-import { ENERGY_MAX, ENERGY_REGEN_MS, energyNow, AWAKEN_STAT, LEVEL_CAP, accountLevel, accountNeed, rebirthTitle, REBIRTH_LEVEL, power, baseRank, baseStats, cardState, collectifs, kitOf, levelFromXp, MAX_LEVEL, statsAt, xpToNext } from './progression'
+import { MAX_GROUPS, ENERGY_MAX, ENERGY_REGEN_MS, energyNow, AWAKEN_STAT, LEVEL_CAP, accountLevel, accountNeed, rebirthTitle, REBIRTH_LEVEL, power, baseRank, baseStats, cardState, collectifs, kitOf, levelFromXp, MAX_LEVEL, statsAt, xpToNext } from './progression'
 
 describe('progression des cartes', () => {
   it('monte de niveau au bon nombre de points', () => {
@@ -20,18 +21,33 @@ describe('progression des cartes', () => {
     expect(statsAt(h, 1, 10).def).toBe(Math.round(h.def * 1.1))
   })
 
-  it('les collectifs comptent les cartes possédées et plafonnent leur bonus', () => {
+  it('le collectif d’univers compte les cartes possédées et plafonne à 12 %', () => {
     const h = HEROES[0]
     const world = HEROES.filter((x) => x.world === h.world)
     expect(collectifs(h, {})[0]).toMatchObject({ have: 0, bonus: 0 })
-    const five = Object.fromEntries(world.slice(0, 5).map((x) => [x.id, 1]))
-    expect(collectifs(h, five)[0].bonus).toBe(2)
+    expect(collectifs(h, Object.fromEntries(world.slice(0, 5).map((x) => [x.id, 1])))[0].bonus).toBe(2)
     const all = Object.fromEntries(HEROES.map((x) => [x.id, 1]))
     expect(collectifs(h, all)[0].bonus).toBe(12)
-    const roleBonus = Math.min(10, Math.floor(HEROES.filter((x) => x.role === h.role).length / 3))
-    expect(collectifs(h, all)[1].bonus).toBe(roleBonus)
-    expect(cardState(h, {}, all).bonus).toBe(12 + roleBonus)
+    expect(cardState(h, {}, all).bonus).toBe(12)
     expect(cardState(h, {}, { ...all, [h.id]: 0 }).bonus).toBe(0) // pas de bonus pour une carte non possédée
+  })
+
+  it('les groupes d’univers s’activent à deux membres, renforcent leur statistique, six au plus', () => {
+    for (const g of GROUPS) {
+      expect(g.members.length).toBeGreaterThanOrEqual(2)
+      for (const id of g.members) expect(HEROES.find((x) => x.id === id)?.world).toBe(g.world)
+    }
+    for (const h of HEROES) expect(collectifs(h, {}).length).toBeGreaterThanOrEqual(2) // chaque carte a au moins un groupe
+    const naruto = HEROES.find((x) => x.id === 'naruto')!
+    const alone = cardState(naruto, {}, { naruto: 1 })
+    const duo = cardState(naruto, {}, { naruto: 1, sasuke: 1 }) // Équipe 7 (+15 % ATK) et Quatrième Grande Guerre (+10 % ATK)
+    expect(alone.extra.atk).toBe(0)
+    expect(duo.extra.atk).toBe(25)
+    expect(duo.stats.atk).toBe(Math.round(naruto.atk * 1.25))
+    expect(duo.stats.def).toBe(naruto.def)
+    expect(cardState(naruto, {}, { sasuke: 1, sakura: 1 }).extra.atk).toBe(0) // il faut posséder la carte elle-même
+    const all = Object.fromEntries(HEROES.map((x) => [x.id, 1]))
+    for (const h of HEROES) expect(collectifs(h, all).filter((c) => c.stat !== 'all' && c.counted).length).toBeLessThanOrEqual(MAX_GROUPS)
   })
 
   it('classe chaque carte de 1 à 210 et donne un kit à chaque rôle', () => {

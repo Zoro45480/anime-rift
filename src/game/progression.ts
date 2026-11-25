@@ -1,5 +1,6 @@
 import { HEROES, type Hero, type Role } from '../data/heroes'
 import { MOVES } from '../data/moves'
+import { GROUPS, type GroupStat } from '../data/collectifs'
 import type { RarityId } from '../data/rarities'
 
 // Progression des cartes : niveaux, statistiques, puissance, collectifs, techniques.
@@ -42,16 +43,29 @@ export type Stats = { hp: number; atk: number; def: number; speed: number }
 // la rareté fixe leur total, le rôle les répartit. La vitesse dépend du rôle.
 export const baseStats = (hero: Hero): Stats => ({ hp: hero.hp, atk: hero.atk, def: hero.def, speed: ROLE_SPEED[hero.role] + (hero.no % 9) })
 
-// Collectifs : posséder des cartes liées renforce toutes les cartes du groupe.
-export type Collectif = { id: string; name: string; rule: string; members: Hero[]; have: number; bonus: number }
+// Collectifs. Deux sortes :
+// – l'univers : +2 % à toutes les statistiques par tranche de 5 cartes possédées de l'univers (12 % au plus) ;
+// – les groupes de l'univers (data/collectifs.ts) : actifs dès que le joueur possède la carte et au moins un autre membre ;
+//   chacun renforce une statistique. Six groupes au plus comptent pour une carte : les plus forts.
+export const MAX_GROUPS = 6
+export const STAT_LABEL: Record<GroupStat | 'all', string> = { all: 'toutes stats', atk: 'ATK', def: 'DEF', hp: 'PV', speed: 'VIT' }
+export type Collectif = { id: string; name: string; rule: string; members: Hero[]; have: number; bonus: number; stat: GroupStat | 'all'; pct: number; active: boolean; counted: boolean }
 
+const BY_ID = new Map(HEROES.map((h) => [h.id, h]))
 export const collectifs = (hero: Hero, owned: Record<string, number>): Collectif[] => {
   const world = HEROES.filter((h) => h.world === hero.world)
-  const role = HEROES.filter((h) => h.role === hero.role)
   const count = (list: Hero[]) => list.filter((h) => owned[h.id]).length
+  const worldBonus = Math.min(12, Math.floor(count(world) / 5) * 2)
+  const groups: Collectif[] = GROUPS.filter((g) => g.members.includes(hero.id)).map((g) => {
+    const members = g.members.map((id) => BY_ID.get(id)!)
+    const have = count(members)
+    const active = Boolean(owned[hero.id]) && have >= 2
+    return { id: g.name, name: g.name, rule: 'Actif avec au moins 2 membres possédés, dont cette carte', members, have, stat: g.stat, pct: g.pct, active, counted: false, bonus: 0 }
+  })
+  for (const g of [...groups].filter((x) => x.active).sort((x, y) => y.pct - x.pct).slice(0, MAX_GROUPS)) { g.counted = true; g.bonus = g.pct }
   return [
-    { id: 'world', name: `Univers ${hero.world}`, rule: '+2 % par tranche de 5 cartes possédées (12 % au plus)', members: world, have: count(world), bonus: Math.min(12, Math.floor(count(world) / 5) * 2) },
-    { id: 'role', name: `Confrérie · ${hero.role}`, rule: '+1 % par tranche de 3 cartes possédées (10 % au plus)', members: role, have: count(role), bonus: Math.min(10, Math.floor(count(role) / 3)) },
+    { id: 'world', name: `Univers ${hero.world}`, rule: '+2 % par tranche de 5 cartes possédées (12 % au plus)', members: world, have: count(world), stat: 'all', pct: 12, active: worldBonus > 0, counted: worldBonus > 0, bonus: worldBonus },
+    ...groups,
   ]
 }
 
@@ -70,9 +84,13 @@ export const cardState = (hero: Hero, xp: Record<string, number>, owned: Record<
   const lv = levelFromXp(xp[hero.id] ?? 0, cap)
   const groups = collectifs(hero, owned)
   // les bonus (collectifs + Renaissances + Libération) ne valent que pour une carte possédée
-  const bonus = owned[hero.id] ? groups.reduce((s, g) => s + g.bonus, 0) + rebirths * REBIRTH_STAT + (freed ? AWAKEN_STAT : 0) : 0
-  const stats = statsAt(hero, lv.level, bonus)
-  return { ...lv, cap, freed, groups, bonus, stats, power: power(stats) }
+  const bonus = owned[hero.id] ? groups[0].bonus + rebirths * REBIRTH_STAT + (freed ? AWAKEN_STAT : 0) : 0
+  const extra: Record<GroupStat, number> = { atk: 0, def: 0, hp: 0, speed: 0 } // bonus des groupes, par statistique
+  for (const g of groups) if (g.counted && g.stat !== 'all') extra[g.stat] += g.bonus
+  const flat = statsAt(hero, lv.level, bonus)
+  const up = (value: number, pct: number) => Math.round(value * (1 + pct / 100))
+  const stats: Stats = { hp: up(flat.hp, extra.hp), atk: up(flat.atk, extra.atk), def: up(flat.def, extra.def), speed: up(flat.speed, extra.speed) }
+  return { ...lv, cap, freed, groups, bonus, extra, stats, power: power(stats) }
 }
 
 // ───── Énergie ─────

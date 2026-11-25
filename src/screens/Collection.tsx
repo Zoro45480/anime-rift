@@ -7,7 +7,7 @@ import { fileToCardImage } from '../state/customArt'
 import { SCROLL_IDS, SCROLLS } from '../game/progression'
 import { SHOWCASE_MAX, useStore } from '../state/store'
 import { AffinityIcon } from '../ui/AffinityIcon'
-import { Card } from '../ui/Card'
+import { Card, LazyCard } from '../ui/Card'
 import { Inventory, Rebirth } from './Rebirth'
 
 // Vérifie qu'un lien mène bien à une image que le navigateur peut afficher.
@@ -220,7 +220,7 @@ const Cards = ({ onSummon }: { onSummon: () => void }) => {
             <div className="col-group__grid">
               {shown.map((h) => (
                 <div key={h.id} className="col-item">
-                  <Card hero={h} count={owned[h.id]} locked={!owned[h.id]} />
+                  <LazyCard hero={h} count={owned[h.id]} locked={!owned[h.id]} />
                   <ArtPicker hero={h} />
                 </div>
               ))}

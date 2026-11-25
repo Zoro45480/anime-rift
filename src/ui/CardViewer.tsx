@@ -46,7 +46,7 @@ const Sheet = ({ hero, onClose, onMore }: { hero: Hero; onClose: () => void; onM
         <div className={`cv__flip ${flipped ? 'is-flipped' : ''}`} role="button" tabIndex={0} onClick={() => setFlipped(!flipped)}
           onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); setFlipped(!flipped) } }}
           aria-label={flipped ? 'Revoir la carte' : 'Retourner la carte pour voir sa fiche'}>
-          <span className="cv__face cv__face--front"><Card hero={hero} inert /></span>
+          <span className="cv__face cv__face--front"><Card hero={hero} inert hd /></span>
           <span className="cv__face cv__face--back" style={{ ['--rc' as string]: rarity.color }}>
             <span className="cv__head"><b>{rarity.short}</b><i>N° {String(hero.no).padStart(4, '0')}</i></span>
             <span className="cv__name">{hero.name}</span>

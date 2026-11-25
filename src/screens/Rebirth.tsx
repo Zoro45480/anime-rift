@@ -4,7 +4,7 @@ import { HEROES } from '../data/heroes'
 import { RARITY_ORDER } from '../data/rarities'
 import { accountLevel, nextRebirthTitle, AWAKEN_STAT, LEVEL_CAP, MAX_LEVEL, REBIRTH_SHARDS, REBIRTH_KEEP, REBIRTH_LEVEL, REBIRTH_REFUND, REBIRTH_SEALS, REBIRTH_STAT, REBIRTH_XP, rebirthTitle, SCROLL_IDS, SCROLLS } from '../game/progression'
 import { START_GEMS, useStore } from '../state/store'
-import { Card } from '../ui/Card'
+import { LazyCard } from '../ui/Card'
 import { Coin } from '../ui/Coin'
 
 const n = (x: number) => x.toLocaleString('fr-FR')
@@ -129,7 +129,7 @@ export const Rebirth = () => {
           <div className="rb-pick__grid">
             {shown.map((h) => (
               <button key={h.id} className={`rb-pick__item ${kept.includes(h.id) ? 'is-kept' : ''}`} aria-pressed={kept.includes(h.id)} aria-label={`${kept.includes(h.id) ? 'Ne plus garder' : 'Garder'} ${h.name}`} onClick={() => toggle(h.id)}>
-                <Card hero={h} inert count={store.owned[h.id]} />
+                <LazyCard hero={h} inert count={store.owned[h.id]} />
                 <span>{kept.includes(h.id) ? '✓ Gardée' : 'Garder'}</span>
               </button>
             ))}

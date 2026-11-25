@@ -1017,3 +1017,23 @@ body { background: #000; }
   .topbar .logo { flex: none; }
 }
 @media (max-width: 360px) { .wallet span, .wallet__energy { padding: 4px 9px 5px 7px; font-size: 12px; } .wallet small { display: none; } }
+
+/* Emplacement d'une carte montée à la demande (LazyCard) : garde sa place tant que la carte n'est pas là */
+.card-slot { width: 100%; aspect-ratio: 5 / 7; }
+.crash { display: grid; gap: 14px; padding: 40px 8px; }
+.crash h1 { font-size: 24px; color: #fff; }
+.crash p { color: var(--text); }
+.crash pre { padding: 12px; border-radius: 10px; background: #111; color: #ff9aa8; font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* Styles du niveau : la lueur suit le style, la Renaissance scintille */
+.lvl--t0 { filter: drop-shadow(0 0 6px rgba(110, 160, 255, 0.6)) drop-shadow(0 2px 0 rgba(0, 0, 0, 0.6)); }
+.lvl--t2 { filter: drop-shadow(0 0 7px rgba(255, 70, 90, 0.7)) drop-shadow(0 2px 0 rgba(0, 0, 0, 0.6)); }
+.lvl--t3 { filter: drop-shadow(0 0 8px rgba(80, 220, 255, 0.75)) drop-shadow(0 2px 0 rgba(0, 0, 0, 0.6)); }
+.lvl--t4 { filter: drop-shadow(0 0 9px rgba(255, 90, 220, 0.8)) drop-shadow(0 0 3px #fff) drop-shadow(0 2px 0 rgba(0, 0, 0, 0.6)); }
+.lvl--r { animation: lvl-rainbow 6s linear infinite; }
+.lvl__star { font-style: normal; font-size: calc(var(--lh) * 0.6); color: #fff; margin-right: 3px; text-shadow: 0 0 8px #fff; animation: lvl-twinkle 1.6s ease-in-out infinite; }
+@keyframes lvl-rainbow { from { filter: hue-rotate(0deg) drop-shadow(0 0 9px rgba(255, 255, 255, 0.75)); } to { filter: hue-rotate(360deg) drop-shadow(0 0 9px rgba(255, 255, 255, 0.75)); } }
+@keyframes lvl-twinkle { 50% { opacity: 0.35; transform: scale(0.8); } }
+@media (prefers-reduced-motion: reduce) { .lvl--r, .lvl__star { animation: none; } }
+.cd-group.is-active { box-shadow: inset 0 0 0 1.5px #4be3a4, 0 0 16px rgba(75, 227, 164, 0.2); }
+.cd-group:not(.is-active) header strong { color: var(--text-faint); text-shadow: none; }

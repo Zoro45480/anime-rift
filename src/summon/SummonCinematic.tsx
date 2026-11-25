@@ -199,7 +199,7 @@ export const SummonCinematic = ({ heroes, onClose }: { heroes: Hero[]; onClose: 
             {sub === 'cutin' ? <CutIn hero={hero} art={artOf(hero)} /> : (
               <>
                 <div className="sc__burst" />
-                <div className="sc__bigcard"><Card hero={hero} /></div>
+                <div className="sc__bigcard"><Card hero={hero} hd /></div>
               </>
             )}
           </div>
@@ -225,7 +225,7 @@ export const SummonCinematic = ({ heroes, onClose }: { heroes: Hero[]; onClose: 
       {step === 'summary' && single && (
         <div className="sc__solo">
           <div className="sc__burst" />
-          <div className="sc__bigcard sc__bigcard--stay"><Card hero={star} /></div>
+          <div className="sc__bigcard sc__bigcard--stay"><Card hero={star} hd /></div>
           <p className="sc__rank"><b>{RARITIES[star.rarity].short}</b>{preset.rank}</p>
           <h2 className="sc__name" aria-label={star.name}>
             {[...star.name].map((ch, i) => <span key={i} style={{ animationDelay: `${0.15 + i * 0.06}s` }}>{ch}</span>)}
