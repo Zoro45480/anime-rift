@@ -5,7 +5,7 @@ import { AFFINITIES } from '../data/affinities'
 import { HEROES, roleKind, type Hero } from '../data/heroes'
 import { RARITIES, RARITY_ORDER } from '../data/rarities'
 import { cardRate } from '../game/gacha'
-import { AWAKEN_COST, AWAKEN_STAT, LEVEL_CAP, baseRank, baseStats, cardState, kitOf, MAX_GROUPS, STAT_LABEL, MAX_LEVEL, MERGE_XP, SCROLL_IDS, SCROLLS, type Collectif } from '../game/progression'
+import { MARKET_BASE, marketFloor, STAT_SCALE, AWAKEN_COST, AWAKEN_STAT, LEVEL_CAP, baseRank, baseStats, cardState, kitOf, MAX_GROUPS, STAT_LABEL, MAX_LEVEL, MERGE_XP, SCROLL_IDS, SCROLLS, type Collectif } from '../game/progression'
 import { SHOWCASE_MAX, useStore } from '../state/store'
 import { AffinityIcon } from './AffinityIcon'
 import { Card, LazyCard } from './Card'
@@ -42,7 +42,7 @@ const Group = ({ group, owned, current, onOpen }: { group: Collectif; owned: Rec
 )
 
 export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () => void; onOpen: (hero: Hero) => void }) => {
-  const { awakened, shards, awaken, rebirths, owned, xp, scrolls, wish, pinned, log, merge, useScroll, toggleWish, togglePin } = useStore()
+  const { remoteFans, awakened, shards, awaken, rebirths, owned, xp, scrolls, wish, pinned, log, merge, useScroll, toggleWish, togglePin } = useStore()
   const [notice, setNotice] = useState('')
   const top = useRef<HTMLDivElement>(null)
   const rarity = RARITIES[hero.rarity]
@@ -74,8 +74,13 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
   const onMerge = () => setNotice(merge(hero.id) ? `Doublon fusionné : +${n(MERGE_XP[hero.rarity])} XP.` : '')
   const onPin = () => setNotice(togglePin(hero.id) ? (isPinned ? 'Retirée de la vitrine.' : 'Épinglée dans la vitrine.') : `La vitrine est pleine (${SHOWCASE_MAX} cartes). Retirez-en une d’abord.`)
 
-  const stat = (label: string, value: number, from: number, hue: string) => (
-    <div className="cd-stat" style={{ ['--sc' as string]: hue }}><small>{label}</small><b>{n(value)}</b>{value !== from && <em>base {n(from)}</em>}</div>
+  // la barre se lit par rapport au maximum possible : la meilleure valeur de base du jeu, portée au niveau 100
+  const stat = (label: string, value: number, from: number, hue: string, scale: number) => (
+    <div className="cd-stat" style={{ ['--sc' as string]: hue }}>
+      <small>{label}</small><b>{n(value)}</b>
+      <span className="cd-stat__bar"><i style={{ width: `${Math.min(100, (value / (scale * 3)) * 100)}%` }} /></span>
+      {value !== from && <em>base {n(from)}</em>}
+    </div>
   )
 
   return createPortal(
@@ -87,7 +92,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
         </nav>
 
         <header className="cd__hero">
-          <div className="cd__card"><Card hero={hero} inert hd locked={!has} /></div>
+          <div className="cd__card"><Card hero={hero} inert hd /></div>
           <div className="cd__id">
             <p className="cd__rar"><b>{rarity.short}</b>{rarity.label} · N° {String(hero.no).padStart(4, '0')}</p>
             <h1>{hero.name}</h1>
@@ -109,18 +114,8 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
           </div>
         </header>
 
-        {!has && (
-          <section className="cd-locked">
-            <p>Tu n'as pas encore cette carte. La fiche complète (statistiques, techniques, amélioration) se débloque dès que tu l'obtiens.</p>
-            <div className="cd-locked__passive"><small>Passif</small><b>✦ {kit[3].name}</b><p>{kit[3].text}</p></div>
-            <dl className="cd-info">
-              <div><dt>Où la trouver</dt><dd>{banner ? `Invocation ${banner.world}` : '—'}</dd></div>
-              <div><dt>Chance par invocation</dt><dd>{rate ? `${pct(rate)} · 1 sur ${n(Math.round(1 / rate))}` : '—'}</dd></div>
-            </dl>
-          </section>
-        )}
+        {!has && <p className="cd-locked-note">Tu n'as pas encore cette carte : statistiques au niveau 1, sans bonus.</p>}
 
-        {has && <>
         <Section hue="#ff5d7a" title="Statistiques" aside={`Puissance ${n(state.power)}`}>
           <div className="cd-level">
             <b>Niveau {state.level}<i> / {state.cap}</i></b>
@@ -128,10 +123,10 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
             <div className="cd-bar"><i style={{ width: maxed ? '100%' : `${(state.into / state.need) * 100}%` }} /></div>
           </div>
           <div className="cd-stats">
-            {stat('PV', state.stats.hp, base.hp, '#4be3a4')}
-            {stat('Attaque', state.stats.atk, base.atk, '#ff5d7a')}
-            {stat('Défense', state.stats.def, base.def, '#5aa8ff')}
-            {stat('Vitesse', state.stats.speed, base.speed, '#ffd24d')}
+            {stat('PV', state.stats.hp, base.hp, '#4be3a4', STAT_SCALE.hp)}
+            {stat('Attaque', state.stats.atk, base.atk, '#ff5d7a', STAT_SCALE.atk)}
+            {stat('Défense', state.stats.def, base.def, '#5aa8ff', STAT_SCALE.def)}
+            {stat('Vitesse', state.stats.speed, base.speed, '#ffd24d', STAT_SCALE.speed / 3 * 1.2)}
             <div className="cd-stat cd-stat--power"><small>Puissance</small><b>{n(state.power)}</b></div>
             <div className="cd-stat" style={{ ['--sc' as string]: '#b78bff' }}><small>Classement de base</small><b>{baseRank(hero)}<i> / {HEROES.length}</i></b></div>
           </div>
@@ -144,7 +139,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
               <li key={m.kind} className={`cd-kit--${m.kind === 'Attaque' ? 'a' : m.kind === 'Technique' ? 't' : m.kind === 'Ultime' ? 'u' : 'p'}`}><small>{m.kind}</small><b>{m.name}</b><p>{m.text}</p>{m.cost && <em>{m.cost}</em>}</li>
             ))}
           </ul>
-          <p className="cd-note">Les chiffres sont calculés sur les statistiques actuelles de la carte : ils montent avec son niveau. Les techniques serviront quand les combats ouvriront.</p>
+          <p className="cd-note">Les chiffres sont calculés sur les statistiques actuelles de la carte : ils montent avec son niveau. Ils sont donnés avant la défense de la cible. Les techniques servent dans La Saga.</p>
         </Section>
 
         <Section hue="#4be3a4" title="Collectifs" aside={`${state.groups.filter((g) => g.counted).length} actif${state.groups.filter((g) => g.counted).length > 1 ? 's' : ''} sur ${state.groups.length}`}>
@@ -152,7 +147,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
           {state.groups.map((g) => <Group key={g.id} group={g} owned={owned} current={hero} onOpen={onOpen} />)}
         </Section>
 
-        <Section hue="#ffc94d" title="Amélioration" aside={`${n(scrolls.small + scrolls.medium + scrolls.large)} parchemin${scrolls.small + scrolls.medium + scrolls.large > 1 ? 's' : ''}`}>
+        {has && <Section hue="#ffc94d" title="Amélioration" aside={`${n(scrolls.small + scrolls.medium + scrolls.large)} parchemin${scrolls.small + scrolls.medium + scrolls.large > 1 ? 's' : ''}`}>
           <ul className="cd-scrolls">
             {SCROLL_IDS.map((id) => (
               <li key={id}>
@@ -173,15 +168,27 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
             {!state.freed && <button className="cd-btn cd-btn--small" disabled={rebirths < 1 || shards < cost} onClick={() => { if (awaken(hero.id)) setNotice('Carte libérée : niveau maximum 100.') }}>Libérer</button>}
           </div>
           <p className="cd-note">Les Fragments d'âme se gagneront dans La Spire (pas encore jouable) ; chaque Renaissance en offre aussi quelques-uns.</p>
-          <p className="cd-note">Chaque carte invoquée donne un parchemin : petit pour N et R, moyen pour SR, grand pour SSR, LR et MR.{!has ? ' Il faut posséder la carte pour l’améliorer.' : ''}</p>
-        </Section>
+          <p className="cd-note">Les parchemins se gagnent dans La Saga (Nexus) : chaque combat affiche son taux de drop.{!has ? ' Il faut posséder la carte pour l’améliorer.' : ''}</p>
+        </Section>}
 
-        <Section hue="#5ee6ff" title="Historique" aside={history.length ? `${history.length} ligne${history.length > 1 ? 's' : ''}` : undefined}>
+        {has && <Section hue="#5ee6ff" title="Historique" aside={history.length ? `${history.length} ligne${history.length > 1 ? 's' : ''}` : undefined}>
           {history.length === 0 ? <p className="cd-note">Rien pour l’instant : cette carte n’a pas encore été obtenue.</p> : (
             <ol className="cd-log">
               {history.map((e, i) => <li key={i} className={`cd-log--${e.k}`}><time>{when(e.t)}</time><span>{e.note}</span></li>)}
             </ol>
           )}
+        </Section>}
+
+        <Section hue="#b78bff" title="Cote de la carte" aside="Marché">
+          <div className="cd-market">
+            <div><small>Médiane 7 j</small><b>—</b></div>
+            <div><small>Médiane 30 j</small><b>—</b></div>
+            <div><small>Ventes conclues</small><b>0</b></div>
+            <div><small>Barème de départ</small><b>{n(MARKET_BASE[hero.rarity])} âmes</b></div>
+            <div><small>Fourchette autorisée</small><b>{n(marketFloor(hero.rarity))} – ∞ âmes</b></div>
+            <div><small>Exemplaires chez toi</small><b>{copies}</b></div>
+          </div>
+          <p className="cd-note">Aucune vente conclue pour le moment : le marché entre joueurs n'est pas encore ouvert (il demande un jeu en ligne). Le barème et la fourchette sont les règles prévues pour cette rareté ; aucune cote n'est inventée.</p>
         </Section>
 
         <Section hue="#7d9bff" title="Informations">
@@ -194,11 +201,10 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
             <div><dt>Bannière</dt><dd>{banner ? banner.world : 'Hors bannière'}</dd></div>
             <div><dt>Chance par invocation</dt><dd>{rate ? `${pct(rate)} · 1 sur ${n(Math.round(1 / rate))}` : '—'}</dd></div>
             <div><dt>Exemplaires</dt><dd>{copies}</dd></div>
+            <div><dt>Popularité</dt><dd>{remoteFans[hero.id] ? `♥ ${n(remoteFans[hero.id])} fans sur AniList` : '—'}</dd></div>
             <div><dt>Première obtention</dt><dd>{first ? when(first.t) : '—'}</dd></div>
           </dl>
         </Section>
-
-        </>}
 
         <Section hue="#b78bff" title="Dans le même univers" aside={`${same.filter((h) => owned[h.id]).length} / ${same.length}`}>
           <div className="cd-same">
@@ -207,7 +213,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
         </Section>
 
         <Section hue="#8089a8" title="Pas encore disponible" closed>
-          <p className="cd-note">La cote de la carte (marché entre joueurs), les performances en combat et l’éveil n’existent pas encore dans le jeu. Ces rubriques apparaîtront ici quand le marché et les combats seront construits ; aucun chiffre n’est inventé d’ici là.</p>
+          <p className="cd-note">Les ventes entre joueurs et les statistiques de combat détaillées (victoires, titres) n’existent pas encore : elles demandent un jeu en ligne. Aucun chiffre n’est inventé d’ici là.</p>
         </Section>
       </div>
     </div>,

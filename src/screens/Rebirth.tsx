@@ -95,7 +95,7 @@ export const Rebirth = () => {
         <div className="rb-level" role="meter" aria-valuemin={1} aria-valuemax={REBIRTH_LEVEL} aria-valuenow={acc.level} aria-label="Niveau de compte">
           <i style={{ width: `${(acc.level / REBIRTH_LEVEL) * 100}%` }} /><span>Niveau {acc.level} / {REBIRTH_LEVEL}{ready ? '' : ` · ${n(acc.into)} / ${n(acc.need)} XP`}</span>
         </div>
-        <p className="rb-note">Ton compte gagne de l'XP à chaque carte invoquée (plus elle est rare, plus elle en donne) et à chaque amélioration de carte.</p>
+        <p className="rb-note">Ton compte gagne de l'XP à chaque victoire dans La Saga, à chaque carte invoquée et à chaque amélioration de carte.</p>
       </section>
 
       <section className="rb-box">
@@ -105,6 +105,7 @@ export const Rebirth = () => {
           <ul>
             <li>{ownedCards.length - kept.length} carte{ownedCards.length - kept.length > 1 ? 's' : ''}, avec leurs niveaux et leurs doublons</li>
             <li>Ton niveau de compte : retour au niveau 1, et chaque niveau demande ensuite deux fois plus d'XP</li>
+            <li>Ta progression dans La Saga : les étoiles repartent à zéro (et peuvent donc redonner des âmes)</li>
             <li>Ton solde d'âmes : il repart à {n(START_GEMS)}, plus les {n(refund)} rendues</li>
           </ul>
         </div>

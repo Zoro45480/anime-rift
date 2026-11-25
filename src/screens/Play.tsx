@@ -3,13 +3,14 @@ import { createPortal } from 'react-dom'
 import { gateArt } from '../assets/manifest'
 import { ENERGY_MAX, ENERGY_REGEN_MS, accountLevel, REBIRTH_KEEP, REBIRTH_LEVEL, REBIRTH_STAT, REBIRTH_XP } from '../game/progression'
 import { useStore } from '../state/store'
+import { Saga } from './Saga'
 import { Coin } from '../ui/Coin'
 import { IconLock } from '../ui/icons'
 import { LEVEL_STYLE_NAME, LevelBadge, levelStyle } from '../ui/LevelBadge'
 
 // Les portes du Nexus. Aucune n'est encore ouverte : chaque fiche dit ce que le mode contiendra.
 const GATES = [
-  { id: 'saga', numeral: 'I', kanji: '物語', title: 'La Saga', tag: 'Histoire', text: 'Vis la Saga I — La Fracture, chapitre après chapitre.', hue: '#2bc8d9',
+  { id: 'saga', numeral: 'I', kanji: '物語', title: 'La Saga', tag: 'Histoire', text: 'Traverse chaque univers, combat après combat. Gagne de l’XP, des âmes et des parchemins.', hue: '#2bc8d9',
     points: ['Des chapitres à traverser avec ton équipe de cartes', 'Des combats au tour par tour avec les techniques de tes personnages', 'De l’XP de compte et des parchemins à chaque victoire'] },
   { id: 'raids', numeral: 'II', kanji: '巨人', title: 'Les Colosses', tag: 'Boss', text: 'Des boss à plusieurs phases qui demandent une vraie préparation.', hue: '#ff3d8b',
     points: ['Des boss géants qui changent de comportement à chaque phase', 'Tanks, DPS et soigneurs deviennent tous utiles', 'Des coffres de raid à ouvrir dans ton inventaire'] },
@@ -21,8 +22,8 @@ const GATES = [
 
 type Gate = (typeof GATES)[number]
 
-const GateTile = ({ gate, featured, onOpen }: { gate: Gate; featured?: boolean; onOpen: () => void }) => (
-  <button className={`gate ${featured ? 'gate--hero' : ''}`} style={{ ['--hue' as string]: gate.hue }} onClick={onOpen} aria-label={`${gate.title} : voir le mode`}>
+const GateTile = ({ gate, featured, playable, onOpen }: { gate: Gate; featured?: boolean; playable?: boolean; onOpen: () => void }) => (
+  <button className={`gate ${featured ? 'gate--hero' : ''} ${playable ? 'gate--play' : ''}`} style={{ ['--hue' as string]: gate.hue }} onClick={onOpen} aria-label={`${gate.title} : ${playable ? 'jouer' : 'voir le mode'}`}>
     <img className="gate__art" src={gateArt(gate.id)} alt="" loading="lazy" />
     <span className="gate__kanji" lang="ja" aria-hidden="true">{gate.kanji}</span>
     <span className="gate__slash" aria-hidden="true" />
@@ -30,7 +31,7 @@ const GateTile = ({ gate, featured, onOpen }: { gate: Gate; featured?: boolean; 
       <span className="gate__kicker">Porte {gate.numeral} · {gate.tag}</span>
       <span className="gate__title">{gate.title}</span>
       <span className="gate__desc">{gate.text}</span>
-      <span className="gate__cta"><IconLock />Bientôt · voir le mode</span>
+      <span className="gate__cta">{playable ? '▶ Jouer' : <><IconLock />Bientôt · voir le mode</>}</span>
     </span>
   </button>
 )
@@ -38,7 +39,9 @@ const GateTile = ({ gate, featured, onOpen }: { gate: Gate; featured?: boolean; 
 export const Play = ({ onRebirth }: { onRebirth: () => void }) => {
   const { accountXp, rebirths, energyLeft } = useStore()
   const [open, setOpen] = useState<Gate | null>(null)
+  const [saga, setSaga] = useState(false)
   const acc = accountLevel(accountXp, rebirths)
+  if (saga) return <Saga onBack={() => { setSaga(false); window.scrollTo(0, 0) }} />
   return (
     <div className="nx">
       <section className="energy" role="meter" aria-valuemin={0} aria-valuemax={ENERGY_MAX} aria-valuenow={energyLeft} aria-label="Énergie">
@@ -47,14 +50,14 @@ export const Play = ({ onRebirth }: { onRebirth: () => void }) => {
           <b>{energyLeft}<i>/{ENERGY_MAX}</i></b>
           <span className="energy__pips">{Array.from({ length: ENERGY_MAX }, (_, i) => <i key={i} className={i < energyLeft ? 'is-on' : ''} />)}</span>
         </div>
-        <p>Un éclair par combat · +1 toutes les {ENERGY_REGEN_MS / 60000} minutes. {energyLeft >= ENERGY_MAX ? 'Énergie pleine.' : 'Elle remonte toute seule.'} Les combats ne sont pas encore ouverts : rien ne la dépense pour l'instant.</p>
+        <p>Un éclair par combat · +1 toutes les {ENERGY_REGEN_MS / 60000} minutes. {energyLeft >= ENERGY_MAX ? 'Énergie pleine.' : 'Elle remonte toute seule.'} Elle se dépense dans La Saga.</p>
       </section>
       <header className="nx__head">
         <p className="eyebrow">Le Nexus</p>
         <h1>Choisis ta porte.</h1>
         <p className="nx__level"><LevelBadge level={acc.level} rebirths={rebirths} size={40} /><span>Style {LEVEL_STYLE_NAME[levelStyle(acc.level, rebirths)]} · {acc.need ? `${acc.into.toLocaleString('fr-FR')} / ${acc.need.toLocaleString('fr-FR')} XP de compte` : 'Niveau maximum'}</span></p>
       </header>
-      <GateTile gate={GATES[0]} featured onOpen={() => setOpen(GATES[0])} />
+      <GateTile gate={GATES[0]} featured playable onOpen={() => { setSaga(true); window.scrollTo(0, 0) }} />
       <div className="nx__row">
         {GATES.slice(1).map((g) => <GateTile key={g.id} gate={g} onOpen={() => setOpen(g)} />)}
       </div>

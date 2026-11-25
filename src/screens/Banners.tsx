@@ -233,11 +233,11 @@ export const Banners = ({ onRebirth }: { onRebirth: () => void }) => {
           </details>
           <details open>
             <summary><img src={iconArt('soul')} alt="" /><span><b>Gagne tes âmes</b><small>Cumule des âmes et invoque.</small></span><i aria-hidden="true" /></summary>
-            <p>Tu commences avec 600 âmes et 20 sceaux. Les âmes se gagneront dans les modes du Nexus quand ils ouvriront ; pour l'instant, seule la Renaissance en rend (25 % de celles dépensées). Dépense-les avec soin.</p>
+            <p>Tu commences avec 600 âmes et 20 sceaux. Chaque nouvelle étoile gagnée dans La Saga rapporte 10 âmes, et la Renaissance rend 25 % de celles dépensées. Dépense-les avec soin.</p>
           </details>
           <details open>
             <summary><img src={iconArt('scroll-medium')} alt="" /><span><b>Renforce tes cartes</b><small>Fais évoluer tes cartes favorites.</small></span><i aria-hidden="true" /></summary>
-            <p>Un doublon n'est jamais perdu : il se fond dans sa carte et lui donne de l'XP. Chaque carte invoquée donne aussi un parchemin d'XP. Une carte monte jusqu'au niveau {LEVEL_CAP}, puis jusqu'au niveau {MAX_LEVEL} une fois libérée.</p>
+            <p>Un doublon n'est jamais perdu : il se fond dans sa carte et lui donne de l'XP. Les parchemins d'XP se gagnent dans La Saga, et chaque victoire donne de l'XP à ton équipe. Une carte monte jusqu'au niveau {LEVEL_CAP}, puis jusqu'au niveau {MAX_LEVEL} une fois libérée.</p>
           </details>
         </section>
       </>}

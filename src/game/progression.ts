@@ -187,3 +187,12 @@ export const kitOf = (hero: Hero, stats: Stats = baseStats(hero)): Move[] => {
   const texts = EFFECTS[hero.role](stats)
   return KINDS.map((kind, i) => ({ kind, name: MOVES[hero.id][i], text: texts[i], cost: COSTS[i] }))
 }
+
+// ───── Cote de la carte ─────
+// Barème de départ d'une carte, en âmes, selon sa rareté ; une vente ne pourra pas se faire sous la moitié du barème.
+// Le marché entre joueurs n'existe pas encore (il demande un jeu en ligne) : ces valeurs sont la règle prévue, pas des ventes.
+export const MARKET_BASE: Record<RarityId, number> = { common: 50, rare: 150, epic: 500, ultra: 2000, legend: 6000, rift: 16000 }
+export const marketFloor = (rarity: RarityId) => MARKET_BASE[rarity] / 2
+
+// Plus grande valeur de base de chaque statistique dans tout le jeu : sert d'échelle aux barres de la fiche.
+export const STAT_SCALE: Stats = HEROES.map(baseStats).reduce((m, s) => ({ hp: Math.max(m.hp, s.hp), atk: Math.max(m.atk, s.atk), def: Math.max(m.def, s.def), speed: Math.max(m.speed, s.speed) }))
