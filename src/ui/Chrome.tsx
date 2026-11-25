@@ -1,17 +1,15 @@
 import { useStore } from '../state/store'
 import { IconGrid, IconPlay, IconRift } from './icons'
 import { Coin } from './Coin'
+import { logoArt } from '../assets/manifest'
 
 export type TabId = 'banners' | 'play' | 'collection'
 
+// Logo 3D : complet sur grand écran, emblème seul sur téléphone.
 export const Logo = () => (
   <div className="logo" role="img" aria-label="ANIME RIFT">
-    <svg viewBox="0 0 40 40" width="36" height="36" aria-hidden="true">
-      <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#9b7bff" /><stop offset="1" stopColor="#5ee6ff" /></linearGradient></defs>
-      <path d="M20 2 36 20 20 38 4 20z" fill="#10122a" stroke="url(#lg)" strokeWidth="1.8" />
-      <path d="M23 5 16.5 17l6 4L15 35" fill="none" stroke="#f2f4ff" strokeWidth="2.6" strokeLinejoin="bevel" />
-    </svg>
-    <span>ANIME<b>RIFT</b></span>
+    <img className="logo__emblem" src={logoArt('emblem')} alt="" />
+    <img className="logo__full" src={logoArt('full')} alt="" />
   </div>
 )
 

@@ -7,8 +7,10 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 /* Barre du haut */
 .topbar { position: sticky; top: 0; z-index: 20; background: linear-gradient(180deg, rgba(7, 8, 18, 0.95) 55%, transparent); }
 .topbar__in { display: flex; align-items: center; justify-content: space-between; gap: 10px; height: 62px; }
-.logo { display: flex; align-items: center; gap: 9px; font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: 24px; letter-spacing: 0.04em; color: var(--cream); line-height: 1; }
-.logo b { font-weight: 800; margin-left: 5px; background: var(--rift); -webkit-background-clip: text; background-clip: text; color: transparent; padding-right: 3px; }
+.logo { display: flex; align-items: center; }
+.logo img { filter: drop-shadow(0 0 10px rgba(94, 230, 255, 0.35)); }
+.logo__emblem { display: none; height: 46px; width: auto; }
+.logo__full { height: 58px; width: auto; margin-left: -8px; }
 .wallet { display: flex; gap: 5px; font-weight: 800; font-size: 14px; font-variant-numeric: tabular-nums; }
 .wallet span { display: flex; align-items: center; gap: 4px; padding: 5px 15px 5px 12px; background: var(--ink-2); clip-path: polygon(9px 0, 100% 0, calc(100% - 9px) 100%, 0 100%); }
 .wallet small { font-weight: 600; color: var(--text-faint); font-size: 11px; }
@@ -28,6 +30,16 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 .dock__main:hover i { top: -29px; }
 .dock__main.is-active { color: var(--cream); }
 .dock__main.is-active i { background: linear-gradient(135deg, #9b7bff, #5ee6ff); color: #0a0b1a; box-shadow: 0 0 0 2px #fff, 0 0 26px rgba(94, 230, 255, 0.6), 0 8px 20px rgba(0, 0, 0, 0.6); }
+
+/* ===== Écran titre ===== */
+.splash { position: relative; isolation: isolate; overflow: hidden; min-height: 100%; display: grid; align-content: center; justify-items: center; gap: 18px; text-align: center; padding-block: 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.splash__beam { position: absolute; z-index: -1; left: 50%; top: 50%; width: 160vmax; height: 34vmin; translate: -50% -50%; rotate: -9deg; background: linear-gradient(180deg, transparent, rgba(155, 123, 255, 0.22) 35%, rgba(94, 230, 255, 0.4) 50%, rgba(155, 123, 255, 0.22) 65%, transparent); animation: beam 5s ease-in-out infinite; }
+@keyframes beam { 50% { opacity: 0.55; scale: 1 0.8; } }
+.splash__logo { width: min(100%, 900px); height: auto; filter: drop-shadow(0 0 26px rgba(94, 230, 255, 0.45)) drop-shadow(0 18px 30px rgba(0, 0, 0, 0.6)); animation: logo-in 900ms var(--ease-out) both, float 6s ease-in-out 900ms infinite; }
+@keyframes logo-in { from { opacity: 0; transform: scale(1.15); filter: blur(12px); } }
+@keyframes float { 50% { translate: 0 -8px; } }
+.splash__tag { font-size: clamp(14px, 2.4vw, 18px); color: var(--text); max-width: 34ch; animation: screen-in var(--slow) var(--ease-out) 300ms both; }
+.splash__btn { width: min(100%, 340px); margin-top: 10px; animation: screen-in var(--slow) var(--ease-out) 500ms both; }
 
 /* ===== Éléments communs ===== */
 .eyebrow { font-size: 12px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: var(--cyan); }
@@ -219,7 +231,8 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
   .console { margin-top: 30px; }
 }
 @media (max-width: 480px) {
-  .logo span { display: none; }
+  .logo__full { display: none; }
+  .logo__emblem { display: block; }
   .wallet span { padding: 5px 12px 5px 9px; }
   .result__grid { gap: 26px 16px; }
   .gate__panel { padding-right: 40%; }
