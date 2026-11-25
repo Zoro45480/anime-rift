@@ -1,35 +1,36 @@
 import { heroById } from '../data/heroes'
 import { heroArt } from '../assets/manifest'
-import { IconCompass, IconLock, IconSwords, IconTower } from '../ui/icons'
+import { IconLock } from '../ui/icons'
 
-// Modes de jeu. Aucun n'est encore jouable : chaque tuile annonce la phase où il le deviendra.
-const MODES = [
-  { id: 'adventure', title: 'Aventure', text: 'Explore les mondes et vis la Saga I — La Fracture.', phase: 11, icon: <IconCompass />, hue: '#e8502f', word: 'SAGA I', cast: ['ren', 'akane', 'lyss', 'kaito', 'shizu'] },
-  { id: 'raids', title: 'Raids', text: 'Des boss à plusieurs phases qui demandent une vraie préparation.', phase: 12, icon: <IconSwords />, hue: '#b0306e', word: '', cast: ['mirelle'] },
-  { id: 'tower', title: 'Tour infinie', text: 'Étage après étage, des règles qui changent.', phase: 12, icon: <IconTower />, hue: '#3d4a8f', word: '', cast: ['celestine', 'poppy'] },
+// Les portes du Nexus. Aucune n'est encore ouverte : chacune annonce la phase du plan où elle le sera.
+const GATES = [
+  { id: 'saga', numeral: 'I', title: 'La Saga', text: 'Vis la Saga I — La Fracture, chapitre après chapitre.', phase: 11, hue: '#2bb7c9', hero: 'lyss' },
+  { id: 'raids', numeral: 'II', title: 'Les Colosses', text: 'Des boss à plusieurs phases qui demandent une vraie préparation.', phase: 12, hue: '#b0306e', hero: 'mirelle' },
+  { id: 'tower', numeral: 'III', title: 'La Spire', text: 'Une tour sans fin, dont les règles changent à chaque étage.', phase: 12, hue: '#c98a1e', hero: 'celestine' },
+  { id: 'arena', numeral: 'IV', title: "L'Arène", text: 'Affronte les équipes des autres joueurs.', phase: 15, hue: '#e8502f', hero: 'akane' },
 ]
 
 export const Play = () => (
-  <div className="play">
-    <header className="play__head">
-      <h1><span>Jouer</span></h1>
-      <p>Choisis ton prochain défi.</p>
+  <div className="nexus">
+    <header className="nexus__head">
+      <p className="eyebrow">Le Nexus</p>
+      <h1>Quatre portes.<br />Une seule s'ouvre à la fois.</h1>
     </header>
-    <div className="modes">
-      {MODES.map((m) => (
-        <article key={m.id} className={`mode mode--${m.id}`} style={{ ['--hue' as string]: m.hue }} aria-disabled="true">
-          <div className="mode__art">
-            {m.word && <span className="mode__word" aria-hidden="true">{m.word}</span>}
-            {m.cast.map((id) => <img key={id} src={heroArt(heroById(id).model, 'full')} alt="" loading="lazy" />)}
+    <div className="gates">
+      {GATES.map((g, i) => (
+        <article key={g.id} className={`gate ${i % 2 ? 'gate--flip' : ''}`} style={{ ['--hue' as string]: g.hue }} aria-disabled="true">
+          <div className="gate__panel">
+            <span className="gate__numeral" aria-hidden="true">{g.numeral}</span>
+            <div className="gate__text">
+              <h2>{g.title}</h2>
+              <p>{g.text}</p>
+              <span className="gate__lock"><IconLock />Ouverture · phase {g.phase}</span>
+            </div>
           </div>
-          <div className="mode__info">
-            <i>{m.icon}</i>
-            <div><h2>{m.title}</h2><p>{m.text}</p></div>
-            <span className="mode__lock"><IconLock />Phase {m.phase}</span>
-          </div>
+          <img className="gate__art" src={heroArt(heroById(g.hero).model, 'full')} alt="" loading="lazy" />
         </article>
       ))}
     </div>
-    <p className="play__note">Ces modes ne sont pas encore jouables. Le numéro indique la phase du plan où chacun le deviendra.</p>
+    <p className="nexus__note">Ces modes ne sont pas encore jouables. Le numéro de phase indique quand chacun le deviendra.</p>
   </div>
 )

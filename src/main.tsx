@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import '@fontsource/anton/400.css'
+import '@fontsource/barlow-condensed/700.css'
+import '@fontsource/barlow-condensed/800-italic.css'
 import '@fontsource/manrope/400.css'
 import '@fontsource/manrope/600.css'
 import '@fontsource/manrope/800.css'

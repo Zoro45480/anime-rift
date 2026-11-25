@@ -1,23 +1,24 @@
-/* ANIME RIFT — jetons de design (v3). Toute couleur, taille ou durée du jeu vient d'ici. */
+/* ANIME RIFT — jetons de design (v4). Toute couleur, taille ou durée du jeu vient d'ici. */
 :root {
   color-scheme: dark;
 
-  --ink: #0b090d;          /* fond général, noir chaud */
-  --ink-2: #15121a;        /* surfaces */
-  --ink-3: #1f1b26;
-  --line: rgba(255, 240, 220, 0.12);
-  --line-strong: rgba(255, 240, 220, 0.38);
+  --ink: #070812;          /* fond général, noir bleuté */
+  --ink-2: #10122a;        /* surfaces */
+  --ink-3: #1a1d3d;
+  --line: rgba(190, 200, 255, 0.14);
+  --line-strong: rgba(210, 220, 255, 0.4);
 
-  --cream: #f6ead2;        /* titres */
-  --text: #ece6dc;
-  --text-dim: #a59f9a;
-  --text-faint: #6f6a6c;
+  --cream: #f2f4ff;        /* titres */
+  --text: #e3e6f7;
+  --text-dim: #9aa0c2;
+  --text-faint: #666b8c;
 
   --gold: #f6cf63;
   --gold-deep: #e0a52a;
-  --ember: #ff5a3c;        /* accent d'action */
   --violet: #9b7bff;
   --cyan: #5ee6ff;
+  --ember: #9b7bff;        /* accent d'action (violet de faille) */
+  --rift: linear-gradient(120deg, #9b7bff, #5ee6ff);
 
   --r-rare: #7fb4ff;
   --r-epic: #b993ff;
@@ -33,12 +34,13 @@
   --a-dark: #a56bff;
   --a-rift: #5ee6ff;
 
-  --font-display: 'Anton', 'Impact', 'Arial Narrow', sans-serif;
+  --font-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
   --font: 'Manrope', 'Segoe UI', system-ui, sans-serif;
 
   --radius: 18px;
   --radius-sm: 12px;
-  --bar-h: 64px;
+  --skew: 14px;            /* pente des formes : la coupe en biais est la signature du jeu */
+  --dock-h: 66px;
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --fast: 140ms;

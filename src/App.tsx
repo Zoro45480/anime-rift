@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { StoreProvider } from './state/store'
-import { TabBar, TopBar, type TabId } from './ui/Chrome'
+import { Dock, TopBar, type TabId } from './ui/Chrome'
 import { Banners } from './screens/Banners'
 import { Play } from './screens/Play'
 import { Collection } from './screens/Collection'
@@ -16,7 +16,7 @@ export const App = () => {
         {tab === 'play' && <Play />}
         {tab === 'collection' && <Collection onSummon={() => go('banners')} />}
       </main>
-      <TabBar tab={tab} onTab={go} />
+      <Dock tab={tab} onTab={go} />
     </StoreProvider>
   )
 }
