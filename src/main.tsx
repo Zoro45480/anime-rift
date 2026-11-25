@@ -1,3 +1,4 @@
+import { applyGraphics } from './ui/graphics'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import '@fontsource/barlow-condensed/700.css'
@@ -20,3 +21,5 @@ createRoot(document.getElementById('root')!).render(
     <App />
   </StrictMode>,
 )
+
+applyGraphics()

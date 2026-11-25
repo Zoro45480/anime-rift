@@ -28,6 +28,15 @@ export const setSoundOn = (on: boolean) => {
   try { localStorage.setItem(SOUND_KEY, on ? 'on' : 'off') } catch { /* non enregistré */ }
 }
 
+// Volume des bruitages, de 0 à 1 (réglé dans les Paramètres).
+const VOLUME_KEY = 'anime-rift-volume'
+export const getVolume = (): number => {
+  try { const v = Number(localStorage.getItem(VOLUME_KEY) ?? '0.8'); return Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : 0.8 } catch { return 0.8 }
+}
+export const setVolume = (v: number) => {
+  try { localStorage.setItem(VOLUME_KEY, String(Math.min(1, Math.max(0, v)))) } catch { /* non enregistré */ }
+}
+
 // Lit un fichier son. Dans la version « un seul fichier » du jeu il est intégré à la page (data:) : on le décode sur place.
 const readBytes = async (url: string): Promise<ArrayBuffer> => {
   if (!url.startsWith('data:')) return (await fetch(url)).arrayBuffer()
@@ -78,7 +87,7 @@ export class SummonAudio {
     src.buffer = buffer
     src.playbackRate.value = rate
     const gain = ctx.createGain()
-    gain.gain.value = volume * (levels.get(name) ?? 1)
+    gain.gain.value = volume * (levels.get(name) ?? 1) * getVolume()
     src.connect(gain).connect(ctx.destination)
     src.start(Math.max(at, ctx.currentTime))
     const entry = { src, gain }

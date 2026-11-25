@@ -33,6 +33,7 @@ type State = {
   saga: Record<string, number> // étoiles gagnées à chaque combat de la Saga
   team: string[] // équipe de combat (3 cartes au plus)
   notifs: Notif[] // les plus récentes d'abord
+  profile: { name: string; avatar: string } // pseudo et photo de profil (image réduite ou lien), gardés sur cet appareil
   awakened: string[] // cartes libérées (niveau maximum 100)
 }
 
@@ -47,6 +48,8 @@ export type FightResult = {
 }
 
 type Store = State & {
+  setProfile: (profile: { name?: string; avatar?: string }) => void
+  resetGame: () => void // efface toute la progression
   readNotifs: () => void // tout marquer comme lu
   clearNotifs: () => void
   teamNow: string[] // l'équipe réellement utilisée : celle choisie, sinon les 3 cartes les plus puissantes
@@ -76,7 +79,7 @@ const LOG_MAX = 30
 // Dotation de départ du compte.
 export const START_GEMS = 600
 const START: State = {
-  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [],
+  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '' },
   tickets: 20, gems: START_GEMS, pity: Object.fromEntries(BANNERS.map((b) => [b.id, 0])), owned: {},
   xp: {}, scrolls: { small: 0, medium: 0, large: 0 }, wish: [], pinned: [], log: {},
 }
@@ -88,7 +91,7 @@ const load = (): State => {
     const raw = localStorage.getItem(SAVE_KEY)
     if (!raw) return START
     const s = JSON.parse(raw) as Partial<State>
-    return { ...START, ...s, pity: { ...START.pity, ...s.pity }, scrolls: { ...START.scrolls, ...s.scrolls } }
+    return { ...START, ...s, pity: { ...START.pity, ...s.pity }, scrolls: { ...START.scrolls, ...s.scrolls }, profile: { ...START.profile, ...s.profile } }
   } catch {
     return START
   }
@@ -136,6 +139,8 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     }
     const readNotifs = () => { if (state.notifs.some((x) => !x.read)) setState({ ...state, notifs: state.notifs.map((x) => ({ ...x, read: true })) }) }
     const clearNotifs = () => setState({ ...state, notifs: [] })
+    const setProfile = (profile: { name?: string; avatar?: string }) => setState({ ...state, profile: { ...state.profile, ...profile } })
+    const resetGame = () => setState({ ...START, profile: state.profile })
 
     const summon = (banner: Banner, currency: Currency, count: number) => {
       if (!canAfford(currency, count)) return null
@@ -274,7 +279,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setArt((a) => Object.fromEntries(Object.entries(a).filter(([k]) => k !== heroId)))
       void removeArt(heroId)
     }
-    return { ...state, canAfford, summon, merge, useScroll, toggleWish, togglePin, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, customArt, setCustomArt, clearCustomArt }
+    return { ...state, canAfford, summon, merge, useScroll, toggleWish, togglePin, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, customArt, setCustomArt, clearCustomArt }
   }, [state, customArt, remoteArt, remoteStatus, remoteFans, now])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>

@@ -1191,3 +1191,42 @@ body { background: #000; }
 @media (max-width: 400px) { .topbar .logo { transform: scale(0.82); transform-origin: left center; margin-right: -8px; } .topbar__in { gap: 4px; padding-left: 10px; padding-right: 10px; } }
 /* la barre du haut reste au-dessus du contenu quand la page défile (sinon ses boutons ne répondent plus) */
 .topbar { z-index: 25; }
+
+/* ───────── Paramètres ───────── */
+.set { display: grid; gap: 18px; }
+.set__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.set__head p { font-size: 13px; font-weight: 700; color: #ffc94d; }
+.set__head h2 { font-family: var(--font-display); font-style: italic; font-size: 38px; line-height: 1; text-transform: uppercase; color: #fff; }
+.set section { display: grid; gap: 10px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+.set h3 { font-size: 15px; font-weight: 800; color: var(--cream); }
+.set__profile { grid-template-columns: auto 1fr; align-items: center; gap: 16px !important; border-top: 0 !important; padding: 16px !important; border-radius: 16px; background: #000; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14); }
+.set__profile div { display: grid; gap: 6px; justify-items: start; min-width: 0; }
+.set__profile b { font-family: var(--font-display); font-size: 26px; text-transform: uppercase; color: #fff; overflow-wrap: anywhere; }
+.set__note { font-size: 13px; line-height: 1.5; color: var(--text-dim); }
+.set__note b { color: #ffc94d; }
+.set__input { width: 100%; min-height: 48px; padding: 8px 14px; border-radius: 12px; font-size: 16px; color: var(--cream); background: #000; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22); }
+.set__row { display: flex; flex-wrap: wrap; gap: 8px; }
+.set__row .cd-btn { cursor: pointer; }
+.set__link { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.set__slider { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; align-items: center; font-size: 14.5px; color: var(--cream); }
+.set__slider b { font-family: var(--font-display); font-size: 22px; color: #fff; font-variant-numeric: tabular-nums; }
+.set__slider input { grid-column: 1 / -1; width: 100%; height: 28px; accent-color: #ff5d7a; }
+.set__seg { display: grid; grid-template-columns: repeat(3, 1fr); border-radius: 12px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2); }
+.set__seg button { display: grid; gap: 3px; padding: 12px 10px; text-align: left; background: #000; border-bottom: 3px solid transparent; }
+.set__seg button + button { box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.14); }
+.set__seg b { font-family: var(--font-display); font-size: 18px; color: var(--text-dim); }
+.set__seg small { font-size: 11.5px; color: var(--text-faint); }
+.set__seg button.is-on { border-bottom-color: #ff5d7a; background: #0d0e15; }
+.set__seg button.is-on b { color: #fff; }
+.set__steps { display: grid; gap: 6px; padding-left: 22px; font-size: 14px; line-height: 1.45; color: var(--text); }
+.set__danger .cd-btn { box-shadow: inset 0 0 0 1.5px #ff5d7a; color: #ffb3c0; justify-self: start; }
+.avatar { flex: none; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35); }
+.avatar--letter { display: grid; place-items: center; font-weight: 800; color: #fff; background: linear-gradient(135deg, #ff5d7a, #8f6bff); }
+.nx__who { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.nx__who b { font-size: 17px; color: #fff; }
+
+/* Mode Fluide : on fige les lueurs animées et on retire les flous */
+:root[data-fx='low'] *, :root[data-fx='low'] *::before, :root[data-fx='low'] *::after { animation-duration: 0.001s !important; animation-iteration-count: 1 !important; backdrop-filter: none !important; }
+:root[data-fx='low'] .card__fx, :root[data-fx='low'] .card__glitter, :root[data-fx='low'] .card__rays { display: none; }
+:root[data-fx='low'] .card__frame { filter: none !important; }
+@media (max-width: 400px) { .bell { width: 28px; height: 28px; margin-left: 1px; } .wallet span, .wallet__energy { padding: 4px 8px 5px 6px !important; } }

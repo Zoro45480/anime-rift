@@ -1,5 +1,6 @@
 import { accountLevel, ENERGY_MAX } from '../game/progression'
 import { LevelBadge } from './LevelBadge'
+import { Settings } from './Settings'
 import { useState } from 'react'
 import { useStore } from '../state/store'
 import { Coin } from './Coin'
@@ -19,6 +20,7 @@ export const Logo = () => (
 export const TopBar = ({ onPlay, onSummon }: { onPlay: () => void; onSummon: () => void }) => {
   const { tickets, gems, energyLeft, accountXp, rebirths, notifs, readNotifs, clearNotifs } = useStore()
   const [open, setOpen] = useState(false)
+  const [settings, setSettings] = useState(false)
   const unread = notifs.filter((x) => !x.read).length
   const full = energyLeft >= ENERGY_MAX
   const toggle = () => { if (open) readNotifs(); setOpen(!open) } // lues quand on referme le panneau
@@ -36,8 +38,12 @@ export const TopBar = ({ onPlay, onSummon }: { onPlay: () => void; onSummon: () 
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z" /><path d="M10 20a2.2 2.2 0 0 0 4 0" /></svg>
             {unread > 0 && <i>{unread > 9 ? '9+' : unread}</i>}
           </button>
+          <button className="bell" onClick={() => setSettings(true)} aria-label="Paramètres">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.9 2.9l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.9-2.9l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.9-2.9l.1.1a1.7 1.7 0 0 0 1.8.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.9 2.9l-.1.1a1.7 1.7 0 0 0-.3 1.8v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" /></svg>
+          </button>
         </div>
       </div>
+      {settings && <Settings onClose={() => setSettings(false)} />}
       {open && (
         <div className="notifs" role="dialog" aria-label="Notifications">
           <header><h2>Notifications</h2>{notifs.length > 0 && <button className="linkbtn" onClick={clearNotifs}>Tout effacer</button>}<button className="notifs__close" onClick={toggle} aria-label="Fermer">×</button></header>

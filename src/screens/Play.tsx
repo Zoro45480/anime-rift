@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { gateArt } from '../assets/manifest'
 import { ENERGY_MAX, ENERGY_REGEN_MS, accountLevel, REBIRTH_KEEP, REBIRTH_LEVEL, REBIRTH_STAT, REBIRTH_XP } from '../game/progression'
 import { useStore } from '../state/store'
+import { Avatar } from '../ui/Settings'
 import { Saga } from './Saga'
 import { Coin } from '../ui/Coin'
 import { IconLock } from '../ui/icons'
@@ -37,7 +38,7 @@ const GateTile = ({ gate, featured, playable, onOpen }: { gate: Gate; featured?:
 )
 
 export const Play = ({ onRebirth }: { onRebirth: () => void }) => {
-  const { accountXp, rebirths, energyLeft } = useStore()
+  const { accountXp, rebirths, energyLeft, profile } = useStore()
   const [open, setOpen] = useState<Gate | null>(null)
   const [saga, setSaga] = useState(false)
   const acc = accountLevel(accountXp, rebirths)
@@ -55,6 +56,7 @@ export const Play = ({ onRebirth }: { onRebirth: () => void }) => {
       <header className="nx__head">
         <p className="eyebrow">Le Nexus</p>
         <h1>Choisis ta porte.</h1>
+        <p className="nx__who"><Avatar size={40} /><b>{profile.name.trim() || 'Joueur'}</b></p>
         <p className="nx__level"><LevelBadge level={acc.level} rebirths={rebirths} size={40} /><span>Style {LEVEL_STYLE_NAME[levelStyle(acc.level, rebirths)]} · {acc.need ? `${acc.into.toLocaleString('fr-FR')} / ${acc.need.toLocaleString('fr-FR')} XP de compte` : 'Niveau maximum'}</span></p>
       </header>
       <GateTile gate={GATES[0]} featured playable onOpen={() => { setSaga(true); window.scrollTo(0, 0) }} />
