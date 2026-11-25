@@ -1,7 +1,6 @@
 import { useStore } from '../state/store'
-import { IconGrid, IconPlay, IconRift } from './icons'
 import { Coin } from './Coin'
-import { logoArt } from '../assets/manifest'
+import { logoArt, uiArt } from '../assets/manifest'
 
 export type TabId = 'banners' | 'play' | 'collection'
 
@@ -35,13 +34,13 @@ export const Dock = ({ tab, onTab }: { tab: TabId; onTab: (t: TabId) => void }) 
   <nav className="dock" aria-label="Navigation">
     <div className="dock__bg" />
     <button className={`dock__side ${tab === 'play' ? 'is-active' : ''}`} onClick={() => onTab('play')} aria-current={tab === 'play' ? 'page' : undefined}>
-      <IconPlay /><span>Nexus</span>
+      <img src={uiArt('nav-nexus')} alt="" /><span>Nexus</span>
     </button>
     <button className={`dock__main ${tab === 'banners' ? 'is-active' : ''}`} onClick={() => onTab('banners')} aria-current={tab === 'banners' ? 'page' : undefined}>
-      <i><IconRift /></i><span>Invoquer</span>
+      <i><img src={uiArt('nav-summon')} alt="" /></i><span>Invoquer</span>
     </button>
     <button className={`dock__side ${tab === 'collection' ? 'is-active' : ''}`} onClick={() => onTab('collection')} aria-current={tab === 'collection' ? 'page' : undefined}>
-      <IconGrid /><span>Collection</span>
+      <img src={uiArt('nav-cards')} alt="" /><span>Collection</span>
     </button>
   </nav>
 )

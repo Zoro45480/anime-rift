@@ -10,8 +10,10 @@ import './styles/base.css'
 import './ui/ui.css'
 import { App } from './App'
 import { installGlitter } from './ui/glitter'
+import { installTheme } from './ui/theme'
 
 installGlitter()
+installTheme()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
