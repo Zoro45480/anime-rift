@@ -11,8 +11,8 @@ export const HEROES: Hero[] = [
   //     fournie avec le jeu, le joueur ajoute les siennes dans la Collection (« Mon image »).
   { id: 'naruto', no: 1, name: 'Naruto Uzumaki', kana: 'ナルト', title: 'Septième Hokage', world: 'Naruto', role: 'Hybride', rarity: 'rift', affinity: 'wind', atk: 3000, def: 2900 },
   { id: 'sasuke', no: 2, name: 'Sasuke Uchiwa', kana: 'サスケ', title: 'Le Dernier Uchiwa', world: 'Naruto', role: 'Burst DPS', rarity: 'rift', affinity: 'thunder', atk: 3050, def: 2750 },
-  { id: 'kaguya', no: 3, name: 'Kaguya Ôtsutsuki', kana: 'カグヤ', title: 'Déesse-Lapin', world: 'Naruto', role: 'Contrôle', rarity: 'rift', affinity: 'rift', atk: 2950, def: 3000 },
-  { id: 'madara', no: 4, name: 'Madara Uchiwa', kana: 'マダラ', title: 'Le Spectre des Uchiwa', world: 'Naruto', role: 'DPS', rarity: 'legend', affinity: 'fire', atk: 2900, def: 2500 },
+  { id: 'kaguya', no: 4, name: 'Kaguya Ôtsutsuki', kana: 'カグヤ', title: 'Déesse-Lapin', world: 'Naruto', role: 'Contrôle', rarity: 'legend', affinity: 'rift', atk: 2850, def: 2700 },
+  { id: 'madara', no: 3, name: 'Madara Uchiwa', kana: 'マダラ', title: 'Le Spectre des Uchiwa', world: 'Naruto', role: 'DPS', rarity: 'rift', affinity: 'fire', atk: 3000, def: 2800 },
   { id: 'hashirama', no: 5, name: 'Hashirama Senju', kana: 'ハシラマ', title: 'Premier Hokage', world: 'Naruto', role: 'Tank', rarity: 'legend', affinity: 'earth', atk: 2600, def: 2900 },
   { id: 'obito', no: 6, name: 'Obito Uchiwa', kana: 'オビト', title: 'L’Homme au Masque', world: 'Naruto', role: 'Contre-attaque', rarity: 'legend', affinity: 'rift', atk: 2750, def: 2600 },
   { id: 'minato', no: 7, name: 'Minato Namikaze', kana: 'ミナト', title: 'L’Éclair Jaune', world: 'Naruto', role: 'Burst DPS', rarity: 'legend', affinity: 'light', atk: 2850, def: 2300 },

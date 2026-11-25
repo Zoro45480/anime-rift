@@ -4,7 +4,7 @@
 export type Banner = { id: string; world: string; subtitle: string; glyph: string; hue: string; star: string; featured: string[]; pool: string[]; endsAt: string }
 
 export const BANNERS: Banner[] = [
-  { id: 'naruto', world: 'Naruto', subtitle: 'La Volonté du Feu', glyph: '忍', hue: '#e8721f', star: 'naruto', featured: ['sasuke', 'naruto', 'kaguya'], pool: ['Naruto'], endsAt: '2026-12-12T00:00:00Z' },
+  { id: 'naruto', world: 'Naruto', subtitle: 'La Volonté du Feu', glyph: '忍', hue: '#e8721f', star: 'naruto', featured: ['sasuke', 'naruto', 'madara'], pool: ['Naruto'], endsAt: '2026-12-12T00:00:00Z' },
   { id: 'rift', world: 'Les Enfants de la Faille', subtitle: "L'Écho Premier", glyph: '裂', hue: '#2bb7c9', star: 'lyss', featured: ['mirelle', 'lyss', 'ren'], pool: ['Enfants de la Faille', 'Académie Hoshikage', "Jardin de l'Aube"], endsAt: '2026-12-02T00:00:00Z' },
   { id: 'academy', world: 'Académie Hoshikage', subtitle: "Rentrée sous l'orage", glyph: '学', hue: '#e8502f', star: 'akane', featured: ['kaito', 'akane', 'ren'], pool: ['Enfants de la Faille', 'Académie Hoshikage', "Jardin de l'Aube"], endsAt: '2026-12-05T00:00:00Z' },
   { id: 'garden', world: "Jardin de l'Aube", subtitle: 'La Dernière Floraison', glyph: '花', hue: '#e07fb0', star: 'celestine', featured: ['poppy', 'celestine', 'shizu'], pool: ['Enfants de la Faille', 'Académie Hoshikage', "Jardin de l'Aube"], endsAt: '2026-12-09T00:00:00Z' },
