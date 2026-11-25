@@ -1,5 +1,6 @@
 /* ANIME RIFT — jetons de design. Toute couleur, taille ou durée du jeu vient d'ici. */
 :root {
+  color-scheme: dark;
   /* Fonds */
   --abyss: #04050d;
   --night: #0a0d24;
