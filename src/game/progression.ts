@@ -1,4 +1,5 @@
-import { HEROES, type Hero } from '../data/heroes'
+import { HEROES, type Hero, type Role } from '../data/heroes'
+import { MOVES } from '../data/moves'
 import type { RarityId } from '../data/rarities'
 
 // Progression des cartes : niveaux, statistiques, puissance, collectifs, techniques.
@@ -31,17 +32,13 @@ export const SCROLLS: Record<ScrollId, { label: string; xp: number }> = {
 export const SCROLL_IDS: ScrollId[] = ['small', 'medium', 'large']
 export const scrollDrop = (rarity: RarityId): ScrollId => (rarity === 'common' || rarity === 'rare' ? 'small' : rarity === 'epic' ? 'medium' : 'large')
 
-const ROLE_SPEED: Record<string, number> = { 'Burst DPS': 24, DPS: 16, 'Contre-attaque': 12, Hybride: 10, Débuffeur: 8, Contrôle: 6, Support: 4, Invocateur: 2, Soigneur: 0, Soigneuse: 0, Tank: -8 }
+const ROLE_SPEED: Record<Role, number> = { DPS: 110, 'DPS / Soigneur': 106, 'DPS / Tank': 104, Soigneur: 100, 'Tank / Soigneur': 94, Tank: 90 }
 
 export type Stats = { hp: number; atk: number; def: number; speed: number }
 
-// Statistiques de base (niveau 1, sans bonus). Les PV et la vitesse découlent de l'attaque, de la défense et du rôle.
-export const baseStats = (hero: Hero): Stats => ({
-  hp: Math.round((hero.def * 1.3 + hero.atk * 0.4) / 10) * 10,
-  atk: hero.atk,
-  def: hero.def,
-  speed: 90 + (ROLE_SPEED[hero.role] ?? 0) + (hero.no % 9),
-})
+// Statistiques de base (niveau 1, sans bonus). Dégâts, défense et PV viennent de la fiche du personnage :
+// la rareté fixe leur total, le rôle les répartit. La vitesse dépend du rôle.
+export const baseStats = (hero: Hero): Stats => ({ hp: hero.hp, atk: hero.atk, def: hero.def, speed: ROLE_SPEED[hero.role] + (hero.no % 9) })
 
 // Collectifs : posséder des cartes liées renforce toutes les cartes du groupe.
 export type Collectif = { id: string; name: string; rule: string; members: Hero[]; have: number; bonus: number }
@@ -77,20 +74,54 @@ export const cardState = (hero: Hero, xp: Record<string, number>, owned: Record<
 const BASE_POWER = new Map(HEROES.map((h) => [h.id, power(baseStats(h))]))
 export const baseRank = (hero: Hero): number => 1 + HEROES.filter((h) => BASE_POWER.get(h.id)! > BASE_POWER.get(hero.id)!).length
 
-// Techniques : un jeu de quatre capacités par rôle. Elles serviront en combat ; d'ici là elles sont affichées telles quelles.
-export type Kit = { attack: [string, string, number]; skill: [string, string, number]; ultimate: [string, string, number]; passive: [string, string] } // [nom, effet, coût en endurance]
-const HEAL: Kit = { attack: ['Onde apaisante', 'Frappe une cible (×0,8) et soigne l’allié le plus blessé de 6 % de ses PV.', 10], skill: ['Soin majeur', 'Rend 25 % de ses PV à un allié et retire une altération.', 25], ultimate: ['Renouveau', 'Soigne toute l’équipe de 30 % des PV et accorde Régénération 8 % pendant 2 tours.', 20], passive: ['Vocation', 'Les soins sont 15 % plus forts sur les alliés sous 40 % de PV.'] }
-export const KITS: Record<string, Kit> = {
-  DPS: { attack: ['Frappe nette', 'Frappe une cible (×1,0). Rend 20 points d’énergie.', 10], skill: ['Enchaînement', 'Deux coups sur la même cible (×0,9 chacun).', 25], ultimate: ['Assaut final', 'Frappe une cible (×3,2). Ignore 20 % de sa défense.', 20], passive: ['Élan', 'Chaque K.O. infligé donne ATK +10 % jusqu’à la fin du combat (3 fois au plus).'] },
-  'Burst DPS': { attack: ['Coup vif', 'Frappe une cible (×1,0). Rend 20 points d’énergie.', 10], skill: ['Percée', 'Frappe une cible (×1,9). Coup critique assuré si elle est au-dessus de 80 % de PV.', 25], ultimate: ['Déchaînement', 'Frappe une cible (×4,0), puis subit DEF −15 % pendant 1 tour.', 20], passive: ['Premier sang', 'Le premier coup du combat inflige 30 % de dégâts en plus.'] },
-  Tank: { attack: ['Coup de bouclier', 'Frappe une cible (×0,8) et gagne un bouclier de 5 % de ses PV.', 10], skill: ['Provocation', 'Force les ennemis à le cibler pendant 2 tours. DEF +25 %.', 25], ultimate: ['Rempart', 'Bouclier de 20 % de ses PV pour toute l’équipe pendant 2 tours.', 20], passive: ['Inébranlable', 'Réduit de 15 % les dégâts subis tant que ses PV dépassent 50 %.'] },
-  Support: { attack: ['Encouragement', 'Frappe une cible (×0,8). Rend 10 points d’énergie à un allié.', 10], skill: ['Ralliement', 'ATK +20 % pour toute l’équipe pendant 2 tours.', 25], ultimate: ['Second souffle', 'Rend 40 points d’énergie à toute l’équipe et avance son prochain tour.', 20], passive: ['Esprit d’équipe', 'Les alliés commencent le combat avec 15 points d’énergie.'] },
-  Soigneur: HEAL,
-  Soigneuse: HEAL,
-  Contrôle: { attack: ['Entrave', 'Frappe une cible (×0,9). 20 % de chance de la ralentir.', 10], skill: ['Immobilisation', 'Frappe une cible (×1,2) et retarde son prochain tour.', 25], ultimate: ['Domaine clos', 'Frappe tous les ennemis (×1,6). 50 % de chance d’étourdir chacun pendant 1 tour.', 20], passive: ['Emprise', 'Les ennemis ralentis subissent 12 % de dégâts en plus.'] },
-  Débuffeur: { attack: ['Entaille', 'Frappe une cible (×0,9) et lui inflige DEF −8 % pendant 2 tours.', 10], skill: ['Affaiblissement', 'Frappe une cible (×1,3). ATK −20 % pendant 2 tours.', 25], ultimate: ['Malédiction', 'Tous les ennemis : ATK et DEF −20 % pendant 2 tours, puis dégâts (×1,4).', 20], passive: ['Opportuniste', '+10 % de dégâts par altération présente sur la cible (30 % au plus).'] },
-  Invocateur: { attack: ['Ordre', 'Frappe une cible (×0,9). L’invocation attaque aussi (×0,4).', 10], skill: ['Appel', 'Invoque une créature (60 % de son ATK) pendant 3 tours.', 25], ultimate: ['Légion', 'Trois créatures frappent des cibles au hasard (×1,3 chacune).', 20], passive: ['Lien', 'Tant qu’une invocation est en jeu, subit 15 % de dégâts en moins.'] },
-  'Contre-attaque': { attack: ['Parade', 'Frappe une cible (×0,9) et se met en garde : riposte au prochain coup reçu.', 10], skill: ['Riposte', 'Pendant 2 tours, renvoie 50 % des dégâts subis.', 25], ultimate: ['Retour de flamme', 'Frappe une cible (×2,0), plus 100 % des dégâts subis depuis son dernier tour.', 20], passive: ['Sang-froid', '25 % de chance d’esquiver un coup au-dessus de 50 % de PV.'] },
-  Hybride: { attack: ['Coup adaptable', 'Frappe une cible (×1,0). Rend 20 points d’énergie.', 10], skill: ['Double jeu', 'Frappe une cible (×1,4) et soigne l’allié le plus blessé de 10 % de ses PV.', 25], ultimate: ['Éveil', 'Frappe tous les ennemis (×1,8), puis ATK et DEF +20 % pendant 2 tours.', 20], passive: ['Polyvalence', 'Gagne ATK +5 % par rôle différent présent dans l’équipe.'] },
+// Techniques : chaque personnage porte les noms de ses propres attaques (data/moves.ts) ;
+// leurs effets dépendent de son rôle et leurs dégâts, soins et boucliers sont calculés sur ses vraies statistiques.
+export type Move = { kind: 'Attaque' | 'Technique' | 'Ultime' | 'Passif'; name: string; text: string; cost?: string }
+
+const n = (x: number) => Math.round(x).toLocaleString('fr-FR')
+type Maker = (s: Stats) => [string, string, string, string]
+const EFFECTS: Record<Role, Maker> = {
+  DPS: (s) => [
+    `Inflige ${n(s.atk)} dégâts à un ennemi.`,
+    `Inflige ${n(s.atk * 1.8)} dégâts à un ennemi.`,
+    `Inflige ${n(s.atk * 3.5)} dégâts à un ennemi et ignore 20 % de sa défense.`,
+    'Chaque ennemi mis K.-O. augmente ses dégâts de 10 % (30 % au plus).',
+  ],
+  Tank: (s) => [
+    `Inflige ${n(s.atk * 0.8)} dégâts et gagne un bouclier de ${n(s.hp * 0.05)} PV.`,
+    `Force les ennemis à l’attaquer pendant 2 tours et gagne un bouclier de ${n(s.hp * 0.15)} PV.`,
+    `Inflige ${n(s.atk * 1.5)} dégâts à tous les ennemis et donne à l’équipe un bouclier de ${n(s.hp * 0.2)} PV.`,
+    'Subit 15 % de dégâts en moins tant que ses PV dépassent la moitié.',
+  ],
+  Soigneur: (s) => [
+    `Inflige ${n(s.atk * 0.8)} dégâts et rend ${n(s.hp * 0.06)} PV à l’allié le plus blessé.`,
+    `Rend ${n(s.hp * 0.25)} PV à un allié et retire une altération.`,
+    `Rend ${n(s.hp * 0.3)} PV à toute l’équipe.`,
+    'Ses soins sont 15 % plus forts sur les alliés sous 40 % de PV.',
+  ],
+  'DPS / Tank': (s) => [
+    `Inflige ${n(s.atk)} dégâts et gagne un bouclier de ${n(s.hp * 0.04)} PV.`,
+    `Inflige ${n(s.atk * 1.6)} dégâts et force les ennemis à l’attaquer pendant 1 tour.`,
+    `Inflige ${n(s.atk * 3)} dégâts à tous les ennemis et gagne un bouclier de ${n(s.hp * 0.15)} PV.`,
+    'Double rôle : +10 % de dégâts infligés et 10 % de dégâts subis en moins.',
+  ],
+  'DPS / Soigneur': (s) => [
+    `Inflige ${n(s.atk)} dégâts et rend ${n(s.hp * 0.04)} PV à l’allié le plus blessé.`,
+    `Inflige ${n(s.atk * 1.6)} dégâts et rend ${n(s.hp * 0.15)} PV à l’allié le plus blessé.`,
+    `Inflige ${n(s.atk * 3)} dégâts à un ennemi et rend ${n(s.hp * 0.15)} PV à toute l’équipe.`,
+    'Double rôle : 20 % des dégâts qu’il inflige lui rendent des PV.',
+  ],
+  'Tank / Soigneur': (s) => [
+    `Inflige ${n(s.atk * 0.8)} dégâts et gagne un bouclier de ${n(s.hp * 0.05)} PV.`,
+    `Force les ennemis à l’attaquer pendant 2 tours et se rend ${n(s.hp * 0.15)} PV.`,
+    `Donne à l’équipe un bouclier de ${n(s.hp * 0.2)} PV et lui rend ${n(s.hp * 0.15)} PV.`,
+    'Double rôle : ses alliés subissent 8 % de dégâts en moins.',
+  ],
 }
-export const kitOf = (hero: Hero): Kit => KITS[hero.role] ?? KITS.DPS
+const KINDS = ['Attaque', 'Technique', 'Ultime', 'Passif'] as const
+const COSTS = ['Endurance 10', 'Endurance 25', 'Énergie pleine', undefined]
+
+export const kitOf = (hero: Hero, stats: Stats = baseStats(hero)): Move[] => {
+  const texts = EFFECTS[hero.role](stats)
+  return KINDS.map((kind, i) => ({ kind, name: MOVES[hero.id][i], text: texts[i], cost: COSTS[i] }))
+}

@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { iconArt } from '../assets/manifest'
-import { heroById, HEROES, type Hero } from '../data/heroes'
+import { heroById, HEROES, ROLE_KINDS, roleKind, type Hero, type RoleKind } from '../data/heroes'
 import { AFFINITY_LIST, type AffinityId } from '../data/affinities'
 import { RARITIES, RARITY_ORDER, type RarityId } from '../data/rarities'
 import { fileToCardImage } from '../state/customArt'
@@ -101,6 +101,7 @@ export const Collection = ({ onSummon }: { onSummon: () => void }) => {
   const [query, setQuery] = useState('')
   const [rarities, setRarities] = useState<RarityId[]>([]) // vide = toutes
   const [affinities, setAffinities] = useState<AffinityId[]>([]) // vide = toutes
+  const [roles, setRoles] = useState<RoleKind[]>([]) // vide = tous
   const [ownedFilter, setOwnedFilter] = useState<OwnedFilter>('all')
 
   const have = HEROES.filter((h) => owned[h.id]).length
@@ -108,10 +109,11 @@ export const Collection = ({ onSummon }: { onSummon: () => void }) => {
   const visible = HEROES.filter((h) =>
     (rarities.length === 0 || rarities.includes(h.rarity)) &&
     (affinities.length === 0 || affinities.includes(h.affinity)) &&
+    (roles.length === 0 || roles.includes(roleKind(h.role))) &&
     (ownedFilter === 'all' || (ownedFilter === 'wish' ? wish.includes(h.id) : (ownedFilter === 'owned') === Boolean(owned[h.id]))) &&
     (q === '' || fold(`${h.name} ${h.title} ${h.world} ${h.role}`).includes(q)))
-  const filtering = q !== '' || rarities.length > 0 || affinities.length > 0 || ownedFilter !== 'all'
-  const reset = () => { setQuery(''); setRarities([]); setAffinities([]); setOwnedFilter('all') }
+  const filtering = q !== '' || rarities.length > 0 || affinities.length > 0 || roles.length > 0 || ownedFilter !== 'all'
+  const reset = () => { setQuery(''); setRarities([]); setAffinities([]); setRoles([]); setOwnedFilter('all') }
 
   const all = RARITY_ORDER.map((id) => ({ rarity: RARITIES[id], cards: HEROES.filter((h) => h.rarity === id) })).filter((g) => g.cards.length > 0)
   const groups = all.map((g) => ({ ...g, shown: g.cards.filter((h) => visible.includes(h)) })).filter((g) => g.shown.length > 0)
@@ -162,6 +164,17 @@ export const Collection = ({ onSummon }: { onSummon: () => void }) => {
               <button key={a.id} className={`fchip fchip--affinity ${affinities.includes(a.id) ? 'is-on' : ''}`} style={{ ['--rc' as string]: a.color }}
                 aria-pressed={affinities.includes(a.id)} onClick={() => setAffinities(toggle(affinities, a.id))}>
                 <AffinityIcon id={a.id} size={14} />{a.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="filters__row">
+          <span className="filters__label">Rôle</span>
+          <div className="filters__chips">
+            {(Object.keys(ROLE_KINDS) as RoleKind[]).map((id) => (
+              <button key={id} className={`fchip role role--${id} ${roles.includes(id) ? 'is-on' : ''}`} aria-pressed={roles.includes(id)} onClick={() => setRoles(toggle(roles, id))}>
+                {ROLE_KINDS[id]}<i>{HEROES.filter((h) => roleKind(h.role) === id).length}</i>
               </button>
             ))}
           </div>

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { HEROES } from '../data/heroes'
-import { baseRank, baseStats, cardState, collectifs, kitOf, levelFromXp, MAX_LEVEL, statsAt, xpToNext } from './progression'
+import { MOVES } from '../data/moves'
+import { RARITY_ORDER } from '../data/rarities'
+import { power, baseRank, baseStats, cardState, collectifs, kitOf, levelFromXp, MAX_LEVEL, statsAt, xpToNext } from './progression'
 
 describe('progression des cartes', () => {
   it('monte de niveau au bon nombre de points', () => {
@@ -36,9 +38,31 @@ describe('progression des cartes', () => {
     for (const h of HEROES) {
       expect(baseRank(h)).toBeGreaterThanOrEqual(1)
       expect(baseRank(h)).toBeLessThanOrEqual(HEROES.length)
-      expect(kitOf(h).ultimate[0].length).toBeGreaterThan(0)
+      expect(kitOf(h)).toHaveLength(4)
+      expect(MOVES[h.id].every((name) => name.length > 0)).toBe(true)
     }
     const best = HEROES.filter((h) => baseRank(h) === 1)
     expect(best.every((h) => h.rarity === 'rift')).toBe(true)
+  })
+
+  it('plus une carte est rare, plus elle est puissante : aucune carte ne dépasse une carte plus rare', () => {
+    const range = (id: string) => HEROES.filter((h) => h.rarity === id).map((h) => power(baseStats(h)))
+    for (let i = 0; i < RARITY_ORDER.length - 1; i++) {
+      expect(Math.min(...range(RARITY_ORDER[i]))).toBeGreaterThan(Math.max(...range(RARITY_ORDER[i + 1])))
+    }
+  })
+
+  it('seules les cartes LR et MR ont un double rôle, et chaque bannière a ses tanks, ses DPS et ses soigneurs', () => {
+    for (const h of HEROES) if (h.role.includes('/')) expect(['legend', 'rift']).toContain(h.rarity)
+    for (const world of new Set(HEROES.map((h) => h.world))) {
+      const roles = HEROES.filter((h) => h.world === world).map((h) => h.role).join(' ')
+      for (const r of ['DPS', 'Tank', 'Soigneur']) expect(roles).toContain(r)
+    }
+  })
+
+  it('les dégâts affichés d’une technique suivent les statistiques de la carte', () => {
+    const h = HEROES.find((x) => x.role === 'DPS')!
+    expect(kitOf(h)[2].text).toContain(Math.round(h.atk * 3.5).toLocaleString('fr-FR'))
+    expect(kitOf(h, statsAt(h, 11, 0))[2].text).toContain(Math.round(Math.round(h.atk * 1.2) * 3.5).toLocaleString('fr-FR'))
   })
 })

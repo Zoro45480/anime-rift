@@ -1,0 +1,210 @@
+naruto|DT|Multi-clonage|Rasengan|Rasen-Shuriken des Six Voies|Chakra de Kurama
+sasuke|DT|Chidori|Amaterasu|Flèche d’Indra|Rinnegan
+kaguya|DT|Os de cendres meurtriers|Amenominaka|Boule de quête de vérité en expansion|Rinne-Sharingan
+madara|DT|Boule de feu suprême|Susanoo parfait|Tengai Shinsei|Sharingan Kaléidoscope éternel
+hashirama|TS|Naissance d’une forêt|Golem de bois|Mille Mains véritables|Régénération du Mode Ermite
+obito|DT|Kamui|Flammes explosives dansantes|Épée de Nunoboko|Intangibilité
+minato|D|Kunai de l’Éclair|Rasengan|Dieu du Tonnerre volant : Danse flamboyante|Hiraishin
+itachi|D|Amaterasu|Tsukuyomi|Susanoo : Épée de Totsuka|Miroir de Yata
+guy|D|Tornade de Konoha|Paon du Matin|Gaï de la Nuit|Les Huit Portes
+kakashi|D|Raikiri|Kamui|Éclair pourfendeur Kamui|Sharingan copieur
+jiraya|D|Rasengan|Bombe à l’huile de crapaud|Rasengan géant|Mode Ermite
+pain|T|Banshô Ten’in|Shinra Tensei|Chibaku Tensei|Les Six Chemins
+tobirama|D|Dragon aqueux|Barrière aqueuse|Sceaux explosifs en chaîne|Dieu du Tonnerre volant
+hiruzen|D|Bâton Enma|Shurikens clonés|Sceau du Dieu de la Mort|Le Professeur
+tsunade|S|Coup de talon céleste|Paume mystique|Sceau du Byakugô : Régénération|Force des Cent
+orochimaru|D|Épée de Kusanagi|Main aux serpents spectraux|Yamata no Orochi|Changement de corps
+bee|T|Lariat|Style des huit lames|Bijû-Dama de Gyûki|Hôte de Hachibi
+gaara|T|Shurikens de sable|Cercueil de sable|Funérailles impériales du désert|Bouclier de sable
+sakura|S|Coup de poing Cerisier|Paume mystique|Sceau du Byakugô|Contrôle parfait du chakra
+lee|D|Tornade de Konoha|Lotus recto|Lotus verso|Poids aux chevilles
+neji|D|Poing souple|Tourbillon divin|Huit Trigrammes : 64 Poings|Byakugan
+shikamaru|T|Manipulation des ombres|Étreinte mortelle de l’ombre|Couture des ombres|Stratège de génie
+hinata|S|Poing souple|Huit Trigrammes : 32 Poings|Poings jumeaux du Lion|Byakugan
+kisame|T|Samehada|Requins-missiles|Grande Vague explosive|Absorption de chakra
+kiba|D|Croc lacérant|Double Croc|Loup à deux têtes|Flair d’Akamaru
+shino|D|Nuée d’insectes|Clone d’insectes|Sphère d’insectes|Kikaichû
+choji|T|Boulet humain|Décuplement partiel|Mode Papillon|Pilules Akimichi
+ino|S|Transposition|Perturbation mentale|Transmission télépathique|Ninjutsu médical
+tenten|D|Lancer de kunais|Dragons jumeaux ascendants|Éventail du Bananier|Arsenal de parchemins
+iruka|S|Lancer de shurikens|Barrière de sceaux explosifs|Sceau de confinement|Cœur de professeur
+luffy|DT|Gomu Gomu no Pistol|Gomu Gomu no Red Hawk|Gomu Gomu no Bajrang Gun|Gear 5 : Nika
+roger|DT|Lame Ace|Haki des Rois infusé|Kamusari|Voix de toutes choses
+shanks|DT|Gryphon|Haki des Rois|Kamusari|Observation du futur
+whitebeard|DT|Bisento|Kaishin|Séisme dévastateur|L’homme le plus fort du monde
+kaido|T|Raimei Hakke|Boro Breath|Dragon de flammes : Torche|La créature la plus forte
+mihawk|D|Lame noire Yoru|Entaille volante|Kokutô Arahoshi|Yeux de faucon
+zoro|D|Oni Giri|108 Pound Hô|Kyûtôryû : Ashura|Haki des Rois naissant
+law|S|Shambles|Gamma Knife|K-Room|Chirurgien de la Mort
+ace|D|Hiken|Hotarubi : Hidaruma|Dai Enkai : Entei|Corps de feu
+sanji|D|Collier Shoot|Diable Jambe|Ifrit Jambe|Haki de l’Observation
+jinbe|T|Karakusa Gawara Seiken|Kairyû Ipponzeoi|Onigawara Seiken|Karaté des Hommes-Poissons
+robin|D|Clutch|Gigantesco Mano|Demonio Fleur|Hana Hana no Mi
+nami|S|Thunderbolt Tempo|Mirage Tempo|Zeus : Raitei|Navigatrice
+usopp|D|Kayaku Boshi|Midori Boshi : Devil|Midori Boshi : Impact Wolf|Sogeking
+chopper|S|Heavy Gong|Kokutei Roseo|Monster Point|Docteur de l’équipage
+goku|DT|Kamehameha|Kaioken|Genkidama|Ultra Instinct
+vegeta|DT|Canon Garric|Final Flash|Final Explosion|Ultra Ego
+beerus|DT|Sphère de destruction|Jugement de Beerus|Hakai|Dieu de la Destruction
+jiren|DT|Power Impact|Colossal Slash|Overheat Magnetron|Fierté de l’Univers 11
+gohan|D|Masenko|Kamehameha père-fils|Makankôsappô de la Bête|Gohan Beast
+broly|D|Eraser Cannon|Gigantic Roar|Omega Blaster|Rage du Saiyan légendaire
+freezer|D|Rayon de la mort|Disque mortel|Death Ball|Golden Freezer
+cell|D|Kamehameha|Cell Juniors|Kamehameha solaire|Régénération
+buu|T|Rayon bonbon|Vanishing Ball|Extinction planétaire|Corps élastique
+piccolo|T|Makankôsappô|Hellzone Grenade|Gekiretsu Kôdan|Régénération namek
+trunks|D|Burning Attack|Buster Cannon|Épée de l’espoir|Super Saiyan Rage
+c18|D|Kienzan|Power Blitz|Accel Dance|Énergie infinie
+krilin|S|Kienzan|Taiyôken|Kienzan en chaîne|Senzu
+tenshinhan|D|Dodonpa|Taiyôken|Kikôhô|Troisième œil
+yamcha|D|Rôga Fûfû Ken|Kamehameha|Sôkidan|Loup du désert
+ichigo|DT|Getsuga Tenshô|Getsuga Tenshô noir|Mugetsu|Hollowfication
+yhwach|DT|Heilig Pfeil|Sankt Altar|The Almighty|Auswählen
+aizen|DT|Kyôka Suigetsu|Hadô n° 90 : Kurohitsugi|Kurohitsugi incanté|Hôgyoku
+yamamoto|DT|Ryûjin Jakka|Jôkaku Enjô|Zanka no Tachi|Capitaine-Commandant
+kenpachi|D|Coup à une main|Kendô à deux mains|Nozarashi|Cache-œil scellé
+byakuya|D|Senbonzakura|Senbonzakura Kageyoshi|Hakuteiken|Shunpo
+urahara|S|Benihime : Nake|Chikasumi no Tate|Kannonbiraki Benihime Aratame|Génie inventeur
+hitsugaya|T|Hyôrinmaru|Sennen Hyôrô|Daiguren Hyôrinmaru|Tensô Jûrin
+ulquiorra|D|Cero|Luz de la Luna|Lanza del Relámpago|Segunda Etapa
+rukia|S|Tsukishiro|Hakuren|Hakka no Togame|Sode no Shirayuki
+renji|D|Zabimaru|Higa Zekkô|Sôô Zabimaru|Ténacité
+ishida|D|Heilig Pfeil|Licht Regen|Sprenger|Antithèse
+orihime|S|Koten Zanshun|Santen Kesshun|Sôten Kisshun|Shun Shun Rikka
+chad|T|Brazo Derecha de Gigante|El Directo|La Muerte|Brazo Izquierda del Diablo
+kon|S|Coup de pied|Saut bondissant|Âme modifiée déchaînée|Peluche increvable
+yoriichi|DT|Souffle du Soleil : Danse|Monde transparent|Treizième mouvement|Marque de naissance
+muzan|DT|Fouets de chair|Sang empoisonné|Ondes de choc|Régénération absolue
+kokushibo|DT|Souffle de la Lune : 1er mouvement|Souffle de la Lune : 7e mouvement|Souffle de la Lune : 16e mouvement|Six yeux
+gyomei|DT|Souffle de la Roche : Serpentinite|Conquête rapide|Arcs de justice|Monde transparent
+tanjiro|D|Souffle de l’Eau : Tranchant de surface|Danse du Dieu du Feu|Hinokami Kagura : Soleil ardent|Odorat hors du commun
+rengoku|D|Souffle de la Flamme : Feu inconnu|Tigre de flammes|9e mouvement : Purgatoire|Cœur ardent
+akaza|D|Destruction : Type Air|Destruction : Type Chaos|Destruction finale : Argent bleu|Aiguille boussole
+giyu|T|Souffle de l’Eau : Tranchant de surface|Dragon des flots|11e mouvement : Accalmie|Marque du pourfendeur
+doma|D|Lotus gelé|Nuage de givre|Bodhisattva du Lotus de glace|Éventails dorés
+nezuko|S|Griffes|Sang explosif|Forme démoniaque éveillée|Flammes purificatrices
+zenitsu|D|Éclair foudroyant|Sextuple éclair|7e mouvement : Honoikazuchi no Kami|Sommeil du guerrier
+inosuke|D|Souffle de la Bête : Croc perçant|Découpe en lambeaux|Morsure folle|Perception spatiale
+kanao|D|Souffle de la Fleur : Pivoine vaine|Cerisier tourbillonnant|Forme finale : Œil vermillon|Vision surhumaine
+genya|D|Tir de fusil|Balles de Nichirin|Dévoration démoniaque|Mangeur de démons
+aoi|S|Coup de sabre|Remède du Domaine des Papillons|Soins intensifs|Infirmière du Domaine
+gojo|DT|Bleu|Rouge|Violet|Infini
+sukuna|DT|Démantèlement|Clivage|Extension du territoire : Autel démoniaque|Roi des Fléaux
+yuta|DS|Katana imprégné|Rika|Extension du territoire : Amour véritable|Sort d’inversion
+kenjaku|DT|Manipulation des fléaux|Antigravité|Uzumaki|Changement de corps
+yuji|D|Poing divergent|Éclair noir|Frappe sur l’âme|Réceptacle
+toji|D|Nuage itinérant|Chaîne aux mille lieues|Lance céleste inversée|Pacte céleste
+megumi|T|Chiens de jade|Nue|Extension : Jardin des ombres chimériques|Dix Ombres
+geto|D|Fléaux mineurs|Dragon arc-en-ciel|Uzumaki|Manipulation des fléaux
+mahito|D|Mutation oisive|Polymorphisme de l’âme|Extension : Incarnation parfaite de soi|Âme intouchable
+nanami|D|Ratio 7:3|Effondrement|Heures supplémentaires|Pacte du temps de travail
+maki|D|Lance|Nuage itinérant|Sabre fendeur d’âme|Pacte céleste
+todo|T|Coup direct|Boogie Woogie|Éclair noir|Meilleur ami
+nobara|D|Clous|Poupée de paille : Résonance|Épingle à cheveux|Résonance d’âme
+inumaki|S|« Ne bouge pas »|« Explose »|« Écrase-toi »|Verbe ensorcelé
+panda|T|Coup de patte|Mode Gorille|Tambour imparable|Trois noyaux
+meruem|DT|Coup de queue|Rage Blast|Photon métamorphique|Aura par dévoration
+netero|DT|Main n° 1|Main n° 99|Zero Hand|Bodhisattva aux cent bras
+gon|D|Jajanken : Pierre|Jajanken : Ciseaux|Jajanken adulte|Serment et contrainte
+ging|DS|Onde de Nen|Technique imitée|Explosion d’aura à distance|Meilleur Hunter
+kirua|D|Yo-yo|Narukami|Kanmuru : Vitesse divine|Assassin Zoldyck
+kuroro|D|Couteau Ben|Indoor Fish|Sun and Moon|Skill Hunter
+hisoka|D|Cartes tranchantes|Bungee Gum|Texture Surprise|Élastique et chewing-gum
+kurapika|S|Chain Jail|Judgment Chain|Emperor Time|Holy Chain
+zeno|D|Dragon Lance|Dragon Head|Dragon Dive|Maître assassin
+pitou|S|Griffes|Terpsichora|Doctor Blythe|En démesuré
+biscuit|S|Coup de poing|Forme véritable|Magical Esthe : Cookie-chan|Maître de Nen
+irumi|D|Aiguilles|Manipulation par aiguille|Armée d’aiguilles|Aura écrasante
+leolio|S|Coup de mallette|Poing téléporté|Soins d’urgence|Futur médecin
+knuckle|D|Coup de poing|Hakoware|A.P.R. : Faillite|Cœur tendre
+zushi|T|Poing du Shingen-ryû|Ren|Garde du Ten|Élève de Wing
+teach|DT|Black Hole|Kurouzu|Kaishin|Deux fruits du démon
+garp|DT|Poing de fer|Lancer de boulets|Galaxy Impact|Héros de la Marine
+akainu|DT|Dai Funka|Meigô|Ryûsei Kazan|Justice absolue
+bigmom|T|Ikoku|Prometheus : Feu céleste|Maser Canon|Soru Soru no Mi
+rayleigh|D|Entaille au Haki|Haki des Rois|Coup du Roi Sombre|Seigneur des Ténèbres
+kuzan|T|Ice Saber|Ice Block : Partisan|Ice Age|Corps de glace
+sabo|D|Ryû no Kagizume|Hiken|Moeru Ryûsô Ken : Kaen|Chef d’état-major
+hancock|D|Pistol Kiss|Perfume Femur|Mero Mero Mellow|Haki des Rois
+doflamingo|D|Goshikito|Parasite|God Thread|Cage à oiseaux
+franky|T|Strong Right|Coup de Vent|Radical Beam|Corps de cyborg
+brook|S|Yahazu Giri|Soul Solid|Chant des âmes|Yomi Yomi no Mi
+crocodile|D|Desert Spada|Sables Pesado|Ground Death|Corps de sable
+vivi|S|Kujakki Slasher|Kujakki String Slasher|Appel à la paix|Princesse d’Alabasta
+koby|D|Soru|Rankyaku|Honesty Impact|Haki de l’Observation
+baggy|D|Bara Bara Hô|Bara Bara Festival|Muggy Ball|Corps en morceaux
+gogeta|DT|Big Bang Kamehameha|Soul Punisher|Kamehameha ultime|Fusion Metamor
+whis|TS|Coup de sceptre|Entraînement angélique|Retour temporel|Ange gardien
+vegetto|DT|Spirit Sword|Big Bang Attack|Final Kamehameha|Potaras
+gokublack|D|Lame d’énergie|Kamehameha noir|Faux divine|Super Saiyan Rosé
+hit|D|Coup vital|Saut temporel|Cage temporelle|Assassin légendaire
+toppo|T|Justice Flash|Justice Crusher|Hakai|Candidat Dieu de la Destruction
+goten|D|Kamehameha|Charge|Kamehameha fraternel|Super Saiyan précoce
+bardock|D|Riot Javelin|Rebellion Trigger|Final Spirit Cannon|Visions du futur
+c17|T|Photon Flash|Barrière androïde|Barrière explosive|Énergie infinie
+roshi|S|Kamehameha|Mafûba|Kamehameha puissance maximale|Maître des tortues
+videl|D|Coup de pied|Enchaînement de Videl|Eagle Kick|Justicière
+raditz|D|Double Sunday|Saturday Crush|Shining Friday|Queue de Saiyan
+chaozu|S|Dodonpa|Télékinésie|Autodestruction|Télépathie
+yajirobe|T|Coup de katana|Tranche du samouraï|Coupe-queue|Senzu
+satan|S|Dynamite Kick|Satan Punch|Cadeau explosif|Champion du monde
+ichibe|DT|Ichimonji|Futen Taisatsuryô|Shirafude Ichimonji|Manako Oshô
+haschwalth|DT|Épée de Quincy|Freund Schild|The Balance|Bouclier du malheur
+kyoraku|DT|Bushôgoma|Kageoni|Katen Kyôkotsu : Karamatsu Shinjû|Jeux d’enfants
+unohana|S|Kendô|Soin du Kaidô|Bankai : Minazuki|Première Kenpachi
+starrk|D|Cero|Cero Metralleta|Los Lobos|Primera Espada
+yoruichi|D|Shunpo|Shunkô|Shunkô : Raijin Senkei|Déesse de l’Éclair
+grimmjow|D|Garra de la Pantera|Gran Rey Cero|Desgarrón|Pantera
+mayuri|D|Ashisogi Jizô|Poison paralysant|Konjiki Ashisogi Jizô|Corps modifié
+shinji|T|Sakanade|Monde inversé|Sakashima Yokoshima Happôfusagari|Masque de Vizard
+soifon|D|Suzumebachi|Nigeki Kessatsu|Jakuhô Raikôben|Shunkô
+ikkaku|D|Hôzukimaru|Lance brisée|Ryûmon Hôzukimaru|Chance du combattant
+rangiku|S|Haineko|Nuage de cendres|Tornade de cendres|Lieutenante
+hanataro|S|Hisagomaru|Soin du Kaidô|Akeiro Hisagomaru|4e Division
+tatsuki|D|Coup de poing|Coup de pied retourné|Enchaînement de karaté|Championne de karaté
+keigo|S|Fuite|Encouragements|Diversion bruyante|Ami fidèle
+tanjiro_king|DT|Fouets dorsaux|Sphère d’énergie|Rage du Roi des Démons|Immunité au soleil
+sanemi|DT|Souffle du Vent : Tourbillon de poussière|Rafale glaciale|9e mouvement : Typhon d’Idaten|Sang rare
+muichiro|D|Souffle de la Brume : Ciel brumeux|Brume dissipatrice|7e mouvement : Nuées obscures|Lame écarlate
+obanai|D|Souffle du Serpent : Entaille sinueuse|Crocs venimeux|5e mouvement : Serpent lové|Kaburamaru
+mitsuri|D|Souffle de l’Amour : Frisson du premier amour|Amour félin tourbillonnant|6e mouvement : Vent félin|Muscles denses
+tengen|D|Souffle du Son : Rugissement|Explosions en chaîne|Partition musicale|Résistance au poison
+shinobu|D|Danse du Papillon : Caprice|Danse de l’Abeille : Dard|Danse du Mille-pattes : Zigzag|Poison de glycine
+gyutaro|D|Faucilles de sang|Faucilles volantes|Découpe circulaire furieuse|Sang empoisonné
+hantengu|T|Sekido : Foudre|Zohakuten : Dragons de bois|Urami : Géant de rancune|Division des émotions
+daki|D|Ceintures tranchantes|Huit ceintures|Ceintures tourbillonnantes|Lien fraternel
+gyokko|D|Aiguilles des mille poissons|Prison d’eau|Dix mille poissons-démons|Jarres de téléportation
+kaigaku|D|Souffle de la Foudre : Riz foudroyant|Tonnerre en essaim|6e mouvement : Éclair grondant|Foudre noire
+sabito|D|Souffle de l’Eau : Roue d’eau|Remous|Tranchant de surface|Masque de renard
+makomo|S|Souffle de l’Eau : Flot continu|Esquive légère|Conseils de Makomo|Esprit du mont Sagiri
+urokodaki|S|Souffle de l’Eau : Tranchant de surface|Pièges du mont Sagiri|Enseignement du maître|Ancien pilier de l’Eau
+yuki|DT|Poing massif|Garuda|Trou noir|Star Rage : Masse virtuelle
+kashimo|DT|Bâton électrifié|Décharge certaine|Ambre mythique|Énergie électrique
+hakari|DS|Portes de métro|Extension : Pari mortel en roue libre|Jackpot|Immortalité de 4 min 11
+choso|D|Sang perforant|Supernova|Flèche de sang supersonique|Manipulation du sang
+jogo|D|Insectes de feu|Éruption|Météore maximal|Cercueil de la Montagne de fer
+uraume|T|Givre|Chute de glace|Formation de glace|Sort d’inversion
+naobito|D|Coup rapide|Projection à 24 images|Vitesse maximale|Projection magique
+hanami|T|Racines|Bourgeons maudits|Extension : Mer cérémonielle de lumière|Écorce robuste
+dagon|T|Jet d’eau|Banc de shikigamis|Extension : Horizon de la Skandha captivante|Marée infinie
+meimei|D|Hache|Corbeaux|Bird Strike|Manipulation des corbeaux
+kamo|D|Flèches de sang|Flux écarlate|Sang perforant|Manipulation du sang
+yaga|T|Poupée maudite|Armée de poupées|Charge des poupées|Corps maudits autonomes
+miwa|D|Garde du Nouveau style|Simple domaine|Frappe dégainée|Nouvelle École de l’Ombre
+momo|S|Balai volant|Rafale de vent|Lame de vent|Vue aérienne
+ijichi|S|Appel téléphonique|Rapport de mission|Rideau|Assistant dévoué
+nanika|TS|« Fais-moi un câlin »|Requête|Vœu exaucé|« Je t’aime, Kirua »
+pouf|DS|Écailles hypnotiques|Spiritual Message|Beelzebub|Dévotion au Roi
+youpi|DT|Bras multiples|Transformation centaure|Rage explosive|Colère accumulée
+silva|D|Coup de poing|Sphère d’aura|Double sphère explosive|Chef des Zoldyck
+morel|T|Pipe géante|Deep Purple|Smoky Jail|Poumons d’acier
+knov|S|Scream|Hide and Seek|Appartement à quatre pièces|Maître de la dissimulation
+feitan|D|Lame cachée|Pain Packer|Rising Sun|Douleur convertie
+uvo|T|Coup de poing|Morsure|Big Bang Impact|Corps d’acier
+razor|D|Tir de ballon|Démons de Nen|Smash des quatorze démons|Maître du jeu
+machi|S|Fils de Nen|Fil étrangleur|Suture de Nen|Intuition
+nobunaga|D|Iai|En de quatre mètres|Coupe instantanée|Sabreur de la Brigade
+kite|D|Crazy Slots : Faux|Crazy Slots : Carabine|Silent Waltz|Crazy Slots
+wing|S|Poing du Shingen-ryû|Ren|Leçon de Nen|Maître instructeur
+ponzu|D|Piqûre d’abeilles|Nuée d’abeilles|Gaz soporifique|Chapeau-ruche
+pokkuru|D|Flèche|Arc-en-ciel : Flèche rouge|Arc-en-ciel : sept flèches|Archer Hunter

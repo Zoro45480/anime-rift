@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { createPortal } from 'react-dom'
 import { AFFINITIES } from '../data/affinities'
 import { BANNERS } from '../data/banners'
-import type { Hero } from '../data/heroes'
+import { roleKind, type Hero } from '../data/heroes'
 import { RARITIES } from '../data/rarities'
 import { cardRate } from '../game/gacha'
 import { cardState } from '../game/progression'
@@ -53,7 +53,7 @@ const Sheet = ({ hero, onClose, onMore }: { hero: Hero; onClose: () => void; onM
             <span className="cv__kana" lang="ja">{hero.kana}</span>
             <span className="cv__world">{hero.title} · {hero.world}</span>
             <span className="cv__tags">
-              <span>{hero.role}</span>
+              <span className={`role role--${roleKind(hero.role)}`}>{hero.role}</span>
               <span><AffinityIcon id={hero.affinity} size={13} />{AFFINITIES[hero.affinity].label}</span>
               <span>{rarity.label}</span>
             </span>
@@ -62,6 +62,7 @@ const Sheet = ({ hero, onClose, onMore }: { hero: Hero; onClose: () => void; onM
               <span><small>Chance par invocation</small><b>{rate ? pct(rate) : '—'}</b></span>
             </span>
             <span className="cv__stats">
+              <span><small>PV</small><b>{state.stats.hp.toLocaleString('fr-FR')}</b></span>
               <span><small>Dégâts</small><b>{state.stats.atk.toLocaleString('fr-FR')}</b></span>
               <span><small>Défense</small><b>{state.stats.def.toLocaleString('fr-FR')}</b></span>
               <span><small>Niveau</small><b>{copies ? state.level : '—'}</b></span>

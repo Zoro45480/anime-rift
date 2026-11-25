@@ -46,6 +46,7 @@ export const Banners = () => {
   const [currency, setCurrency] = useState<Currency>('ticket')
   const [results, setResults] = useState<Hero[] | null>(null)
   const [showIndex, setShowIndex] = useState(false)
+  const [focus, setFocus] = useState(false) // « Voir la bannière » : n'affiche plus que la bannière choisie
   const banner = BANNERS[index]
   const star = heroById(banner.star)
   const starArt = store.customArt[star.id] ?? heroArt(star.model, 'full')
@@ -61,7 +62,8 @@ export const Banners = () => {
   }
 
   return (
-    <div className="summon" style={{ ['--hue' as string]: banner.hue }}>
+    <div className={`summon ${focus ? 'summon--focus' : ''}`} style={{ ['--hue' as string]: banner.hue }}>
+      {focus && <button className="summon__back" onClick={() => { setFocus(false); window.scrollTo({ top: 0 }) }}>← Toutes les invocations</button>}
       {/* Affiche de la bannière */}
       <section className="poster" key={banner.id}>
         <div className="poster__slash" aria-hidden="true" />
@@ -76,12 +78,12 @@ export const Banners = () => {
             <span className="chip">MR {pct(RARITIES.rift.rate)} · LR {pct(RARITIES.legend.rate)}</span>
           </div>
         </div>
-        <button className="poster__nav poster__nav--prev" onClick={() => turn(-1)} aria-label="Bannière précédente"><IconChevron left /></button>
-        <button className="poster__nav poster__nav--next" onClick={() => turn(1)} aria-label="Bannière suivante"><IconChevron /></button>
+        {!focus && <button className="poster__nav poster__nav--prev" onClick={() => turn(-1)} aria-label="Bannière précédente"><IconChevron left /></button>}
+        {!focus && <button className="poster__nav poster__nav--next" onClick={() => turn(1)} aria-label="Bannière suivante"><IconChevron /></button>}
       </section>
 
       {/* Choix de la bannière */}
-      <div className="rail" role="tablist" aria-label="Bannières">
+      {!focus && <div className="rail" role="tablist" aria-label="Bannières">
         {BANNERS.map((b, i) => {
           const have = b.featured.filter((id) => store.owned[id]).length
           return (
@@ -91,7 +93,7 @@ export const Banners = () => {
             </button>
           )
         })}
-      </div>
+      </div>}
 
       {/* Cartes à l'affiche */}
       <section className="lineup">
@@ -132,8 +134,35 @@ export const Banners = () => {
         </div>
       </section>
 
+      {/* Bannière seule : ses têtes d'affiche, une par une */}
+      {focus && (
+        <section className="heads">
+          <header className="section__head"><span>{two(banner.featured.length)}</span><div><h2>Têtes d'affiche</h2><p>Les cartes les plus rares de la bannière {banner.world}.</p></div></header>
+          {banner.featured.map((id) => {
+            const h = heroById(id)
+            const rate = cardRate(banner, h)
+            return (
+              <article key={id} className="head" style={{ ['--rc' as string]: RARITIES[h.rarity].color }}>
+                <div className="head__card"><Card hero={h} locked={!store.owned[id]} /></div>
+                <div className="head__text">
+                  <p className="head__kicker">Tête d'affiche · {RARITIES[h.rarity].short}</p>
+                  <h3>{h.name} <i>({h.title})</i></h3>
+                  <p className="head__desc">L'une des cartes les plus rares du jeu. Elle ne tombe que sur cette bannière. {store.owned[id] ? `Vous en possédez ${store.owned[id]}.` : 'Vous ne la possédez pas encore.'}</p>
+                  <ul className="head__facts">
+                    <li><b>{pct(rate)}</b><span>par carte invoquée · 1 chance sur {Math.round(1 / rate).toLocaleString('fr-FR')}</span></li>
+                    <li><b>{h.role}</b><span>son rôle en combat</span></li>
+                    <li><b>Cadre animé</b><span>reflets et effets en mouvement</span></li>
+                    <li><b>Invocation {RARITIES[h.rarity].short}</b><span>son animation dédiée si elle tombe</span></li>
+                  </ul>
+                </div>
+              </article>
+            )
+          })}
+        </section>
+      )}
+
       {/* Toutes les bannières : informations, progression et carte vedette */}
-      <section className="showcase">
+      {!focus && <section className="showcase">
         <header className="section__head"><span>{two(BANNERS.length)}</span><div><h2>À l'affiche</h2><p>Les bannières ouvertes en ce moment.</p></div></header>
         <div className="showcase__list">
           {BANNERS.map((b, i) => {
@@ -147,7 +176,7 @@ export const Banners = () => {
                     <p className="show__kicker">Bannière limitée</p>
                     <h3>{b.world}</h3>
                     <p className="show__star"><b>{RARITIES[s.rarity].short}</b>{s.name} ({s.title})</p>
-                    <button className="show__link" onClick={() => { setIndex(i); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>Voir la bannière ↗</button>
+                    <button className="show__link" onClick={() => { setIndex(i); setFocus(true); window.scrollTo({ top: 0 }) }}>Voir la bannière ↗</button>
                   </div>
                   <div className="show__card"><Card hero={s} /></div>
                 </div>
@@ -159,7 +188,7 @@ export const Banners = () => {
             )
           })}
         </div>
-      </section>
+      </section>}
 
       {showIndex && createPortal(
         <div className="modal" role="dialog" aria-modal="true" aria-label="Index de la bannière" onClick={() => setShowIndex(false)}>

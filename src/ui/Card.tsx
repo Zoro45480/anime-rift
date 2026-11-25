@@ -1,7 +1,7 @@
 import { useRef, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react'
 import { AFFINITIES } from '../data/affinities'
 import { frameOf } from '../data/banners'
-import type { Hero } from '../data/heroes'
+import { roleKind, type Hero } from '../data/heroes'
 import { RARITIES } from '../data/rarities'
 import { cardState } from '../game/progression'
 import { frameArt, frameFx, heroArt } from '../assets/manifest'
@@ -71,11 +71,11 @@ export const Card = ({ hero, count, locked, inert, className = '', style }: Prop
 
           <div className="card__plate">
             <span className="card__name">{hero.name} <i>({hero.title})</i></span>
-            <span className="card__world">{hero.world}</span>
+            <span className="card__world">{hero.world} · <span className={`role role--${roleKind(hero.role)}`}>{hero.role}</span></span>
             <span className="card__rule" />
             <span className="card__stats">
-              <b><small>Dégâts</small>{state.stats.atk.toLocaleString('fr-FR')}</b>
-              <b><small>Défense</small>{state.stats.def.toLocaleString('fr-FR')}</b>
+              <b><small>Dégâts</small>{locked ? '?' : state.stats.atk.toLocaleString('fr-FR')}</b>
+              <b><small>Défense</small>{locked ? '?' : state.stats.def.toLocaleString('fr-FR')}</b>
               <em>N° {String(hero.no).padStart(4, '0')}</em>
             </span>
           </div>

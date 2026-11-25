@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { iconArt } from '../assets/manifest'
 import { AFFINITIES } from '../data/affinities'
-import { HEROES, type Hero } from '../data/heroes'
+import { HEROES, roleKind, type Hero } from '../data/heroes'
 import { RARITIES, RARITY_ORDER } from '../data/rarities'
 import { cardRate } from '../game/gacha'
 import { baseRank, baseStats, cardState, kitOf, MAX_LEVEL, MERGE_XP, SCROLL_IDS, SCROLLS, type Collectif } from '../game/progression'
@@ -52,7 +52,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
   const maxed = state.level >= MAX_LEVEL
   const wished = wish.includes(hero.id)
   const isPinned = pinned.includes(hero.id)
-  const kit = kitOf(hero)
+  const kit = kitOf(hero, state.stats)
   const history = log[hero.id] ?? []
   const first = history.filter((e) => e.k === 'pull').at(-1)
   const same = HEROES.filter((h) => h.world === hero.world && h.id !== hero.id)
@@ -91,20 +91,32 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
             <p className="cd__title">{hero.title}</p>
             <ul className="cd__chips">
               <li>{hero.world}</li>
-              <li>{hero.role}</li>
+              <li className={`role role--${roleKind(hero.role)}`}>{hero.role}</li>
               <li><AffinityIcon id={hero.affinity} size={13} />{AFFINITIES[hero.affinity].label}</li>
               <li>{has ? `Niveau ${state.level}` : 'Non obtenue'}</li>
               <li>{copies} exemplaire{copies > 1 ? 's' : ''}</li>
             </ul>
             <div className="cd__actions">
-              <button className="cd-btn cd-btn--main" disabled={copies < 2 || maxed} onClick={onMerge}>Fusionner un doublon<small>{maxed ? 'Niveau maximum' : copies < 2 ? 'Il faut 2 exemplaires' : `+${n(MERGE_XP[hero.rarity])} XP`}</small></button>
-              <button className={`cd-btn ${isPinned ? 'is-on' : ''}`} disabled={!has} aria-pressed={isPinned} onClick={onPin}>{isPinned ? 'Retirer de ma vitrine' : 'Épingler dans ma vitrine'}<small>{pinned.length} / {SHOWCASE_MAX} places</small></button>
+              {has && <button className="cd-btn cd-btn--main" disabled={copies < 2 || maxed} onClick={onMerge}>Fusionner un doublon<small>{maxed ? 'Niveau maximum' : copies < 2 ? 'Il faut 2 exemplaires' : `+${n(MERGE_XP[hero.rarity])} XP`}</small></button>}
+              {has && <button className={`cd-btn ${isPinned ? 'is-on' : ''}`} aria-pressed={isPinned} onClick={onPin}>{isPinned ? 'Retirer de ma vitrine' : 'Épingler dans ma vitrine'}<small>{pinned.length} / {SHOWCASE_MAX} places</small></button>}
               <button className={`cd-btn ${wished ? 'is-on' : ''}`} aria-pressed={wished} onClick={() => toggleWish(hero.id)}>{wished ? '♥ Dans mes envies' : '♡ Ajouter aux envies'}</button>
             </div>
             <p className="cd__notice" role="status">{notice}</p>
           </div>
         </header>
 
+        {!has && (
+          <section className="cd-locked">
+            <p>Tu n'as pas encore cette carte. La fiche complète (statistiques, techniques, amélioration) se débloque dès que tu l'obtiens.</p>
+            <div className="cd-locked__passive"><small>Passif</small><b>✦ {kit[3].name}</b><p>{kit[3].text}</p></div>
+            <dl className="cd-info">
+              <div><dt>Où la trouver</dt><dd>{banner ? `Invocation ${banner.world}` : '—'}</dd></div>
+              <div><dt>Chance par invocation</dt><dd>{rate ? `${pct(rate)} · 1 sur ${n(Math.round(1 / rate))}` : '—'}</dd></div>
+            </dl>
+          </section>
+        )}
+
+        {has && <>
         <Section hue="#ff5d7a" title="Statistiques" aside={`Puissance ${n(state.power)}`}>
           <div className="cd-level">
             <b>Niveau {state.level}<i> / {MAX_LEVEL}</i></b>
@@ -124,12 +136,11 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
 
         <Section hue="#ff9a3d" title="Techniques" aside={hero.role}>
           <ul className="cd-kit">
-            {([['Attaque', kit.attack], ['Technique', kit.skill], ['Ultime', kit.ultimate]] as const).map(([kind, [name, text, cost]]) => (
-              <li key={kind} className={`cd-kit--${kind === 'Attaque' ? 'a' : kind === 'Technique' ? 't' : 'u'}`}><small>{kind}</small><b>{name}</b><p>{text}</p><em>{kind === 'Ultime' ? 'Énergie pleine' : `Endurance ${cost}`}</em></li>
+            {kit.map((m) => (
+              <li key={m.kind} className={`cd-kit--${m.kind === 'Attaque' ? 'a' : m.kind === 'Technique' ? 't' : m.kind === 'Ultime' ? 'u' : 'p'}`}><small>{m.kind}</small><b>{m.name}</b><p>{m.text}</p>{m.cost && <em>{m.cost}</em>}</li>
             ))}
-            <li className="cd-kit__passive"><small>Passif</small><b>{kit.passive[0]}</b><p>{kit.passive[1]}</p></li>
           </ul>
-          <p className="cd-note">Techniques du rôle « {hero.role} ». Elles serviront quand les combats ouvriront ; les vraies attaques de chaque personnage ne sont pas encore écrites.</p>
+          <p className="cd-note">Les chiffres sont calculés sur les statistiques actuelles de la carte : ils montent avec son niveau. Les techniques serviront quand les combats ouvriront.</p>
         </Section>
 
         <Section hue="#4be3a4" title="Collectifs" aside={`+${state.groups.reduce((s, g) => s + g.bonus, 0)} %`}>
@@ -170,6 +181,8 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
             <div><dt>Première obtention</dt><dd>{first ? when(first.t) : '—'}</dd></div>
           </dl>
         </Section>
+
+        </>}
 
         <Section hue="#b78bff" title="Dans le même univers" aside={`${same.filter((h) => owned[h.id]).length} / ${same.length}`}>
           <div className="cd-same">
