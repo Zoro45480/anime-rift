@@ -134,6 +134,8 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 .card__burst--back { opacity: 0.85; }
 .card__feather { stroke: rgba(7, 8, 18, 0.6); stroke-width: 0.3; stroke-linejoin: round; }
 .card__vein { fill: none; stroke: rgba(255, 255, 255, 0.75); stroke-width: 0.35; stroke-linecap: round; }
+.card__vein--chrome { stroke: rgba(255, 255, 255, 0.95); stroke-width: 0.5; }
+.card__vein--dark { stroke: rgba(255, 255, 255, 0.35); stroke-width: 0.3; }
 .card__curl { fill: none; stroke-width: 0.8; stroke-linecap: round; }
 .card__spark { fill: #fff; transform-box: fill-box; transform-origin: center; animation: spark 2.8s ease-in-out infinite; }
 @keyframes spark { 0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); } 50% { opacity: 1; transform: scale(1) rotate(45deg); } }
