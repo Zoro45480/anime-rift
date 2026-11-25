@@ -1,0 +1,55 @@
+/* ANIME RIFT — jetons de design. Toute couleur, taille ou durée du jeu vient d'ici. */
+:root {
+  /* Fonds */
+  --abyss: #04050d;
+  --night: #0a0d24;
+  --night-2: #121638;
+  --veil: rgba(140, 150, 255, 0.07);
+
+  /* Énergie */
+  --violet: #8b5cff;
+  --violet-deep: #4a1fb8;
+  --cyan: #3ef0ff;
+  --cyan-soft: #8ff7ff;
+  --silver: #c9d2ee;
+  --white: #f6f8ff;
+  --gold: #ffd77a;
+  --gold-deep: #c78a2c;
+  --danger: #ff4d6d;
+  --heal: #5dffb0;
+
+  /* Texte */
+  --text: #e9ecff;
+  --text-dim: #9aa2cf;
+  --text-faint: #5f678f;
+
+  /* Raretés */
+  --r-rare: #5aa9ff;
+  --r-epic: #b06bff;
+  --r-legend: #ffd77a;
+  --r-rift: #3ef0ff;
+
+  /* Affinités */
+  --a-fire: #ff6b3d;
+  --a-water: #3d9bff;
+  --a-thunder: #ffe14d;
+  --a-wind: #6dffb8;
+  --a-earth: #c9925a;
+  --a-light: #fff4c2;
+  --a-dark: #9a4dff;
+  --a-rift: #3ef0ff;
+
+  /* Typo */
+  --font-display: 'Chakra Petch', 'Segoe UI', sans-serif;
+  --font-body: 'Sora', 'Segoe UI', sans-serif;
+
+  /* Formes : l'angle coupé est la signature du jeu */
+  --cut: 14px;
+  --cut-lg: 26px;
+
+  /* Mouvement */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --fast: 140ms;
+  --mid: 320ms;
+  --slow: 700ms;
+}
