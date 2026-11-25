@@ -2,7 +2,7 @@
 html, body, #root { height: 100%; }
 body {
   margin: 0;
-  background: var(--abyss);
+  background: var(--ink);
   color: var(--text);
   font-family: var(--font);
   font-size: 15px;
@@ -12,7 +12,7 @@ body {
 }
 h1, h2, h3, p { margin: 0; }
 button { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; }
-button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+button:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 img { display: block; max-width: 100%; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }

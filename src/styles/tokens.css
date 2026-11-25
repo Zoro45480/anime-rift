@@ -1,37 +1,29 @@
-/* ANIME RIFT — jetons de design (v2, style épuré). Toute couleur, taille ou durée du jeu vient d'ici. */
+/* ANIME RIFT — jetons de design (v3). Toute couleur, taille ou durée du jeu vient d'ici. */
 :root {
   color-scheme: dark;
 
-  /* Fonds */
-  --abyss: #05060e;
-  --night: #0b0e22;
-  --night-2: #141834;
+  --ink: #0b090d;          /* fond général, noir chaud */
+  --ink-2: #15121a;        /* surfaces */
+  --ink-3: #1f1b26;
+  --line: rgba(255, 240, 220, 0.12);
+  --line-strong: rgba(255, 240, 220, 0.38);
 
-  /* Surfaces : verre sombre, liseré très fin */
-  --glass: rgba(18, 22, 48, 0.55);
-  --glass-strong: rgba(14, 17, 38, 0.82);
-  --line: rgba(255, 255, 255, 0.09);
-  --line-strong: rgba(255, 255, 255, 0.22);
+  --cream: #f6ead2;        /* titres */
+  --text: #ece6dc;
+  --text-dim: #a59f9a;
+  --text-faint: #6f6a6c;
 
-  /* Accents */
-  --violet: #8f6bff;
+  --gold: #f6cf63;
+  --gold-deep: #e0a52a;
+  --ember: #ff5a3c;        /* accent d'action */
+  --violet: #9b7bff;
   --cyan: #5ee6ff;
-  --silver: #c7cee6;
-  --white: #f7f8ff;
-  --gold: #f2cf8d;
 
-  /* Texte */
-  --text: #eef0ff;
-  --text-dim: #a2a8c9;
-  --text-faint: #6a7096;
+  --r-rare: #7fb4ff;
+  --r-epic: #b993ff;
+  --r-legend: #ffd56b;
+  --r-rift: #ff4d6a;
 
-  /* Raretés */
-  --r-rare: #6fb1ff;
-  --r-epic: #b48cff;
-  --r-legend: #f2cf8d;
-  --r-rift: #5ee6ff;
-
-  /* Affinités */
   --a-fire: #ff7a52;
   --a-water: #55a8ff;
   --a-thunder: #ffe066;
@@ -41,13 +33,15 @@
   --a-dark: #a56bff;
   --a-rift: #5ee6ff;
 
-  --font: 'Sora', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Anton', 'Impact', 'Arial Narrow', sans-serif;
+  --font: 'Manrope', 'Segoe UI', system-ui, sans-serif;
 
-  --radius: 14px;
-  --radius-sm: 9px;
+  --radius: 18px;
+  --radius-sm: 12px;
+  --bar-h: 64px;
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --fast: 140ms;
-  --mid: 320ms;
-  --slow: 700ms;
+  --mid: 300ms;
+  --slow: 650ms;
 }
