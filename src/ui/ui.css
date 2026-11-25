@@ -515,9 +515,25 @@ body { background: #000; }
 .col-ring__fill { stroke-linecap: round; transition: stroke-dashoffset var(--slow) var(--ease-out); filter: drop-shadow(0 0 6px rgba(94, 230, 255, 0.6)); }
 .col-ring b { position: absolute; inset: 0; display: grid; place-content: center; grid-auto-flow: column; align-items: baseline; font-family: var(--font-display); font-weight: 700; font-size: clamp(24px, 6vw, 32px); color: var(--cream); font-variant-numeric: tabular-nums; }
 .col-ring b i { font-style: normal; font-size: 0.5em; color: var(--text-dim); margin-left: 2px; }
-.col__tally { display: flex; flex-wrap: wrap; gap: 6px; }
-.col__tally span { display: flex; align-items: baseline; gap: 8px; padding: 6px 14px 6px 10px; border-radius: 10px; font-size: 13px; font-weight: 800; color: var(--text); background: #0a0b10; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.09), inset 3px 0 0 var(--rc); font-variant-numeric: tabular-nums; }
-.col__tally b { font-family: var(--font-display); font-style: italic; font-size: 17px; color: var(--rc); }
+/* Filtres de la collection */
+.filters { display: grid; gap: 12px; padding: 16px 18px; border-radius: 18px; background: #08090d; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.09); }
+.filters__label { font-size: 10.5px; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-faint); }
+.filters__search { display: grid; gap: 6px; }
+.filters__search input { width: 100%; min-height: 44px; padding: 0 14px; font: inherit; font-size: 16px; color: var(--cream); background: #000; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 12px; }
+.filters__search input::placeholder { color: var(--text-faint); }
+.filters__search input:focus-visible { outline: 2px solid var(--cyan); outline-offset: 1px; }
+.filters__row { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 10px; align-items: center; }
+.filters__chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.fchip { --rc: var(--cyan); display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 5px 13px; border-radius: 10px; font-size: 13px; font-weight: 800; color: var(--text-dim); background: #000; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12); font-variant-numeric: tabular-nums; transition: color var(--mid), box-shadow var(--mid), background var(--mid); }
+.fchip b { font-family: var(--font-display); font-style: italic; font-size: 17px; color: var(--rc); }
+.fchip:hover { color: var(--cream); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3); }
+.fchip.is-on { color: var(--cream); background: color-mix(in srgb, var(--rc) 20%, #000); box-shadow: inset 0 0 0 1.5px var(--rc), 0 0 14px color-mix(in srgb, var(--rc) 35%, transparent); }
+.fchip--affinity { padding-left: 11px; }
+.fchip--affinity .affinity { background: none; width: auto !important; height: auto !important; }
+.filters__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 13px; color: var(--text-dim); }
+.filters__foot .linkbtn { padding: 2px 0; }
+.col__empty { display: grid; justify-items: center; gap: 14px; padding: 34px 16px; text-align: center; color: var(--text-dim); border-radius: 18px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.09); }
+.col__empty .btn { width: auto; }
 .col__hint { font-size: 13px; color: var(--text-dim); }
 .col__groups { display: flex; flex-wrap: wrap; gap: 22px 18px; }
 /* chaque rareté occupe juste la largeur de ses cartes : les petites se rangent côte à côte */
@@ -535,3 +551,4 @@ body { background: #000; }
   .nx-gate__art { right: -12%; }
   .nx-gate__text { max-width: 66%; }
 }
+@media (max-width: 480px) { .filters__row { grid-template-columns: minmax(0, 1fr); gap: 6px; } }

@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { HEROES, type Hero } from '../data/heroes'
-import { RARITIES, RARITY_ORDER } from '../data/rarities'
+import { AFFINITY_LIST, type AffinityId } from '../data/affinities'
+import { RARITIES, RARITY_ORDER, type RarityId } from '../data/rarities'
 import { fileToCardImage } from '../state/customArt'
 import { useStore } from '../state/store'
+import { AffinityIcon } from '../ui/AffinityIcon'
 import { Card } from '../ui/Card'
 
 // Bouton « Mon image » : le joueur choisit une image sur son appareil pour illustrer la carte.
@@ -48,10 +50,34 @@ const Ring = ({ value, total }: { value: number; total: number }) => {
   )
 }
 
+type OwnedFilter = 'all' | 'owned' | 'missing'
+const OWNED_LABELS: Record<OwnedFilter, string> = { all: 'Toutes', owned: 'Obtenues', missing: 'Manquantes' }
+
+// Ignore la casse et les accents, pour que « celestine » trouve « Célestine ».
+const fold = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+
+const toggle = <T,>(list: T[], item: T): T[] => (list.includes(item) ? list.filter((x) => x !== item) : [...list, item])
+
 export const Collection = ({ onSummon }: { onSummon: () => void }) => {
   const { owned } = useStore()
+  const [query, setQuery] = useState('')
+  const [rarities, setRarities] = useState<RarityId[]>([]) // vide = toutes
+  const [affinities, setAffinities] = useState<AffinityId[]>([]) // vide = toutes
+  const [ownedFilter, setOwnedFilter] = useState<OwnedFilter>('all')
+
   const have = HEROES.filter((h) => owned[h.id]).length
-  const groups = RARITY_ORDER.map((id) => ({ rarity: RARITIES[id], cards: HEROES.filter((h) => h.rarity === id) })).filter((g) => g.cards.length > 0)
+  const q = fold(query.trim())
+  const visible = HEROES.filter((h) =>
+    (rarities.length === 0 || rarities.includes(h.rarity)) &&
+    (affinities.length === 0 || affinities.includes(h.affinity)) &&
+    (ownedFilter === 'all' || (ownedFilter === 'owned') === Boolean(owned[h.id])) &&
+    (q === '' || fold(`${h.name} ${h.title} ${h.world} ${h.role}`).includes(q)))
+  const filtering = q !== '' || rarities.length > 0 || affinities.length > 0 || ownedFilter !== 'all'
+  const reset = () => { setQuery(''); setRarities([]); setAffinities([]); setOwnedFilter('all') }
+
+  const all = RARITY_ORDER.map((id) => ({ rarity: RARITIES[id], cards: HEROES.filter((h) => h.rarity === id) })).filter((g) => g.cards.length > 0)
+  const groups = all.map((g) => ({ ...g, shown: g.cards.filter((h) => visible.includes(h)) })).filter((g) => g.shown.length > 0)
+  const usedAffinities = AFFINITY_LIST.filter((a) => HEROES.some((h) => h.affinity === a.id))
 
   return (
     <div className="col">
@@ -64,31 +90,77 @@ export const Collection = ({ onSummon }: { onSummon: () => void }) => {
         <Ring value={have} total={HEROES.length} />
       </header>
 
-      <div className="col__tally" aria-label="Cartes obtenues par rareté">
-        {groups.map(({ rarity, cards }) => (
-          <span key={rarity.id} style={{ ['--rc' as string]: rarity.color }}><b>{rarity.short}</b>{cards.filter((h) => owned[h.id]).length}/{cards.length}</span>
-        ))}
-      </div>
+      <section className="filters" aria-label="Filtres de la collection">
+        <div className="filters__search">
+          <label htmlFor="col-search" className="filters__label">Recherche</label>
+          <input id="col-search" type="search" placeholder="Nom, titre, univers ou rôle…" value={query} onChange={(e) => setQuery(e.target.value)} />
+        </div>
+
+        <div className="filters__row">
+          <span className="filters__label">Rareté</span>
+          <div className="filters__chips">
+            {all.map(({ rarity, cards }) => (
+              <button key={rarity.id} className={`fchip ${rarities.includes(rarity.id) ? 'is-on' : ''}`} style={{ ['--rc' as string]: rarity.color }}
+                aria-pressed={rarities.includes(rarity.id)} onClick={() => setRarities(toggle(rarities, rarity.id))}>
+                <b>{rarity.short}</b>{cards.filter((h) => owned[h.id]).length}/{cards.length}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="filters__row">
+          <span className="filters__label">Affinité</span>
+          <div className="filters__chips">
+            {usedAffinities.map((a) => (
+              <button key={a.id} className={`fchip fchip--affinity ${affinities.includes(a.id) ? 'is-on' : ''}`} style={{ ['--rc' as string]: a.color }}
+                aria-pressed={affinities.includes(a.id)} onClick={() => setAffinities(toggle(affinities, a.id))}>
+                <AffinityIcon id={a.id} size={14} />{a.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="filters__row">
+          <span className="filters__label">Cartes</span>
+          <div className="filters__chips" role="radiogroup" aria-label="Possession">
+            {(Object.keys(OWNED_LABELS) as OwnedFilter[]).map((id) => (
+              <button key={id} role="radio" aria-checked={ownedFilter === id} className={`fchip ${ownedFilter === id ? 'is-on' : ''}`} onClick={() => setOwnedFilter(id)}>{OWNED_LABELS[id]}</button>
+            ))}
+          </div>
+        </div>
+
+        <div className="filters__foot">
+          <p role="status">{visible.length} carte{visible.length > 1 ? 's' : ''} affichée{visible.length > 1 ? 's' : ''} sur {HEROES.length}</p>
+          {filtering && <button className="linkbtn" onClick={reset}>Réinitialiser les filtres</button>}
+        </div>
+      </section>
 
       <p className="col__hint">« Mon image » remplace l'illustration d'une carte par une image de votre appareil. Elle reste sur cet appareil.</p>
 
+      {groups.length === 0 && (
+        <div className="col__empty">
+          <p>Aucune carte ne correspond à ces filtres.</p>
+          <button className="btn" onClick={reset}>Réinitialiser les filtres</button>
+        </div>
+      )}
+
       <div className="col__groups">
-      {groups.map(({ rarity, cards }) => (
-        <section key={rarity.id} className="col-group" style={{ ['--rc' as string]: rarity.color }}>
-          <header className="col-group__head">
-            <b>{rarity.short}</b><span>{rarity.label}</span><i />
-            <em>{cards.filter((h) => owned[h.id]).length} / {cards.length}</em>
-          </header>
-          <div className="col-group__grid">
-            {cards.map((h) => (
-              <div key={h.id} className="col-item">
-                <Card hero={h} count={owned[h.id]} locked={!owned[h.id]} />
-                <ArtPicker hero={h} />
-              </div>
-            ))}
-          </div>
-        </section>
-      ))}
+        {groups.map(({ rarity, cards, shown }) => (
+          <section key={rarity.id} className="col-group" style={{ ['--rc' as string]: rarity.color }}>
+            <header className="col-group__head">
+              <b>{rarity.short}</b><span>{rarity.label}</span><i />
+              <em>{cards.filter((h) => owned[h.id]).length} / {cards.length}</em>
+            </header>
+            <div className="col-group__grid">
+              {shown.map((h) => (
+                <div key={h.id} className="col-item">
+                  <Card hero={h} count={owned[h.id]} locked={!owned[h.id]} />
+                  <ArtPicker hero={h} />
+                </div>
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
 
       {have === 0 && <button className="btn btn--gold col__cta" onClick={onSummon}>Faire une première invocation</button>}
