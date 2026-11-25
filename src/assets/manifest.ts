@@ -18,3 +18,8 @@ const logos = import.meta.glob('./logo/*.png', { eager: true, query: '?url', imp
 
 // Logo 3D (rendu par tools/render-logo) : 'full' = emblème + ANIME RIFT, 'emblem' = losange seul.
 export const logoArt = (variant: 'full' | 'emblem'): string => logos[`./logo/${variant}.png`] ?? ''
+
+const frames = import.meta.glob('./frames/*.png', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
+
+// Cadre d'une rareté, rendu avec Blender (tools/blender/build_frames.py). L'image déborde de la carte : voir .card__frame.
+export const frameArt = (rarity: string): string => frames[`./frames/${rarity}.png`] ?? ''

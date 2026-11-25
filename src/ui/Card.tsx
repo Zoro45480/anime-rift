@@ -2,11 +2,9 @@ import { useRef, type CSSProperties, type PointerEvent } from 'react'
 import { AFFINITIES } from '../data/affinities'
 import type { Hero } from '../data/heroes'
 import { RARITIES } from '../data/rarities'
-import { heroArt } from '../assets/manifest'
+import { frameArt, heroArt } from '../assets/manifest'
 import { useStore } from '../state/store'
 import { AffinityIcon } from './AffinityIcon'
-import { CardOrnaments } from './CardOrnaments'
-import { CardBurst } from './CardBurst'
 
 type Props = { hero: Hero; count?: number; locked?: boolean; className?: string; style?: CSSProperties }
 
@@ -41,8 +39,6 @@ export const Card = ({ hero, count, locked, className = '', style }: Props) => {
       style={{ ['--rc' as string]: rarity.color, ['--ac' as string]: AFFINITIES[hero.affinity].color, ['--delay' as string]: `${-hero.no * 0.9}s`, ...style }}
       onPointerMove={locked ? undefined : onMove} onPointerLeave={onLeave} onPointerCancel={onLeave}>
       <div className="card__tilt">
-        <CardBurst rarity={hero.rarity} layer="back" />
-        <div className="card__edge" />
         <div className="card__face">
           <div className="card__bg" />
           <div className="card__rays" />
@@ -66,9 +62,8 @@ export const Card = ({ hero, count, locked, className = '', style }: Props) => {
               <em>N° {String(hero.no).padStart(4, '0')}</em>
             </span>
           </div>
-          <CardOrnaments rarity={hero.rarity} />
         </div>
-        <CardBurst rarity={hero.rarity} layer="front" />
+        <img className="card__frame" src={frameArt(hero.rarity)} alt="" />
         <span className="card__mono" data-t={rarity.short} aria-label={rarity.label}>{rarity.short}</span>
       </div>
     </div>
