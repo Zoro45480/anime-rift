@@ -88,6 +88,37 @@ export class SummonAudio {
     }
   }
 
+  // Une lumière éclate et révèle sa carte : petit souffle et note de la rareté (plus riche si la carte est rare).
+  pop(rarity: RarityId) {
+    if (!ctx) return
+    const c = ctx
+    const out = this.bus(c, 0.42)
+    const at = c.currentTime + 0.01
+    this.sweep(c, out, this.noiseBuffer(c), at, 0.22, 3200, 500, 0.28, 'bandpass')
+    const notes = { rare: [12], epic: [12, 19], legend: [12, 16, 19, 24], rift: [0, 7, 12, 15, 19] }[rarity]
+    notes.forEach((n, i) => this.bell(c, out, at + 0.03 + i * 0.045, rarity === 'rare' ? 0.6 : 1.3, NOTE(n), 0.16))
+    if (rarity === 'legend' || rarity === 'rift') this.tone(c, out, at, 0.9, 140, 34, 0.6, 'sine')
+  }
+
+  // Plan d'annonce d'une carte LR ou MR : sifflement tranchant puis coup grave.
+  cutIn(rarity: RarityId) {
+    if (!ctx) return
+    const c = ctx
+    const out = this.bus(c, 0.45)
+    const at = c.currentTime + 0.01
+    this.sweep(c, out, this.noiseBuffer(c), at, 0.35, 900, 9000, 0.4, 'highpass')
+    this.tone(c, out, at + 0.28, 1.1, 180, 30, rarity === 'rift' ? 0.95 : 0.75, 'sine')
+    this.tone(c, out, at + 0.28, 0.5, 880, 220, 0.12, 'sawtooth', 1800)
+  }
+
+  // Sortie audio indépendante de la piste principale (pour les sons déclenchés à la demande).
+  private bus(c: AudioContext, gain: number) {
+    const g = c.createGain()
+    g.gain.value = gain
+    g.connect(c.destination)
+    return g
+  }
+
   // Passer la cinématique : on coupe tout et on joue seulement l'accord.
   skip(rarity: RarityId) {
     this.stop(0.08)

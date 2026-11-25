@@ -18,6 +18,7 @@ export type Quality = 'high' | 'low'
 export type StageEvents = {
   onPhase: (phase: Phase) => void
   onFrame: (flash: number, dark: number) => void // éclat blanc et assombrissement, appliqués par l'interface
+  onReady?: () => void // toutes les lumières des cartes sont en place autour du portail
 }
 
 const ease = (t: number) => t * t * (3 - 2 * t)
@@ -82,6 +83,9 @@ export class SummonStage {
   private rays!: THREE.Mesh
   private flare!: THREE.Sprite
   private hero: THREE.Mesh | null = null
+  private orbs: { root: THREE.Group; gem: THREE.Mesh; glow: THREE.Sprite; home: THREE.Vector3; popAt: number }[] = []
+  private pulse = 0 // petit éclat à chaque lumière qui éclate
+  private ready = false
   private disposables: { dispose: () => void }[] = []
 
   private canvas: HTMLCanvasElement
@@ -151,7 +155,7 @@ export class SummonStage {
   }
 
   // Lance la séquence pour une rareté. `artUrl` = illustration du personnage révélé (absente pour un tirage multiple).
-  async start(preset: SummonPreset, artUrl: string | null, events: StageEvents) {
+  async start(preset: SummonPreset, artUrl: string | null, events: StageEvents, orbColors: number[] = []) {
     this.preset = preset
     this.events = events
     const c = preset.colors
@@ -221,6 +225,7 @@ export class SummonStage {
     this.scene.add(this.flare)
     this.buildBackdrop(c)
     if (artUrl) await this.buildHero(artUrl, c)
+    this.buildOrbs(orbColors)
 
     // caméra : le plan animé dans Blender, piloté par l'avancement de la séquence
     const cam = this.cameras.get(preset.camera)
@@ -251,10 +256,23 @@ export class SummonStage {
     this.raf = requestAnimationFrame(this.tick)
   }
 
-  // Saute directement à la révélation.
+  // Saute directement à la fin de l'ouverture : les lumières sont en place autour du portail.
   skip() {
     const reveal = phaseStarts(this.preset.times).reveal
-    if (this.time < reveal) this.time = reveal + 0.9
+    if (this.time < reveal + 2) this.time = reveal + 2
+  }
+
+  // Durée, en secondes, entre l'explosion et le moment où toutes les lumières ont pris leur place.
+  orbsSettleTime(): number {
+    return this.preset.times.burst + 0.15 + this.orbs.length * 0.08 + 0.75
+  }
+
+  // Fait éclater la lumière n° i : elle fonce vers la caméra et disparaît dans un éclat.
+  popOrb(i: number) {
+    const orb = this.orbs[i]
+    if (!orb || orb.popAt >= 0) return
+    orb.popAt = this.time
+    this.pulse = 1
   }
 
   resize = () => {
@@ -297,6 +315,34 @@ export class SummonStage {
     g.fillStyle = grad
     g.fillRect(0, 0, 128, 128)
     return this.keep(new THREE.CanvasTexture(c))
+  }
+
+  // Une lumière par carte tirée : un cristal blanc dans un halo à la couleur de sa rareté.
+  // Elles jaillissent du portail à l'explosion et se rangent en cercle autour de lui (ou au centre s'il n'y en a qu'une).
+  private buildOrbs(colors: number[]) {
+    if (colors.length === 0) return
+    const glowTex = this.radialTexture()
+    const geo = this.crystals[0].geometry
+    const R = 2.05 * this.preset.portalScale + 1.2
+    // sur un écran en hauteur (téléphone), le cercle devient un ovale pour que toutes les lumières restent visibles
+    const portrait = this.canvas.clientWidth < this.canvas.clientHeight
+    const squeeze = portrait ? 0.6 : 1
+    const stretch = portrait ? 1.2 : 1
+    colors.forEach((color, i) => {
+      const root = new THREE.Group()
+      const glow = new THREE.Sprite(this.keep(new THREE.SpriteMaterial({ map: glowTex, color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false })))
+      glow.scale.setScalar(2.6)
+      const halo = new THREE.Mesh(new THREE.RingGeometry(0.46, 0.53, 40), this.keep(new THREE.MeshBasicMaterial({ color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false, side: THREE.DoubleSide })))
+      const gem = new THREE.Mesh(geo, this.keep(new THREE.MeshBasicMaterial({ color: 0xffffff, depthTest: false })))
+      gem.scale.setScalar(0.6)
+      root.add(glow, halo, gem)
+      root.visible = false
+      root.renderOrder = 20
+      const a = Math.PI / 2 - (i / colors.length) * Math.PI * 2 // la première en haut, puis dans le sens des aiguilles
+      const home = colors.length === 1 ? new THREE.Vector3(0, 0.15, 1.8) : new THREE.Vector3(Math.cos(a) * R * squeeze, Math.sin(a) * R * stretch, 0.8)
+      this.scene.add(root)
+      this.orbs.push({ root, gem, glow, home, popAt: -1 })
+    })
   }
 
   // Particules : elles sont aspirées en spirale vers le portail, puis soufflées par l'explosion.
@@ -554,6 +600,35 @@ export class SummonStage {
     flareMat.opacity = clamp01(energy * 0.16 + flash * 0.9) * (p.voidDisc && !is('burst') ? 0.25 : 1) * (is('reveal') ? 1 - 0.9 * settled : 1)
     this.flare.scale.setScalar((4 + energy * 3 + flash * 16) * p.portalScale)
 
+    // --- lumières des cartes --------------------------------------------------------------------------------
+    this.pulse = Math.max(0, this.pulse - dt * 3.2)
+    const sinceBurst = this.time - phaseStarts(T).burst
+    if (!this.ready && sinceBurst >= this.orbsSettleTime()) {
+      this.ready = true
+      this.events.onReady?.()
+    }
+    const facing = this.camera.getWorldQuaternion(new THREE.Quaternion())
+    this.orbs.forEach((orb, i) => {
+      if (orb.popAt >= 0) {
+        const u = (this.time - orb.popAt) / 0.32
+        orb.root.visible = u < 1
+        orb.root.position.lerpVectors(orb.home, new THREE.Vector3(0, 0, 3), ease(clamp01(u)))
+        orb.root.scale.setScalar(1 + u * 3)
+        orb.glow.material.opacity = 1 - clamp01(u) * 0.6
+        return
+      }
+      const u = clamp01((sinceBurst - 0.15 - i * 0.08) / 0.75)
+      orb.root.visible = u > 0
+      if (u <= 0) return
+      const out = 1 - Math.pow(1 - u, 3) // jaillit vite, se pose doucement
+      orb.root.position.copy(orb.home).multiplyScalar(out)
+      orb.root.position.z = orb.home.z * out + Math.sin(Math.PI * u) * 2.6 // arc vers la caméra pendant le vol
+      orb.root.position.y += Math.sin(this.time * 2.2 + i) * 0.07 * out
+      orb.root.scale.setScalar(0.3 + 0.7 * out + Math.sin(this.time * 5 + i * 1.7) * 0.05)
+      orb.root.quaternion.copy(facing)
+      orb.gem.rotation.z += dt * 2.4
+    })
+
     // --- personnage ---------------------------------------------------------------------------------------
     if (this.hero) {
       const hu = (this.hero.material as THREE.ShaderMaterial).uniforms
@@ -566,7 +641,7 @@ export class SummonStage {
     }
 
     // --- rendu --------------------------------------------------------------------------------------------
-    this.events.onFrame(flash, this.composer ? 0 : dark * 0.8)
+    this.events.onFrame(Math.max(flash, this.pulse * 0.55), this.composer ? 0 : dark * 0.8)
     if (this.composer && this.bloom && this.warp) {
       this.bloom.strength = (p.bloom * (0.3 + energy * 0.4) + flash * 1.1) * (1 - 0.65 * settled)
       const center = new THREE.Vector3(0, 0, 0).project(this.camera)
