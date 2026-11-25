@@ -75,6 +75,13 @@ export const cardState = (hero: Hero, xp: Record<string, number>, owned: Record<
   return { ...lv, cap, freed, groups, bonus, stats, power: power(stats) }
 }
 
+// ───── Énergie ─────
+// Chaque combat coûtera un éclair. L'énergie remonte toute seule : un éclair toutes les 6 minutes, jusqu'au maximum.
+export const ENERGY_MAX = 10
+export const ENERGY_REGEN_MS = 6 * 60 * 1000
+export const energyNow = (energy: number, at: number, now: number) =>
+  energy >= ENERGY_MAX ? energy : Math.min(ENERGY_MAX, energy + Math.floor(Math.max(0, now - at) / ENERGY_REGEN_MS))
+
 // ───── Compte du joueur et Renaissance ─────
 // Le compte gagne de l'XP à chaque carte invoquée et à chaque amélioration de carte. Au niveau 100, le joueur peut
 // « renaître » : il repart du niveau 1 avec 5 cartes de son choix et garde pour toujours les bonus ci-dessous.

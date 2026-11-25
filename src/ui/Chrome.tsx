@@ -1,4 +1,5 @@
-import { accountLevel } from '../game/progression'
+import { accountLevel, ENERGY_MAX } from '../game/progression'
+import { LevelBadge } from './LevelBadge'
 import { useStore } from '../state/store'
 import { Coin } from './Coin'
 import { logoArt, uiArt } from '../assets/manifest'
@@ -14,14 +15,15 @@ export const Logo = () => (
 )
 
 // Barre du haut : logo et ressources du joueur, chaque ressource dans sa plaquette en biais.
-export const TopBar = () => {
-  const { tickets, gems, accountXp, rebirths } = useStore()
+export const TopBar = ({ onPlay }: { onPlay: () => void }) => {
+  const { tickets, gems, energyLeft, accountXp, rebirths } = useStore()
   return (
     <header className="topbar">
       <div className="topbar__in">
         <Logo />
         <div className="wallet" aria-label="Vos ressources">
-          <span title="Niveau de compte"><Coin name="bolt" size={24} /><b><small>Nv </small>{accountLevel(accountXp, rebirths).level}</b></span>
+          <LevelBadge level={accountLevel(accountXp, rebirths).level} />
+          <button className="wallet__energy" onClick={onPlay} aria-label={`Énergie : ${energyLeft} sur ${ENERGY_MAX}. Aller au Nexus`}><Coin name="bolt" size={24} /><b>{energyLeft}<small>/{ENERGY_MAX}</small></b></button>
           <span title="Flammes d'âme"><Coin name="soul" size={24} /><b>{gems}</b></span>
           <span title="Sceaux d'invocation"><Coin name="seal" size={24} /><b>{tickets}</b></span>
         </div>

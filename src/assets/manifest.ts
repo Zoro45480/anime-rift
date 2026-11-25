@@ -40,3 +40,8 @@ const gates = import.meta.glob('./gates/*.webp', { eager: true, query: '?url', i
 
 // Illustrations 3D des portes du Nexus et de la Renaissance (tools/blender/build_gates.py).
 export const gateArt = (name: 'saga' | 'raids' | 'spire' | 'arena' | 'rebirth'): string => gates[`./gates/${name}.webp`] ?? ''
+
+const digits = import.meta.glob('./digits/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
+
+// Chiffres 3D dorés du niveau de compte, et le sigle « NV » (tools/blender/build_digits.py).
+export const digitArt = (glyph: string): string => digits[`./digits/${glyph}.webp`] ?? ''

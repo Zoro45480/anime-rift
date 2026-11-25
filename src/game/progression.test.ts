@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { HEROES } from '../data/heroes'
 import { MOVES } from '../data/moves'
 import { RARITY_ORDER } from '../data/rarities'
-import { AWAKEN_STAT, LEVEL_CAP, accountLevel, accountNeed, rebirthTitle, REBIRTH_LEVEL, power, baseRank, baseStats, cardState, collectifs, kitOf, levelFromXp, MAX_LEVEL, statsAt, xpToNext } from './progression'
+import { ENERGY_MAX, ENERGY_REGEN_MS, energyNow, AWAKEN_STAT, LEVEL_CAP, accountLevel, accountNeed, rebirthTitle, REBIRTH_LEVEL, power, baseRank, baseStats, cardState, collectifs, kitOf, levelFromXp, MAX_LEVEL, statsAt, xpToNext } from './progression'
 
 describe('progression des cartes', () => {
   it('monte de niveau au bon nombre de points', () => {
@@ -96,5 +96,12 @@ describe('progression des cartes', () => {
     expect(freed.level).toBe(MAX_LEVEL)
     expect(freed.bonus - locked.bonus).toBe(AWAKEN_STAT)
     expect(freed.stats.hp).toBeGreaterThan(locked.stats.hp)
+  })
+
+  it('l’énergie remonte d’un éclair toutes les 6 minutes sans dépasser le maximum', () => {
+    expect(energyNow(3, 0, ENERGY_REGEN_MS - 1)).toBe(3)
+    expect(energyNow(3, 0, ENERGY_REGEN_MS * 2)).toBe(5)
+    expect(energyNow(3, 0, ENERGY_REGEN_MS * 100)).toBe(ENERGY_MAX)
+    expect(energyNow(ENERGY_MAX, 0, 1e12)).toBe(ENERGY_MAX)
   })
 })

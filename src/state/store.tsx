@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { BANNERS, COST, type Banner } from '../data/banners'
 import { heroById, type Hero } from '../data/heroes'
 import { pullMany } from '../game/gacha'
-import { ACCOUNT_XP, accountLevel, AWAKEN_COST, LEVEL_CAP, REBIRTH_SHARDS, levelFromXp, MAX_LEVEL, MERGE_XP, REBIRTH_KEEP, REBIRTH_LEVEL, REBIRTH_REFUND, REBIRTH_SEALS, REBIRTH_XP, scrollDrop, SCROLLS, type ScrollId } from '../game/progression'
+import { ENERGY_MAX, ENERGY_REGEN_MS, energyNow, ACCOUNT_XP, accountLevel, AWAKEN_COST, LEVEL_CAP, REBIRTH_SHARDS, levelFromXp, MAX_LEVEL, MERGE_XP, REBIRTH_KEEP, REBIRTH_LEVEL, REBIRTH_REFUND, REBIRTH_SEALS, REBIRTH_XP, scrollDrop, SCROLLS, type ScrollId } from '../game/progression'
 import { loadAllArt, removeArt, saveArt } from './customArt'
 import { loadRemoteArt, type RemoteStatus } from './remoteArt'
 
@@ -25,6 +25,8 @@ type State = {
   rebirths: number // nombre de Renaissances
   gemsSpent: number // âmes dépensées depuis la dernière Renaissance
   shards: number // Fragments d'âme
+  energy: number // éclairs au moment `energyAt` (ils remontent avec le temps, voir energyNow)
+  energyAt: number
   awakened: string[] // cartes libérées (niveau maximum 100)
 }
 
@@ -35,6 +37,8 @@ type Store = State & {
   useScroll: (heroId: string, scroll: ScrollId) => boolean
   toggleWish: (heroId: string) => void
   togglePin: (heroId: string) => boolean // false = vitrine pleine
+  energyLeft: number // éclairs disponibles maintenant
+  spendEnergy: () => boolean // un éclair par combat
   awaken: (heroId: string) => boolean // Libération d'une carte contre des Fragments d'âme
   rebirth: (keep: string[]) => boolean // Renaissance : repart du niveau 1 en gardant ces cartes
   remoteArt: Record<string, string> // adresses des portraits officiels sur AniList, par identifiant de personnage
@@ -50,7 +54,7 @@ const LOG_MAX = 30
 // Dotation de départ du compte.
 export const START_GEMS = 600
 const START: State = {
-  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [],
+  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0,
   tickets: 20, gems: START_GEMS, pity: Object.fromEntries(BANNERS.map((b) => [b.id, 0])), owned: {},
   xp: {}, scrolls: { small: 0, medium: 0, large: 0 }, wish: [], pinned: [], log: {},
 }
@@ -85,6 +89,11 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     void loadRemoteArt(setRemote).then(setRemoteStatus)
   }, [])
   useEffect(() => save(state), [state])
+  const [now, setNow] = useState(Date.now()) // fait remonter l'énergie à l'écran
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 15000)
+    return () => clearInterval(t)
+  }, [])
 
   const store = useMemo<Store>(() => {
     const price = (currency: Currency, count: number) => count * (currency === 'ticket' ? COST.ticket : COST.gems)
@@ -147,6 +156,15 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       return true
     }
 
+    const energyLeft = energyNow(state.energy, state.energyAt, now)
+    const spendEnergy = () => {
+      const left = energyNow(state.energy, state.energyAt, Date.now())
+      if (left < 1) return false
+      // on garde le temps déjà écoulé vers le prochain éclair
+      const at = left >= ENERGY_MAX ? Date.now() : state.energyAt + (left - state.energy) * ENERGY_REGEN_MS
+      setState({ ...state, energy: left - 1, energyAt: at })
+      return true
+    }
     const awaken = (heroId: string) => {
       const cost = AWAKEN_COST[heroById(heroId).rarity]
       if (state.rebirths < 1 || !state.owned[heroId] || state.awakened.includes(heroId) || state.shards < cost) return false
@@ -176,8 +194,8 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setArt((a) => Object.fromEntries(Object.entries(a).filter(([k]) => k !== heroId)))
       void removeArt(heroId)
     }
-    return { ...state, canAfford, summon, merge, useScroll, toggleWish, togglePin, awaken, rebirth, remoteArt, remoteStatus, customArt, setCustomArt, clearCustomArt }
-  }, [state, customArt, remoteArt, remoteStatus])
+    return { ...state, canAfford, summon, merge, useScroll, toggleWish, togglePin, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, customArt, setCustomArt, clearCustomArt }
+  }, [state, customArt, remoteArt, remoteStatus, now])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>
 }

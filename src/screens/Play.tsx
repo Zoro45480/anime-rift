@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { gateArt } from '../assets/manifest'
-import { accountLevel, REBIRTH_KEEP, REBIRTH_LEVEL, REBIRTH_STAT, REBIRTH_XP } from '../game/progression'
+import { ENERGY_MAX, ENERGY_REGEN_MS, accountLevel, REBIRTH_KEEP, REBIRTH_LEVEL, REBIRTH_STAT, REBIRTH_XP } from '../game/progression'
 import { useStore } from '../state/store'
+import { Coin } from '../ui/Coin'
 import { IconLock } from '../ui/icons'
+import { LevelBadge } from '../ui/LevelBadge'
 
 // Les portes du Nexus. Aucune n'est encore ouverte : chaque fiche dit ce que le mode contiendra.
 const GATES = [
@@ -34,15 +36,23 @@ const GateTile = ({ gate, featured, onOpen }: { gate: Gate; featured?: boolean; 
 )
 
 export const Play = ({ onRebirth }: { onRebirth: () => void }) => {
-  const { accountXp, rebirths } = useStore()
+  const { accountXp, rebirths, energyLeft } = useStore()
   const [open, setOpen] = useState<Gate | null>(null)
   const acc = accountLevel(accountXp, rebirths)
   return (
     <div className="nx">
+      <section className="energy" role="meter" aria-valuemin={0} aria-valuemax={ENERGY_MAX} aria-valuenow={energyLeft} aria-label="Énergie">
+        <div className="energy__row">
+          <Coin name="bolt" size={34} />
+          <b>{energyLeft}<i>/{ENERGY_MAX}</i></b>
+          <span className="energy__pips">{Array.from({ length: ENERGY_MAX }, (_, i) => <i key={i} className={i < energyLeft ? 'is-on' : ''} />)}</span>
+        </div>
+        <p>Un éclair par combat · +1 toutes les {ENERGY_REGEN_MS / 60000} minutes. {energyLeft >= ENERGY_MAX ? 'Énergie pleine.' : 'Elle remonte toute seule.'} Les combats ne sont pas encore ouverts : rien ne la dépense pour l'instant.</p>
+      </section>
       <header className="nx__head">
         <p className="eyebrow">Le Nexus</p>
         <h1>Choisis ta porte.</h1>
-        <p className="nx__level">Compte niveau <b>{acc.level}</b>{acc.need ? ` · ${acc.into.toLocaleString('fr-FR')} / ${acc.need.toLocaleString('fr-FR')} XP` : ' · niveau maximum'}</p>
+        <p className="nx__level"><LevelBadge level={acc.level} size={40} /><span>{acc.need ? `${acc.into.toLocaleString('fr-FR')} / ${acc.need.toLocaleString('fr-FR')} XP de compte` : 'Niveau maximum'}</span></p>
       </header>
       <GateTile gate={GATES[0]} featured onOpen={() => setOpen(GATES[0])} />
       <div className="nx__row">
