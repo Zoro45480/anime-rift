@@ -28,9 +28,20 @@ const rollRarity = (rng: Rng, pity: number): RarityId => {
 const pick = <T,>(rng: Rng, list: T[]): T => list[Math.floor(rng() * list.length)]
 
 // Les cartes qu'une bannière peut donner.
-export const bannerPool = (banner: Banner): Hero[] => HEROES.filter((h) => banner.pool.includes(h.world))
+const POOLS = new Map<string, Hero[]>() // calculé une fois par bannière
+export const bannerPool = (banner: Banner): Hero[] => {
+  let pool = POOLS.get(banner.id)
+  if (!pool) POOLS.set(banner.id, (pool = HEROES.filter((h) => banner.pool.includes(h.world))))
+  return pool
+}
 
-const poolOf = (banner: Banner, rarity: RarityId) => bannerPool(banner).filter((h) => h.rarity === rarity)
+const BY_RARITY = new Map<string, Hero[]>()
+const poolOf = (banner: Banner, rarity: RarityId) => {
+  const key = `${banner.id}/${rarity}`
+  let pool = BY_RARITY.get(key)
+  if (!pool) BY_RARITY.set(key, (pool = bannerPool(banner).filter((h) => h.rarity === rarity)))
+  return pool
+}
 
 // Une invocation. Fonction pure : mêmes entrées = même résultat (testable, et rejouable côté serveur plus tard).
 // Quand une rareté sort : 1 fois sur 2 on choisit parmi les cartes à l'affiche de cette rareté, sinon parmi toutes.

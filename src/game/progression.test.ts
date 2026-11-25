@@ -50,7 +50,7 @@ describe('progression des cartes', () => {
     for (const h of HEROES) expect(collectifs(h, all, HEROES.map((x) => x.id)).filter((c) => c.stat !== 'all' && c.counted).length).toBeLessThanOrEqual(MAX_GROUPS)
   })
 
-  it('classe chaque carte de 1 à 210 et donne un kit à chaque rôle', () => {
+  it('classe chaque carte parmi toutes celles du jeu et donne un kit à chaque rôle', () => {
     for (const h of HEROES) {
       expect(baseRank(h)).toBeGreaterThanOrEqual(1)
       expect(baseRank(h)).toBeLessThanOrEqual(HEROES.length)

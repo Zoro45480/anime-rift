@@ -1,0 +1,121 @@
+nagato|Nagato|ナガト|Le Maître de Pain|Naruto|LR|dark|DT|Banshô Ten’in|Shinra Tensei|Statue du Démon hérétique|Rinnegan|Akatsuki|Nagato
+konan|Konan|コナン|L’Ange de papier|Naruto|SR|wind|D|Shurikens de papier|Danse du Shikigami|Océan de six cents milliards de sceaux|Corps de papier|Akatsuki|Konan
+deidara|Deidara|デイダラ|L’Artiste de l’explosion|Naruto|SSR|earth|D|Argile explosive C1|Dragon C2|C0 : Art ultime|« L’art est une explosion »|Akatsuki|Deidara
+sasori|Sasori|サソリ|Le Scorpion des Sables rouges|Naruto|SSR|dark|D|Queue empoisonnée|Sable de fer|Cent marionnettes|Corps de marionnette|Akatsuki|Sasori
+hidan|Hidan|ヒダン|L’Immortel de Jashin|Naruto|SR|dark|T|Faux à trois lames|Malédiction de sang|Rituel de Jashin|Immortalité|Akatsuki|Hidan
+kakuzu|Kakuzu|カクズ|Le Trésorier aux cinq cœurs|Naruto|SR|earth|T|Fils noirs|Lance de terre|Tir du Faux Ténèbres|Cinq cœurs|Akatsuki|Kakuzu
+zabuza|Zabuza Momochi|ザブザ|Le Démon du Brouillard|Naruto|SR|water|D|Kubikiribôchô|Technique du brouillard|Dragon aqueux|Assassinat silencieux|Démons de Kiri:speed:15|Zabuza Momochi
+haku|Haku|ハク|L’Enfant de la glace|Naruto|R|water|D|Senbons|Mille aiguilles d’eau|Miroirs de glace démoniaques|Hyôton|Démons de Kiri:speed:15|Haku
+kabuto|Kabuto Yakushi|カブト|L’Ermite serpent|Naruto|SSR|dark|S|Scalpel de chakra|Paume mystique|Réincarnation des âmes|Régénération|Les Sannin|Kabuto Yakushi
+danzo|Danzô Shimura|ダンゾウ|L’Ombre de Konoha|Naruto|SR|wind|D|Lame de vent|Baku|Izanagi|Bras aux dix Sharingan|Racine de Konoha:atk:15|Danzou Shimura
+sai|Sai|サイ|Le Peintre de la Racine|Naruto|R|dark|D|Lame courte|Fauves d’encre|Sceau du Tigre|Dessins vivants|Racine de Konoha:atk:15|Sai
+kushina|Kushina Uzumaki|クシナ|La Tornade rouge|Naruto|SR|fire|T|Coup de poing|Chaînes de chakra|Sceau des chaînes d’adamantine|Chakra des Uzumaki|Hôtes de démons|Kushina Uzumaki
+yamato|Yamato|ヤマト|Le Gardien du Mokuton|Naruto|SR|earth|T|Pieux de bois|Prison de bois|Naissance d’une forêt|Suppression des démons à queue|Clan Senju|Yamato
+shisui|Shisui Uchiwa|シスイ|Shisui le Téléporteur|Naruto|SSR|wind|D|Lame éclair|Clones rémanents|Kotoamatsukami|Corps scintillant|Clan Uchiwa|Shisui Uchiha
+raikage|Ay, Quatrième Raikage|エー|L’Éclair de Kumo|Naruto|SSR|thunder|T|Coup droit éclair|Lariat|Liger Bomb|Armure de foudre|Les cinq Kage:def:15|Raikage
+onoki|Ônoki|オオノキ|Le Tsuchikage aux deux balances|Naruto|SR|earth|D|Poing de roche|Technique de l’alourdissement|Jinton : Démantèlement atomique|Vol|Les cinq Kage:def:15|Oonoki
+mei|Mei Terumi|メイ|La Cinquième Mizukage|Naruto|SR|water|D|Balle d’eau|Brume corrosive|Yôton : Lave fondante|Deux kekkei genkai|Les cinq Kage:def:15|Mei Terumi
+temari|Temari|テマリ|La Maîtresse du vent|Naruto|R|wind|D|Éventail géant|Lames du vent|Danse de la faux|Stratège de Suna|Fratrie du Sable:def:15|Temari
+kankuro|Kankurô|カンクロウ|Le Marionnettiste|Naruto|R|dark|D|Karasu|Kuroari|Pièce noire : Vierge de fer|Fils de chakra|Fratrie du Sable:def:15|Kankurou
+asuma|Asuma Sarutobi|アスマ|Le Fils du Troisième|Naruto|R|wind|D|Lames de chakra|Hien|Nuage de cendres incandescentes|Roi du shôgi|Maîtres et élèves|Asuma Sarutobi
+kurenai|Kurenai Yûhi|クレナイ|La Maîtresse du genjutsu|Naruto|N|dark|D|Kunai|Illusion de l’arbre|Prison florale|Genjutsu|Maîtres et élèves|Kurenai Yuuhi
+shizune|Shizune|シズネ|L’Assistante de Tsunade|Naruto|N|water|S|Aiguilles empoisonnées|Paume mystique|Brume empoisonnée|Ninjutsu médical|Les Sannin|Shizune
+konohamaru|Konohamaru Sarutobi|コノハマル|Le Petit-fils du Troisième|Naruto|N|wind|D|Shurikens|Clonage|Rasengan|Élève de Naruto|Maîtres et élèves|Konohamaru Sarutobi
+karin|Karin|カリン|La Sensorielle de Taka|Naruto|R|fire|S|Coup de pied|Morsure de soin|Chaînes d’adamantine|Œil de Kagura|Clan Uchiwa|Karin
+marco|Marco|マルコ|Marco le Phénix|One Piece|SSR|fire|S|Serres du Phénix|Flammes de résurrection|Hôô In|Flammes bleues|Équipage de Barbe Blanche:hp:15|Marco
+oden|Kozuki Oden|オデン|Le Shogun de Wano|One Piece|LR|fire|DT|Entaille à deux sabres|Gun Modoki|Tôgen Totsuka|« Oden doit bouillir »|Équipage de Roger|Oden Kouzuki
+kizaru|Borsalino|キザル|Kizaru, le Singe jaune|One Piece|LR|light|DT|Coup de pied lumière|Yata no Kagami|Yasakani no Magatama|Corps de lumière|La Marine|Borsalino
+fujitora|Issho|フジトラ|Fujitora, le Tigre violet|One Piece|SSR|earth|T|Lame dégainée|Gravité écrasante|Pluie de météores|Haki de l’Observation|La Marine|Issho
+katakuri|Charlotte Katakuri|カタクリ|Le Commandant sucré|One Piece|SSR|earth|T|Mochi Tsuki|Zan Giri Mochi|Buzz Cut Mochi|Vision du futur|Pirates de Big Mom:def:15|Katakuri Charlotte
+yamato_op|Yamato|ヤマト|La Fille d’Oni|One Piece|SSR|water|T|Raimei Hakke|Namuji Hyôga|Shinsoku Hakujaku|Fruit du Loup divin|Wano:atk:15|Yamato
+king|King|キング|King le Flamboyant|One Piece|SR|fire|T|Tankyudon|Andon|Omori Karyudon|Lunaria|Pirates aux cent bêtes:atk:15|King
+queen|Queen|クイーン|Queen la Pandémie|One Piece|SR|dark|T|Brachio Bomber|Rayon noir|Bridal Grapper|Cyborg brachiosaure|Pirates aux cent bêtes:atk:15|Queen
+kid|Eustass Kid|キッド|Le Capitaine|One Piece|SSR|thunder|D|Repel|Punk Gibson|Damned Punk|Magnétisme|Pire Génération|Kid Eustass
+enel|Enel|エネル|Le Dieu de Skypiea|One Piece|SSR|thunder|D|El Thor|Sango|Raigo|Mantra|Ennemis de Grand Line:atk:10|Enel
+lucci|Rob Lucci|ルッチ|L’Arme du CP9|One Piece|SR|dark|D|Shigan|Rankyaku|Rokuôgan|Forme léopard|Ennemis de Grand Line:atk:10|Lucci Rob
+magellan|Magellan|マゼラン|Le Directeur d’Impel Down|One Piece|SR|dark|D|Hydra|Chloro Ball|Venom Demon|Corps de poison|Ennemis de Grand Line:atk:10|Magellan
+kuma|Bartholomew Kuma|クマ|Le Tyran|One Piece|SR|wind|T|Pad Hô|Tsuppari Pad Hô|Ursus Shock|Nikyu Nikyu no Mi|Grands Corsaires|Kuma Bartholomew
+moria|Gecko Moria|モリア|Le Maître des ombres|One Piece|R|dark|D|Brick Bat|Doppelman|Shadow’s Asgard|Kage Kage no Mi|Grands Corsaires|Moria Gecko
+perona|Perona|ペローナ|La Princesse fantôme|One Piece|R|dark|D|Negative Hollow|Mini Hollow|Kamikaze Rap|Corps astral|Thriller Bark:speed:15|Perona
+smoker|Smoker|スモーカー|Le Chasseur blanc|One Piece|R|wind|T|Jitte en granit marin|White Blow|White Out|Corps de fumée|La Marine|Smoker
+tashigi|Tashigi|タシギ|La Sabreuse de la Marine|One Piece|N|water|D|Shigure|Kiri Shigure|Entaille au Haki|Amoureuse des sabres|La Marine|Tashigi
+ivankov|Emporio Ivankov|イワンコフ|Le Roi des travestis|One Piece|R|light|S|Death Wink|Emporio Tension Hormone|Galaxy Wink|Hormones de guérison|Armée révolutionnaire:hp:15|Ivankov Emporio
+reiju|Vinsmoke Reiju|レイジュ|Poison Pink|One Piece|R|dark|S|Pink Hornet|Aspiration du poison|Coup de pied empoisonné|Immunité au poison|Famille Vinsmoke:def:15|Reiju Vinsmoke
+carrot|Carrot|キャロット|La Lapine de Zou|One Piece|R|thunder|D|Electro|Griffes électriques|Forme Sulong|Bonds de lapin|Wano:atk:15|Carrot
+bartolomeo|Bartolomeo|バルトロメオ|Le Cannibale|One Piece|R|light|T|Barrière|Barrier Crash|Hommage Dieu Fist|Fan de Luffy|Colisée de Dressrosa:hp:10|Bartolomeo
+cavendish|Cavendish|キャベンディッシュ|Le Cheval blanc|One Piece|R|light|D|Bitô Hakuba|Blue Bird|Hakuba|Double personnalité|Colisée de Dressrosa:hp:10|Cavendish
+bellamy|Bellamy|ベラミー|La Hyène|One Piece|N|earth|D|Spring Snipe|Spring Hopper|Spring Death Knock|Bane Bane no Mi|Colisée de Dressrosa:hp:10|Bellamy
+zamasu|Zamasu fusionné|ザマス|Le Dieu immortel|Dragon Ball|SSR|light|D|Lame divine|Mur de lumière|Colère sacrée|Corps immortel|Grands ennemis|Zamasu
+gotenks|Gotenks|ゴテンクス|La Fusion des petits|Dragon Ball|SSR|light|D|Galactica Donut|Super Ghost Kamikaze Attack|Charging Ultra Buu Buu Volleyball|Fusion Metamor|Fusions|Gotenks
+kefla|Kefla|ケフラ|La Fusion de l’Univers 6|Dragon Ball|SSR|thunder|D|Blaster Meteor|Gigantic Ray|Gigantic Burst|Potaras|Saiyans de l’Univers 6:atk:15|Kefla
+caulifla|Caulifla|カリフラ|La Prodige Saiyan|Dragon Ball|SR|fire|D|Crush Cannon|Enchaînement Super Saiyan 2|Rafale d’énergie|Talent inné|Saiyans de l’Univers 6:atk:15|Caulifla
+kale|Kale|ケール|La Berserker légendaire|Dragon Ball|SR|earth|D|Resist Blast|Charge du berserker|Blaster Meteor|Forme légendaire|Saiyans de l’Univers 6:atk:15|Kale
+champa|Champa|シャンパ|Le Dieu de la Destruction de l’Univers 6|Dragon Ball|SSR|dark|D|Coup de patte|Sphère de destruction|Hakai|Jumeau de Beerus|Dieux et anges|Champa
+vados|Vados|ヴァドス|L’Ange de l’Univers 6|Dragon Ball|SR|light|S|Coup de sceptre|Barrière angélique|Restauration|Sœur de Whis|Dieux et anges|Vados
+dyspo|Dyspo|ディスポ|L’Éclair pourpre|Dragon Ball|SR|thunder|D|Justice Kick|Canon Maximum|Mode Lumière super maximal|Vitesse du son|Tournoi du Pouvoir|Dyspo
+c16|C-16|ジュウロク|Le Colosse pacifique|Dragon Ball|SR|earth|T|Rocket Punch|Hell’s Flash|Autodestruction|Ami des oiseaux|Cyborgs du Dr Gero|Jinzouningen 16-gou
+ginyu|Capitaine Ginyu|ギニュー|Le Chef du commando|Dragon Ball|SR|dark|D|Milky Cannon|Pose de combat|Changement de corps|Commando Ginyu|Armée de Freezer:atk:15|Ginyu
+nappa|Nappa|ナッパ|Le Général Saiyan|Dragon Ball|R|earth|T|Bomber DX|Explosion géante|Break Cannon|Saibamen|Armée de Freezer:atk:15|Nappa
+dabra|Dabra|ダーブラ|Le Roi des démons|Dragon Ball|SR|dark|D|Lance démoniaque|Souffle de feu|Crachat pétrifiant|Magie démoniaque|Famille Satan|Dabura
+shin|Kaiôshin de l’Est|シン|Le Dieu suprême|Dragon Ball|R|light|S|Onde divine|Paralysie|Restauration divine|Kai Kai|Dieux et anges|Higashi no Kaioushin
+dende|Dende|デンデ|Le Dieu de la Terre|Dragon Ball|N|light|S|Petit coup|Soin namek|Guérison totale|Gardien des Dragon Balls|Guerriers Z|Dende
+uub|Oob|ウーブ|La Réincarnation de Buu|Dragon Ball|R|earth|D|Coup de poing|Rafale de ki|Explosion de fureur|Puissance cachée|Guerriers Z|Oob
+kingpiccolo|Piccolo Daimaô|ピッコロ|Le Grand Roi démon|Dragon Ball|SR|dark|D|Rayon des yeux|Makôsen|Bakurikimaha|Rajeunissement|Grands ennemis|Piccolo Daimaou
+gin|Gin Ichimaru|ギン|Le Serpent|Bleach|SSR|light|D|Shinsô|Butô|Kamishini no Yari|Sourire de renard|Traîtres de la Soul Society:atk:15|Gin Ichimaru
+tosen|Kaname Tôsen|トウセン|Le Chemin de la justice|Bleach|SR|dark|D|Suzumushi|Benihikô|Suzumushi Tsuishiki : Enma Kôrogi|Justice aveugle|Traîtres de la Soul Society:atk:15|Kaname Tousen
+harribel|Tier Harribel|ハリベル|La Tercera Espada|Bleach|SSR|water|D|Ola Azul|Cascada|La Gota|Tiburón|Espada|Tier Harribel
+barragan|Baraggan Louisenbairn|バラガン|Le Roi de Hueco Mundo|Bleach|SSR|dark|D|Hache géante|Senescencia|Respira|Arrogante|Espada|Baraggan Louisenbairn
+nnoitra|Nnoitra Gilga|ノイトラ|La Quinta Espada|Bleach|SR|earth|T|Santa Teresa|Cero|Six bras|Hierro le plus dur|Espada|Nnoitra Gilga
+nelliel|Nelliel Tu Odelschwanck|ネリエル|L’Ancienne Tercera|Bleach|SR|wind|T|Lanzador Verde|Cero Doble|Gamuza|Salive de soin|Espada|Nelliel Tu Odelschwanck
+komamura|Sajin Komamura|コマムラ|Le Capitaine loup|Bleach|SR|earth|T|Tenken|Bras du géant|Kokujô Tengen Myôô|Loyauté|Capitaines du Gotei 13|Sajin Komamura
+ukitake|Jûshirô Ukitake|ウキタケ|Le Capitaine bienveillant|Bleach|SR|water|D|Sôgyo no Kotowari|Renvoi d’énergie|Kamikake|Main de Mimihagi|Capitaines du Gotei 13|Juushirou Ukitake
+isshin|Isshin Kurosaki|イッシン|Le Père d’Ichigo|Bleach|SSR|fire|D|Engetsu|Oni Dekopin|Getsuga Tenshô|Ancien capitaine|Amis de Karakura|Isshin Kurosaki
+hisagi|Shûhei Hisagi|ヒサギ|Le Lieutenant au 69|Bleach|R|wind|D|Kazeshini|Faux enchaînées|Fushi no Kôjyô|Peur de sa lame|Lieutenants|Shuuhei Hisagi
+kira|Izuru Kira|キラ|Le Lieutenant mélancolique|Bleach|R|earth|D|Wabisuke|Poids doublé|Tête courbée|Kidô expert|Lieutenants|Izuru Kira
+hinamori|Momo Hinamori|ヒナモリ|La Lieutenante du Kidô|Bleach|N|fire|D|Tobiume|Boule de feu|Filet de Kidô|Maîtresse du Kidô|Lieutenants|Momo Hinamori
+isane|Isane Kotetsu|イサネ|La Lieutenante de la 4e|Bleach|N|water|S|Itegumo|Soin du Kaidô|Barrière de soin|4e Division|4e Division|Isane Kotetsu
+ginjo|Kûgo Ginjô|ギンジョウ|Le Premier Shinigami remplaçant|Bleach|SR|dark|D|Cross of Scaffold|Getsuga Tenshô volé|Bankai emprunté|Fullbring|Amis de Karakura|Kuugo Ginjou
+bazzb|Bazz-B|バズビー|The Heat|Bleach|SR|fire|D|Burner Finger 1|Burner Finger 3|Burner Finger 4|Vollständig|Quincy|Bazz-B
+gremmy|Gremmy Thoumeaux|グレミィ|The Visionary|Bleach|SSR|light|D|Imagination meurtrière|Clones imaginés|Météorite imaginée|Tout ce qu’il imagine existe|Quincy|Gremmy Thoumeaux
+tamayo|Tamayo|タマヨ|La Médecin démon|Demon Slayer|SR|dark|S|Griffes|Parfum d’illusion|Remède contre Muzan|Savoir médical|Alliés démons:hp:15|Tamayo
+yushiro|Yushirô|ユシロウ|Le Gardien de Tamayo|Demon Slayer|R|dark|D|Coup rapide|Talismans de vision|Bandeau d’invisibilité|Dévouement|Alliés démons:hp:15|Yushirou
+rui|Rui|ルイ|La Lune inférieure 5|Demon Slayer|SR|dark|D|Fils tranchants|Cage de fils|Fils meurtriers : Roue rotative|Famille factice|Lunes inférieures:atk:15|Rui
+enmu|Enmu|エンム|La Lune inférieure 1|Demon Slayer|SR|dark|D|Murmure hypnotique|Sommeil forcé|Fusion avec le train|Rêves manipulés|Lunes inférieures:atk:15|Enmu
+kyogai|Kyôgai|キョウガイ|Le Démon aux tambours|Demon Slayer|R|earth|D|Griffes rapides|Tambour : rotation|Tambours en rafale|Manoir tournant|Lunes inférieures:atk:15|Kyougai
+nakime|Nakime|ナキメ|La Joueuse de biwa|Demon Slayer|SR|rift|D|Note de biwa|Salle déplacée|Forteresse infinie|Œil espion|Lunes supérieures|Nakime
+kanae|Kanae Kochô|カナエ|L’Ancien pilier de la Fleur|Demon Slayer|R|light|D|Souffle de la Fleur : Pivoine vaine|Fleur de prunier|Cerisier tourbillonnant|Douceur|Domaine des Papillons|Kanae Kochou
+jigoro|Jigorô Kuwajima|ジゴロウ|L’Ancien pilier de la Foudre|Demon Slayer|R|thunder|D|Coup de canne|Souffle de la Foudre : Éclair foudroyant|Sextuple éclair|Maître sévère|Souffle de la Foudre|Jigorou Kuwajima
+susamaru|Susamaru|スサマル|La Démone aux temari|Demon Slayer|N|fire|D|Lancer de temari|Six bras|Temari déchaînés|Force brute|Démons d’Asakusa:atk:10|Susamaru
+yahaba|Yahaba|ヤハバ|Le Démon aux flèches|Demon Slayer|N|wind|D|Flèche de direction|Vecteurs multiples|Flèches écarlates|Yeux dans les mains|Démons d’Asakusa:atk:10|Yahaba
+murata|Murata|ムラタ|Le Pourfendeur ordinaire|Demon Slayer|N|water|D|Souffle de l’Eau : Tranchant de surface|Roue d’eau|Coup désespéré|Survivant|Compagnons de Tanjirô|Murata
+mahoraga|Mahoraga|マコラ|Le Général divin|Jujutsu Kaisen|LR|light|DT|Épée de l’extermination|Adaptation|Roue du Dharma|Adaptation à tout phénomène|Dix Ombres:def:15|Mahoraga
+rika|Rika Orimoto|リカ|La Reine des fléaux|Jujutsu Kaisen|SSR|dark|D|Griffes|Étreinte|Canon d’énergie pure|Amour maudit|Deuxième année de Tokyo|Rika Orimoto
+higuruma|Hiromi Higuruma|ヒグルマ|L’Avocat|Jujutsu Kaisen|SSR|light|D|Marteau|Confiscation|Épée du bourreau|Extension : Sentence de mort|Jeu de massacre|Hiromi Higuruma
+naoya|Naoya Zen’in|ナオヤ|L’Héritier des Zen’in|Jujutsu Kaisen|SR|wind|D|Coup rapide|Projection à 24 images|Vitesse supersonique|Projection magique|Clan Zen’in|Naoya Zenin
+shoko|Shôko Ieiri|ショウコ|La Médecin de l’école|Jujutsu Kaisen|SR|light|S|Scalpel|Sort d’inversion|Soins d’urgence|Soigne les autres|Enseignants et staff|Shouko Ieiri
+utahime|Utahime Iori|ウタヒメ|La Prêtresse de Kyoto|Jujutsu Kaisen|R|light|S|Coup d’éventail|Danse rituelle|Chant de la solitude|Amplifie les alliés|Enseignants et staff|Utahime Iori
+gakuganji|Yoshinobu Gakuganji|ガクガンジ|Le Directeur de Kyoto|Jujutsu Kaisen|R|thunder|D|Riff de guitare|Onde amplifiée|Solo dévastateur|Guitare électrique|École de Kyoto|Yoshinobu Gakuganji
+mechamaru|Mechamaru|メカマル|Kokichi Muta|Jujutsu Kaisen|R|fire|D|Sword Option|Boost On|Ultra Cannon|Pacte céleste|École de Kyoto|Kokichi Muta
+mai|Mai Zen’in|マイ|La Sœur de Maki|Jujutsu Kaisen|N|dark|D|Tir de revolver|Balle créée|Dernière création|Construction|École de Kyoto|Mai Zenin
+kusakabe|Atsuya Kusakabe|クサカベ|Le Classe 1 sans technique|Jujutsu Kaisen|R|wind|T|Sabre dégainé|Simple domaine|Lune du soir|Nouvelle École de l’Ombre|Enseignants et staff|Atsuya Kusakabe
+ino_takuma|Takuma Ino|イノ|L’Élève de Nanami|Jujutsu Kaisen|N|earth|D|Kaichi|Reiki|Kirin|Masque du médium|Enseignants et staff|Takuma Ino
+junpei|Junpei Yoshino|ジュンペイ|L’Ami de Yûji|Jujutsu Kaisen|N|water|D|Tentacule|Poison de méduse|Moon Dregs|Shikigami méduse|Première année de Tokyo|Junpei Yoshino
+miguel|Miguel|ミゲル|Le Guerrier d’Afrique|Jujutsu Kaisen|R|earth|T|Corde noire|Rythme du combat|Coup de corde maudite|Corps hors norme|Classe spéciale|Miguel
+phinks|Phinks|フィンクス|Le Bras tournant|Hunter x Hunter|SR|fire|D|Coup de poing|Ripper Cyclotron|Cyclotron chargé|Force de la Brigade|Brigade fantôme|Phinks Magcub
+shalnark|Shalnark|シャルナーク|Le Stratège de la Brigade|Hunter x Hunter|R|light|D|Antenne|Téléphone de contrôle|Mode automatique|Black Voice|Brigade fantôme|Shalnark
+franklin|Franklin|フランクリン|Le Mitrailleur|Hunter x Hunter|R|earth|D|Coup massif|Rafale de Nen|Double Machine Gun|Doigts coupés|Brigade fantôme|Franklin Bordeau
+shizuku|Shizuku|シズク|L’Aspiratrice|Hunter x Hunter|R|dark|D|Coup d’aspirateur|Aspiration de sang|Blinky|Mémoire courte|Brigade fantôme|Shizuku Murasaki
+pakunoda|Pakunoda|パクノダ|La Lectrice de mémoire|Hunter x Hunter|N|dark|D|Tir de revolver|Lecture de mémoire|Memory Bomb|Loyauté|Brigade fantôme|Pakunoda
+bonolenov|Bonolenov|ボノレノフ|Le Danseur de guerre|Hunter x Hunter|N|wind|D|Mélodie de combat|Prologue|Battle Cantabile : Jupiter|Corps percé|Brigade fantôme|Bonolenov Ndongo
+kalluto|Kalluto Zoldyck|カルト|Le Benjamin des Zoldyck|Hunter x Hunter|R|wind|D|Éventail|Confettis tranchants|Danse des serpents de papier|Surveillance de papier|Famille Zoldyck|Kalluto Zoldyck
+gotoh|Gotoh|ゴトー|Le Majordome|Hunter x Hunter|R|light|D|Pièce lancée|Rafale de pièces|Tir de précision|Fidélité aux Zoldyck|Famille Zoldyck|Gotoh
+genthru|Genthru|ゲンスルー|Le Bomber|Hunter x Hunter|SR|fire|D|Little Flower|Poignée explosive|Countdown|Release|Greed Island|Genthru
+palm|Palm Siberia|パーム|La Sirène|Hunter x Hunter|R|dark|D|Couteau|Wink Blue|Black Widow|Clairvoyance|Chasseurs de fourmis|Palm Siberia
+shoot|Shoot McMahon|シュート|Le Hunter hésitant|Hunter x Hunter|R|dark|D|Mains flottantes|Hotel Rafflesia|Assaut des trois mains|Cage|Chasseurs de fourmis|Shoot McMahon
+meleoron|Meleoron|メレオロン|Le Caméléon|Hunter x Hunter|N|wind|D|Coup furtif|Perfect Plan|God’s Accomplice|Invisibilité|Chasseurs de fourmis|Meleoron
+ikalgo|Ikalgo|イカルゴ|Le Poulpe au grand cœur|Hunter x Hunter|N|water|D|Tir de puce|Living Dead Dolls|Tir de sniper|Fierté de poulpe|Chasseurs de fourmis|Ikalgo
+cheetu|Cheetu|ヂートゥ|Le Guépard|Hunter x Hunter|R|thunder|D|Griffes|Course folle|Tag|Vitesse pure|Fourmis-Chimères|Cheetu
+leol|Leol|レオル|Le Lion|Hunter x Hunter|R|water|D|Coup de griffe|Rental Pod|TUBE|Emprunt de pouvoirs|Fourmis-Chimères|Leol
+cheadle|Cheadle Yorkshire|チードル|Le Chien du Zodiaque|Hunter x Hunter|R|light|S|Analyse|Diagnostic|Traitement d’urgence|Médecin trois étoiles|287e examen|Cheadle Yorkshire
+hanzo|Hanzo|ハンゾー|Le Ninja|Hunter x Hunter|R|dark|D|Lame cachée|Clé de bras|Hanzo Skill 4|Bavard|287e examen|Hanzo
+tonpa|Tonpa|トンパ|Le Briseur de débutants|Hunter x Hunter|N|earth|D|Croche-pied|Jus laxatif|Abandon stratégique|35 examens|287e examen|Tonpa

@@ -208,3 +208,124 @@ kite|D|Crazy Slots : Faux|Crazy Slots : Carabine|Silent Waltz|Crazy Slots
 wing|D|Poing du Shingen-ryû|Ren|Leçon de Nen|Maître instructeur
 ponzu|D|Piqûre d’abeilles|Nuée d’abeilles|Gaz soporifique|Chapeau-ruche
 pokkuru|D|Flèche|Arc-en-ciel : Flèche rouge|Arc-en-ciel : sept flèches|Archer Hunter
+nagato|DT|Banshô Ten’in|Shinra Tensei|Statue du Démon hérétique|Rinnegan
+konan|D|Shurikens de papier|Danse du Shikigami|Océan de six cents milliards de sceaux|Corps de papier
+deidara|D|Argile explosive C1|Dragon C2|C0 : Art ultime|« L’art est une explosion »
+sasori|D|Queue empoisonnée|Sable de fer|Cent marionnettes|Corps de marionnette
+hidan|T|Faux à trois lames|Malédiction de sang|Rituel de Jashin|Immortalité
+kakuzu|T|Fils noirs|Lance de terre|Tir du Faux Ténèbres|Cinq cœurs
+zabuza|D|Kubikiribôchô|Technique du brouillard|Dragon aqueux|Assassinat silencieux
+haku|D|Senbons|Mille aiguilles d’eau|Miroirs de glace démoniaques|Hyôton
+kabuto|S|Scalpel de chakra|Paume mystique|Réincarnation des âmes|Régénération
+danzo|D|Lame de vent|Baku|Izanagi|Bras aux dix Sharingan
+sai|D|Lame courte|Fauves d’encre|Sceau du Tigre|Dessins vivants
+kushina|T|Coup de poing|Chaînes de chakra|Sceau des chaînes d’adamantine|Chakra des Uzumaki
+yamato|T|Pieux de bois|Prison de bois|Naissance d’une forêt|Suppression des démons à queue
+shisui|D|Lame éclair|Clones rémanents|Kotoamatsukami|Corps scintillant
+raikage|T|Coup droit éclair|Lariat|Liger Bomb|Armure de foudre
+onoki|D|Poing de roche|Technique de l’alourdissement|Jinton : Démantèlement atomique|Vol
+mei|D|Balle d’eau|Brume corrosive|Yôton : Lave fondante|Deux kekkei genkai
+temari|D|Éventail géant|Lames du vent|Danse de la faux|Stratège de Suna
+kankuro|D|Karasu|Kuroari|Pièce noire : Vierge de fer|Fils de chakra
+asuma|D|Lames de chakra|Hien|Nuage de cendres incandescentes|Roi du shôgi
+kurenai|D|Kunai|Illusion de l’arbre|Prison florale|Genjutsu
+shizune|S|Aiguilles empoisonnées|Paume mystique|Brume empoisonnée|Ninjutsu médical
+konohamaru|D|Shurikens|Clonage|Rasengan|Élève de Naruto
+karin|S|Coup de pied|Morsure de soin|Chaînes d’adamantine|Œil de Kagura
+marco|S|Serres du Phénix|Flammes de résurrection|Hôô In|Flammes bleues
+oden|DT|Entaille à deux sabres|Gun Modoki|Tôgen Totsuka|« Oden doit bouillir »
+kizaru|DT|Coup de pied lumière|Yata no Kagami|Yasakani no Magatama|Corps de lumière
+fujitora|T|Lame dégainée|Gravité écrasante|Pluie de météores|Haki de l’Observation
+katakuri|T|Mochi Tsuki|Zan Giri Mochi|Buzz Cut Mochi|Vision du futur
+yamato_op|T|Raimei Hakke|Namuji Hyôga|Shinsoku Hakujaku|Fruit du Loup divin
+king|T|Tankyudon|Andon|Omori Karyudon|Lunaria
+queen|T|Brachio Bomber|Rayon noir|Bridal Grapper|Cyborg brachiosaure
+kid|D|Repel|Punk Gibson|Damned Punk|Magnétisme
+enel|D|El Thor|Sango|Raigo|Mantra
+lucci|D|Shigan|Rankyaku|Rokuôgan|Forme léopard
+magellan|D|Hydra|Chloro Ball|Venom Demon|Corps de poison
+kuma|T|Pad Hô|Tsuppari Pad Hô|Ursus Shock|Nikyu Nikyu no Mi
+moria|D|Brick Bat|Doppelman|Shadow’s Asgard|Kage Kage no Mi
+perona|D|Negative Hollow|Mini Hollow|Kamikaze Rap|Corps astral
+smoker|T|Jitte en granit marin|White Blow|White Out|Corps de fumée
+tashigi|D|Shigure|Kiri Shigure|Entaille au Haki|Amoureuse des sabres
+ivankov|S|Death Wink|Emporio Tension Hormone|Galaxy Wink|Hormones de guérison
+reiju|S|Pink Hornet|Aspiration du poison|Coup de pied empoisonné|Immunité au poison
+carrot|D|Electro|Griffes électriques|Forme Sulong|Bonds de lapin
+bartolomeo|T|Barrière|Barrier Crash|Hommage Dieu Fist|Fan de Luffy
+cavendish|D|Bitô Hakuba|Blue Bird|Hakuba|Double personnalité
+bellamy|D|Spring Snipe|Spring Hopper|Spring Death Knock|Bane Bane no Mi
+zamasu|D|Lame divine|Mur de lumière|Colère sacrée|Corps immortel
+gotenks|D|Galactica Donut|Super Ghost Kamikaze Attack|Charging Ultra Buu Buu Volleyball|Fusion Metamor
+kefla|D|Blaster Meteor|Gigantic Ray|Gigantic Burst|Potaras
+caulifla|D|Crush Cannon|Enchaînement Super Saiyan 2|Rafale d’énergie|Talent inné
+kale|D|Resist Blast|Charge du berserker|Blaster Meteor|Forme légendaire
+champa|D|Coup de patte|Sphère de destruction|Hakai|Jumeau de Beerus
+vados|S|Coup de sceptre|Barrière angélique|Restauration|Sœur de Whis
+dyspo|D|Justice Kick|Canon Maximum|Mode Lumière super maximal|Vitesse du son
+c16|T|Rocket Punch|Hell’s Flash|Autodestruction|Ami des oiseaux
+ginyu|D|Milky Cannon|Pose de combat|Changement de corps|Commando Ginyu
+nappa|T|Bomber DX|Explosion géante|Break Cannon|Saibamen
+dabra|D|Lance démoniaque|Souffle de feu|Crachat pétrifiant|Magie démoniaque
+shin|S|Onde divine|Paralysie|Restauration divine|Kai Kai
+dende|S|Petit coup|Soin namek|Guérison totale|Gardien des Dragon Balls
+uub|D|Coup de poing|Rafale de ki|Explosion de fureur|Puissance cachée
+kingpiccolo|D|Rayon des yeux|Makôsen|Bakurikimaha|Rajeunissement
+gin|D|Shinsô|Butô|Kamishini no Yari|Sourire de renard
+tosen|D|Suzumushi|Benihikô|Suzumushi Tsuishiki : Enma Kôrogi|Justice aveugle
+harribel|D|Ola Azul|Cascada|La Gota|Tiburón
+barragan|D|Hache géante|Senescencia|Respira|Arrogante
+nnoitra|T|Santa Teresa|Cero|Six bras|Hierro le plus dur
+nelliel|T|Lanzador Verde|Cero Doble|Gamuza|Salive de soin
+komamura|T|Tenken|Bras du géant|Kokujô Tengen Myôô|Loyauté
+ukitake|D|Sôgyo no Kotowari|Renvoi d’énergie|Kamikake|Main de Mimihagi
+isshin|D|Engetsu|Oni Dekopin|Getsuga Tenshô|Ancien capitaine
+hisagi|D|Kazeshini|Faux enchaînées|Fushi no Kôjyô|Peur de sa lame
+kira|D|Wabisuke|Poids doublé|Tête courbée|Kidô expert
+hinamori|D|Tobiume|Boule de feu|Filet de Kidô|Maîtresse du Kidô
+isane|S|Itegumo|Soin du Kaidô|Barrière de soin|4e Division
+ginjo|D|Cross of Scaffold|Getsuga Tenshô volé|Bankai emprunté|Fullbring
+bazzb|D|Burner Finger 1|Burner Finger 3|Burner Finger 4|Vollständig
+gremmy|D|Imagination meurtrière|Clones imaginés|Météorite imaginée|Tout ce qu’il imagine existe
+tamayo|S|Griffes|Parfum d’illusion|Remède contre Muzan|Savoir médical
+yushiro|D|Coup rapide|Talismans de vision|Bandeau d’invisibilité|Dévouement
+rui|D|Fils tranchants|Cage de fils|Fils meurtriers : Roue rotative|Famille factice
+enmu|D|Murmure hypnotique|Sommeil forcé|Fusion avec le train|Rêves manipulés
+kyogai|D|Griffes rapides|Tambour : rotation|Tambours en rafale|Manoir tournant
+nakime|D|Note de biwa|Salle déplacée|Forteresse infinie|Œil espion
+kanae|D|Souffle de la Fleur : Pivoine vaine|Fleur de prunier|Cerisier tourbillonnant|Douceur
+jigoro|D|Coup de canne|Souffle de la Foudre : Éclair foudroyant|Sextuple éclair|Maître sévère
+susamaru|D|Lancer de temari|Six bras|Temari déchaînés|Force brute
+yahaba|D|Flèche de direction|Vecteurs multiples|Flèches écarlates|Yeux dans les mains
+murata|D|Souffle de l’Eau : Tranchant de surface|Roue d’eau|Coup désespéré|Survivant
+mahoraga|DT|Épée de l’extermination|Adaptation|Roue du Dharma|Adaptation à tout phénomène
+rika|D|Griffes|Étreinte|Canon d’énergie pure|Amour maudit
+higuruma|D|Marteau|Confiscation|Épée du bourreau|Extension : Sentence de mort
+naoya|D|Coup rapide|Projection à 24 images|Vitesse supersonique|Projection magique
+shoko|S|Scalpel|Sort d’inversion|Soins d’urgence|Soigne les autres
+utahime|S|Coup d’éventail|Danse rituelle|Chant de la solitude|Amplifie les alliés
+gakuganji|D|Riff de guitare|Onde amplifiée|Solo dévastateur|Guitare électrique
+mechamaru|D|Sword Option|Boost On|Ultra Cannon|Pacte céleste
+mai|D|Tir de revolver|Balle créée|Dernière création|Construction
+kusakabe|T|Sabre dégainé|Simple domaine|Lune du soir|Nouvelle École de l’Ombre
+ino_takuma|D|Kaichi|Reiki|Kirin|Masque du médium
+junpei|D|Tentacule|Poison de méduse|Moon Dregs|Shikigami méduse
+miguel|T|Corde noire|Rythme du combat|Coup de corde maudite|Corps hors norme
+phinks|D|Coup de poing|Ripper Cyclotron|Cyclotron chargé|Force de la Brigade
+shalnark|D|Antenne|Téléphone de contrôle|Mode automatique|Black Voice
+franklin|D|Coup massif|Rafale de Nen|Double Machine Gun|Doigts coupés
+shizuku|D|Coup d’aspirateur|Aspiration de sang|Blinky|Mémoire courte
+pakunoda|D|Tir de revolver|Lecture de mémoire|Memory Bomb|Loyauté
+bonolenov|D|Mélodie de combat|Prologue|Battle Cantabile : Jupiter|Corps percé
+kalluto|D|Éventail|Confettis tranchants|Danse des serpents de papier|Surveillance de papier
+gotoh|D|Pièce lancée|Rafale de pièces|Tir de précision|Fidélité aux Zoldyck
+genthru|D|Little Flower|Poignée explosive|Countdown|Release
+palm|D|Couteau|Wink Blue|Black Widow|Clairvoyance
+shoot|D|Mains flottantes|Hotel Rafflesia|Assaut des trois mains|Cage
+meleoron|D|Coup furtif|Perfect Plan|God’s Accomplice|Invisibilité
+ikalgo|D|Tir de puce|Living Dead Dolls|Tir de sniper|Fierté de poulpe
+cheetu|D|Griffes|Course folle|Tag|Vitesse pure
+leol|D|Coup de griffe|Rental Pod|TUBE|Emprunt de pouvoirs
+cheadle|S|Analyse|Diagnostic|Traitement d’urgence|Médecin trois étoiles
+hanzo|D|Lame cachée|Clé de bras|Hanzo Skill 4|Bavard
+tonpa|D|Croche-pied|Jus laxatif|Abandon stratégique|35 examens

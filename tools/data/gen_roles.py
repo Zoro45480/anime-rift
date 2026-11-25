@@ -25,7 +25,7 @@ def fix(m):
     line = re.sub(r"atk: \d+, def: \d+(, hp: \d+)?", f"atk: {rnd(b * ka, 10)}, def: {rnd(b * kd, 10)}, hp: {rnd(b * kh, 50)}", line)
     return line
 src = re.sub(r"^  \{ id: '.*$", fix, src, flags=re.M)
-assert len(seen) == 210 and seen == set(moves), (len(seen), set(moves) - seen)
+assert seen == set(moves), (len(seen), set(moves) - seen)
 src = src.replace("affinity: AffinityId; atk: number; def: number }", "affinity: AffinityId; atk: number; def: number; hp: number }")
 src = src.replace("export type Hero = { id: string; no: number; model?: string; name: string; kana: string; title: string; world: string; role: string;",
   "// Rôles : DPS (frappe fort), Tank (encaisse), Soigneur (soigne). Seules les cartes LR et MR peuvent cumuler deux rôles.\n// Dégâts, défense et PV de base (niveau 1) : fixés par la rareté puis répartis selon le rôle (tools : scratch gen_roles).\nexport type Role = 'DPS' | 'Tank' | 'Soigneur' | 'DPS / Tank' | 'DPS / Soigneur' | 'Tank / Soigneur'\nexport type Hero = { id: string; no: number; model?: string; name: string; kana: string; title: string; world: string; role: Role;")
