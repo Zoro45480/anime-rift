@@ -21,6 +21,7 @@ OUT = os.path.join(os.path.dirname(__file__), '..', '..', 'src', 'assets', 'fram
 W, H = 2.5, 3.5  # demi-largeur et demi-hauteur de la carte
 RES = (936, 1196)  # 7.2 × 9.2 unités à 130 px par unité
 ONLY = [a for a in sys.argv[1:] if a in ('common', 'rare', 'epic', 'ultra', 'legend', 'rift')]
+THEME_ARGS = [a for a in sys.argv[1:] if a in ('onepiece', 'dragonball', 'bleach', 'demonslayer', 'jujutsu', 'hunter')]
 
 
 # --- matières ------------------------------------------------------------------------------------------------
@@ -87,6 +88,10 @@ def materials():
         'holo': rainbow('Holo'),
         'pearl': principled('Pearl', (1.0, 0.97, 0.98), 0.75, 0.12, film=520),
         'gold': principled('Gold', (1.0, 0.72, 0.22), 1, 0.12, (1.0, 0.7, 0.2), 0.25),
+        'sea': principled('Sea', (0.05, 0.32, 0.9), 0.8, 0.12, (0.05, 0.4, 1.0), 0.5),
+        'jade': principled('Jade', (0.05, 0.7, 0.45), 0.7, 0.12, (0.05, 0.8, 0.5), 0.5),
+        'curse': principled('Curse', (0.2, 0.1, 0.9), 0.5, 0.15, (0.3, 0.15, 1.0), 1.2),
+        'emerald': principled('Emerald', (0.1, 0.75, 0.3), 0.7, 0.1, (0.1, 0.8, 0.3), 0.5),
         'iron': principled('Iron', (0.32, 0.3, 0.3), 1, 0.42),
         'ironlip': principled('IronLip', (0.55, 0.5, 0.46), 1, 0.3),
         'deepgold': principled('DeepGold', (0.55, 0.3, 0.05), 1, 0.2),
@@ -291,6 +296,117 @@ def build(rarity, mats):
         spiral(px + nx * 0.3, py + ny * 0.3, a + math.pi, random.choice((-1, 1)), random.uniform(0.14, 0.24), 0.035, mats[r['vines'][-1] if r['vines'] else r['frame']], z=0.3)
 
 
+# --- familles de cadres : une par bannière --------------------------------------------------------------------------
+# La rareté garde sa matière (fer, acier, améthyste, or, arc-en-ciel, chrome) ; la bannière change la FORME des
+# ornements et leur couleur d'accent. Lancer par exemple :  python3 tools/blender/build_frames.py onepiece bleach
+THEMES = {
+    'onepiece': dict(vine='rope', thorn='none', corner='wheel', back='waves', accent='sea'),          # cordages, barres à roue, vagues
+    'dragonball': dict(vine='none', thorn='straight', corner='orb', back='rays', accent='amber'),     # boules d'ambre, aura en pointes
+    'bleach': dict(vine='none', thorn='none', corner='cross', back='rays', accent='dark'),            # lames droites croisées
+    'demonslayer': dict(vine='wave', thorn='flame', corner='orb', back='claws', accent='jade'),       # flammes couchées par le vent
+    'jujutsu': dict(vine='wave', thorn='none', corner='curl', back='none', accent='curse'),           # volutes d'énergie
+    'hunter': dict(vine='chain', thorn='none', corner='orb', back='rays', accent='emerald'),          # chaînes
+}
+LEVEL = {'common': 0, 'rare': 1, 'epic': 2, 'ultra': 3, 'legend': 4, 'rift': 5}
+
+
+def smooth(obj, mat):
+    obj.data.materials.append(mat)
+    for poly in obj.data.polygons:
+        poly.use_smooth = True
+    return obj
+
+
+def build_themed(rarity, theme, mats):
+    r, t, k = RECIPES[rarity], THEMES[theme], LEVEL[rarity]
+    random.seed(11)
+    acc, main = mats[t['accent']], mats[r['frame']]
+    second = mats[r['vines'][0]] if r['vines'] else main
+    molding(main, r['band'])
+    molding(mats[r['lip']], 0.07, z=0.1, inset=r['band'] - 0.02)
+
+    # tour du cadre (à partir de SR)
+    if k >= 2:
+        for a, b, n, waves in SIDES:
+            if t['vine'] == 'wave':
+                for v, tone in enumerate(r['vines']):
+                    vine(a, b, n, waves, r['amp'], math.pi if len(r['vines']) > 1 and v == 0 else 0, r['vine_r'], mats[tone])
+            elif t['vine'] == 'rope':  # deux torons serrés
+                vine(a, b, n, waves * 3.4, 0.085, 0, r['vine_r'] * 1.2, second)
+                vine(a, b, n, waves * 3.4, 0.085, math.pi, r['vine_r'] * 1.2, main)
+            elif t['vine'] == 'chain':  # maillons alternés, à plat puis de chant
+                length = math.hypot(b[0] - a[0], b[1] - a[1])
+                count = int(length / 0.4)
+                horizontal = abs(b[0] - a[0]) > abs(b[1] - a[1])
+                for i in range(count):
+                    f = (i + 0.5) / count
+                    bpy.ops.mesh.primitive_torus_add(major_radius=0.15 + 0.01 * k, minor_radius=0.042 + 0.004 * k, location=(a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, 0.2))
+                    link = smooth(bpy.context.object, main if i % 2 else second)
+                    link.scale = (1.45, 1, 1) if horizontal else (1, 1.45, 1)
+                    if i % 2:
+                        link.rotation_euler = (math.pi / 2, 0, 0) if horizontal else (0, math.pi / 2, 0)
+
+    # pointes autour du cadre
+    count = [0, 8, 14, 20, 28, 38][k]
+    for i in range(count if t['thorn'] != 'none' else 0):
+        (x, y), (nx, ny) = rim((i + 0.5) / count, W - 0.05, H - 0.05)
+        out = math.atan2(ny, nx)
+        if t['thorn'] == 'straight':
+            thorn(x, y, out, (0.3 + 0.09 * k) * (1.6 if i % 2 == 0 else 1), 0.05 + 0.006 * k, 0, acc if i % 3 == 0 else main, z=0.15)
+        else:  # flammes : toutes couchées dans le même sens
+            thorn(x, y, out - 0.7, (0.3 + 0.1 * k) * random.uniform(0.7, 1.4), 0.06 + 0.008 * k, -0.5, acc if i % 2 else main, z=0.15)
+
+    size = 0.16 + 0.06 * k
+    for sx, sy in CORNERS:
+        x, y = sx * (W - 0.14), sy * (H - 0.14)
+        diag = math.atan2(sy, sx)
+        turn = 1 if sx * sy > 0 else -1
+        # derrière le coin
+        if k >= 2 and t['back'] == 'claws' and r['back']:
+            offsets, lengths, radius, tones = r['back']
+            for i, (o, length) in enumerate(zip(offsets, lengths)):
+                thorn(x - sx * 0.2, y - sy * 0.2, diag + math.radians(o), length, radius, 0.42 * turn, acc if i % 2 else main, z=-0.25)
+        elif k >= 2 and t['back'] == 'rays':
+            rays = 3 + k
+            for i in range(rays):
+                spread = (i / (rays - 1) - 0.5) * 2.4
+                thorn(x - sx * 0.2, y - sy * 0.2, diag + spread, (0.45 + 0.2 * k) * (1 - abs(spread) * 0.28), 0.07 + 0.02 * k, 0, acc if i % 2 else main, z=-0.25)
+        elif k >= 2 and t['back'] == 'waves':
+            spiral(x + sx * 0.3, y + sy * 0.3, diag + math.pi, turn, 0.32 + 0.1 * k, 0.07 + 0.014 * k, acc, z=-0.2)
+            spiral(x + sx * 0.1 - sy * 0.5 * turn, y + sy * 0.1 + sx * 0.5 * turn, diag + 2.4, -turn, 0.2 + 0.06 * k, 0.05 + 0.01 * k, main, z=-0.22)
+        # sur le coin
+        if t['corner'] == 'wheel':
+            bpy.ops.mesh.primitive_torus_add(major_radius=size, minor_radius=size * 0.17, location=(x, y, 0.36))
+            smooth(bpy.context.object, main)
+            for i in range(4):
+                bpy.ops.mesh.primitive_cylinder_add(radius=size * 0.075, depth=size * 2.7, location=(x, y, 0.36), rotation=(math.pi / 2, 0, i * math.pi / 4))
+                smooth(bpy.context.object, second)
+            bpy.ops.mesh.primitive_uv_sphere_add(radius=size * 0.3, location=(x, y, 0.42))
+            smooth(bpy.context.object, acc)
+        elif t['corner'] == 'orb':
+            bpy.ops.mesh.primitive_uv_sphere_add(radius=size * 0.72, location=(x, y, 0.36))
+            smooth(bpy.context.object, acc)
+            bpy.ops.mesh.primitive_torus_add(major_radius=size * 0.95, minor_radius=size * 0.12, location=(x, y, 0.3))
+            smooth(bpy.context.object, main)
+        elif t['corner'] == 'cross':
+            for i, lean in enumerate((-0.55, 0.55, 0)):
+                thorn(x - sx * 0.25, y - sy * 0.25, diag + lean, (0.55 + 0.26 * k) * (1.25 if lean == 0 else 1), 0.06 + 0.012 * k, 0, acc if i == 2 else main, z=0.3)
+            gem(x, y, size * 0.55, main)
+        else:  # volutes
+            spiral(x + sx * size, y + sy * size, diag + math.pi, turn, size * 1.5, 0.05 + 0.01 * k, acc)
+            spiral(x + sx * 0.1 - sy * size * 1.4 * turn, y + sy * 0.1 + sx * size * 1.4 * turn, diag + 2.6, -turn, size, 0.04 + 0.008 * k, main)
+            gem(x, y, size * 0.5, acc)
+
+    if k >= 3:  # un cabochon au milieu de chaque bord
+        for a, b, n, _ in SIDES:
+            gem((a[0] + b[0]) / 2 + n[0] * 0.05, (a[1] + b[1]) / 2 + n[1] * 0.05, 0.1 + 0.02 * k, acc, z=0.4)
+    if t['corner'] == 'curl':  # énergie qui s'échappe tout autour
+        for i in range(4 * k):
+            (px, py), (nx, ny) = rim(random.random())
+            ang = math.atan2(ny, nx) + random.uniform(-0.6, 0.6)
+            spiral(px + nx * 0.32, py + ny * 0.32, ang + math.pi, random.choice((-1, 1)), random.uniform(0.16, 0.3), 0.04, acc if i % 2 else main, z=0.3)
+
+
 # --- effets lumineux autour du cadre (seconde image, que le jeu anime par-dessus le cadre) -------------------------
 def glow(name, color, strength):
     m = bpy.data.materials.new(name)
@@ -431,6 +547,48 @@ def build_fx(rarity):
             star(x, y, random.uniform(0.16, 0.44), white if i % 2 else hot, random.uniform(0, 0.6))
 
 
+# Effets lumineux propres à chaque bannière : mêmes outils (étoiles, braises, traits, arcs, flammes), dosés autrement.
+#   c1, c2 : couleurs ; stars, embers, streaks, arcs, flames : quantités à la rareté maximale (réduites pour les autres).
+FX_THEMES = {
+    'onepiece': dict(c1=(0.3, 0.75, 1), c2=(0.85, 0.97, 1), stars=6, embers=40, streaks=0, arcs=0, flames=10, lean=1.2),      # embruns et vagues
+    'dragonball': dict(c1=(1, 0.85, 0.2), c2=(1, 0.55, 0.1), stars=10, embers=14, streaks=0, arcs=6, flames=12, lean=0),         # aura et éclairs
+    'bleach': dict(c1=(1, 1, 1), c2=(0.75, 0.7, 1), stars=6, embers=6, streaks=14, arcs=0, flames=0, lean=0),                    # entailles
+    'demonslayer': dict(c1=(0.2, 1, 0.65), c2=(1, 0.6, 0.15), stars=6, embers=30, streaks=0, arcs=0, flames=22, lean=-0.8),      # flammes
+    'jujutsu': dict(c1=(0.55, 0.35, 1), c2=(0.3, 0.6, 1), stars=8, embers=12, streaks=0, arcs=8, flames=8, lean=0.6),            # énergie occulte
+    'hunter': dict(c1=(0.3, 1, 0.45), c2=(1, 0.9, 0.4), stars=16, embers=26, streaks=4, arcs=0, flames=6, lean=0),              # aura
+}
+
+
+def build_fx_themed(rarity, theme):
+    f, k = FX_THEMES[theme], LEVEL[rarity]
+    random.seed(29)
+    dose = [0.0, 0.2, 0.4, 0.62, 0.82, 1.0][k]
+    a, b, white = glow('A', f['c1'], 1.0), glow('B', f['c2'], 1.0), glow('White', (1, 1, 1), 1.0)
+    pick = lambda i: (a, b, white)[i % 3]
+    if k == 0:  # carte commune : deux reflets discrets
+        for sx, sy in ((-1, 1), (1, -1)):
+            star(sx * (W - 0.1), sy * (H - 0.1), 0.2, a, 0.2)
+        return
+    for i in range(round(f['stars'] * dose) + 2):
+        x, y, _ = outside(0.9)
+        star(x, y, random.uniform(0.14, 0.44), pick(i), random.uniform(0, 0.6))
+    for i in range(round(f['embers'] * dose)):
+        x, y, _ = outside(1.0)
+        ember(x, y, random.uniform(0.025, 0.07), pick(i))
+    for i in range(round(f['streaks'] * dose)):  # entailles : longs traits obliques, tous dans le même sens
+        x, y, _ = outside(0.5)
+        streak(x, y, math.radians(-58) + random.uniform(-0.12, 0.12), random.uniform(0.9, 2.2), 0.035, pick(i))
+    for i in range(round(f['flames'] * dose)):
+        x, y, ang = outside(0.15)
+        thorn(x, y, ang * 0.4 + math.pi / 2 * 0.6 + f['lean'] + random.uniform(-0.3, 0.3), random.uniform(0.4, 0.95), 0.05, random.choice((-0.7, 0.7)), a if i % 3 else b, z=0.6)
+    arcs = round(f['arcs'] * dose)
+    corners = [(sx * (W + 0.05), sy * (H + 0.05)) for sx, sy in CORNERS]
+    for i in range(arcs):
+        p0, p1 = corners[i % 4], corners[(i + 1) % 4]
+        mid = ((p0[0] + p1[0]) / 2 * 1.14, (p0[1] + p1[1]) / 2 * 1.09)
+        lightning(p0 if i < 4 else mid, mid if i < 4 else p1, pick(i), jitter=0.26)
+
+
 # --- studio et rendu -------------------------------------------------------------------------------------------
 def studio(accent):
     scene = bpy.context.scene
@@ -488,7 +646,7 @@ def studio(accent):
 ACCENT = {'common': (0.6, 0.6, 0.7), 'ultra': (1, 0.6, 0.15), 'rare': (0.3, 0.6, 1), 'epic': (0.6, 0.3, 1), 'legend': (1, 0.5, 0.8), 'rift': (1, 0.05, 0.12)}
 
 os.makedirs(OUT, exist_ok=True)
-for rarity in ONLY or list(RECIPES):
+for rarity in [] if THEME_ARGS else (ONLY or list(RECIPES)):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     build(rarity, materials())
     studio(ACCENT[rarity])
@@ -518,3 +676,33 @@ for rarity in ONLY or list(RECIPES):
     scene.render.filepath = fx_path
     bpy.ops.render.render(write_still=True)
     print(f'Blender {bpy.app.version_string} — effets {rarity} : {os.path.getsize(fx_path) / 1024:.0f} Ko')
+
+# cadres des autres bannières : une image par rareté, dans un sous-dossier (les effets lumineux sont communs)
+for theme in THEME_ARGS:
+    os.makedirs(os.path.join(OUT, theme), exist_ok=True)
+    for rarity in ONLY or list(RECIPES):
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        build_themed(rarity, theme, materials())
+        studio(ACCENT[rarity])
+        path = os.path.join(OUT, theme, f'{rarity}.png')
+        bpy.context.scene.render.filepath = path
+        if 'fx-only' not in sys.argv:
+            bpy.ops.render.render(write_still=True)
+            print(f'Blender {bpy.app.version_string} — cadre {theme}/{rarity}')
+        # effets de cette bannière, sans éclairage
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        materials()
+        build_fx_themed(rarity, theme)
+        studio(ACCENT[rarity])
+        scene = bpy.context.scene
+        for obj in [o for o in scene.objects if o.name.startswith('Plane')]:
+            bpy.data.objects.remove(obj)
+        scene.world.node_tree.nodes['Background'].inputs[1].default_value = 0
+        scene.cycles.samples = 12
+        scene.cycles.use_denoising = False
+        scene.render.filepath = os.path.join(OUT, theme, f'{rarity}-fx.png')
+        bpy.ops.render.render(write_still=True)
+        print(f'Blender {bpy.app.version_string} — effets {theme}/{rarity}')
+        continue
+        print(f'Blender {bpy.app.version_string} — cadre {theme}/{rarity} : {os.path.getsize(path) / 1024:.0f} Ko')
+

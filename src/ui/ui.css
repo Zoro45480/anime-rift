@@ -96,6 +96,7 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 @keyframes fx-pulse { 50% { opacity: 0.5; scale: 1.02; } }
 @keyframes fx-prism { 0% { filter: drop-shadow(0 0 2cqw #fff) hue-rotate(0deg); opacity: 1; } 50% { filter: drop-shadow(0 0 3cqw #fff) hue-rotate(180deg); opacity: 0.65; } 100% { filter: drop-shadow(0 0 2cqw #fff) hue-rotate(360deg); opacity: 1; } }
 @keyframes fx-crackle { 0%, 100% { opacity: 1; scale: 1; } 12% { opacity: 0.35; } 20% { opacity: 1; scale: 1.015; } 46% { opacity: 0.75; } 54% { opacity: 0.2; } 60% { opacity: 1; scale: 0.99; } 82% { opacity: 0.6; } }
+.card__fx--own { filter: drop-shadow(0 0 1.5cqw rgba(255, 255, 255, 0.55)) !important; }
 .card.is-locked .card__fx { display: none; }
 .card.is-live .card__tilt { transition: none; }
 .card__face { position: relative; width: 100%; height: 100%; border-radius: 4cqw; overflow: hidden; isolation: isolate; background: #0b0c1c; box-shadow: inset 0 0 0 0.4cqw rgba(7, 8, 18, 0.7); }
@@ -562,3 +563,24 @@ body { background: #000; }
 .rail__glyph { flex: none; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; font-style: normal; font-size: 22px; font-weight: 800; color: #fff; background: color-mix(in srgb, var(--hue) 55%, #000); box-shadow: 0 0 0 1.5px var(--hue), 0 0 12px color-mix(in srgb, var(--hue) 50%, transparent); }
 .poster__art--custom { right: 0; bottom: 0; height: 100%; width: 62%; object-fit: cover; -webkit-mask-image: linear-gradient(90deg, transparent, #000 45%); mask-image: linear-gradient(90deg, transparent, #000 45%); filter: none; }
 .cutin__kana { position: absolute; right: 6%; top: 50%; translate: 0 -50%; transform: skewY(9deg); font-weight: 800; font-size: clamp(60px, 16vw, 170px); line-height: 1; color: #fff; text-shadow: 0 0 40px var(--sc), 6px 6px 0 rgba(3, 4, 10, 0.6); white-space: nowrap; animation: hero-slide 1.4s cubic-bezier(0.1, 0.8, 0.2, 1) 150ms both; }
+
+/* ===== Liste « À l'affiche » : une tuile par bannière ===== */
+.showcase { margin-top: 30px; grid-column: 1 / -1; }
+.showcase__list { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 430px), 1fr)); }
+.show { --hue: var(--violet); border-radius: 20px; overflow: hidden; background: #08090d; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1); }
+.show.is-current { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--hue) 75%, #fff), 0 0 26px color-mix(in srgb, var(--hue) 28%, transparent); }
+.show__top { position: relative; isolation: isolate; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) clamp(104px, 30%, 150px); gap: 26px; align-items: center; min-height: 250px; padding: 22px 40px 22px 22px;
+  background: linear-gradient(105deg, #0b0c12 25%, color-mix(in srgb, var(--hue) 70%, #0b0c12) 100%); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+.show__glyph { position: absolute; z-index: -1; left: 30%; top: 50%; translate: 0 -50%; font-size: 260px; font-weight: 800; line-height: 1; color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.13); user-select: none; }
+.show__text { display: grid; gap: 6px; justify-items: start; }
+.show__kicker { font-size: 12px; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: #b9a8ff; }
+.show__text h3 { font-family: var(--font); font-weight: 800; font-size: clamp(22px, 5vw, 28px); line-height: 1.1; color: var(--cream); }
+.show__star { font-size: 15px; color: var(--text); }
+.show__star b { display: inline-block; margin-right: 8px; padding: 1px 9px; border-radius: 7px; font-size: 13px; background: var(--cream); color: #0a0b1a; }
+.show__link { margin-top: 8px; font-weight: 800; font-size: 16px; color: #ff9d6c; }
+.show__link:hover { text-decoration: underline; text-underline-offset: 4px; }
+.show__card { rotate: 4deg; }
+.show__stats { display: grid; gap: 14px; padding: 18px 22px 22px; }
+.show__stats > div { display: grid; grid-template-columns: 1fr auto; gap: 8px; color: var(--text-dim); font-size: 15px; }
+.show__stats b { color: var(--cream); font-variant-numeric: tabular-nums; }
+.show__stats .bar { grid-column: 1 / -1; height: 5px; border: 0; }

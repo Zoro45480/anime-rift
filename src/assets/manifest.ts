@@ -21,13 +21,14 @@ const logos = import.meta.glob('./logo/*.webp', { eager: true, query: '?url', im
 // Logo 3D (rendu par tools/render-logo) : 'full' = emblème + ANIME RIFT, 'emblem' = losange seul.
 export const logoArt = (variant: 'full' | 'emblem'): string => logos[`./logo/${variant}.webp`] ?? ''
 
-const frames = import.meta.glob('./frames/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
+const frames = import.meta.glob('./frames/**/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 
 // Cadre d'une rareté, rendu avec Blender (tools/blender/build_frames.py). L'image déborde de la carte : voir .card__frame.
-export const frameArt = (rarity: string): string => frames[`./frames/${rarity}.webp`] ?? ''
+// `theme` = famille de cadres de la bannière ; à défaut, on retombe sur les cadres d'origine.
+export const frameArt = (rarity: string, theme = 'naruto'): string => frames[`./frames/${theme}/${rarity}.webp`] ?? frames[`./frames/${rarity}.webp`] ?? ''
 
 // Effets lumineux du même cadre (étoiles, arcs, flammes), rendus à part pour que le jeu puisse les animer.
-export const frameFx = (rarity: string): string => frames[`./frames/${rarity}-fx.webp`] ?? ''
+export const frameFx = (rarity: string, theme = 'naruto'): string => frames[`./frames/${theme}/${rarity}-fx.webp`] ?? frames[`./frames/${rarity}-fx.webp`] ?? ''
 
 const ui = import.meta.glob('./ui/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 

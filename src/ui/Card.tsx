@@ -1,5 +1,6 @@
 import { useRef, type CSSProperties, type PointerEvent } from 'react'
 import { AFFINITIES } from '../data/affinities'
+import { frameOf } from '../data/banners'
 import type { Hero } from '../data/heroes'
 import { RARITIES } from '../data/rarities'
 import { frameArt, frameFx, heroArt } from '../assets/manifest'
@@ -69,8 +70,8 @@ export const Card = ({ hero, count, locked, className = '', style }: Props) => {
             </span>
           </div>
         </div>
-        <img className="card__frame" src={frameArt(hero.rarity)} alt="" />
-        <img className="card__fx" src={frameFx(hero.rarity)} alt="" />
+        <img className="card__frame" src={frameArt(hero.rarity, frameOf(hero.world))} alt="" />
+        <img className={`card__fx ${frameOf(hero.world) === 'naruto' ? '' : 'card__fx--own'}`} src={frameFx(hero.rarity, frameOf(hero.world))} alt="" />
         <span className="card__mono" data-t={rarity.short} aria-label={rarity.label}>{rarity.short}</span>
       </div>
     </div>

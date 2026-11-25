@@ -96,7 +96,7 @@ export const Banners = () => {
       {/* Cartes à l'affiche */}
       <section className="lineup">
         <header className="lineup__head">
-          <h2>À l'affiche</h2>
+          <h2>Cartes vedettes</h2>
           <button className="linkbtn" onClick={() => setShowIndex(true)}><IconInfo />Index et taux</button>
         </header>
         <div className="lineup__cards">
@@ -129,6 +129,35 @@ export const Banners = () => {
               <span><Coin name={coin} size={20} />{price(n)}</span>
             </button>
           ))}
+        </div>
+      </section>
+
+      {/* Toutes les bannières : informations, progression et carte vedette */}
+      <section className="showcase">
+        <header className="section__head"><span>{two(BANNERS.length)}</span><div><h2>À l'affiche</h2><p>Les bannières ouvertes en ce moment.</p></div></header>
+        <div className="showcase__list">
+          {BANNERS.map((b, i) => {
+            const s = heroById(b.star)
+            const have = b.featured.filter((id) => store.owned[id]).length
+            return (
+              <article key={b.id} className={`show ${i === index ? 'is-current' : ''}`} style={{ ['--hue' as string]: b.hue }}>
+                <div className="show__top">
+                  <span className="show__glyph" lang="ja" aria-hidden="true">{b.glyph}</span>
+                  <div className="show__text">
+                    <p className="show__kicker">Bannière limitée</p>
+                    <h3>{b.world}</h3>
+                    <p className="show__star"><b>{RARITIES[s.rarity].short}</b>{s.name} ({s.title})</p>
+                    <button className="show__link" onClick={() => { setIndex(i); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>Voir la bannière ↗</button>
+                  </div>
+                  <div className="show__card"><Card hero={s} /></div>
+                </div>
+                <div className="show__stats">
+                  <div><span>Cartes à l'affiche possédées</span><b>{have} / {b.featured.length}</b><div className="bar"><i style={{ width: `${(have / b.featured.length) * 100}%` }} /></div></div>
+                  <div><span>Pity SSR ou mieux</span><b>{store.pity[b.id]} / {PITY_MAX}</b><div className="bar"><i style={{ width: `${(store.pity[b.id] / PITY_MAX) * 100}%` }} /></div></div>
+                </div>
+              </article>
+            )
+          })}
         </div>
       </section>
 
