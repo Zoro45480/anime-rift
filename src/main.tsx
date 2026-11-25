@@ -9,6 +9,9 @@ import './styles/tokens.css'
 import './styles/base.css'
 import './ui/ui.css'
 import { App } from './App'
+import { installGlitter } from './ui/glitter'
+
+installGlitter()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -61,38 +61,107 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 .section__head h2 { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: 40px; line-height: 1; text-transform: uppercase; color: var(--cream); }
 .section__head p { color: var(--text-dim); margin-top: 4px; }
 
-/* ===== Carte ===== */
-.card { --rc: var(--r-rare); --ac: var(--cyan); position: relative; aspect-ratio: 5 / 7; width: 100%; border-radius: 7% / 5%; padding: 5.5%; background: #0d0b14; box-shadow: 0 14px 34px rgba(0, 0, 0, 0.6); container-type: inline-size; isolation: isolate; }
-/* Le cadre 3D couvre 7.2 × 9.2 unités pour une carte de 5 × 7 : il déborde de 22 % en largeur et 15.71 % en hauteur. */
-.card__frame { position: absolute; left: -22%; top: -15.71%; width: 144%; height: 131.43%; max-width: none; pointer-events: none; z-index: 2; filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.55)); }
-.card__frame--legend { animation: holo 9s linear infinite; }
-.card__frame--rift { filter: drop-shadow(0 0 7px rgba(255, 46, 79, 0.75)) drop-shadow(0 3px 5px rgba(0, 0, 0, 0.55)); }
-@keyframes holo { to { filter: hue-rotate(360deg) drop-shadow(0 3px 5px rgba(0, 0, 0, 0.55)); } }
-.card__sparks { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 3; }
-.card__sparks path { fill: #fff; transform-box: fill-box; transform-origin: center; animation: spark 2.6s ease-in-out infinite; }
-.card__sparks--rift path { fill: #ffd9df; }
-@keyframes spark { 0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); } 50% { opacity: 1; transform: scale(1) rotate(45deg); } }
-.card__body { position: relative; width: 100%; height: 100%; border-radius: 6.5% / 4.6%; overflow: hidden; background: radial-gradient(120% 80% at 50% 20%, color-mix(in srgb, var(--ac) 70%, #fff) 0%, color-mix(in srgb, var(--ac) 55%, #120f1c) 45%, #0d0b14 100%); }
-.card__rays { position: absolute; inset: -40%; background: repeating-conic-gradient(from 0deg at 50% 45%, rgba(255, 255, 255, 0.14) 0 4deg, transparent 4deg 14deg); mix-blend-mode: overlay; }
-.card__art { position: absolute; left: 50%; top: 4%; width: 150%; max-width: none; translate: -50% 0; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.45)); }
+/* ===== Carte holographique ===== */
+/* --px / --py : position du reflet. --ang : rotation des feuilles métalliques. --rx / --ry : inclinaison. */
+@property --px { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
+@property --py { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
+@property --ang { syntax: '<angle>'; inherits: true; initial-value: 0deg; }
+@keyframes holo-idle {
+  0% { --px: 18%; --py: 22%; --ang: 0deg; }
+  35% { --px: 78%; --py: 34%; --ang: 130deg; }
+  70% { --px: 62%; --py: 82%; --ang: 250deg; }
+  100% { --px: 18%; --py: 22%; --ang: 360deg; }
+}
+.card { --rc: var(--r-rare); --ac: var(--cyan); --rx: 0deg; --ry: 0deg; --edge: 3.4cqw; --foil: 0; --sparkle: 0;
+  position: relative; aspect-ratio: 5 / 7; width: 100%; container-type: inline-size; perspective: 900px; touch-action: pan-y;
+  animation: holo-idle 9s ease-in-out infinite; animation-delay: var(--delay, 0s); }
+.card.is-live { animation: none; }
+.card__tilt { position: absolute; inset: 0; border-radius: 6.5cqw; padding: var(--edge); transform: rotateX(var(--rx)) rotateY(var(--ry)); transition: transform 500ms var(--ease-out); box-shadow: 0 3cqw 7cqw rgba(0, 0, 0, 0.6);
+  background: linear-gradient(140deg, #eef4ff, #8ea3c8 30%, #4d5c80 55%, #a9bcdf 80%, #f4f8ff); }
+.card.is-live .card__tilt { transition: none; }
+.card__face { position: relative; width: 100%; height: 100%; border-radius: calc(6.5cqw - var(--edge) * 0.7); overflow: hidden; isolation: isolate; background: #0b0c1c; box-shadow: inset 0 0 0 0.4cqw rgba(7, 8, 18, 0.7); }
+
+/* Fond et illustration */
+.card__bg { position: absolute; inset: 0; background:
+  radial-gradient(90% 60% at 50% 28%, color-mix(in srgb, var(--ac) 80%, #fff) 0%, color-mix(in srgb, var(--ac) 60%, #141633) 42%, #0b0c1c 100%); }
+.card__rays { position: absolute; inset: -30%; opacity: 0.5; mix-blend-mode: soft-light; background: repeating-conic-gradient(from var(--ang) at 50% 42%, rgba(255, 255, 255, 0.9) 0 3deg, transparent 3deg 13deg); }
+.card__art { position: absolute; left: 50%; top: 6%; width: 150%; max-width: none; translate: -50% 0; filter: drop-shadow(0 1.5cqw 2.5cqw rgba(0, 0, 0, 0.5)); }
 .card__art--custom { left: 0; top: 0; width: 100%; height: 100%; translate: none; object-fit: cover; filter: none; }
-.card__foil { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 32%, rgba(255, 255, 255, 0.34) 46%, rgba(255, 255, 255, 0.05) 52%, transparent 64%); background-size: 260% 100%; background-position: 120% 0; mix-blend-mode: screen; transition: background-position 900ms var(--ease-out); pointer-events: none; }
-.card:hover .card__art--custom { left: 0; top: 0; width: 100%; height: 100%; translate: none; object-fit: cover; filter: none; }
-.card__foil { background-position: -20% 0; }
-.card__rarity { position: absolute; left: 8%; top: 4%; font-family: var(--font-display); font-style: italic; font-size: 17cqw; line-height: 1.1; color: #fff; -webkit-text-stroke: 0.6cqw rgba(0, 0, 0, 0.55); paint-order: stroke fill; text-shadow: 0 0 3cqw var(--rc), 0.8cqw 0.8cqw 0 rgba(0, 0, 0, 0.5); }
-.card--rift .card__rarity { color: #fff; text-shadow: 0 0 4cqw #ff2e4f, 0.8cqw 0.8cqw 0 #5b0012; }
-.card__count { position: absolute; right: 9%; top: 8%; font-weight: 800; font-size: 7cqw; padding: 0.5cqw 3cqw; border-radius: 99px; background: rgba(11, 9, 13, 0.8); color: var(--gold); }
-.card__plate { position: absolute; left: 0; right: 0; bottom: 0; padding: 22% 9% 9%; display: grid; gap: 0.6cqw; background: linear-gradient(180deg, transparent, rgba(8, 6, 12, 0.94) 52%); }
-.card__name { font-family: var(--font-display); font-weight: 700; font-size: 10.5cqw; line-height: 1.05; text-transform: uppercase; color: #fff; }
-.card__name i { font-style: normal; font-size: 0.72em; opacity: 0.85; }
-.card__world { font-size: 4.2cqw; color: rgba(255, 255, 255, 0.6); }
-.card__stats { display: flex; align-items: baseline; gap: 4cqw; margin-top: 2.5cqw; font-family: var(--font-display); font-weight: 700; font-size: 7.6cqw; color: #fff; }
-.card__stats b { font-weight: 400; display: flex; align-items: baseline; gap: 1.5cqw; }
-.card__stats small { font-family: var(--font); font-weight: 800; font-size: 3.4cqw; color: rgba(255, 255, 255, 0.55); }
-.card__stats em { margin-left: auto; font-family: var(--font); font-style: normal; font-size: 3.2cqw; color: rgba(255, 255, 255, 0.45); }
-.card.is-locked { filter: grayscale(1) brightness(0.42); animation: none; }
-.card.is-locked .card__sparks { display: none; }
-.card.is-locked .card__frame { animation: none; }
+
+/* Feuille holographique : arc-en-ciel, paillettes près du reflet, éclat blanc */
+.card__shine, .card__glitter, .card__glare { position: absolute; inset: 0; pointer-events: none; }
+.card__shine { opacity: calc(var(--foil) * 0.5); mix-blend-mode: color-dodge; filter: brightness(0.75) contrast(1.5);
+  background: repeating-linear-gradient(115deg, #ff5fb8 0%, #ffd95a 7%, #7dffb0 14%, #5fd0ff 21%, #a98bff 28%, #ff5fb8 35%); background-size: 320% 320%; background-position: var(--px) var(--py); }
+.card__glitter { opacity: var(--sparkle); mix-blend-mode: color-dodge; background-image: var(--glitter); background-size: 62cqw 62cqw; background-position: calc(50% - var(--px) * 0.4) calc(50% - var(--py) * 0.4);
+  -webkit-mask-image: radial-gradient(farthest-corner circle at var(--px) var(--py), #000 8%, rgba(0, 0, 0, 0.35) 38%, transparent 72%); mask-image: radial-gradient(farthest-corner circle at var(--px) var(--py), #000 8%, rgba(0, 0, 0, 0.35) 38%, transparent 72%); }
+.card__glare { mix-blend-mode: overlay; background: radial-gradient(farthest-corner circle at var(--px) var(--py), rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.12) 28%, rgba(0, 0, 0, 0.25) 90%); }
+
+/* En-tête : rareté et affinité */
+.card__top { position: absolute; left: 7cqw; right: 7cqw; top: 6.5cqw; display: flex; justify-content: space-between; align-items: center; }
+.card__rarity { display: grid; place-items: center; min-width: 17cqw; height: 10cqw; padding: 0 3cqw; background: rgba(7, 8, 18, 0.72); clip-path: polygon(2.5cqw 0, 100% 0, calc(100% - 2.5cqw) 100%, 0 100%); }
+.card__rarity b { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: 8.5cqw; line-height: 1; letter-spacing: 0.02em; color: var(--rc); }
+.card__affinity { display: grid; place-items: center; width: 10cqw; height: 10cqw; border-radius: 50%; background: rgba(7, 8, 18, 0.72); }
+.card__affinity .affinity { width: 100% !important; height: 100% !important; background: none; }
+.card__affinity svg { width: 6cqw; height: 6cqw; }
+.card__count { position: absolute; right: 7cqw; top: 19cqw; font-weight: 800; font-size: 6cqw; padding: 0.5cqw 3cqw; border-radius: 99px; background: rgba(7, 8, 18, 0.8); color: var(--gold); }
+
+/* Cartouche du bas */
+.card__plate { position: absolute; left: 0; right: 0; bottom: 0; padding: 26cqw 9cqw 9cqw; display: grid; justify-items: center; text-align: center; background: linear-gradient(180deg, transparent, rgba(7, 8, 18, 0.9) 48%, rgba(7, 8, 18, 0.97)); }
+.card__name { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: 15cqw; line-height: 0.95; text-transform: uppercase; color: #fff; letter-spacing: 0.01em; padding-right: 0.08em; }
+.card__title { font-size: 4.4cqw; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: color-mix(in srgb, var(--rc) 70%, #fff); margin-top: 0.8cqw; }
+.card__rule { position: relative; width: 100%; height: 0.35cqw; margin: 3.4cqw 0 2.6cqw; background: linear-gradient(90deg, transparent, var(--rc) 25%, var(--rc) 75%, transparent); opacity: 0.8; }
+.card__rule i { position: absolute; left: 50%; top: 50%; width: 2.6cqw; height: 2.6cqw; translate: -50% -50%; rotate: 45deg; background: var(--rc); box-shadow: 0 0 2cqw var(--rc); }
+.card__stats { display: flex; align-items: baseline; justify-content: center; gap: 5cqw; width: 100%; font-family: var(--font-display); font-weight: 700; font-size: 8cqw; line-height: 1; color: #fff; font-variant-numeric: tabular-nums; }
+.card__stats b { font-weight: 700; display: flex; align-items: baseline; gap: 1.4cqw; }
+.card__stats small { font-family: var(--font); font-weight: 800; font-size: 3.3cqw; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.55); }
+.card__stats em { position: absolute; left: 0; right: 0; bottom: 3cqw; text-align: center; font-family: var(--font); font-style: normal; font-weight: 600; font-size: 2.8cqw; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.4); }
+
+/* Ornements gravés */
+.card__orn { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.card__orn .o-a { stop-color: #fff; } .card__orn .o-b { stop-color: var(--rc); } .card__orn .o-c { stop-color: #fff; }
+
+/* --- SR : métal violet anodisé, reflet léger --- */
+.card--epic { --foil: 0.35; --sparkle: 0.25; }
+.card--epic .card__tilt { background: linear-gradient(calc(var(--ang) * 0.5 + 120deg), #f1e8ff, #a47bff 22%, #4a2f9a 48%, #c9b0ff 72%, #6a45d0); }
+
+/* --- LR : feuille d'or guillochée, holographie complète --- */
+.card--legend { --foil: 0.8; --sparkle: 0.85; --edge: 4cqw; }
+.card--legend .card__tilt { background:
+  repeating-linear-gradient(45deg, rgba(90, 55, 0, 0.3) 0 0.35cqw, transparent 0.35cqw 1.1cqw),
+  repeating-linear-gradient(-45deg, rgba(90, 55, 0, 0.3) 0 0.35cqw, transparent 0.35cqw 1.1cqw),
+  conic-gradient(from var(--ang), #b9851a, #fff6c9, #d9a428, #fffbe6, #a8720f, #ffe89a, #c8921c, #fff3bf, #b9851a);
+  box-shadow: 0 0 0 0.35cqw #fff3bf, 0 0 6cqw rgba(246, 207, 99, 0.45), 0 3cqw 7cqw rgba(0, 0, 0, 0.6); }
+.card--legend .card__name { background: linear-gradient(180deg, #fffbe6 20%, #f6cf63 60%, #c8921c); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.card--legend .card__orn .o-a { stop-color: #fffbe6; } .card--legend .card__orn .o-b { stop-color: #f6cf63; } .card--legend .card__orn .o-c { stop-color: #fff3bf; }
+
+/* --- MR : carte de faille, bord prismatique fin, illustration pleine carte, cosmos --- */
+.card--rift { --foil: 1; --sparkle: 1; --edge: 1.5cqw; --rc: #ffffff; }
+.card--rift .card__tilt { background: conic-gradient(from var(--ang), #7df9ff, #ffffff, #ff7ad9, #ffd56b, #ffffff, #9b7bff, #7df9ff);
+  box-shadow: 0 0 5cqw rgba(125, 249, 255, 0.6), 0 0 11cqw rgba(155, 123, 255, 0.45), 0 3cqw 7cqw rgba(0, 0, 0, 0.6); }
+.card--rift .card__bg { background:
+  radial-gradient(45% 30% at 22% 20%, rgba(255, 122, 217, 0.75), transparent 70%),
+  radial-gradient(50% 34% at 80% 30%, rgba(125, 249, 255, 0.8), transparent 70%),
+  radial-gradient(60% 40% at 50% 70%, rgba(155, 123, 255, 0.7), transparent 75%),
+  linear-gradient(180deg, #1a1147, #070812); }
+.card--rift .card__rays { opacity: 0.8; mix-blend-mode: overlay; }
+.card--rift .card__art:not(.card__art--custom) { width: 168%; top: 3%; }
+.card--rift .card__rarity { background: linear-gradient(120deg, #7df9ff, #ffffff 45%, #ff7ad9); }
+.card--rift .card__rarity b { color: #0a0b1a; }
+.card--rift .card__name { background: linear-gradient(100deg, #7df9ff, #ffffff 40%, #ff9be3 75%, #ffd56b); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 2cqw rgba(125, 249, 255, 0.5)); }
+.card--rift .card__title { color: #bff6ff; }
+.card--rift .card__rule, .card--rift .card__rule i { background: linear-gradient(90deg, transparent, #7df9ff 25%, #ff7ad9 75%, transparent); }
+.card--rift .card__rule i { background: #fff; box-shadow: 0 0 2.5cqw #7df9ff; }
+.card--rift .card__orn .o-a { stop-color: #7df9ff; } .card--rift .card__orn .o-b { stop-color: #ffffff; } .card--rift .card__orn .o-c { stop-color: #ff7ad9; }
+
+/* Cartes ornées : l'en-tête et le cartouche se glissent à l'intérieur des volutes */
+.card--legend .card__top, .card--rift .card__top { left: 14cqw; right: 14cqw; top: 13.5cqw; }
+.card--legend .card__count, .card--rift .card__count { right: 14cqw; top: 26cqw; }
+.card--legend .card__plate, .card--rift .card__plate { padding: 26cqw 15cqw 15cqw; }
+.card--legend .card__stats, .card--rift .card__stats { font-size: 7.2cqw; gap: 4cqw; }
+.card--legend .card__stats em, .card--rift .card__stats em { bottom: 8.5cqw; }
+
+.card.is-locked { animation: none; filter: grayscale(1) brightness(0.4); }
+.card.is-locked .card__shine, .card.is-locked .card__glitter, .card.is-locked .card__glare { display: none; }
 
 /* ===== Invocation ===== */
 .summon { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
@@ -132,8 +201,8 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 .lineup { margin-top: 12px; }
 .lineup__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .lineup__head h2 { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: 34px; line-height: 1; text-transform: uppercase; color: var(--cream); }
-.lineup__cards { display: flex; gap: 50px; overflow-x: auto; scrollbar-width: none; padding: 46px 44px 10px; justify-content: safe center; }
-.lineup__slot { flex: none; width: clamp(132px, 36vw, 190px); display: grid; gap: 34px; justify-items: center; }
+.lineup__cards { display: flex; gap: 18px; overflow-x: auto; scrollbar-width: none; padding: 26px 8px 10px; justify-content: safe center; }
+.lineup__slot { flex: none; width: clamp(150px, 42vw, 210px); display: grid; gap: 12px; justify-items: center; }
 .lineup__slot:nth-child(2) { margin-top: -14px; }
 .lineup__own { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); }
 .lineup__own.is-owned { color: var(--cyan); }
@@ -198,7 +267,7 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 .rates p { font-size: 13px; color: var(--text-dim); margin: 2px 0 0 44px; }
 .result { width: min(100%, 860px); display: grid; gap: 22px; justify-items: center; }
 .result__title { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: 44px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--cream); }
-.result__grid { width: 100%; display: grid; gap: 34px 26px; padding: 10px 14px; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.result__grid { width: 100%; display: grid; gap: 12px; grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .result__grid--1 { grid-template-columns: minmax(0, 260px); justify-content: center; }
 .result__card { animation: deal 520ms var(--ease-out) both; }
 @keyframes deal { from { opacity: 0; transform: translateY(40px) rotateY(80deg) scale(0.8); } }
@@ -206,9 +275,9 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 
 /* ===== Collection ===== */
 .collection { padding-top: 10px; }
-.collection__grid { display: grid; gap: 44px 34px; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); padding-inline: 14px; }
-.collection__hint { font-size: 13px; color: var(--text-dim); margin-bottom: 30px; }
-.collection__item { display: grid; gap: 26px; align-content: start; }
+.collection__grid { display: grid; gap: 26px 16px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.collection__hint { font-size: 13px; color: var(--text-dim); margin-bottom: 18px; }
+.collection__item { display: grid; gap: 10px; align-content: start; }
 .artpick { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .artpick__input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .artpick__btn { cursor: pointer; font-size: 12px; font-weight: 800; padding: 7px 12px; border-radius: 99px; border: 1px solid var(--line-strong); color: var(--cream); transition: border-color var(--mid), background var(--mid); }
@@ -221,8 +290,7 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 /* ===== Grand écran : l'affiche s'élargit, la console passe à côté des cartes ===== */
 @media (min-width: 900px) {
   .summon { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); column-gap: 26px; align-items: start; }
-  .lineup__cards { gap: 44px; padding-inline: 34px; }
-  .lineup__slot { width: 150px; }
+  .lineup__slot { width: 186px; }
   .poster, .rail { grid-column: 1 / -1; }
   .poster { padding: 40px 46px 50px; }
   .poster__art { right: 4%; }
@@ -234,7 +302,7 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
   .logo__full { display: none; }
   .logo__emblem { display: block; }
   .wallet span { padding: 5px 12px 5px 9px; }
-  .result__grid { gap: 26px 16px; }
+  .result__grid { gap: 8px; }
   .gate__panel { padding-right: 40%; }
   .gate--flip .gate__panel { padding-left: 40%; }
   .gate__art { right: 4%; width: 130px; }
