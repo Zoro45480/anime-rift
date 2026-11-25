@@ -1,7 +1,8 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { BANNERS, COST, type Banner } from '../data/banners'
 import type { Hero } from '../data/heroes'
 import { pullMany } from '../game/gacha'
+import { loadAllArt, removeArt, saveArt } from './customArt'
 
 export type Currency = 'ticket' | 'gems'
 
@@ -10,6 +11,9 @@ type State = { tickets: number; gems: number; pity: Record<string, number>; owne
 type Store = State & {
   canAfford: (currency: Currency, count: number) => boolean
   summon: (banner: Banner, currency: Currency, count: number) => Hero[] | null
+  customArt: Record<string, string> // images personnelles du joueur, par identifiant de personnage
+  setCustomArt: (heroId: string, dataUrl: string) => Promise<boolean> // false = affichée mais non enregistrée
+  clearCustomArt: (heroId: string) => void
 }
 
 // Dotation de départ du compte. La progression n'est PAS encore sauvegardée (phase 14) : elle repart d'ici à chaque rechargement.
@@ -19,6 +23,11 @@ const Ctx = createContext<Store | null>(null)
 
 export const StoreProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<State>(START)
+  const [customArt, setArt] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    void loadAllArt().then(setArt)
+  }, [])
 
   const store = useMemo<Store>(() => {
     const price = (currency: Currency, count: number) => count * (currency === 'ticket' ? COST.ticket : COST.gems)
@@ -36,8 +45,16 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       })
       return heroes
     }
-    return { ...state, canAfford, summon }
-  }, [state])
+    const setCustomArt = async (heroId: string, dataUrl: string) => {
+      setArt((a) => ({ ...a, [heroId]: dataUrl }))
+      return saveArt(heroId, dataUrl)
+    }
+    const clearCustomArt = (heroId: string) => {
+      setArt((a) => Object.fromEntries(Object.entries(a).filter(([k]) => k !== heroId)))
+      void removeArt(heroId)
+    }
+    return { ...state, canAfford, summon, customArt, setCustomArt, clearCustomArt }
+  }, [state, customArt])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>
 }

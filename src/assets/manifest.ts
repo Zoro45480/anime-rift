@@ -13,3 +13,8 @@ const icons = import.meta.glob('./icons/*.png', { eager: true, query: '?url', im
 export type IconName = 'gem' | 'ticket' | 'bolt'
 
 export const iconArt = (name: IconName): string => icons[`./icons/${name}.png`] ?? ''
+
+const frames = import.meta.glob('./frames/*.png', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
+
+// Cadre 3D d'une rareté (rendu par tools/render-frames). L'image déborde de la carte : voir .card__frame.
+export const frameArt = (rarity: string): string => frames[`./frames/${rarity}.png`] ?? ''
