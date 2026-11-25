@@ -434,80 +434,73 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 }
 
 /* =====================================================================================================================
-   THÈME ANIME — habillage dessiné dans Blender (tools/blender/build_ui.py).
-   Cette section ne change que l'apparence : elle remplace les fonds, les formes des boutons et des panneaux par les
-   images du thème (variables --ui-*, posées par src/ui/theme.ts) et donne aux titres un contour à l'encre.
+   THÈME — habillage modélisé et rendu dans Blender (tools/blender/build_ui.py).
+   Sobre et haut de gamme : métal, verre sombre, reflets réels, fond nocturne feutré. Aucun gros contour.
+   Cette section ne change que l'apparence : elle pose les images du thème (variables --ui-*, fournies par
+   src/ui/theme.ts) sur les boutons, les panneaux et la navigation.
    Les plaques et le cadre sont étirés par leurs bords : les coins gardent leurs détails, le centre est uni.
    ===================================================================================================================== */
-:root { --ink-line: #05061a; }
 
 /* Fond des menus : l'illustration, assombrie vers le bas pour que les textes restent lisibles */
-body { background: linear-gradient(180deg, rgba(7, 8, 22, 0.28) 0%, rgba(7, 8, 22, 0.5) 45%, rgba(7, 8, 22, 0.86) 100%), var(--ui-bg) center top / cover no-repeat fixed, var(--ink); }
-/* trame de points, comme sur une planche de manga */
-#root::before { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.16; background: radial-gradient(circle, #fff 1.1px, transparent 1.5px) 0 0 / 9px 9px;
-  -webkit-mask-image: linear-gradient(135deg, transparent 45%, #000 100%); mask-image: linear-gradient(135deg, transparent 45%, #000 100%); }
-.screen, .topbar, .dock, .splash { position: relative; z-index: 1; }
-.topbar { position: sticky; background: linear-gradient(180deg, rgba(5, 6, 26, 0.92) 50%, transparent); }
-.dock { position: fixed; }
+body { background: linear-gradient(180deg, rgba(5, 6, 18, 0.2) 0%, rgba(5, 6, 18, 0.5) 50%, rgba(5, 6, 18, 0.88) 100%), var(--ui-bg) center top / cover no-repeat fixed, var(--ink); }
+.screen, .topbar, .splash { position: relative; z-index: 1; }
+.topbar { position: sticky; background: linear-gradient(180deg, rgba(5, 6, 18, 0.9) 45%, transparent); }
 .splash { background: none; }
 
-/* Titres : contour épais à l'encre et ombre décalée */
-.section__head h2, .lineup__head h2, .nexus__head h1, .poster__title, .modal__title, .result__title, .gate__text h2 {
-  -webkit-text-stroke: 0.14em var(--ink-line); paint-order: stroke fill; text-shadow: 0.07em 0.08em 0 var(--ink-line); letter-spacing: 0.02em; }
-.poster__title { -webkit-text-stroke-width: 0.1em; }
+/* Titres : nets, avec une lueur douce plutôt qu'un contour */
+.section__head h2, .lineup__head h2, .nexus__head h1, .gate__text h2, .modal__title, .result__title { text-shadow: 0 2px 18px rgba(5, 6, 18, 0.9), 0 0 26px rgba(120, 140, 255, 0.25); letter-spacing: 0.03em; }
+.poster__title { text-shadow: 0 3px 24px rgba(5, 6, 18, 0.85); }
 
-/* Boutons : les plaques penchées du thème */
-.btn, .pull, .sc__btn, .artpick__btn { clip-path: none; background: none; border: 0; border-image: var(--ui-btn-indigo) 40 70 40 70 fill / 15px 26px 15px 26px; filter: none; }
-.btn { min-height: 58px; padding: 12px 34px 16px; color: var(--cream); text-shadow: 0 2px 0 var(--ink-line); }
-.btn--gold, .pull--gold { border-image-source: var(--ui-btn-gold); color: #2b1600; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45); background: none; }
-.btn:hover:not(:disabled), .pull:hover:not(:disabled) { filter: brightness(1.12) saturate(1.1); transform: translate(-1px, -3px); }
-.btn:active:not(:disabled), .pull:active:not(:disabled) { transform: translate(2px, 3px); filter: brightness(0.94); }
-.pull { min-height: 78px; padding: 8px 26px 12px; border-image-width: 17px 30px 17px 30px; }
+/* Boutons : plaques de métal et de verre */
+.btn, .pull, .sc__btn, .artpick__btn { clip-path: none; background: none; border: 0; border-image: var(--ui-btn-indigo) 40 70 40 70 fill / 15px 26px 15px 26px; }
+.btn { min-height: 56px; padding: 12px 34px 14px; color: var(--cream); text-shadow: 0 1px 6px rgba(5, 6, 18, 0.9); letter-spacing: 0.04em; }
+.btn--gold, .pull--gold { border-image-source: var(--ui-btn-gold); color: #241300; text-shadow: 0 1px 0 rgba(255, 240, 190, 0.55); background: none; }
+.btn:hover:not(:disabled), .pull:hover:not(:disabled) { filter: brightness(1.14) drop-shadow(0 6px 16px rgba(120, 150, 255, 0.35)); transform: translateY(-2px); }
+.btn--gold:hover:not(:disabled), .pull--gold:hover:not(:disabled) { filter: brightness(1.1) drop-shadow(0 6px 18px rgba(255, 200, 80, 0.5)); }
+.btn:active:not(:disabled), .pull:active:not(:disabled) { transform: translateY(1px) scale(0.985); filter: brightness(0.94); }
+.pull { min-height: 76px; padding: 8px 26px 10px; border-image-width: 17px 30px 17px 30px; text-shadow: 0 1px 6px rgba(5, 6, 18, 0.9); }
 .pull:nth-child(2) { border-image-source: var(--ui-btn-pink); }
-.pull b { -webkit-text-stroke: 0.12em var(--ink-line); paint-order: stroke fill; }
-.pull--gold b { -webkit-text-stroke: 0; }
+.pull--gold { text-shadow: 0 1px 0 rgba(255, 240, 190, 0.55); }
 .console__pulls { gap: 2px; }
-.sc__btn, .artpick__btn { border-image-source: var(--ui-btn-ghost); border-image-width: 11px 20px 11px 20px; padding: 10px 22px 12px; border-radius: 0; }
-.sc__btn--skip { border-image-source: var(--ui-btn-pink); color: #fff; text-shadow: 0 1px 0 var(--ink-line); }
+.sc__btn, .artpick__btn { border-image-source: var(--ui-btn-ghost); border-image-width: 11px 20px 11px 20px; padding: 10px 22px 11px; border-radius: 0; }
+.sc__btn--skip { border-image-source: var(--ui-btn-indigo); color: #fff; }
 .artpick__btn { color: var(--cream); }
-.artpick__btn:hover { background: none; filter: brightness(1.3); }
+.artpick__btn:hover { background: none; filter: brightness(1.35); }
 
-/* Panneaux et fenêtres : le cadre du thème */
-.console, .modal__box { clip-path: none; background: none; border: 0; border-image: var(--ui-panel) 80 80 80 80 fill / 40px; padding: 26px 22px 28px; }
-.modal__box.index { padding: 30px 26px 30px; }
-.console { padding-top: 30px; }
+/* Panneaux et fenêtres : verre sombre cerclé d'un filet de métal clair */
+.console, .modal__box { clip-path: none; background: none; border: 0; border-image: var(--ui-panel) 80 80 80 80 fill / 38px; padding: 24px 22px 26px; filter: drop-shadow(0 18px 34px rgba(0, 0, 0, 0.55)); }
+.modal__box.index { padding: 28px 26px 28px; }
+.console { padding-top: 28px; }
 
-/* Ressources du joueur et rail des bannières : petites plaques sombres */
-.wallet span { clip-path: none; background: none; border-image: var(--ui-btn-ghost) 40 70 40 70 fill / 10px 17px 10px 17px; padding: 6px 20px 8px 16px; }
-.rail__item { background: none; border: 0; border-image: var(--ui-btn-ghost) 40 70 40 70 fill / 15px 26px 15px 26px; padding: 10px 28px 14px 22px; box-shadow: none; }
+/* Ressources, rail des bannières, étiquettes : petites plaques de verre */
+.wallet span { clip-path: none; background: none; border-image: var(--ui-btn-ghost) 40 70 40 70 fill / 10px 17px 10px 17px; padding: 6px 20px 7px 16px; }
+.rail__item { background: none; border: 0; border-image: var(--ui-btn-ghost) 40 70 40 70 fill / 15px 26px 15px 26px; padding: 10px 28px 12px 22px; box-shadow: none; }
 .rail__item.is-active { border-image-source: var(--ui-btn-indigo); background: none; box-shadow: none; }
-.rail__item img { clip-path: none; border-radius: 50%; border: 3px solid var(--ink-line); box-shadow: 0 0 0 2px var(--hue); }
-.pay button { border: 3px solid var(--ink-line); border-radius: 16px; background: rgba(8, 9, 30, 0.75); box-shadow: 3px 4px 0 var(--ink-line); }
-.pay .is-active { background: rgba(246, 207, 99, 0.16); border-color: var(--gold); box-shadow: 3px 4px 0 var(--ink-line), 0 0 14px rgba(246, 207, 99, 0.35); }
-.chip { clip-path: none; background: none; border-image: var(--ui-btn-ghost) 40 70 40 70 fill / 9px 16px 9px 16px; padding: 7px 20px 9px; }
+.rail__item img { clip-path: none; border-radius: 50%; box-shadow: 0 0 0 1.5px var(--hue), 0 0 12px color-mix(in srgb, var(--hue) 50%, transparent); }
+.pay button { border: 1px solid rgba(190, 200, 255, 0.2); border-radius: 14px; background: rgba(8, 9, 28, 0.6); }
+.pay .is-active { background: linear-gradient(180deg, rgba(246, 207, 99, 0.16), rgba(246, 207, 99, 0.05)); border-color: rgba(246, 207, 99, 0.85); box-shadow: 0 0 18px rgba(246, 207, 99, 0.22); }
+.chip { clip-path: none; background: none; border-image: var(--ui-btn-ghost) 40 70 40 70 fill / 9px 16px 9px 16px; padding: 7px 20px 8px; }
 
-/* Barre de pity : une jauge à contour épais */
-.pity__track { height: 16px; clip-path: none; border: 3px solid var(--ink-line); border-radius: 99px; background: rgba(8, 9, 30, 0.8); box-shadow: 2px 3px 0 var(--ink-line); }
-.pity__track i { border-radius: 99px; background: repeating-linear-gradient(115deg, var(--gold) 0 10px, #fff3bf 10px 14px); box-shadow: none; }
+/* Barre de pity : fine, à reflet doré */
+.pity__track { height: 10px; clip-path: none; border-radius: 99px; background: rgba(8, 9, 28, 0.75); box-shadow: inset 0 0 0 1px rgba(190, 200, 255, 0.22); }
+.pity__track i { border-radius: 99px; background: linear-gradient(90deg, #b8842a, var(--gold) 60%, #fff3bf); box-shadow: 0 0 12px rgba(246, 207, 99, 0.6); }
 
-/* Barre de navigation : plaque du thème et icônes dessinées */
-.dock__bg { clip-path: none; background: none; box-shadow: none; border-image: var(--ui-btn-ghost) 40 70 40 70 fill / 20px 34px 20px 34px; inset: -2px -6px -8px -6px; }
+/* Barre de navigation : plaque de verre et icônes en volume */
+.dock__bg { clip-path: none; background: none; box-shadow: none; border-image: var(--ui-btn-ghost) 40 70 40 70 fill / 20px 34px 20px 34px; inset: -2px -6px -6px -6px; filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.6)); }
 .dock::before { display: none; }
-.dock__side img { width: 38px; height: 38px; margin-top: -8px; object-fit: contain; filter: saturate(0.85) brightness(0.95); transition: filter var(--mid), transform var(--mid) var(--ease-out); }
-.dock__side:hover img { filter: none; }
-.dock__side.is-active img { filter: drop-shadow(0 0 6px rgba(94, 230, 255, 0.7)); transform: scale(1.18) translateY(-2px); }
-.dock__main i, .dock__main.is-active i { rotate: 0deg; width: 76px; height: 76px; top: -40px; border-radius: 0; background: none; box-shadow: none; }
-.dock__main i img { width: 100%; height: 100%; object-fit: contain; rotate: 0deg; filter: saturate(0.9) brightness(0.95); transition: filter var(--mid), scale var(--mid) var(--ease-out); }
-.dock__main:hover i { top: -44px; }
-.dock__main.is-active i img { filter: drop-shadow(0 0 10px rgba(255, 210, 80, 0.8)); scale: 1.08; }
+.dock__side img { width: 36px; height: 36px; margin-top: -6px; object-fit: contain; opacity: 0.7; transition: opacity var(--mid), transform var(--mid) var(--ease-out), filter var(--mid); }
+.dock__side:hover img { opacity: 1; }
+.dock__side.is-active img { opacity: 1; filter: drop-shadow(0 0 8px rgba(94, 230, 255, 0.6)); transform: scale(1.15) translateY(-2px); }
+.dock__main i, .dock__main.is-active i { rotate: 0deg; width: 72px; height: 72px; top: -38px; border-radius: 0; background: none; box-shadow: none; }
+.dock__main i img { width: 100%; height: 100%; object-fit: contain; rotate: 0deg; opacity: 0.85; transition: opacity var(--mid), filter var(--mid), scale var(--mid) var(--ease-out); }
+.dock__main:hover i { top: -41px; }
+.dock__main.is-active i img { opacity: 1; filter: drop-shadow(0 0 12px rgba(120, 200, 255, 0.75)); scale: 1.06; }
 
-/* Affiche de la bannière et portes du Nexus : un contour à l'encre et des hachures */
-.poster { border: 4px solid var(--ink-line); clip-path: none; border-radius: 22px 22px 22px 60px; box-shadow: 6px 8px 0 var(--ink-line); }
-.poster__nav { clip-path: none; border-radius: 12px; border: 3px solid var(--ink-line); background: rgba(8, 9, 30, 0.8); width: 40px; height: 48px; }
+/* Affiche de la bannière et portes du Nexus : coins arrondis, liseré fin, ombre douce */
+.poster { clip-path: none; border-radius: 20px 20px 20px 54px; box-shadow: inset 0 0 0 1px rgba(210, 220, 255, 0.28), 0 22px 44px rgba(0, 0, 0, 0.55); }
+.poster__nav { clip-path: none; border-radius: 12px; background: rgba(8, 9, 28, 0.6); box-shadow: inset 0 0 0 1px rgba(210, 220, 255, 0.25); width: 38px; height: 46px; backdrop-filter: blur(6px); }
 .poster__nav--prev { left: 8px; } .poster__nav--next { right: 8px; }
-.gate__panel { clip-path: none; border: 4px solid var(--ink-line); border-radius: 18px 46px 18px 18px; box-shadow: 5px 7px 0 var(--ink-line); }
-.gate--flip .gate__panel { clip-path: none; border-radius: 46px 18px 18px 18px; }
-.gate__lock { clip-path: none; border-radius: 99px; border: 2px solid var(--ink-line); }
-.lineup__own { padding: 4px 12px; border-radius: 99px; background: rgba(8, 9, 30, 0.75); border: 2px solid var(--ink-line); }
-.bar { height: 10px; border: 2px solid var(--ink-line); background: rgba(8, 9, 30, 0.8); }
-.collection__hint, .nexus__note, .pity__note, .modal__note { text-shadow: 0 1px 0 var(--ink-line); }
+.gate__panel { clip-path: none; border-radius: 16px 44px 16px 16px; box-shadow: inset 0 0 0 1px rgba(210, 220, 255, 0.22), 0 16px 32px rgba(0, 0, 0, 0.5); }
+.gate--flip .gate__panel { clip-path: none; border-radius: 44px 16px 16px 16px; }
+.gate__lock { clip-path: none; border-radius: 99px; }
+.lineup__own { padding: 4px 12px; border-radius: 99px; background: rgba(8, 9, 28, 0.6); }

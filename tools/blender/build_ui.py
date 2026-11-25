@@ -1,14 +1,17 @@
-"""ANIME RIFT — habillage de l'interface, dessiné dans Blender en style anime (aplats, paliers de couleur, contour à l'encre).
+"""ANIME RIFT — habillage de l'interface, modélisé et rendu dans Blender (Cycles).
 
 Lancer :  python3 tools/blender/build_ui.py            puis   python3 tools/optimize_images.py
           python3 tools/blender/build_ui.py bg         (un seul élément)
 
+Style : sobre et haut de gamme. Boutons et panneaux en métal et en verre sombre, avec de vrais reflets ;
+icônes en volume ; fond de ciel nocturne doux, sans aplats ni contours.
+
 Produit dans src/assets/ui/ :
-  bg            fond des menus : ciel de nuit, lune, nuages, îles flottantes, portail
-  btn-gold      plaque du bouton principal          btn-pink    plaque d'action secondaire
-  btn-indigo    plaque de bouton neutre             btn-ghost   plaque discrète
+  bg            fond des menus : ciel de nuit, lune voilée, nuages, îles flottantes, portail
+  btn-gold      plaque du bouton principal (or)       btn-pink    plaque d'action (améthyste)
+  btn-indigo    plaque neutre (verre bleu nuit)       btn-ghost   plaque discrète (verre noir)
   panel         cadre des panneaux et des fenêtres
-  nav-nexus, nav-summon, nav-cards                   icônes de la barre de navigation
+  nav-nexus, nav-summon, nav-cards                     icônes de la barre de navigation
 
 Les plaques et le cadre sont faits pour être étirés par leurs bords (border-image) : seuls les coins gardent leurs
 détails, le centre est uni.
@@ -19,34 +22,50 @@ import random
 import sys
 
 import bpy
+from PIL import Image, ImageFilter
 
 OUT = os.path.join(os.path.dirname(__file__), '..', '..', 'src', 'assets', 'ui')
-INK = (0.025, 0.025, 0.07)
 PX = 100  # pixels par unité Blender
+# Repère : les objets sont posés dans le plan XZ, face à la caméra placée du côté des Y négatifs.
 
 
-# --- matières : des aplats qui émettent leur couleur, sans ombre -----------------------------------------------
 def lin(color):
     """Les couleurs de ce fichier sont écrites telles qu'on les voit à l'écran ; Blender calcule en lumière linéaire."""
     return tuple(c ** 2.2 for c in color)
 
 
+# --- matières ---------------------------------------------------------------------------------------------------
+def pbr(color, metallic=1.0, roughness=0.15, emission=None, strength=0.0, coat=0.0):
+    m = bpy.data.materials.new('Pbr')
+    m.use_nodes = True
+    b = m.node_tree.nodes['Principled BSDF']
+    b.inputs['Base Color'].default_value = (*lin(color), 1)
+    b.inputs['Metallic'].default_value = metallic
+    b.inputs['Roughness'].default_value = roughness
+    if 'Coat Weight' in b.inputs:
+        b.inputs['Coat Weight'].default_value = coat
+    if emission:
+        b.inputs['Emission Color'].default_value = (*lin(emission), 1)
+        b.inputs['Emission Strength'].default_value = strength
+    return m
 
-def flat(color):
-    m = bpy.data.materials.new('Flat')
+
+def glow(color, strength=1.0):
+    m = bpy.data.materials.new('Glow')
     m.use_nodes = True
     nt = m.node_tree
     nt.nodes.clear()
     e = nt.nodes.new('ShaderNodeEmission')
     e.inputs[0].default_value = (*lin(color), 1)
+    e.inputs[1].default_value = strength
     out = nt.nodes.new('ShaderNodeOutputMaterial')
     nt.links.new(e.outputs[0], out.inputs[0])
     return m
 
 
-def banded(stops, lo, hi, axis='Z'):
-    """Dégradé en paliers nets le long d'un axe : le « cel shading » des animes."""
-    m = bpy.data.materials.new('Banded')
+def gradient(stops, lo, hi):
+    """Dégradé doux le long de la hauteur (pour le ciel)."""
+    m = bpy.data.materials.new('Gradient')
     m.use_nodes = True
     nt = m.node_tree
     nt.nodes.clear()
@@ -56,7 +75,6 @@ def banded(stops, lo, hi, axis='Z'):
     rng.inputs['From Min'].default_value = lo
     rng.inputs['From Max'].default_value = hi
     ramp = nt.nodes.new('ShaderNodeValToRGB')
-    ramp.color_ramp.interpolation = 'CONSTANT'
     els = ramp.color_ramp.elements
     els[0].position, els[0].color = stops[0][0], (*lin(stops[0][1]), 1)
     els[1].position, els[1].color = stops[1][0], (*lin(stops[1][1]), 1)
@@ -66,20 +84,47 @@ def banded(stops, lo, hi, axis='Z'):
     em = nt.nodes.new('ShaderNodeEmission')
     out = nt.nodes.new('ShaderNodeOutputMaterial')
     nt.links.new(coord.outputs['Object'], sep.inputs[0])
-    nt.links.new(sep.outputs[axis], rng.inputs['Value'])
+    nt.links.new(sep.outputs['Z'], rng.inputs['Value'])
     nt.links.new(rng.outputs['Result'], ramp.inputs[0])
     nt.links.new(ramp.outputs[0], em.inputs[0])
     nt.links.new(em.outputs[0], out.inputs[0])
     return m
 
 
-# --- formes plates, posées face à la caméra ; `depth` = plus grand, plus loin ------------------------------------
-def shape(pts, mat, depth=0.0):
-    me = bpy.data.meshes.new('Shape')
+# --- formes -----------------------------------------------------------------------------------------------------
+def flat_shape(pts, mat, depth=0.0):
+    """Forme plate face à la caméra (pour le fond). `depth` plus grand = plus loin."""
+    me = bpy.data.meshes.new('Flat')
     me.from_pydata([(x, depth, z) for x, z in pts], [], [tuple(range(len(pts)))])
-    obj = bpy.data.objects.new('Shape', me)
+    obj = bpy.data.objects.new('Flat', me)
     bpy.context.scene.collection.objects.link(obj)
     obj.data.materials.append(mat)
+    return obj
+
+
+def solid(pts, thickness, mat, bevel=0.04, back=0.0):
+    """Pièce en volume : le contour `pts` extrudé vers la caméra, arêtes adoucies pour accrocher la lumière."""
+    n = len(pts)
+    verts = [(x, back, z) for x, z in pts] + [(x, back - thickness, z) for x, z in pts]
+    faces = [tuple(reversed(range(n))), tuple(range(n, 2 * n))] + [(i, n + i, n + (i + 1) % n, (i + 1) % n) for i in range(n)]
+    me = bpy.data.meshes.new('Solid')
+    me.from_pydata(verts, [], faces)
+    me.update()
+    obj = bpy.data.objects.new('Solid', me)
+    bpy.context.scene.collection.objects.link(obj)
+    obj.data.materials.append(mat)
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.normals_make_consistent(inside=False)
+    bpy.ops.object.mode_set(mode='OBJECT')
+    if bevel:
+        mod = obj.modifiers.new('Bevel', 'BEVEL')
+        mod.width = bevel
+        mod.segments = 4
+        mod.limit_method = 'ANGLE'
+    for p in me.polygons:
+        p.use_smooth = True
     return obj
 
 
@@ -107,185 +152,185 @@ def circle(cx, cz, r, n=48):
     return [(cx + math.cos(2 * math.pi * i / n) * r, cz + math.sin(2 * math.pi * i / n) * r) for i in range(n)]
 
 
-def star(cx, cz, size, mat, depth, angle=0.0):
-    pts = []
-    for i in range(8):
-        a = angle + i * math.pi / 4
-        r = size if i % 2 == 0 else size * 0.18
-        pts.append((cx + math.cos(a) * r, cz + math.sin(a) * r))
-    return shape(pts, mat, depth)
-
-
 def rotated(pts, angle, cx=0.0, cz=0.0):
     c, s = math.cos(angle), math.sin(angle)
     return [(cx + (x - cx) * c - (z - cz) * s, cz + (x - cx) * s + (z - cz) * c) for x, z in pts]
 
 
-# --- plaques de boutons ------------------------------------------------------------------------------------------
-def plate(low, high, shine):
-    """Plaque penchée : ombre portée décalée, contour à l'encre, deux paliers de couleur, reflet en haut."""
+# --- plaques de boutons -------------------------------------------------------------------------------------------
+def plate(rim, face):
+    """Plaque penchée : un jonc de métal fin autour d'une face bombée, en métal ou en verre sombre."""
     w, h, s = 4.0, 1.0, 0.3
-    ink = flat(INK)
-    shape(slanted(w, h, s, 0.07, 0.09, -0.1), ink, 0.4)                     # ombre portée, façon autocollant
-    shape(slanted(w, h, s, 0.07), ink, 0.3)                                 # contour
-    shape(slanted(w, h, s), banded([(0.0, low), (0.46, high)], -h / 2, h / 2), 0.2)
-    shape(slanted(w - 0.16, 0.13, 0.04, 0, 0.12, h / 2 - 0.13), flat(shine), 0.1)  # reflet
+    solid(slanted(w, h, s, 0.045), 0.1, rim, bevel=0.035)
+    solid(slanted(w - 0.06, h - 0.06, s), 0.16, face, bevel=0.06)
     return 4.5, 1.4
 
 
-# --- cadre des panneaux --------------------------------------------------------------------------------------------
+# --- cadre des panneaux ---------------------------------------------------------------------------------------------
 def panel():
-    w, h, r, cut = 4.0, 3.0, 0.2, 0.42
-    ink = flat(INK)
-    shape(rounded(w, h, r, 0.07, 0.1, -0.11, cut), ink, 0.5)
-    shape(rounded(w, h, r, 0.07, cut=cut + 0.03), ink, 0.4)
-    shape(rounded(w, h, r, cut=cut), banded([(0.0, (0.05, 0.055, 0.15)), (0.72, (0.075, 0.085, 0.21))], -h / 2, h / 2), 0.3)
-    # liseré clair le long du pan coupé, et deux petits traits d'accent : tout tient dans les coins
-    cyan = flat((0.3, 0.86, 1.0))
-    pink = flat((1.0, 0.35, 0.7))
-    x0, z1 = -w / 2, h / 2
-    shape([(x0 + cut + 0.02, z1 - 0.07), (x0 + 0.07, z1 - cut - 0.02), (x0 + 0.07, z1 - cut - 0.16), (x0 + cut + 0.16, z1 - 0.07)], cyan, 0.2)
-    shape(slanted(0.34, 0.07, 0.05, 0, x0 + cut + 0.5, z1 - 0.1), pink, 0.2)
-    shape(slanted(0.14, 0.07, 0.05, 0, x0 + cut + 0.82, z1 - 0.1), cyan, 0.2)
-    shape([(w / 2 - 0.08, -h / 2 + 0.08), (w / 2 - 0.08, -h / 2 + 0.36), (w / 2 - 0.36, -h / 2 + 0.08)], pink, 0.2)  # coin bas-droit
+    w, h, r, cut = 4.0, 3.0, 0.16, 0.36
+    solid(rounded(w, h, r, 0.03, cut=cut + 0.012), 0.08, pbr((0.75, 0.8, 1.0), 1, 0.12), bevel=0.02)   # filet de métal clair
+    solid(rounded(w - 0.05, h - 0.05, r, cut=cut), 0.11, pbr((0.022, 0.026, 0.085), 0.2, 0.78), bevel=0.03)  # verre sombre, mat
     return 4.5, 3.5
 
 
-# --- icônes de navigation ------------------------------------------------------------------------------------------
+# --- icônes de navigation ---------------------------------------------------------------------------------------------
 def nav_nexus():
-    """Le Nexus : un portique devant un portail."""
-    ink = flat(INK)
-    shape(circle(0, 0.05, 1.06), ink, 0.5)
-    shape(circle(0, 0.05, 0.98), banded([(0.0, (0.35, 0.2, 1.0)), (0.4, (0.25, 0.6, 1.0)), (0.7, (0.5, 0.95, 1.0))], -1, 1), 0.4)
-    shape(circle(0, 0.05, 0.42), flat((1, 1, 1)), 0.35)
-    red = banded([(0.0, (0.8, 0.1, 0.2)), (0.5, (1.0, 0.25, 0.3))], -1.2, 1.2)
-    for parts in ([(-0.92, -1.15, -0.62, 0.62), (0.62, -1.15, 0.92, 0.62)],):
-        for x0, z0, x1, z1 in parts:
-            shape([(x0 - 0.06, z0 - 0.06), (x1 + 0.06, z0 - 0.06), (x1 + 0.06, z1 + 0.06), (x0 - 0.06, z1 + 0.06)], ink, 0.3)
-            shape([(x0, z0), (x1, z0), (x1, z1), (x0, z1)], red, 0.2)
-    beam = [(-1.42, 0.86), (-1.22, 0.56), (1.22, 0.56), (1.42, 0.86), (1.3, 0.98), (-1.3, 0.98)]
-    shape([(x * 1.04, 0.77 + (z - 0.77) * 1.3) for x, z in beam], ink, 0.3)
-    shape(beam, red, 0.2)
-    shape([(-1.08, 0.2), (1.08, 0.2), (1.08, 0.4), (-1.08, 0.4)], ink, 0.25)
-    shape([(-1.02, 0.25), (1.02, 0.25), (1.02, 0.35), (-1.02, 0.35)], red, 0.2)
+    """Le Nexus : un portique laqué devant un portail de lumière."""
+    lacquer = pbr((0.62, 0.06, 0.12), 0.55, 0.2, coat=1)
+    gold = pbr((1.0, 0.74, 0.25), 1, 0.16)
+    flat_shape(circle(0, 0.0, 0.92), glow((0.35, 0.8, 1.0), 1.1), 0.3)
+    flat_shape(circle(0, 0.0, 0.5), glow((0.9, 1.0, 1.0), 1.4), 0.25)
+    for x in (-0.78, 0.78):
+        solid([(x - 0.13, -1.2), (x + 0.13, -1.2), (x + 0.11, 0.62), (x - 0.11, 0.62)], 0.24, lacquer, bevel=0.05)
+        solid([(x - 0.2, -1.28), (x + 0.2, -1.28), (x + 0.2, -1.1), (x - 0.2, -1.1)], 0.3, gold, bevel=0.04)
+    solid([(-1.4, 0.94), (-1.2, 0.62), (1.2, 0.62), (1.4, 0.94), (1.28, 1.06), (-1.28, 1.06)], 0.3, lacquer, bevel=0.05)
+    solid([(-1.46, 1.02), (1.46, 1.02), (1.36, 1.14), (-1.36, 1.14)], 0.34, gold, bevel=0.03)
+    solid([(-1.02, 0.22), (1.02, 0.22), (1.02, 0.38), (-1.02, 0.38)], 0.2, lacquer, bevel=0.04)
     return 3.2, 3.2
 
 
 def nav_summon():
-    """L'invocation : le losange fendu du logo, auréolé de rayons."""
-    ink = flat(INK)
-    gold = flat((1.0, 0.82, 0.25))
-    for i in range(8):
-        shape(rotated([(-0.07, 1.02), (0.07, 1.02), (0.0, 1.5)], i * math.pi / 4), gold, 0.5)
-    diamond = [(0, 1.05), (0.8, 0), (0, -1.05), (-0.8, 0)]
-    shape([(x * 1.12, z * 1.1) for x, z in diamond], ink, 0.4)
-    shape(diamond, banded([(0.0, (0.3, 0.16, 0.9)), (0.45, (0.25, 0.55, 1.0)), (0.75, (0.45, 0.92, 1.0))], -1.05, 1.05), 0.3)
-    crack = [(0.2, 0.85), (-0.2, 0.14), (0.14, -0.06), (-0.26, -0.84), (-0.08, -0.84), (0.34, 0.02), (0.02, 0.2), (0.38, 0.85)]
-    shape(crack, flat((1, 1, 1)), 0.2)
+    """L'invocation : un cristal taillé, cerclé de métal."""
+    violet = pbr((0.5, 0.3, 1.0), 0.45, 0.08, (0.4, 0.25, 1.0), 0.5, coat=1)
+    cyan = pbr((0.45, 0.9, 1.0), 0.45, 0.08, (0.3, 0.8, 1.0), 0.5, coat=1)
+    chrome = pbr((0.95, 0.96, 1.0), 1, 0.06)
+    bpy.ops.mesh.primitive_torus_add(major_radius=1.22, minor_radius=0.05, location=(0, 0, 0), rotation=(math.radians(68), math.radians(18), 0))
+    bpy.context.object.data.materials.append(chrome)
+    for p in bpy.context.object.data.polygons:
+        p.use_smooth = True
+    # deux moitiés de cristal, séparées par une fente de lumière
+    top = [(0, 1.18), (0.62, 0.16), (-0.62, 0.02)]
+    bottom = [(0.62, 0.02), (0, -1.18), (-0.62, -0.12)]
+    solid([(x + 0.04, z + 0.03) for x, z in top], 0.5, cyan, bevel=0.1)
+    solid([(x - 0.04, z - 0.03) for x, z in bottom], 0.5, violet, bevel=0.1)
+    flat_shape([(-0.9, -0.1), (0.9, 0.12), (0.9, 0.17), (-0.9, -0.05)], glow((1, 1, 1), 2.0), -0.6)
     return 3.2, 3.2
 
 
 def nav_cards():
-    """La collection : deux cartes en éventail et une étoile."""
-    ink = flat(INK)
-    for angle, cx, low, high in ((0.24, -0.34, (0.75, 0.12, 0.5), (1.0, 0.35, 0.7)), (-0.16, 0.3, (0.1, 0.4, 0.95), (0.3, 0.8, 1.0))):
-        shape(rotated(rounded(1.26, 1.86, 0.16, 0.07, cx, 0), angle, cx, -0.6), ink, 0.4 - cx * 0.1)
-        card = shape(rotated(rounded(1.26, 1.86, 0.16, 0, cx, 0), angle, cx, -0.6), banded([(0.0, low), (0.5, high)], -1, 1), 0.3 - cx * 0.1)
-        card.name = 'Card'
-    star(0.36, 0.1, 0.46, flat((1, 1, 1)), 0.1, 0.2)
-    star(0.36, 0.1, 0.6, flat(INK), 0.15, 0.2)
+    """La collection : deux cartes de métal en éventail, une étoile d'or."""
+    for angle, cx, color in ((0.24, -0.34, (0.5, 0.2, 0.75)), (-0.16, 0.3, (0.12, 0.3, 0.75))):
+        back = 0.0 if cx < 0 else -0.14
+        solid(rotated(rounded(1.3, 1.9, 0.14, 0.03, cx, 0), angle, cx, -0.6), 0.08, pbr((0.9, 0.92, 1.0), 1, 0.1), bevel=0.02, back=back)
+        solid(rotated(rounded(1.24, 1.84, 0.12, 0, cx, 0), angle, cx, -0.6), 0.12, pbr(color, 0.7, 0.2, coat=1), bevel=0.03, back=back)
+    star = []
+    for i in range(8):
+        a = 0.2 + i * math.pi / 4
+        r = 0.44 if i % 2 == 0 else 0.11
+        star.append((0.36 + math.cos(a) * r, 0.1 + math.sin(a) * r))
+    solid(star, 0.1, pbr((1.0, 0.8, 0.3), 1, 0.12, (1.0, 0.75, 0.25), 0.4), bevel=0.02, back=-0.26)
     return 3.2, 3.2
 
 
-# --- fond des menus --------------------------------------------------------------------------------------------------
+# --- fond des menus -----------------------------------------------------------------------------------------------------
 def background():
+    """Ciel nocturne en dégradés doux. L'image est ensuite légèrement floutée : elle doit rester en retrait."""
     random.seed(4)
     w, h = 9.0, 16.0
-    sky = banded([(0.0, (0.86, 0.34, 0.42)), (0.07, (0.66, 0.22, 0.52)), (0.17, (0.42, 0.16, 0.56)), (0.3, (0.24, 0.12, 0.46)),
-                  (0.46, (0.13, 0.09, 0.34)), (0.64, (0.075, 0.065, 0.24)), (0.82, (0.04, 0.04, 0.15))], -h / 2, h / 2)
-    shape([(-w / 2, -h / 2), (w / 2, -h / 2), (w / 2, h / 2), (-w / 2, h / 2)], sky, 5.0)
+    sky = gradient([(0.0, (0.3, 0.13, 0.33)), (0.14, (0.2, 0.1, 0.32)), (0.34, (0.11, 0.075, 0.25)), (0.6, (0.055, 0.05, 0.17)), (1.0, (0.025, 0.03, 0.1))], -h / 2, h / 2)
+    flat_shape([(-w / 2, -h / 2), (w / 2, -h / 2), (w / 2, h / 2), (-w / 2, h / 2)], sky, 5.0)
 
-    white = flat((1, 1, 1))
-    soft = flat((0.75, 0.8, 1.0))
-    for _ in range(90):  # étoiles : surtout en haut
-        x, z = random.uniform(-w / 2, w / 2), random.uniform(-1.5, h / 2)
-        star(x, z, random.uniform(0.03, 0.11), white if random.random() < 0.5 else soft, 4.8, random.uniform(0, 0.7))
+    for _ in range(140):
+        x, z = random.uniform(-w / 2, w / 2), random.uniform(-2.5, h / 2)
+        flat_shape(circle(x, z, random.uniform(0.012, 0.04), 8), glow((0.85, 0.9, 1.0), random.uniform(0.4, 1.0)), 4.8)
 
-    # la lune et son halo, en trois paliers
+    # la lune : un disque pâle dans plusieurs halos de plus en plus sombres
     mx, mz = 2.0, 4.3
-    shape(circle(mx, mz, 2.9, 64), flat((0.17, 0.12, 0.4)), 4.6)
-    shape(circle(mx, mz, 2.2, 64), flat((0.26, 0.17, 0.52)), 4.5)
-    shape(circle(mx, mz, 1.55, 64), banded([(0.0, (0.95, 0.8, 0.9)), (0.45, (1.0, 0.96, 0.9))], mz - 1.55, mz + 1.55), 4.4)
-    shape(circle(mx - 0.5, mz + 0.45, 0.28), flat((0.93, 0.82, 0.9)), 4.3)
-    shape(circle(mx + 0.4, mz - 0.5, 0.42), flat((0.93, 0.82, 0.9)), 4.3)
+    for i, (r, c) in enumerate(((3.6, (0.075, 0.065, 0.2)), (3.0, (0.095, 0.08, 0.24)), (2.5, (0.12, 0.1, 0.29)), (2.05, (0.16, 0.13, 0.35)), (1.72, (0.22, 0.18, 0.43)))):
+        flat_shape(circle(mx, mz, r, 72), glow(c), 4.7 - i * 0.02)
+    flat_shape(circle(mx, mz, 1.45, 72), gradient([(0.0, (0.72, 0.66, 0.84)), (1.0, (0.96, 0.94, 1.0))], mz - 1.45, mz + 1.45), 4.5)
 
-    # la faille : une déchirure lumineuse qui descend du ciel jusqu'au portail
+    # la faille : un trait de lumière fin qui descend jusqu'au portail
     crack, x = [], -1.3
     for i in range(13):
-        z = 7.6 - i * 0.62
-        x += random.uniform(-0.42, 0.42)
-        crack.append((x, z))
-    width = [0.03 + 0.11 * math.sin(math.pi * i / 12) for i in range(13)]
-    shape([(cx - wd * 2.4, cz) for (cx, cz), wd in zip(crack, width)] + [(cx + wd * 2.4, cz) for (cx, cz), wd in reversed(list(zip(crack, width)))], flat((0.35, 0.75, 1.0)), 4.2)
-    shape([(cx - wd, cz) for (cx, cz), wd in zip(crack, width)] + [(cx + wd, cz) for (cx, cz), wd in reversed(list(zip(crack, width)))], white, 4.1)
+        x += random.uniform(-0.4, 0.4)
+        crack.append((x, 7.6 - i * 0.62))
+    width = [0.02 + 0.06 * math.sin(math.pi * i / 12) for i in range(13)]
+    for scale, color in ((4.5, (0.12, 0.2, 0.45)), (2.2, (0.25, 0.5, 0.85)), (1.0, (0.85, 0.95, 1.0))):
+        left = [(cx - wd * scale, cz) for (cx, cz), wd in zip(crack, width)]
+        right = [(cx + wd * scale, cz) for (cx, cz), wd in reversed(list(zip(crack, width)))]
+        flat_shape(left + right, glow(color), 4.3 - scale * 0.01)
 
     def cloud(cx, cz, scale, color, depth):
-        mat = flat(color)
+        mat = gradient([(0.0, tuple(c * 0.55 for c in color)), (1.0, color)], cz - scale, cz + scale * 1.2)
         for i in range(7):
             r = scale * (0.55 + 0.45 * math.sin(math.pi * (i + 0.5) / 7)) * random.uniform(0.8, 1.15)
-            shape(circle(cx + (i - 3) * scale * 0.72, cz + r * 0.45, r, 28), mat, depth)
-        shape([(cx - scale * 3.2, cz - scale * 0.5), (cx + scale * 3.2, cz - scale * 0.5), (cx + scale * 3.2, cz + scale * 0.5), (cx - scale * 3.2, cz + scale * 0.5)], mat, depth)
+            flat_shape(circle(cx + (i - 3) * scale * 0.72, cz + r * 0.45, r, 32), mat, depth)
+        flat_shape([(cx - scale * 3.2, cz - scale * 3), (cx + scale * 3.2, cz - scale * 3), (cx + scale * 3.2, cz + scale * 0.5), (cx - scale * 3.2, cz + scale * 0.5)], mat, depth)
 
     def island(cx, cz, size, depth, gate=False):
-        rock = banded([(0.0, (0.05, 0.04, 0.15)), (0.55, (0.1, 0.07, 0.24))], cz - size, cz + size * 0.2)
+        rock = gradient([(0.0, (0.02, 0.02, 0.07)), (1.0, (0.07, 0.06, 0.17))], cz - size, cz + size * 0.2)
         top = [(cx - size, cz), (cx - size * 0.7, cz + size * 0.16), (cx + size * 0.75, cz + size * 0.14), (cx + size, cz)]
         under = [(cx + size * 0.62, cz - size * 0.42), (cx + size * 0.2, cz - size * 0.7), (cx - size * 0.05, cz - size * 1.15), (cx - size * 0.36, cz - size * 0.6), (cx - size * 0.72, cz - size * 0.34)]
-        shape(top + under, rock, depth)
-        shape([(cx - size, cz), (cx - size * 0.7, cz + size * 0.16), (cx + size * 0.75, cz + size * 0.14), (cx + size, cz), (cx + size * 0.8, cz - size * 0.08), (cx - size * 0.8, cz - size * 0.08)], flat((0.2, 0.42, 0.5)), depth - 0.02)
-        for k in range(3):  # cristaux
+        flat_shape(top + under, rock, depth)
+        for k in range(3):
             bx = cx + size * random.uniform(-0.75, 0.75)
-            ht = size * random.uniform(0.22, 0.5)
-            shape([(bx - ht * 0.2, cz + size * 0.1), (bx + ht * 0.2, cz + size * 0.1), (bx + ht * 0.06, cz + size * 0.1 + ht)], flat((0.4, 0.9, 1.0) if k % 2 else (0.7, 0.5, 1.0)), depth - 0.03)
-        if gate:  # le portique du Nexus et son portail
+            ht = size * random.uniform(0.2, 0.42)
+            flat_shape([(bx - ht * 0.18, cz + size * 0.1), (bx + ht * 0.18, cz + size * 0.1), (bx + ht * 0.05, cz + size * 0.1 + ht)], glow((0.3, 0.6, 0.85) if k % 2 else (0.45, 0.35, 0.8), 0.8), depth - 0.03)
+        if gate:
             gz = cz + size * 0.13
-            dark = flat((0.035, 0.03, 0.1))
-            shape(circle(cx, gz + size * 0.62, size * 0.5, 40), banded([(0.0, (0.3, 0.25, 1.0)), (0.4, (0.3, 0.7, 1.0)), (0.72, (0.75, 1.0, 1.0))], gz + size * 0.12, gz + size * 1.12), depth - 0.04)
-            shape(circle(cx, gz + size * 0.62, size * 0.2, 28), white, depth - 0.05)
+            dark = glow((0.02, 0.018, 0.06))
+            for r, c in ((0.78, (0.1, 0.16, 0.4)), (0.6, (0.16, 0.3, 0.62)), (0.46, (0.3, 0.6, 0.9)), (0.24, (0.85, 0.95, 1.0))):
+                flat_shape(circle(cx, gz + size * 0.6, size * r, 48), glow(c), depth - 0.04 - (1 - r) * 0.01)
             for sx in (-1, 1):
-                shape([(cx + sx * size * 0.62, gz), (cx + sx * size * 0.48, gz), (cx + sx * size * 0.48, gz + size * 1.1), (cx + sx * size * 0.62, gz + size * 1.1)], dark, depth - 0.06)
-            shape([(cx - size * 0.92, gz + size * 1.26), (cx - size * 0.8, gz + size * 1.06), (cx + size * 0.8, gz + size * 1.06), (cx + size * 0.92, gz + size * 1.26), (cx + size * 0.84, gz + size * 1.34), (cx - size * 0.84, gz + size * 1.34)], dark, depth - 0.06)
-            shape([(cx - size * 0.68, gz + size * 0.84), (cx + size * 0.68, gz + size * 0.84), (cx + size * 0.68, gz + size * 0.94), (cx - size * 0.68, gz + size * 0.94)], dark, depth - 0.06)
+                flat_shape([(cx + sx * size * 0.62, gz), (cx + sx * size * 0.5, gz), (cx + sx * size * 0.5, gz + size * 1.1), (cx + sx * size * 0.62, gz + size * 1.1)], dark, depth - 0.06)
+            flat_shape([(cx - size * 0.92, gz + size * 1.26), (cx - size * 0.8, gz + size * 1.08), (cx + size * 0.8, gz + size * 1.08), (cx + size * 0.92, gz + size * 1.26), (cx + size * 0.84, gz + size * 1.33), (cx - size * 0.84, gz + size * 1.33)], dark, depth - 0.06)
+            flat_shape([(cx - size * 0.68, gz + size * 0.86), (cx + size * 0.68, gz + size * 0.86), (cx + size * 0.68, gz + size * 0.94), (cx - size * 0.68, gz + size * 0.94)], dark, depth - 0.06)
 
-    cloud(-2.6, 1.3, 0.7, (0.3, 0.17, 0.52), 4.0)
-    cloud(3.0, -0.2, 0.9, (0.36, 0.17, 0.54), 3.9)
+    cloud(-2.6, 1.3, 0.7, (0.13, 0.09, 0.27), 4.0)
+    cloud(3.0, -0.2, 0.9, (0.15, 0.1, 0.29), 3.9)
     island(3.1, 0.9, 0.9, 3.6)
     island(-3.2, -1.4, 0.75, 3.5)
-    cloud(-1.0, -2.6, 1.1, (0.52, 0.2, 0.55), 3.4)
-    island(-0.6, -2.5, 2.0, 3.0, gate=True)   # l'île du Nexus, au bas de la faille
-    cloud(2.8, -4.4, 1.25, (0.66, 0.24, 0.52), 2.6)
-    cloud(-2.9, -5.4, 1.5, (0.5, 0.17, 0.5), 2.4)
-    cloud(1.4, -6.9, 1.9, (0.3, 0.11, 0.4), 2.2)
-    cloud(-2.0, -8.0, 2.2, (0.16, 0.07, 0.28), 2.0)
+    cloud(-1.0, -2.8, 1.1, (0.2, 0.11, 0.31), 3.4)
+    island(-0.6, -2.5, 2.0, 3.0, gate=True)
+    cloud(2.8, -4.6, 1.25, (0.24, 0.12, 0.32), 2.6)
+    cloud(-2.9, -5.6, 1.5, (0.18, 0.09, 0.27), 2.4)
+    cloud(1.4, -7.0, 1.9, (0.11, 0.06, 0.2), 2.2)
+    cloud(-2.0, -8.2, 2.2, (0.06, 0.04, 0.13), 2.0)
     return w, h
+
+
+def studio():
+    """Éclairage des pièces en volume : des panneaux lumineux, visibles seulement dans les reflets."""
+    scene = bpy.context.scene
+    scene.world.use_nodes = True
+    scene.world.node_tree.nodes['Background'].inputs[0].default_value = (0.02, 0.02, 0.035, 1)
+
+    def light(loc, size, color, strength):
+        bpy.ops.mesh.primitive_plane_add(size=1, location=loc)
+        p = bpy.context.object
+        p.scale = (size[0], size[1], 1)
+        direction = (-loc[0], -loc[1], -loc[2])
+        p.rotation_euler = (math.atan2(math.hypot(direction[0], direction[1]), direction[2]), 0, math.atan2(direction[1], direction[0]) + math.pi / 2)
+        p.data.materials.append(glow(color, strength))
+        p.visible_camera = False
+
+    light((0, -9, 2.5), (8, 2.6), (1, 1, 1), 5)            # grande boîte à lumière, un peu au-dessus
+    light((-6, -5, 1), (1.4, 8), (0.8, 0.9, 1.0), 8)       # bande froide à gauche
+    light((6, -5, -1), (1.2, 8), (1.0, 0.92, 0.84), 6)     # bande chaude à droite
+    light((0, -4, 6), (9, 1.2), (1, 1, 1), 8)              # liseré du haut
+    light((0, -5, -6), (8, 1.5), (0.55, 0.4, 1.0), 3)      # contre-jour violet par en dessous
 
 
 ELEMENTS = {
     'bg': background,
-    'btn-gold': lambda: plate((1.0, 0.58, 0.06), (1.0, 0.8, 0.2), (1.0, 0.96, 0.62)),
-    'btn-pink': lambda: plate((0.82, 0.12, 0.5), (1.0, 0.32, 0.68), (1.0, 0.76, 0.9)),
-    'btn-indigo': lambda: plate((0.11, 0.12, 0.34), (0.18, 0.2, 0.5), (0.42, 0.55, 1.0)),
-    'btn-ghost': lambda: plate((0.055, 0.06, 0.17), (0.085, 0.095, 0.24), (0.26, 0.3, 0.58)),
+    'btn-gold': lambda: plate(pbr((1.0, 0.86, 0.5), 1, 0.1), pbr((1.0, 0.7, 0.2), 1, 0.2)),
+    'btn-pink': lambda: plate(pbr((0.92, 0.85, 1.0), 1, 0.08), pbr((0.42, 0.18, 0.7), 0.75, 0.2, coat=1)),
+    'btn-indigo': lambda: plate(pbr((0.8, 0.86, 1.0), 1, 0.08), pbr((0.07, 0.1, 0.32), 0.6, 0.24, coat=1)),
+    'btn-ghost': lambda: plate(pbr((0.4, 0.44, 0.6), 1, 0.16), pbr((0.03, 0.035, 0.09), 0.4, 0.36, coat=0.5)),
     'panel': panel,
     'nav-nexus': nav_nexus,
     'nav-summon': nav_summon,
     'nav-cards': nav_cards,
 }
-SCALE = {'nav-nexus': 50, 'nav-summon': 50, 'nav-cards': 50}  # pixels par unité, quand ce n'est pas PX
+SCALE = {'nav-nexus': 60, 'nav-summon': 60, 'nav-cards': 60}  # pixels par unité, quand ce n'est pas PX
 
 os.makedirs(OUT, exist_ok=True)
 for name in [a for a in sys.argv[1:] if a in ELEMENTS] or list(ELEMENTS):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
+    scene.world = bpy.data.worlds.new('World')
     width, height = ELEMENTS[name]()
     px = SCALE.get(name, PX)
     cam_data = bpy.data.cameras.new('Cam')
@@ -296,17 +341,28 @@ for name in [a for a in sys.argv[1:] if a in ELEMENTS] or list(ELEMENTS):
     cam.rotation_euler = (math.pi / 2, 0, 0)
     scene.collection.objects.link(cam)
     scene.camera = cam
-    scene.world = bpy.data.worlds.new('World')
     scene.render.engine = 'CYCLES'
     scene.cycles.device = 'CPU'
-    scene.cycles.samples = 16
-    scene.cycles.use_denoising = False
     scene.render.film_transparent = name != 'bg'
+    if name == 'bg':
+        scene.cycles.samples = 16
+        scene.cycles.use_denoising = False
+    else:
+        studio()
+        scene.cycles.samples = 64
+        scene.cycles.use_denoising = True
     scene.render.resolution_x, scene.render.resolution_y = round(width * px), round(height * px)
     scene.render.image_settings.file_format = 'PNG'
     scene.render.image_settings.color_mode = 'RGBA'
     scene.view_settings.view_transform = 'Standard'
     path = os.path.join(OUT, f'{name}.png')
     scene.render.filepath = path
-    bpy.ops.render.render(write_still=True)
+    try:
+        bpy.ops.render.render(write_still=True)
+    except RuntimeError:
+        scene.cycles.use_denoising = False
+        scene.cycles.samples = 160
+        bpy.ops.render.render(write_still=True)
+    if name == 'bg':  # léger flou : le fond reste doux et ne dispute pas l'attention aux menus
+        Image.open(path).filter(ImageFilter.GaussianBlur(5)).save(path)
     print(f'Blender {bpy.app.version_string} — {name} : {scene.render.resolution_x}×{scene.render.resolution_y}, {os.path.getsize(path) / 1024:.0f} Ko')
