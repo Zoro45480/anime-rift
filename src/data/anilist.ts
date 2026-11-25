@@ -1,0 +1,31 @@
+// Identifiant AniList de chaque personnage (anilist.co/character/<id>). Le jeu ne contient aucune image :
+// au lancement, le navigateur du joueur demande à l'API publique d'AniList l'adresse du portrait officiel et l'affiche.
+// Sans identifiant (personnage absent d'AniList), la carte garde son portrait de remplacement.
+export const ANILIST_ID: Record<string, number> = {
+  naruto: 17, sasuke: 13, kaguya: 126069, madara: 53901, hashirama: 12464, obito: 3149, minato: 2535, itachi: 14,
+  guy: 307, kakashi: 85, jiraya: 2423, pain: 3180, tobirama: 12465, hiruzen: 7571, tsunade: 2767, orochimaru: 2455,
+  bee: 18473, gaara: 1662, sakura: 145, lee: 306, neji: 1694, shikamaru: 2007, hinata: 1555, kisame: 2672,
+  kiba: 3495, shino: 3428, choji: 2008, ino: 2009, tenten: 3710, iruka: 2011, luffy: 40, roger: 4883,
+  shanks: 727, whitebeard: 2751, kaido: 46109, mihawk: 2064, zoro: 62, law: 13767, ace: 2072, sanji: 305,
+  jinbe: 18938, robin: 61, nami: 723, usopp: 724, chopper: 309, goku: 246, vegeta: 913, beerus: 76348,
+  jiren: 126257, gohan: 2093, broly: 4945, freezer: 3694, cell: 3908, buu: 1012, piccolo: 914, trunks: 2707,
+  c18: 4318, krilin: 2159, tenshinhan: 5499, yamcha: 4014, ichigo: 5, yhwach: 68537, aizen: 1086, yamamoto: 5726,
+  kenpachi: 909, byakuya: 907, urahara: 210, hitsugaya: 245, ulquiorra: 1081, rukia: 6, renji: 906, ishida: 564,
+  orihime: 7, chad: 575, kon: 1089, yoriichi: 149220, muzan: 129132, kokushibo: 141918, gyomei: 137778, tanjiro: 126071,
+  rengoku: 129133, akaza: 141694, giyu: 130050, doma: 144591, nezuko: 127518, zenitsu: 129131, inosuke: 129130, kanao: 139038,
+  genya: 137776, aoi: 145288, gojo: 127691, sukuna: 133701, yuta: 129571, kenjaku: 289584, yuji: 127212, toji: 162722,
+  megumi: 126635, geto: 133699, mahito: 133702, nanami: 133704, maki: 134167, todo: 137975, nobara: 133700, inumaki: 157115,
+  panda: 137974, meruem: 23277, netero: 14489, gon: 30, ging: 26, kirua: 27, kuroro: 58, hisoka: 31,
+  kurapika: 28, zeno: 59, pitou: 12300, biscuit: 13898, irumi: 57, leolio: 29, knuckle: 29809, zushi: 43931,
+  teach: 3331, garp: 8064, akainu: 22687, bigmom: 54495, rayleigh: 17142, kuzan: 2752, sabo: 32893, hancock: 16342,
+  doflamingo: 2754, franky: 64, brook: 5627, crocodile: 2749, vivi: 726, koby: 12361, baggy: 725, whis: 76346,
+  gokublack: 126199, hit: 126883, toppo: 130282, goten: 2551, bardock: 6122, c17: 2147, roshi: 6167, videl: 2111,
+  raditz: 6155, chaozu: 2151, yajirobe: 2097, satan: 9377, ichibe: 74359, haschwalth: 71949, kyoraku: 1088, unohana: 3845,
+  starrk: 3212, yoruichi: 908, grimmjow: 1080, mayuri: 1168, shinji: 1084, soifon: 905, ikkaku: 1151, rangiku: 904,
+  hanataro: 2161, tatsuki: 1094, keigo: 4227, tanjiro_king: 126071, sanemi: 137774, muichiro: 136069, obanai: 137777, mitsuri: 136072,
+  tengen: 136071, shinobu: 136070, gyutaro: 139735, hantengu: 260323, daki: 139734, gyokko: 205590, kaigaku: 165862, sabito: 137809,
+  makomo: 137806, urokodaki: 137773, yuki: 196502, kashimo: 248143, hakari: 197584, choso: 157116, jogo: 156991, uraume: 210830,
+  naobito: 188432, hanami: 172743, dagon: 204383, meimei: 157215, kamo: 157866, yaga: 189237, miwa: 156848, momo: 157868,
+  ijichi: 189238, nanika: 209939, pouf: 41135, youpi: 43953, silva: 60, morel: 29806, knov: 82925, feitan: 3195,
+  uvo: 5836, razor: 22518, machi: 5830, nobunaga: 5831, kite: 20594, wing: 22521, ponzu: 24279, pokkuru: 33376,
+}

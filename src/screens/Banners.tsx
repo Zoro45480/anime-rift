@@ -49,7 +49,7 @@ export const Banners = () => {
   const [focus, setFocus] = useState(false) // « Voir la bannière » : n'affiche plus que la bannière choisie
   const banner = BANNERS[index]
   const star = heroById(banner.star)
-  const starArt = store.customArt[star.id] ?? heroArt(star.model, 'full')
+  const starArt = store.customArt[star.id] ?? store.remoteArt[star.id] ?? heroArt(star.model, 'full')
   const left = useCountdown(banner.endsAt)
   const pity = store.pity[banner.id]
   const coin = currency === 'ticket' ? 'seal' : 'soul'
@@ -68,7 +68,7 @@ export const Banners = () => {
       <section className="poster" key={banner.id}>
         <div className="poster__slash" aria-hidden="true" />
         <span className="poster__glyph" aria-hidden="true">{banner.glyph}</span>
-        {starArt && <img className={`poster__art ${store.customArt[star.id] ? 'poster__art--custom' : ''}`} src={starArt} alt={star.name} />}
+        {starArt && <img className={`poster__art ${store.customArt[star.id] || store.remoteArt[star.id] ? 'poster__art--custom' : ''}`} src={starArt} alt={star.name} referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
         <div className="poster__text">
           <p className="poster__count"><b>{two(index + 1)}</b> / {two(BANNERS.length)} · Faille ouverte</p>
           <h1 className="poster__title">{banner.world}</h1>

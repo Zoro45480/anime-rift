@@ -4,6 +4,7 @@ import { heroById, type Hero } from '../data/heroes'
 import { pullMany } from '../game/gacha'
 import { ACCOUNT_XP, accountLevel, AWAKEN_COST, LEVEL_CAP, REBIRTH_SHARDS, levelFromXp, MAX_LEVEL, MERGE_XP, REBIRTH_KEEP, REBIRTH_LEVEL, REBIRTH_REFUND, REBIRTH_SEALS, REBIRTH_XP, scrollDrop, SCROLLS, type ScrollId } from '../game/progression'
 import { loadAllArt, removeArt, saveArt } from './customArt'
+import { loadRemoteArt, type RemoteStatus } from './remoteArt'
 
 export type Currency = 'ticket' | 'gems'
 
@@ -36,6 +37,8 @@ type Store = State & {
   togglePin: (heroId: string) => boolean // false = vitrine pleine
   awaken: (heroId: string) => boolean // Libération d'une carte contre des Fragments d'âme
   rebirth: (keep: string[]) => boolean // Renaissance : repart du niveau 1 en gardant ces cartes
+  remoteArt: Record<string, string> // adresses des portraits officiels sur AniList, par identifiant de personnage
+  remoteStatus: RemoteStatus
   customArt: Record<string, string> // images personnelles du joueur, par identifiant de personnage
   setCustomArt: (heroId: string, dataUrl: string) => Promise<boolean> // false = affichée mais non enregistrée
   clearCustomArt: (heroId: string) => void
@@ -74,8 +77,12 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<State>(load)
   const [customArt, setArt] = useState<Record<string, string>>({})
 
+  const [remoteArt, setRemote] = useState<Record<string, string>>({})
+  const [remoteStatus, setRemoteStatus] = useState<RemoteStatus>('loading')
+
   useEffect(() => {
     void loadAllArt().then(setArt)
+    void loadRemoteArt(setRemote).then(setRemoteStatus)
   }, [])
   useEffect(() => save(state), [state])
 
@@ -169,8 +176,8 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setArt((a) => Object.fromEntries(Object.entries(a).filter(([k]) => k !== heroId)))
       void removeArt(heroId)
     }
-    return { ...state, canAfford, summon, merge, useScroll, toggleWish, togglePin, awaken, rebirth, customArt, setCustomArt, clearCustomArt }
-  }, [state, customArt])
+    return { ...state, canAfford, summon, merge, useScroll, toggleWish, togglePin, awaken, rebirth, remoteArt, remoteStatus, customArt, setCustomArt, clearCustomArt }
+  }, [state, customArt, remoteArt, remoteStatus])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>
 }

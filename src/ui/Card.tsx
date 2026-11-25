@@ -1,4 +1,4 @@
-import { useRef, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react'
+import { useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react'
 import { AFFINITIES } from '../data/affinities'
 import { frameOf } from '../data/banners'
 import { roleKind, type Hero } from '../data/heroes'
@@ -20,10 +20,13 @@ export const Card = ({ hero, count, locked, inert, className = '', style }: Prop
   const openable = !inert && viewer !== null
   const ref = useRef<HTMLDivElement>(null)
   const rarity = RARITIES[hero.rarity]
-  const { customArt, xp, owned, wish, rebirths, awakened } = useStore()
+  const { customArt, remoteArt, xp, owned, wish, rebirths, awakened } = useStore()
   const custom = customArt[hero.id]
   const state = cardState(hero, xp, owned, rebirths, awakened) // niveau et statistiques réels de la carte chez le joueur
-  const art = custom ?? heroArt(hero.model, 'full')
+  const [failed, setFailed] = useState('') // adresse AniList qui n'a pas pu s'afficher
+  const remote = remoteArt[hero.id] && remoteArt[hero.id] !== failed ? remoteArt[hero.id] : undefined
+  // ordre : l'image choisie par le joueur, puis le portrait officiel chargé depuis AniList, sinon le portrait de remplacement
+  const art = custom ?? remote ?? heroArt(hero.model, 'full')
 
   const onMove = (e: PointerEvent<HTMLDivElement>) => {
     const el = ref.current!
@@ -53,17 +56,17 @@ export const Card = ({ hero, count, locked, inert, className = '', style }: Prop
           <div className="card__bg" />
           <div className="card__rays" />
           {art ? (
-            <img className={`card__art ${custom ? 'card__art--custom' : ''}`} src={art} alt="" loading="lazy" />
+            <img className={`card__art ${custom || remote ? 'card__art--custom' : ''}`} src={art} alt="" loading="lazy" referrerPolicy="no-referrer" onError={() => { if (!custom && remote) setFailed(remote) }} />
           ) : (
-            // pas d'illustration : le nom en japonais, en grand, tient lieu d'image
-            <span className="card__blank" lang="ja" style={{ fontSize: `${Math.min(20, 56 / hero.kana.length)}cqw` }}>{hero.kana}</span>
+            // pas d'image (pas encore chargée, ou en échec) : portrait de remplacement = couleur de l'affinité + initiale
+            <span className="card__blank card__blank--initial" aria-hidden="true">{hero.name[0]}</span>
           )}
           <div className="card__shine" />
           <div className="card__glitter" />
           <div className="card__glare" />
 
           <span className="card__brand">RIFT</span>
-          {art && <span className="card__kana" lang="ja">{hero.kana}</span>}
+          <span className="card__kana" lang="ja">{hero.kana}</span>
           <span className="card__affinity"><AffinityIcon id={hero.affinity} size={14} /></span>
           {count !== undefined && count > 1 && <span className="card__count">×{count}</span>}
           {owned[hero.id] > 0 && (state.level > 1 || state.freed) && <span className={`card__level ${state.freed ? 'card__level--free' : ''}`}>{state.freed ? '✦ ' : ''}Nv {state.level}</span>}

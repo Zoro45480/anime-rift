@@ -98,7 +98,7 @@ const fold = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g,
 const toggle = <T,>(list: T[], item: T): T[] => (list.includes(item) ? list.filter((x) => x !== item) : [...list, item])
 
 const Cards = ({ onSummon }: { onSummon: () => void }) => {
-  const { owned, wish, pinned, scrolls } = useStore()
+  const { owned, wish, pinned, scrolls, remoteStatus, remoteArt } = useStore()
   const [query, setQuery] = useState('')
   const [rarities, setRarities] = useState<RarityId[]>([]) // vide = toutes
   const [affinities, setAffinities] = useState<AffinityId[]>([]) // vide = toutes
@@ -196,7 +196,12 @@ const Cards = ({ onSummon }: { onSummon: () => void }) => {
         </div>
       </section>
 
-      <p className="col__hint">« Mon image » met une image de votre appareil sur une carte ; « Lien d'image » utilise l'adresse d'une image en ligne, chargée par votre navigateur. Ce choix reste sur cet appareil.</p>
+      <p className="col__hint">
+        {remoteStatus === 'loading' && 'Chargement des portraits officiels depuis AniList… '}
+        {remoteStatus === 'ok' && `Portraits officiels chargés par votre navigateur depuis AniList (${Object.keys(remoteArt).length} personnages) : le jeu ne contient aucune image. `}
+        {remoteStatus === 'blocked' && 'Portraits AniList indisponibles ici (page qui bloque les chargements externes, ou pas de connexion) : les cartes gardent leur portrait de remplacement. '}
+        Pour changer l'image d'une carte : « Mon image » (un fichier de votre appareil) ou « Lien d'image » (l'adresse d'une image en ligne). Ce choix reste sur cet appareil.
+      </p>
 
       {groups.length === 0 && (
         <div className="col__empty">
