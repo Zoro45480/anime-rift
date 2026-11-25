@@ -6,7 +6,7 @@ import { useStore } from '../state/store'
 import { Card } from '../ui/Card'
 import { PRESETS } from './presets'
 import { pickHeadliner } from './timeline'
-import { SummonAudio } from './audio'
+import { isSoundOn, setSoundOn, SummonAudio } from './audio'
 import type { Quality, SummonStage } from './SummonStage'
 
 // Cinématique d'invocation. `heroes` est exactement ce que le tirage réel a renvoyé : 1, 5 ou 10 cartes.
@@ -57,6 +57,7 @@ export const SummonCinematic = ({ heroes, onClose }: { heroes: Hero[]; onClose: 
   const [index, setIndex] = useState(0)
   const [sub, setSub] = useState<Sub>('card')
   const [quality, setQuality] = useState<Quality>(readQuality)
+  const [sound, setSound] = useState(isSoundOn)
   const { customArt } = useStore()
 
   const single = heroes.length === 1
@@ -93,7 +94,7 @@ export const SummonCinematic = ({ heroes, onClose }: { heroes: Hero[]; onClose: 
           },
         }, heroes.map((h) => PRESETS[h.rarity].colors.accent))
         if (cancelled) return
-        sound.start(preset, star.rarity)
+        void sound.start(preset, star.rarity)
         setStep('intro')
         window.addEventListener('resize', s.resize)
       } catch {
@@ -128,7 +129,7 @@ export const SummonCinematic = ({ heroes, onClose }: { heroes: Hero[]; onClose: 
       timer.current = window.setTimeout(() => setSub('card'), CUTIN_MS[h.rarity])
     } else {
       stage.current?.popOrb(index)
-      audio.current.pop(h.rarity)
+      audio.current.pop(h.rarity, index)
       timer.current = window.setTimeout(next, CARD_MS[h.rarity] + (single ? 500 : 0))
     }
     return () => window.clearTimeout(timer.current)
@@ -148,7 +149,7 @@ export const SummonCinematic = ({ heroes, onClose }: { heroes: Hero[]; onClose: 
   const skipAll = () => {
     if (step === 'summary') return onClose()
     window.clearTimeout(timer.current)
-    audio.current.skip(star.rarity)
+    audio.current.skip()
     heroes.forEach((_, i) => stage.current?.popOrb(i))
     setStep('summary')
   }
@@ -166,6 +167,13 @@ export const SummonCinematic = ({ heroes, onClose }: { heroes: Hero[]; onClose: 
     const nextQuality: Quality = quality === 'high' ? 'low' : 'high'
     setQuality(nextQuality)
     try { localStorage.setItem(QUALITY_KEY, nextQuality) } catch { /* non enregistré */ }
+  }
+
+  const toggleSound = () => {
+    const on = !sound
+    setSound(on)
+    setSoundOn(on)
+    if (!on) audio.current.stop(0.1)
   }
 
   const shown = step === 'cards' ? hero : star
@@ -208,6 +216,7 @@ export const SummonCinematic = ({ heroes, onClose }: { heroes: Hero[]; onClose: 
 
       {(step === 'intro' || step === 'cards') && (
         <div className="sc__controls">
+          <button className="sc__btn" onClick={toggleSound} aria-pressed={sound}>Son : {sound ? 'activé' : 'coupé'}</button>
           <button className="sc__btn" onClick={toggleQuality} title="S'applique à la prochaine invocation">Effets : {quality === 'high' ? 'complets' : 'réduits'}</button>
           <button className="sc__btn sc__btn--skip" onClick={skipAll}>Passer ▸▸</button>
         </div>

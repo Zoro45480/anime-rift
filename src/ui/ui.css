@@ -284,8 +284,8 @@ body { background: radial-gradient(90% 50% at 80% 0%, #1b1640 0%, transparent 70
 .sc__bar--top { top: 0; translate: 0 -100%; }
 .sc__bar--bottom { bottom: 0; translate: 0 100%; }
 .sc__loading { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; font-size: 13px; color: var(--text-dim); }
-.sc__controls { position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(9vh + 14px); display: flex; gap: 8px; animation: fade 600ms 600ms both; }
-.sc__btn { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); padding: 9px 18px; background: rgba(7, 8, 18, 0.7); clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); transition: color var(--mid), background var(--mid); }
+.sc__controls { position: absolute; left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(9vh + 14px); display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; animation: fade 600ms 600ms both; }
+.sc__btn { font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-dim); padding: 9px 14px; background: rgba(7, 8, 18, 0.7); clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); transition: color var(--mid), background var(--mid); }
 .sc__btn:hover { color: var(--cream); background: rgba(30, 33, 70, 0.9); }
 .sc__btn--skip { color: var(--cream); }
 
