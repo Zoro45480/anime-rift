@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { HEROES, type Hero } from '../data/heroes'
 import { AFFINITY_LIST, type AffinityId } from '../data/affinities'
 import { RARITIES, RARITY_ORDER, type RarityId } from '../data/rarities'
@@ -7,10 +7,23 @@ import { useStore } from '../state/store'
 import { AffinityIcon } from '../ui/AffinityIcon'
 import { Card } from '../ui/Card'
 
-// Bouton « Mon image » : le joueur choisit une image sur son appareil pour illustrer la carte.
+// Vérifie qu'un lien mène bien à une image que le navigateur peut afficher.
+const canLoad = (url: string) =>
+  new Promise<boolean>((resolve) => {
+    const img = new Image()
+    img.onload = () => resolve(true)
+    img.onerror = () => resolve(false)
+    img.src = url
+  })
+
+// Illustration personnelle d'une carte : une image de l'appareil (« Mon image ») ou l'adresse d'une image en ligne
+// (« Lien d'image »). Avec un lien, rien n'est copié dans le jeu : c'est le navigateur du joueur qui charge l'image.
 const ArtPicker = ({ hero }: { hero: Hero }) => {
   const { customArt, setCustomArt, clearCustomArt } = useStore()
   const [error, setError] = useState('')
+  const [linking, setLinking] = useState(false)
+  const [link, setLink] = useState('')
+  const [checking, setChecking] = useState(false)
   const inputId = `art-${hero.id}`
 
   const onFile = async (file: File | undefined) => {
@@ -24,11 +37,34 @@ const ArtPicker = ({ hero }: { hero: Hero }) => {
     }
   }
 
+  const onLink = async (e: FormEvent) => {
+    e.preventDefault()
+    const url = link.trim()
+    setError('')
+    if (!/^https?:\/\/\S+$/i.test(url)) return setError('Collez une adresse complète, qui commence par https://')
+    setChecking(true)
+    const loads = await canLoad(url)
+    setChecking(false)
+    if (!loads) return setError("Ce lien n'a pas pu être chargé comme image (adresse incorrecte, ou site qui bloque l'affichage ailleurs).")
+    const ok = await setCustomArt(hero.id, url)
+    if (!ok) setError('Image affichée, mais lien non enregistré sur cet appareil.')
+    setLinking(false)
+    setLink('')
+  }
+
   return (
     <div className="artpick">
       <label className="artpick__btn" htmlFor={inputId}>{customArt[hero.id] ? "Changer l'image" : 'Mon image'}</label>
       <input id={inputId} className="artpick__input" type="file" accept="image/*" onChange={(e) => { void onFile(e.target.files?.[0]); e.target.value = '' }} />
+      <button className="artpick__btn" aria-expanded={linking} onClick={() => { setLinking(!linking); setError('') }}>Lien d'image</button>
       {customArt[hero.id] && <button className="artpick__btn artpick__btn--ghost" onClick={() => clearCustomArt(hero.id)}>Retirer</button>}
+      {linking && (
+        <form className="artpick__link" onSubmit={(e) => void onLink(e)}>
+          <label htmlFor={`link-${hero.id}`}>Adresse de l'image pour {hero.name}</label>
+          <input id={`link-${hero.id}`} type="url" inputMode="url" placeholder="https://…" value={link} onChange={(e) => setLink(e.target.value)} autoFocus />
+          <button className="artpick__btn" type="submit" disabled={checking}>{checking ? 'Vérification…' : 'Valider'}</button>
+        </form>
+      )}
       {error && <p className="artpick__error" role="alert">{error}</p>}
     </div>
   )
@@ -135,7 +171,7 @@ export const Collection = ({ onSummon }: { onSummon: () => void }) => {
         </div>
       </section>
 
-      <p className="col__hint">« Mon image » remplace l'illustration d'une carte par une image de votre appareil. Elle reste sur cet appareil.</p>
+      <p className="col__hint">« Mon image » met une image de votre appareil sur une carte ; « Lien d'image » utilise l'adresse d'une image en ligne, chargée par votre navigateur. Ce choix reste sur cet appareil.</p>
 
       {groups.length === 0 && (
         <div className="col__empty">

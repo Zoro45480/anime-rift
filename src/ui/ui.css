@@ -552,3 +552,7 @@ body { background: #000; }
   .nx-gate__text { max-width: 66%; }
 }
 @media (max-width: 480px) { .filters__row { grid-template-columns: minmax(0, 1fr); gap: 6px; } }
+.artpick__link { flex-basis: 100%; display: grid; gap: 6px; padding-top: 4px; }
+.artpick__link label { font-size: 11px; color: var(--text-dim); }
+.artpick__link input { width: 100%; min-height: 40px; padding: 0 10px; font: inherit; font-size: 16px; color: var(--cream); background: #000; border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 10px; }
+.artpick__link input:focus-visible { outline: 2px solid var(--cyan); outline-offset: 1px; }

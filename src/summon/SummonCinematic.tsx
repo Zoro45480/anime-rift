@@ -40,7 +40,7 @@ const CutIn = ({ hero, art }: { hero: Hero; art: string }) => (
     <div className="cutin__flash" />
     <div className="cutin__band">
       <div className="cutin__streaks" />
-      <img className={art.startsWith('data:image/jpeg') ? 'is-photo' : ''} src={art} alt="" />
+      <img className={art.startsWith('data:image/jpeg') || /^https?:/.test(art) ? 'is-photo' : ''} src={art} alt="" />
     </div>
     <p className="cutin__word">{PRESETS[hero.rarity].rank}&nbsp;!</p>
   </div>
