@@ -172,6 +172,45 @@ export const Banners = ({ onRebirth }: { onRebirth: () => void }) => {
         </section>
       )}
 
+      {/* Bannière seule : toutes ses cartes par rareté, avec la chance de chacune, puis ses « plus » */}
+      {focus && (
+        <section className="bcards">
+          <header className="section__head"><span>{two(bannerPool(banner).length)}</span><div><h2>Toutes les cartes</h2><p>Touche une carte pour l'ouvrir. La chance indiquée est celle d'une invocation.</p></div></header>
+          {RARITY_ORDER.map((rid) => {
+            const cards = bannerPool(banner).filter((h) => h.rarity === rid)
+            if (cards.length === 0) return null
+            const rates = [...new Set(cards.map((h) => pct(cardRate(banner, h))))]
+            return (
+              <div key={rid} className="bcards__group" style={{ ['--rc' as string]: RARITIES[rid].color }}>
+                <header><i /><b>{RARITIES[rid].short}</b><span>{cards.length} carte{cards.length > 1 ? 's' : ''} · {rates.length === 1 ? `${rates[0]}${cards.length > 1 ? ' chacune' : ''}` : `${pct(RARITIES[rid].rate)} en tout`}</span></header>
+                <div className="bcards__grid">
+                  {cards.map((h) => <figure key={h.id}><LazyCard hero={h} /><figcaption>{pct(cardRate(banner, h))}</figcaption></figure>)}
+                </div>
+              </div>
+            )
+          })}
+        </section>
+      )}
+      {focus && (
+        <section className="bplus">
+          <h2>Les plus de la bannière</h2>
+          <div className="bplus__box">
+            <h3>Garantie SSR ou mieux</h3>
+            <div className="pity__track"><i style={{ width: `${(pity / PITY_MAX) * 100}%` }} /></div>
+            <p><b>{pity} / {PITY_MAX}</b> invocations. À la {PITY_MAX}e sans carte SSR, LR ou MR, la suivante en est une à coup sûr. Le compteur est propre à cette bannière.</p>
+          </div>
+          <div className="bplus__box">
+            <h3>Taux par rareté</h3>
+            <dl>{RARITY_ORDER.map((rid) => <div key={rid} style={{ ['--rc' as string]: RARITIES[rid].color }}><dt>{RARITIES[rid].short} <small>{RARITIES[rid].label}</small></dt><dd>{pct(RARITIES[rid].rate)}</dd></div>)}</dl>
+            <button className="bplus__btn" onClick={() => setShowIndex(true)}>Index de la bannière</button>
+          </div>
+          <div className="bplus__box">
+            <h3>Parchemins et âmes</h3>
+            <p>Les invocations ne donnent que des cartes. Les parchemins d'XP et les âmes se gagnent dans La Saga.</p>
+          </div>
+        </section>
+      )}
+
       {/* Toutes les bannières : informations, progression et carte vedette */}
       {!focus && <section className="showcase">
         <header className="section__head"><span>{two(BANNERS.length)}</span><div><h2>À l'affiche</h2><p>Les bannières ouvertes en ce moment.</p></div></header>
