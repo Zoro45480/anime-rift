@@ -3,7 +3,10 @@ import { createPortal } from 'react-dom'
 import { BANNERS, COST, PITY_MAX } from '../data/banners'
 import { heroById, type Hero } from '../data/heroes'
 import { RARITIES, RARITY_ORDER } from '../data/rarities'
-import { heroArt } from '../assets/manifest'
+import { heroArt, iconArt } from '../assets/manifest'
+import { HEROES } from '../data/heroes'
+import { isPityRarity } from '../data/rarities'
+import { LEVEL_CAP, MAX_LEVEL } from '../game/progression'
 import { bannerPool, cardRate } from '../game/gacha'
 import { useStore, type Currency } from '../state/store'
 import { Card } from '../ui/Card'
@@ -40,7 +43,7 @@ const PityBar = ({ value }: { value: number }) => (
   </div>
 )
 
-export const Banners = () => {
+export const Banners = ({ onRebirth }: { onRebirth: () => void }) => {
   const store = useStore()
   const [index, setIndex] = useState(0)
   const [currency, setCurrency] = useState<Currency>('ticket')
@@ -55,6 +58,14 @@ export const Banners = () => {
   const coin = currency === 'ticket' ? 'seal' : 'soul'
   const price = (n: number) => n * (currency === 'ticket' ? COST.ticket : COST.gems)
   const turn = (step: number) => setIndex((i) => (i + step + BANNERS.length) % BANNERS.length)
+  // Mes gros tirages : les cartes SSR, LR et MR réellement obtenues sur cet appareil, les plus récentes d'abord.
+  const bigPulls = HEROES.filter((h) => isPityRarity(h.rarity))
+    .flatMap((h) => (store.log[h.id] ?? []).filter((e) => e.k === 'pull').map((e) => ({ hero: h, t: e.t })))
+    .sort((a, b) => b.t - a.t).slice(0, 12)
+  const ago = (t: number) => {
+    const m = Math.floor((Date.now() - t) / 60000)
+    return m < 1 ? 'à l’instant' : m < 60 ? `il y a ${m} min` : m < 1440 ? `il y a ${Math.floor(m / 60)} h` : `il y a ${Math.floor(m / 1440)} j`
+  }
   const summon = (n: number) => {
     primeAudio() // le son n'est autorisé par le navigateur que pendant ce clic
     const r = store.summon(banner, currency, n) // le tirage réel : c'est lui qui fixe les raretés
@@ -189,6 +200,47 @@ export const Banners = () => {
           })}
         </div>
       </section>}
+
+      {!focus && <>
+        {/* Échos des failles : les anciennes bannières, rouvertes par la Renaissance */}
+        <section className="echo">
+          <header className="section__head"><span>00</span><div><h2>Échos des failles</h2><p>Les anciennes bannières, rouvertes après chaque Renaissance.</p></div></header>
+          <div className="echo__box">
+            <h3>{store.rebirths > 0 ? 'Débloqué par ta Renaissance' : 'Débloqué par la Renaissance'}</h3>
+            <p>{store.rebirths > 0 ? 'Tu as accès aux Échos.' : 'Fais une Renaissance (niveau de compte 100) pour ouvrir les Échos.'} Les bannières qui ont fermé reviendront ici.</p>
+            <button className="echo__btn" onClick={onRebirth}>Voir la Renaissance ↗</button>
+          </div>
+          <p className="echo__empty">Aucune bannière n'a encore fermé : il n'y a donc pas d'Écho pour l'instant. Les {BANNERS.length} bannières du jeu sont toutes ouvertes ci-dessus.</p>
+        </section>
+
+        {/* Mes gros tirages */}
+        <section className="pulls">
+          <p className="pulls__kicker"><i />Sur cet appareil · SSR, LR et MR</p>
+          <h2>Mes gros tirages</h2>
+          {bigPulls.length === 0 ? <p className="echo__empty">Pas encore de carte SSR, LR ou MR. Tes plus beaux tirages s'afficheront ici.</p> : (
+            <div className="pulls__row">
+              {bigPulls.map((x, i) => <figure key={i} className="pulls__item"><Card hero={x.hero} /><figcaption>{ago(x.t)}</figcaption></figure>)}
+            </div>
+          )}
+          <p className="echo__empty">Les tirages des autres joueurs, en direct, demandent un jeu en ligne avec des profils : ce sera pour plus tard.</p>
+        </section>
+
+        {/* Comment ça marche */}
+        <section className="howto">
+          <details open>
+            <summary><img src={iconArt('seal')} alt="" /><span><b>Invoque</b><small>Obtiens de nouvelles cartes.</small></span><i aria-hidden="true" /></summary>
+            <p>Choisis une bannière : une invocation coûte {COST.ticket} sceau ou {COST.gems} âmes, par 1, 5 ou 10. Les taux sont publics (« Index et taux ») et chaque tirage est réellement aléatoire. Une carte SSR, LR ou MR est garantie au plus tard à la {PITY_MAX}e invocation.</p>
+          </details>
+          <details open>
+            <summary><img src={iconArt('soul')} alt="" /><span><b>Gagne tes âmes</b><small>Cumule des âmes et invoque.</small></span><i aria-hidden="true" /></summary>
+            <p>Tu commences avec 600 âmes et 20 sceaux. Les âmes se gagneront dans les modes du Nexus quand ils ouvriront ; pour l'instant, seule la Renaissance en rend (25 % de celles dépensées). Dépense-les avec soin.</p>
+          </details>
+          <details open>
+            <summary><img src={iconArt('scroll-medium')} alt="" /><span><b>Renforce tes cartes</b><small>Fais évoluer tes cartes favorites.</small></span><i aria-hidden="true" /></summary>
+            <p>Un doublon n'est jamais perdu : il se fond dans sa carte et lui donne de l'XP. Chaque carte invoquée donne aussi un parchemin d'XP. Une carte monte jusqu'au niveau {LEVEL_CAP}, puis jusqu'au niveau {MAX_LEVEL} une fois libérée.</p>
+          </details>
+        </section>
+      </>}
 
       {showIndex && createPortal(
         <div className="modal" role="dialog" aria-modal="true" aria-label="Index de la bannière" onClick={() => setShowIndex(false)}>

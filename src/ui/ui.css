@@ -964,3 +964,28 @@ body { background: #000; }
 /* Portrait de remplacement : l'initiale du personnage sur la couleur de son affinité */
 .card__blank--initial { writing-mode: horizontal-tb; top: 10%; font-family: var(--font-display); font-style: italic; font-size: 46cqw !important; letter-spacing: 0; color: #fff; text-shadow: 0 0 8cqw var(--ac), 0 0 3cqw var(--ac), 0 1cqw 0 rgba(0, 0, 0, 0.5); }
 .card__face:has(.card__blank--initial) .card__bg { background-image: radial-gradient(80% 60% at 50% 28%, color-mix(in srgb, var(--ac) 75%, #000), color-mix(in srgb, var(--ac) 22%, #05060c) 75%); }
+
+/* ───────── Invoquer : Échos des failles, mes gros tirages, aide ───────── */
+.echo, .pulls, .howto { display: grid; gap: 12px; margin-top: 14px; }
+.echo__box { display: grid; gap: 10px; justify-items: start; padding: 22px 20px; border-radius: 18px; background: radial-gradient(90% 140% at 0% 0%, rgba(155, 123, 255, 0.24), transparent 65%), #0a0812; box-shadow: inset 0 0 0 1px rgba(155, 123, 255, 0.45); }
+.echo__box h3 { font-size: 20px; font-weight: 800; color: #fff; }
+.echo__box p { font-size: 14.5px; line-height: 1.5; color: var(--text); }
+.echo__btn { min-height: 48px; padding: 10px 20px; border-radius: 12px; font-size: 15px; font-weight: 800; color: #1a1030; background: linear-gradient(100deg, #d9c8ff, #9fd8ff); transition: transform 160ms var(--ease-out), filter 160ms; }
+.echo__btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
+.echo__empty { font-size: 13.5px; line-height: 1.5; color: var(--text-dim); }
+.pulls { padding: 22px 20px; border-radius: 18px; background: #08090d; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1); }
+.pulls__kicker { display: flex; align-items: center; gap: 9px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-dim); }
+.pulls__kicker i { width: 9px; height: 9px; border-radius: 50%; background: #ff4d6d; box-shadow: 0 0 10px #ff4d6d; }
+.pulls h2 { font-size: 28px; font-weight: 800; color: #fff; }
+.pulls__row { display: flex; gap: 44px; overflow-x: auto; padding: 30px 26px 10px; margin: 0 -20px; }
+.pulls__item { flex: none; width: 130px; display: grid; gap: 30px; }
+.pulls__item figcaption { text-align: center; font-size: 12.5px; color: var(--text-dim); }
+.howto details { border-radius: 14px; background: linear-gradient(180deg, #12100c, #08070a); box-shadow: inset 0 0 0 1px rgba(255, 190, 90, 0.35); }
+.howto summary { display: grid; grid-template-columns: 56px 1fr auto; gap: 14px; align-items: center; padding: 14px 18px; cursor: pointer; list-style: none; }
+.howto summary::-webkit-details-marker { display: none; }
+.howto summary img { width: 56px; height: 56px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(255, 190, 90, 0.5)); }
+.howto summary b { display: block; font-size: 18px; color: #fff; }
+.howto summary small { font-size: 13.5px; color: var(--text-dim); }
+.howto summary i { width: 10px; height: 10px; border-right: 2px solid var(--text-dim); border-bottom: 2px solid var(--text-dim); transform: rotate(45deg); transition: transform 200ms; }
+.howto details[open] summary i { transform: rotate(-135deg); }
+.howto details p { margin: 0 18px; padding: 14px 0 18px; border-top: 1px solid rgba(255, 255, 255, 0.1); font-size: 14.5px; line-height: 1.55; color: var(--text); }
