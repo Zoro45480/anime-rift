@@ -15,7 +15,7 @@ export const Logo = () => (
 )
 
 // Barre du haut : logo et ressources du joueur, chaque ressource dans sa plaquette en biais.
-export const TopBar = ({ onPlay }: { onPlay: () => void }) => {
+export const TopBar = ({ onPlay, onSummon }: { onPlay: () => void; onSummon: () => void }) => {
   const { tickets, gems, energyLeft, accountXp, rebirths } = useStore()
   return (
     <header className="topbar">
@@ -24,8 +24,8 @@ export const TopBar = ({ onPlay }: { onPlay: () => void }) => {
         <div className="wallet" aria-label="Vos ressources">
           <LevelBadge level={accountLevel(accountXp, rebirths).level} rebirths={rebirths} />
           <button className="wallet__energy" onClick={onPlay} aria-label={`Énergie : ${energyLeft} sur ${ENERGY_MAX}. Aller au Nexus`}><Coin name="bolt" size={24} /><b>{energyLeft}<small>/{ENERGY_MAX}</small></b></button>
-          <span title="Flammes d'âme"><Coin name="soul" size={24} /><b>{gems}</b></span>
-          <span title="Sceaux d'invocation"><Coin name="seal" size={24} /><b>{tickets}</b></span>
+          <button className="wallet__energy" onClick={onSummon} aria-label={`Flammes d'âme : ${gems}. Aller aux invocations`}><Coin name="soul" size={24} /><b>{gems}</b></button>
+          <button className="wallet__energy" onClick={onSummon} aria-label={`Sceaux d'invocation : ${tickets}. Aller aux invocations`}><Coin name="seal" size={24} /><b>{tickets}</b></button>
         </div>
       </div>
     </header>

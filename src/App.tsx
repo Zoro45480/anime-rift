@@ -18,7 +18,7 @@ export const App = () => {
   return (
     <StoreProvider>
       <CardViewerProvider>
-      <TopBar onPlay={() => go('play')} />
+      <TopBar onPlay={() => go('play')} onSummon={() => go('banners')} />
       <main className="screen" key={tab}>
         <ErrorBoundary>
         {tab === 'banners' && <Banners onRebirth={toRebirth} />}
