@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
+import { Social } from './Social'
+import { GuildPage } from './Guild'
+import { Referral } from './Referral'
+export { openSettings } from '../state/online'
+import { openSettings } from '../state/online'
 import { loadFame, myRank, scoreOf, useOnline, type OnlineProfile } from '../state/online'
-import { extraArt, uiArt } from '../assets/manifest'
 import { HEROES } from '../data/heroes'
 import { ACHIEVEMENTS, progressOf } from '../game/achievements'
 import { leagueOf } from '../game/arena'
@@ -12,14 +16,7 @@ export type CommunityTab = 'social' | 'guild' | 'fame' | 'referral'
 export const COMMUNITY: [CommunityTab, string][] = [['social', 'Social'], ['guild', 'Guilde'], ['fame', 'Panthéon'], ['referral', 'Parrainage']]
 const n = (x: number) => x.toLocaleString('fr-FR')
 
-// Ce que chaque partie contiendra une fois le jeu en ligne. Rien n'est inventé : pas de faux joueurs.
-const SOON: Record<Exclude<CommunityTab, 'fame'>, { title: string; lede: string; points: string[]; icon: string }> = {
-  social: { title: 'Social', lede: 'Tes amis, tes messages et tes échanges de cartes.', icon: uiArt('nav-profile'), points: ['Ajouter des amis par pseudo#tag et voir qui est en ligne', 'Messagerie privée, avec le réglage « qui peut m’écrire »', 'Proposer un échange de cartes équitable depuis le profil d’un ami'] },
-  guild: { title: 'Guilde', lede: 'Rejoins un Ordre et affrontez ensemble le boss de la semaine.', icon: uiArt('rift-path'), points: ['Créer ou rejoindre un Ordre (nom, tag, emblème, conditions)', 'Boss de la semaine : les dégâts de tous les membres s’additionnent', 'Rivalités entre Ordres et classement de la semaine'] },
-  referral: { title: 'Parrainage', lede: 'Invite tes amis et débloque un calendrier de 10 récompenses.', icon: uiArt('chest'), points: ['Un code et un lien à partager', 'Une case du calendrier s’ouvre pour chaque ami qui rejoint le jeu', 'Coffres, âmes et sceaux, jusqu’au gros lot de la 10e case'] },
-}
-
-export const Community = ({ start = 'fame' }: { start?: CommunityTab }) => {
+export const Community = ({ start = 'fame', onProfile }: { start?: CommunityTab; onProfile: () => void }) => {
   const store = useStore()
   const [tab, setTab] = useState<CommunityTab>(start)
   const mine = HEROES.filter((h) => store.owned[h.id]).length
@@ -38,23 +35,14 @@ export const Community = ({ start = 'fame' }: { start?: CommunityTab }) => {
       <div className="coltabs__bar" role="tablist" aria-label="Communauté">
         {COMMUNITY.map(([id, label]) => <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>{label}</button>)}
       </div>
-      {tab === 'fame' ? (<>
+      {tab === 'referral' ? <Referral /> : tab === 'guild' ? <GuildPage onConnect={openSettings} /> : tab === 'social' ? <Social onGuild={() => setTab('guild')} onProfile={onProfile} onConnect={openSettings} /> : tab === 'fame' ? (<>
         <FameBoard />
         <section className="cm__fame">
           <h3 className="sp-sub">Tes records</h3>
           <div className="cm__me"><Avatar size={64} /><div><b>{store.profile.name.trim() || 'Joueur'}</b><small>Ta carrière, avant et après les Renaissances</small></div></div>
           <ul className="cm__records">{records.map(([k, v, s]) => <li key={k}><small>{k}</small><b>{v}</b><span>{s}</span></li>)}</ul>
         </section>
-      </>) : (
-        <section className="cm__soon">
-          <img src={SOON[tab].icon} alt="" />
-          <div>
-            <h2>{SOON[tab].title}</h2><p className="cm__lede">{SOON[tab].lede}</p>
-            <ul>{SOON[tab].points.map((p) => <li key={p}>{p}</li>)}</ul>
-            <p className="cm__lock"><span className="kiri" style={{ width: 40, height: 40, backgroundImage: `url(${extraArt('guide')})` }} aria-hidden="true" />Cette partie a besoin d’autres joueurs : elle ouvrira quand le jeu aura un serveur en ligne. Aucun faux joueur n’est affiché d’ici là.</p>
-          </div>
-        </section>
-      )}
+      </>) : null}
     </div>
   )
 }

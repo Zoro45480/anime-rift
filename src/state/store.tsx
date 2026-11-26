@@ -1,10 +1,10 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { BANNERS, BIG_PITY, COST, type Banner } from '../data/banners'
 import { HEROES, heroById, type Hero } from '../data/heroes'
-import { pushCloud, startOnline } from './online'
-import { isPityRarity, RARITIES } from '../data/rarities'
+import { fetchInbox, heartbeat, markInbox, pushCloud, pushTeamLater, startOnline, useOnline } from './online'
+import { isPityRarity, RARITIES, RARITY_ORDER } from '../data/rarities'
 import { pullMany } from '../game/gacha'
-import { ENERGY_OVER, ENERGY_REFILL, ENERGY_REFILL_COST, cardState, power, ENERGY_MAX, ENERGY_REGEN_MS, energyNow, ACCOUNT_XP, accountLevel, AWAKEN_COST, LEVEL_CAP, REBIRTH_SHARDS, levelFromXp, MAX_LEVEL, MERGE_XP, REBIRTH_KEEP, REBIRTH_LEVEL, REBIRTH_REFUND, REBIRTH_SEALS, REBIRTH_XP, SCROLLS, type ScrollId } from '../game/progression'
+import { ENERGY_OVER, ENERGY_REFILL, ENERGY_REFILL_COST, cardState, power, ENERGY_MAX, ENERGY_REGEN_MS, energyNow, ACCOUNT_XP, accountLevel, AWAKEN_COST, LEVEL_CAP, REBIRTH_SHARDS, levelFromXp, xpForLevel, MAX_LEVEL, MERGE_XP, REBIRTH_KEEP, REBIRTH_LEVEL, REBIRTH_REFUND, REBIRTH_SEALS, REBIRTH_XP, SCROLLS, type ScrollId } from '../game/progression'
 import { makeUnit, simulate, type BattleEvent, type Unit } from '../game/battle'
 import { foeUnits, isUnlocked, rollDrops, SOULS_PER_STAR, stageById, starsFor, TEAM_SIZE, type Stage } from '../game/saga'
 import { canBuy, cosmeticById } from '../game/cosmetics'
@@ -14,6 +14,7 @@ import { applyRule, floor as spireFloor, spireFoes, type Floor } from '../game/s
 import { ACHIEVEMENTS, doneIds, METAL_LABEL } from '../game/achievements'
 import { colossusFoes, colossusOf, DIFFICULTIES, eventDone, isOpen as colOpen, rollCol, TRIES_PER_DAY, WIN_SOULS, type ColState, type Difficulty } from '../game/colossus'
 import { emptyTourney, ROUNDS, tourneyRival, type Tourney, DUELS_PER_DAY, eloChange, emptyArena, PVP_GOALS, rivalsFor, rivalUnits, rollWeek, WIN_SOULS as DUEL_SOULS, type ArenaState, type Rival } from '../game/arena'
+import { REFERRAL } from '../game/referral'
 import { emptyShop, giftOf, rollAtLeast, weeklyOffers, type ShopState } from '../game/shop'
 import { AUCTION_HOURS, auctionResult, emptyBazaar, quickPrice, stallOf, type BazaarState } from '../game/bazaar'
 import { loadAllArt, removeArt, saveArt } from './customArt'
@@ -54,6 +55,8 @@ type State = {
   shop: ShopState // boutique : offres achetées cette semaine, cadeau du jour, historique
   tourney: Tourney // Le Grand Rift : tournoi du jour, titres gagnés
   arena: ArenaState // L'Arène : cote, ligue, duels du jour, défis de la semaine
+  refClaimed: number[] // cases du calendrier de parrainage déjà ouvertes
+  gtries: { day: string; n: number } // essais du jour contre le boss de guilde
   col: ColState // Les Colosses : semaine, difficultés battues, essais du jour, objectifs d'événement
   multis: Record<string, number> // grande garantie : multis ×10 d'affilée sans MR, par bannière
   spire: { best: number } // La Spire : plus haut étage gagné
@@ -74,6 +77,7 @@ const NOTIF_MAX = 30
 
 // Ce qu'un combat a donné : de quoi le rejouer à l'écran et afficher les récompenses.
 export type ColResult = { diff: Difficulty; allies: Unit[]; foes: Unit[]; events: BattleEvent[]; win: boolean; first: boolean; card: Hero | null }
+export type RealOpponent = { id: string; name: string; no: number; elo: number; team: { id: string; level: number }[] }
 export type DuelResult = { rival: Rival; allies: Unit[]; foes: Unit[]; events: BattleEvent[]; win: boolean; delta: number; elo: number }
 export type SpireResult = { floor: Floor; allies: Unit[]; foes: Unit[]; events: BattleEvent[]; win: boolean; first: boolean }
 export type FightResult = {
@@ -99,6 +103,9 @@ type Store = State & {
   clearNotifs: () => void
   teamNow: string[] // l'équipe réellement utilisée : celle choisie, sinon les 3 cartes les plus puissantes
   setTeam: (ids: string[]) => void
+  fightGuildBoss: () => { result: ColResult; damage: number } | null // boss de guilde : 3 essais par jour, les dégâts comptent pour toute la guilde
+  guildTries: number
+  claimReferral: (step: number, friends: number) => boolean // ouvre une case du calendrier de parrainage
   fightColossus: (diff: Difficulty['id']) => ColResult | null // combat contre le Colosse de la semaine
   claimEvent: () => Hero | null // récompense finale de l'événement : une carte SR ou mieux
   colTries: number // essais restants aujourd'hui
@@ -110,7 +117,7 @@ type Store = State & {
   buyOffer: (id: string) => Hero | true | null // achète une offre de la semaine (la carte garantie s'il y en a une)
   claimGift: () => boolean // cadeau gratuit du jour
   giftReady: boolean
-  duel: (rivalId: string) => DuelResult | null // duel d'arène contre un rival du jeu
+  duel: (rivalId: string, real?: RealOpponent) => DuelResult | null // duel d'arène contre un rival du jeu
   tourneyFight: () => DuelResult | null // combat du tour suivant du Grand Rift
   newRivals: () => void // propose trois autres rivaux
   claimPvp: (id: string) => boolean // défi d'arène de la semaine
@@ -124,6 +131,10 @@ type Store = State & {
   useScroll: (heroId: string, scroll: ScrollId, count?: number) => number // parchemins réellement utilisés (s'arrête au niveau maximum)
   scrollsUseful: (heroId: string, scroll: ScrollId) => number // combien de parchemins servent encore avant le niveau maximum
   toggleFav: (heroId: string) => void
+  takeCards: (ids: string[]) => boolean // met de côté des doublons (échange, vente) ; la dernière copie reste toujours
+  spendGems: (n: number) => boolean // âmes mises de côté (achat, enchère entre joueurs)
+  addGems: (n: number) => void
+  giveCards: (ids: string[]) => void // rend des cartes mises de côté si le serveur refuse // remboursement immédiat si le serveur refuse
   mergeAll: () => { merged: number; cards: number } // fusionne tous les doublons (jusqu'au niveau maximum de chaque carte)
   dupes: number // exemplaires en trop dans toute la collection
   toggleWish: (heroId: string) => void
@@ -148,7 +159,7 @@ const LOG_MAX = 30
 // Dotation de départ du compte.
 export const START_GEMS = 600
 const START: State = {
-  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' }, frame: '', ornament: '', aura: '', color: '', effect: '', theme: '', badges: [] }, pulls: 0, wins: 0, cosmetics: [], quests: emptyQuests(), path: { season: 0, xp: 0, claimed: [] }, spire: { best: 0 }, shop: emptyShop(), bazaar: emptyBazaar(), tourney: emptyTourney(), arena: emptyArena(), col: { week: '', cleared: [], tries: { day: '', n: 0 }, wins: 0, pulls: 0, final: false }, multis: {}, seen: { last: '', days: 0 }, achDone: [], arcHeroes: {}, tutorialSeen: [],
+  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' }, frame: '', ornament: '', aura: '', color: '', effect: '', theme: '', badges: [] }, pulls: 0, wins: 0, cosmetics: [], quests: emptyQuests(), path: { season: 0, xp: 0, claimed: [] }, spire: { best: 0 }, shop: emptyShop(), bazaar: emptyBazaar(), tourney: emptyTourney(), arena: emptyArena(), refClaimed: [], gtries: { day: '', n: 0 }, col: { week: '', cleared: [], tries: { day: '', n: 0 }, wins: 0, pulls: 0, final: false }, multis: {}, seen: { last: '', days: 0 }, achDone: [], arcHeroes: {}, tutorialSeen: [],
   tickets: 20, gems: START_GEMS, pity: Object.fromEntries(BANNERS.map((b) => [b.id, 0])), owned: {},
   xp: {}, scrolls: { small: 0, medium: 0, large: 0 }, wish: [], pinned: [], favs: [], log: {},
 }
@@ -197,6 +208,11 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     pushCloud(state, { name: state.profile.name.trim() || 'Joueur', avatar: state.profile.avatar.startsWith('http') ? state.profile.avatar : '', title: state.profile.title, bio: state.profile.bio,
       level: accountLevel(state.accountXp, state.rebirths).level, rebirths: state.rebirths, collection: owned.length, mr: owned.filter((h) => h.rarity === 'rift').length, lr: owned.filter((h) => h.rarity === 'legend').length,
       achievements: doneIds(state).length, spire: state.spire.best, arena: state.arena.best })
+    // équipe d'Arène visible par les autres joueurs : l'équipe choisie, sinon les 3 cartes les plus rares
+    const ids = state.team.filter((id) => state.owned[id]).slice(0, 3)
+    const team = (ids.length ? ids : owned.sort((a, b) => RARITY_ORDER.indexOf(a.rarity) - RARITY_ORDER.indexOf(b.rarity)).slice(0, 3).map((h) => h.id))
+      .map((id) => ({ id, level: levelFromXp(state.xp[id] ?? 0, state.awakened.includes(id) ? MAX_LEVEL : LEVEL_CAP).level }))
+    pushTeamLater(team)
   }, [state])
   // Jours de jeu et succès : on compte un nouveau jour, et on annonce chaque succès qui vient d'être obtenu.
   useEffect(() => {
@@ -217,6 +233,32 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     const t = setInterval(() => setNow(Date.now()), 15000)
     return () => clearInterval(t)
   }, [])
+  // En ligne : la boîte de réception (ventes, achats, échanges, enchères) est ouverte toute seule.
+  const online = useOnline()
+  useEffect(() => {
+    if (!online.session) return
+    let live = true
+    const tick = async () => {
+      heartbeat()
+      const items = await fetchInbox()
+      if (!live || !items.length) return
+      await markInbox(items.map((x) => x.id))
+      setState((s) => {
+        const owned = { ...s.owned }
+        let log = s.log
+        for (const x of items) for (const id of x.cards) {
+          owned[id] = (owned[id] ?? 0) + 1
+          log = { ...log, [id]: [{ t: Date.now(), k: 'pull' as const, note: x.note }, ...(log[id] ?? [])].slice(0, 30) }
+        }
+        const notes = items.map((x, i) => ({ id: Date.now() * 100 + i, t: Date.now(), kind: 'bazaar' as const, read: false,
+          text: `${x.note}${x.gems ? ` : +${x.gems} âmes` : ''}${x.tickets ? ` · +${x.tickets} sceaux` : ''}${x.cards.length ? ` · ${x.cards.map((id) => heroById(id)?.name ?? id).join(', ')}` : ''}.` }))
+        return { ...s, owned, log, gems: s.gems + items.reduce((n, x) => n + x.gems, 0), tickets: s.tickets + items.reduce((n, x) => n + x.tickets, 0), notifs: [...notes, ...s.notifs].slice(0, NOTIF_MAX) }
+      })
+    }
+    void tick()
+    const t = setInterval(() => void tick(), 30000)
+    return () => { live = false; clearInterval(t) }
+  }, [online.session])
   // Bazar : les enchères terminées sont réglées, et les alertes de prix préviennent une fois par jour.
   useEffect(() => {
     const t = Date.now(), day = dayKey(new Date(t))
@@ -377,6 +419,18 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       if (merged) setState(tracked({ ...state, owned, xp, log }, { merges: merged, levels }))
       return { merged, cards }
     }
+    const takeCards = (ids: string[]) => {
+      const need: Record<string, number> = {}
+      for (const id of ids) need[id] = (need[id] ?? 0) + 1
+      if (Object.entries(need).some(([id, k]) => (state.owned[id] ?? 0) - k < 1)) return false
+      const owned = { ...state.owned }
+      for (const [id, k] of Object.entries(need)) owned[id] -= k
+      setState({ ...state, owned })
+      return true
+    }
+    const spendGems = (k: number) => { if (k < 1 || state.gems < k) return false; setState(tracked({ ...state, gems: state.gems - k, gemsSpent: state.gemsSpent + k }, { gemsSpent: k })); return true }
+    const addGems = (k: number) => setState({ ...state, gems: state.gems + k })
+    const giveCards = (ids: string[]) => { const owned = { ...state.owned }; for (const id of ids) owned[id] = (owned[id] ?? 0) + 1; setState({ ...state, owned }) }
     const toggleFav = (heroId: string) => setState({ ...state, favs: state.favs.includes(heroId) ? state.favs.filter((x) => x !== heroId) : [...state.favs, heroId] })
     const toggleWish = (heroId: string) =>
       setState({ ...state, wish: state.wish.includes(heroId) ? state.wish.filter((x) => x !== heroId) : [...state.wish, heroId] })
@@ -491,6 +545,29 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setState(tracked(next, { wins: 1, bosses: 1, damage }))
       return { diff, allies, foes, events, win, first, card }
     }
+    const guildTries = TRIES_PER_DAY - (state.gtries.day === today ? state.gtries.n : 0)
+    const fightGuildBoss = () => {
+      const day = dayKey(new Date())
+      const used = state.gtries.day === day ? state.gtries.n : 0
+      if (teamNow.length === 0 || used >= TRIES_PER_DAY) return null
+      const { boss, minions } = colossusOf(new Date())
+      const diff = DIFFICULTIES[3]
+      const allies = teamNow.map((hid, i) => makeUnit(heroById(hid), cardState(heroById(hid), state.xp, state.owned, state.rebirths, state.awakened, teamNow).stats, 0, i))
+      // le boss de guilde a énormément de PV : on ne le bat pas seul, on lui retire un maximum de PV en 40 tours
+      const foes = colossusFoes(boss, minions, diff).slice(0, 1).map((u) => ({ ...u, maxHp: u.maxHp * 400, hp: u.maxHp * 400 }))
+      const { events } = simulate(allies, foes, Math.random)
+      const damage = events.filter((e) => e.actor.startsWith('0-')).reduce((n, e) => n + e.hits.reduce((m, h) => m + h.amount, 0), 0)
+      setState(tracked({ ...state, gtries: { day, n: used + 1 } }, { damage }))
+      return { result: { diff, allies, foes, events, win: false, first: false, card: null }, damage }
+    }
+    const claimReferral = (step: number, friends: number) => {
+      const r = REFERRAL[step - 1]
+      if (!r || friends < step || state.refClaimed.includes(step)) return false
+      let next: State = grant({ ...state, refClaimed: [...state.refClaimed, step] }, r.reward)
+      if (r.card) { const c = rollAtLeast(r.card, Math.random); next = { ...next, owned: { ...next.owned, [c.id]: (next.owned[c.id] ?? 0) + 1 }, notifs: notify(next.notifs, [['pull', `Parrainage : ${c.name} (${RARITIES[c.rarity].short}) rejoint ta collection.`]]) } }
+      setState(next)
+      return true
+    }
     const claimEvent = () => {
       const col = rollCol(state.col, new Date())
       if (col.final || !eventDone(col)) return null
@@ -504,15 +581,20 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     const arenaUnits = () => teamNow.map((hid, i) => makeUnit(heroById(hid), cardState(heroById(hid), state.xp, state.owned, 0, state.awakened, teamNow).stats, 0, i))
     const arenaPower = arenaUnits().reduce((s, u) => s + power(u), 0)
     const duelsLeft = DUELS_PER_DAY - (state.arena.day === today ? state.arena.duels : 0)
-    const duel = (rivalId: string): DuelResult | null => {
+    const duel = (rivalId: string, real?: RealOpponent): DuelResult | null => {
       const t = new Date()
       const a = state.arena
       const day = dayKey(t)
       const used = a.day === day ? a.duels : 0
-      const rival = rivalsFor(a.elo, a.seed).find((r) => r.id === rivalId)
-      if (!rival || teamNow.length === 0 || used >= DUELS_PER_DAY) return null
+      // un vrai joueur : son équipe affichée, avec le niveau de chaque carte (sans bonus de Renaissance, comme toi)
+      const rival: Rival | undefined = real
+        ? { id: `p-${real.id}`, name: `${real.name} #${real.no}`, elo: real.elo, heroes: real.team.map((x) => heroById(x.id)).filter(Boolean), scale: 1 }
+        : rivalsFor(a.elo, a.seed).find((r) => r.id === rivalId)
+      if (!rival || !rival.heroes.length || teamNow.length === 0 || used >= DUELS_PER_DAY) return null
       const allies = arenaUnits()
-      const foes = rivalUnits(rival, a.elo, arenaPower)
+      const foes = real
+        ? real.team.filter((x) => heroById(x.id)).map((x, i) => makeUnit(heroById(x.id), cardState(heroById(x.id), { [x.id]: xpForLevel(x.level) }, { [x.id]: 1 }, 0, x.level > LEVEL_CAP ? [x.id] : [], []).stats, 1, i))
+        : rivalUnits(rival, a.elo, arenaPower)
       const { events, win } = simulate(allies, foes, Math.random)
       const damage = events.filter((e) => e.actor.startsWith('0-')).reduce((n, e) => n + e.hits.reduce((m, h) => m + h.amount, 0), 0)
       const delta = eloChange(a.elo, rival.elo, win)
@@ -699,7 +781,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setArt((a) => Object.fromEntries(Object.entries(a).filter(([k]) => k !== heroId)))
       void removeArt(heroId)
     }
-    return { ...state, canAfford, summon, merge, mergeAll, dupes, useScroll, scrollsUseful, toggleFav, toggleWish, togglePin, fightSpire, tourneyFight, buyStall, quickSell, listAuction, setAlert, levelOf, buyOffer, claimGift, giftReady, duel, newRivals, claimPvp, duelsLeft, arenaPower, fightColossus, claimEvent, colTries, claimContract, claimDaily, claimChallenge, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
+    return { ...state, canAfford, summon, merge, mergeAll, dupes, useScroll, scrollsUseful, toggleFav, takeCards, spendGems, addGems, giveCards, toggleWish, togglePin, fightSpire, fightGuildBoss, guildTries, claimReferral, tourneyFight, buyStall, quickSell, listAuction, setAlert, levelOf, buyOffer, claimGift, giftReady, duel, newRivals, claimPvp, duelsLeft, arenaPower, fightColossus, claimEvent, colTries, claimContract, claimDaily, claimChallenge, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
   }, [state, customArt, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, now])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>

@@ -53,13 +53,19 @@ let started = false
 export const startOnline = () => {
   if (started) return
   started = true
+  // lien de parrainage : ?ref=NUMERO, gardé jusqu'à la première connexion
+  try { const ref = new URLSearchParams(window.location.search).get('ref'); if (ref && /^\d+$/.test(ref)) localStorage.setItem('anime-rift-ref', ref) } catch { /* rien */ }
   void supa.auth.getSession().then(async ({ data }) => {
     set({ session: data.session, ready: true })
     if (data.session) { await fetchMe(data.session.user.id); await adopt(data.session) }
   })
   supa.auth.onAuthStateChange((event, session) => {
     set({ session })
-    if (event === 'SIGNED_IN' && session) void fetchMe(session.user.id).then(() => adopt(session))
+    if (event === 'SIGNED_IN' && session) {
+      const ref = localStorage.getItem('anime-rift-ref')
+      if (ref) { localStorage.removeItem('anime-rift-ref'); void supa.rpc('set_referrer', { no: Number(ref) }) }
+      void fetchMe(session.user.id).then(() => adopt(session))
+    }
     if (event === 'SIGNED_OUT') { set({ me: null }); localStorage.removeItem(SYNC_KEY) }
   })
 }
@@ -121,3 +127,159 @@ export const myRank = async (me: OnlineProfile, order: 'score' | 'collection' | 
   const { count } = await supa.from('profiles').select('id', { count: 'exact', head: true }).gt(order, me[order])
   return (count ?? 0) + 1
 }
+
+// ═════════ Étape 2 : boîte de réception, social, échanges, marché, guildes, chat, parrainage ═════════
+export const myId = () => current.session?.user.id ?? null
+export type InboxItem = { id: number; gems: number; tickets: number; cards: string[]; note: string; created_at: string }
+export const fetchInbox = async () => {
+  if (!myId()) return [] as InboxItem[]
+  const { data } = await supa.from('inbox').select('*').eq('claimed', false).order('id')
+  return (data ?? []) as InboxItem[]
+}
+export const markInbox = (ids: number[]) => supa.from('inbox').update({ claimed: true }).in('id', ids)
+
+const rpc = async (fn: string, args: Record<string, unknown>) => {
+  const { data, error } = await supa.rpc(fn, args)
+  if (error) return error.message
+  return String(data ?? 'ok')
+}
+
+// Joueurs
+export type PublicPlayer = OnlineProfile & { last_seen: string; dm_policy: 'all' | 'friends' | 'nobody'; guild_id: string | null; team: { id: string; level: number }[] }
+export const isOnlineNow = (p: { last_seen: string }) => Date.now() - new Date(p.last_seen).getTime() < 5 * 60000
+export const findPlayers = async (q: string) => {
+  const m = q.trim().match(/^(.*?)#?(\d+)?$/)
+  let req = supa.from('profiles').select('*').neq('id', myId() ?? '').limit(10)
+  if (m?.[2]) req = req.eq('player_no', Number(m[2]))
+  else req = req.ilike('name', `%${q.trim()}%`)
+  const { data } = await req
+  return (data ?? []) as PublicPlayer[]
+}
+export const playersById = async (ids: string[]) => {
+  if (!ids.length) return [] as PublicPlayer[]
+  const { data } = await supa.from('profiles').select('*').in('id', ids)
+  return (data ?? []) as PublicPlayer[]
+}
+export const setDmPolicy = (p: 'all' | 'friends' | 'nobody') => supa.from('profiles').update({ dm_policy: p }).eq('id', myId() ?? '')
+export const heartbeat = () => { const id = myId(); if (id) void supa.from('profiles').update({ last_seen: new Date().toISOString() }).eq('id', id) }
+
+// Amis
+export type FriendRow = { user_id: string; friend_id: string; status: 'pending' | 'accepted' }
+export const fetchFriends = async () => {
+  const { data } = await supa.from('friends').select('*')
+  return (data ?? []) as FriendRow[]
+}
+export const askFriend = async (id: string) => { const { error } = await supa.from('friends').insert({ user_id: myId(), friend_id: id }); return error ? (/duplicate/.test(error.message) ? 'Demande déjà envoyée.' : error.message) : 'ok' }
+export const acceptFriend = (from: string) => supa.from('friends').update({ status: 'accepted' }).eq('user_id', from).eq('friend_id', myId() ?? '')
+export const removeFriend = async (other: string) => {
+  const me = myId() ?? ''
+  await supa.from('friends').delete().or(`and(user_id.eq.${me},friend_id.eq.${other}),and(user_id.eq.${other},friend_id.eq.${me})`)
+}
+
+// Messages
+export type Message = { id: number; from_id: string; to_id: string; body: string; read: boolean; created_at: string }
+export const fetchMessages = async () => {
+  const { data } = await supa.from('messages').select('*').order('id', { ascending: false }).limit(300)
+  return ((data ?? []) as Message[]).reverse()
+}
+export const sendMessage = async (to: string, body: string) => {
+  const { error } = await supa.from('messages').insert({ from_id: myId(), to_id: to, body: body.trim().slice(0, 500) })
+  return error ? (/row-level security/.test(error.message) ? 'Ce joueur n’accepte pas tes messages.' : error.message) : 'ok'
+}
+export const markRead = (from: string) => supa.from('messages').update({ read: true }).eq('from_id', from).eq('to_id', myId() ?? '').eq('read', false)
+
+// Échanges
+export type Trade = { id: number; from_id: string; to_id: string; give: string[]; want: string[]; status: 'open' | 'accepted' | 'refused' | 'cancelled'; created_at: string }
+export const fetchTrades = async () => {
+  const { data } = await supa.from('trades').select('*').order('id', { ascending: false }).limit(50)
+  return (data ?? []) as Trade[]
+}
+export const proposeTrade = async (to: string, give: string[], want: string[]) => {
+  const { error } = await supa.from('trades').insert({ from_id: myId(), to_id: to, give, want })
+  return error ? error.message : 'ok'
+}
+export const answerTrade = (id: number, accept: boolean) => rpc('answer_trade', { trade: id, accept })
+
+// Marché entre joueurs
+export type Listing = { id: number; seller: string; hero_id: string; level: number; kind: 'fixed' | 'auction'; price: number; best_bid: number | null; best_bidder: string | null; ends_at: string; status: string; buyer: string | null; created_at: string }
+export const fetchListings = async () => {
+  const { data } = await supa.from('listings').select('*').eq('status', 'open').order('created_at', { ascending: false }).limit(200)
+  return (data ?? []) as Listing[]
+}
+export const fetchMyListings = async () => {
+  const { data } = await supa.from('listings').select('*').or(`seller.eq.${myId()},buyer.eq.${myId()},best_bidder.eq.${myId()}`).order('id', { ascending: false }).limit(50)
+  return (data ?? []) as Listing[]
+}
+export const createListing = async (hero_id: string, level: number, kind: 'fixed' | 'auction', price: number, hours: number) => {
+  const { error } = await supa.from('listings').insert({ seller: myId(), hero_id, level, kind, price, ends_at: new Date(Date.now() + hours * 3600000).toISOString() })
+  return error ? error.message : 'ok'
+}
+export const buyListing = (id: number) => rpc('buy_listing', { listing: id })
+export const bidListing = (id: number, amount: number) => rpc('bid_listing', { listing: id, amount })
+export const closeListing = (id: number) => rpc('close_listing', { listing: id })
+
+// Guildes
+export type Guild = { id: string; name: string; tag: string; description: string; kind: 'open' | 'invite' | 'closed'; min_level: number; max_members: number; emblem: string; color: string; members: number; week_damage: number }
+export type GuildMember = { guild_id: string; user_id: string; role: 'chef' | 'adjoint' | 'membre'; joined_at: string }
+export const fetchGuilds = async (q = '') => {
+  let req = supa.from('guild_board').select('*').order('week_damage', { ascending: false }).limit(50)
+  if (q.trim()) req = req.or(`name.ilike.%${q.trim()}%,tag.ilike.%${q.trim()}%`)
+  const { data } = await req
+  return (data ?? []) as Guild[]
+}
+export const fetchMyGuild = async () => {
+  const id = myId()
+  if (!id) return null
+  const { data: m } = await supa.from('guild_members').select('*').eq('user_id', id).maybeSingle()
+  if (!m) return null
+  const [{ data: g }, { data: members }, { data: reqs }] = await Promise.all([
+    supa.from('guild_board').select('*').eq('id', m.guild_id).maybeSingle(),
+    supa.from('guild_members').select('*').eq('guild_id', m.guild_id),
+    supa.from('guild_requests').select('*').eq('guild_id', m.guild_id),
+  ])
+  return { guild: g as Guild, me: m as GuildMember, members: (members ?? []) as GuildMember[], requests: (reqs ?? []) as { user_id: string }[] }
+}
+export const weekDamage = async (guildId: string, week: string) => {
+  const { data } = await supa.from('guild_damage').select('*').eq('guild_id', guildId).eq('week', week)
+  return (data ?? []) as { user_id: string; damage: number; tries: number }[]
+}
+export const createGuild = (g: { name: string; tag: string; description: string; kind: string; min_level: number; max_members: number; emblem: string; color: string }) =>
+  rpc('create_guild', { g_name: g.name, g_tag: g.tag, g_desc: g.description, g_kind: g.kind, g_min: g.min_level, g_max: g.max_members, g_emblem: g.emblem, g_color: g.color })
+export const joinGuild = (id: string) => rpc('join_guild', { gid: id })
+export const leaveGuild = () => rpc('leave_guild', {})
+export const answerRequest = (gid: string, uid: string, accept: boolean) => rpc('answer_request', { gid, uid, accept })
+export const setMemberRole = (uid: string, role: string) => rpc('set_member_role', { uid, new_role: role })
+export const hitGuildBoss = (week: string, damage: number) => rpc('hit_guild_boss', { wk: week, dmg: Math.round(damage) })
+
+// Chat
+export type ChatLine = { id: number; room: string; user_id: string; body: string; card: string | null; created_at: string }
+export const fetchChat = async (room: string, after = 0) => {
+  const { data } = await supa.from('chat').select('*').eq('room', room).gt('id', after).order('id', { ascending: false }).limit(60)
+  return ((data ?? []) as ChatLine[]).reverse()
+}
+export const sendChat = async (room: string, body: string, card?: string) => {
+  const { error } = await supa.from('chat').insert({ room, user_id: myId(), body: body.trim().slice(0, 300), card: card ?? null })
+  return error ? error.message : 'ok'
+}
+
+// Parrainage
+export const setReferrer = (no: number) => rpc('set_referrer', { no })
+export const myReferrals = async () => { const { data } = await supa.rpc('my_referrals'); return Number(data ?? 0) }
+
+// Équipe affichée pour l'Arène (les autres joueurs l'affrontent)
+export const pushTeam = (team: { id: string; level: number }[]) => { const id = myId(); if (id) void supa.from('profiles').update({ team }).eq('id', id) }
+export const arenaOpponents = async (elo: number) => {
+  const { data } = await supa.from('profiles').select('*').neq('id', myId() ?? '').gte('arena', elo - 250).lte('arena', elo + 250).order('last_seen', { ascending: false }).limit(30)
+  return ((data ?? []) as PublicPlayer[]).filter((p) => Array.isArray(p.team) && p.team.length > 0)
+}
+let teamTimer: ReturnType<typeof setTimeout> | undefined
+let lastTeam = ''
+export const pushTeamLater = (team: { id: string; level: number }[]) => {
+  const key = JSON.stringify(team)
+  if (key === lastTeam || !myId()) return
+  clearTimeout(teamTimer)
+  teamTimer = setTimeout(() => { lastTeam = key; pushTeam(team) }, 4000)
+}
+
+// Ouvre les Réglages (où se trouve la connexion) depuis n'importe quel écran.
+export const openSettings = () => window.dispatchEvent(new Event('anime-rift:settings'))

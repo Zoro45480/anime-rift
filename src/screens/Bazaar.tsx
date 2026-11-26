@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { extraArt, uiArt } from '../assets/manifest'
+import { PlayerMarket } from './PlayerMarket'
+import { openSettings } from '../state/online'
 import { BANNERS } from '../data/banners'
 import { AFFINITY_LIST, type AffinityId } from '../data/affinities'
 import { AffinityIcon } from '../ui/AffinityIcon'
@@ -26,7 +28,7 @@ export const Spark = ({ trades }: { trades: Trade[] }) => {
   return <svg className="bz-spark" viewBox="0 0 100 30" preserveAspectRatio="none" aria-label="Évolution de tes prix"><polyline points={path} /></svg>
 }
 
-type Tab = 'buy' | 'sell' | 'auctions' | 'mine'
+type Tab = 'players' | 'buy' | 'sell' | 'auctions' | 'mine'
 type BzSort = 'value-desc' | 'price-asc' | 'rarity' | 'name'
 const BZ_SORTS: [BzSort, string][] = [['value-desc', 'Valeur décroissante'], ['price-asc', 'Valeur croissante'], ['rarity', 'Rareté'], ['name', 'Nom']]
 type Only = 'missing' | 'wish' | 'afford'
@@ -35,7 +37,7 @@ const tog = <T,>(list: T[], x: T) => (list.includes(x) ? list.filter((y) => y !=
 
 export const Bazaar = () => {
   const store = useStore()
-  const [tab, setTab] = useState<Tab>('buy')
+  const [tab, setTab] = useState<Tab>('players')
   const [now, setNow] = useState(() => Date.now())
   const [msg, setMsg] = useState('')
   const [q, setQ] = useState('')
@@ -100,16 +102,18 @@ export const Bazaar = () => {
         <div><p className="eyebrow">Le marché</p><h1>Bazar des Failles</h1><p>Achète, vends, mets aux enchères. Tes âmes : <Price v={store.gems} /></p></div>
       </header>
       <ul className="bz__rules">
-        <li>Marchands et acheteurs sont joués par le jeu (le marché entre joueurs demandera un serveur).</li>
+        <li>Onglet Joueurs : le vrai marché entre joueurs. Onglets Marchands et Vendre aux marchands : des personnages joués par le jeu.</li>
         <li>Vente immédiate : {Math.round(QUICK_SALE * 100)} % de la valeur du jour. Enchères : {AUCTION_HOURS} h, 5 à la fois.</li>
         <li>Seuls les doublons se vendent : ta dernière copie reste toujours dans ta collection.</li>
       </ul>
       <div className="coltabs__bar" role="tablist" aria-label="Sections du Bazar">
-        {([['buy', 'Acheter'], ['sell', 'Vendre'], ['auctions', `Enchères (${store.bazaar.auctions.length})`], ['mine', 'Mon Bazar']] as [Tab, string][]).map(([id, label]) => (
+        {([['players', 'Joueurs'], ['buy', 'Marchands'], ['sell', 'Vendre aux marchands'], ['auctions', `Enchères (${store.bazaar.auctions.length})`], ['mine', 'Mon Bazar']] as [Tab, string][]).map(([id, label]) => (
           <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>{label}</button>
         ))}
       </div>
       <p className="cd__notice" role="status">{msg}</p>
+
+      {tab === 'players' && <PlayerMarket onConnect={openSettings} />}
 
       {tab === 'buy' && <section className="bz-sec">
         <p className="cn__meta">L'étal du jour · nouveaux marchands dans <b>{clock(msToDayEnd(new Date(now)))}</b>{store.wish.length ? ' · les cartes de ta liste d’envies passent en premier' : ' · ajoute des cartes à tes envies pour les voir ici'}</p>

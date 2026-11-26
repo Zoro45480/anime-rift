@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { StoreProvider } from './state/store'
 import { Dock, TopBar, type QuestTab, type TabId } from './ui/Chrome'
 import { Home } from './screens/Home'
+import { Chat } from './ui/Chat'
 import { Community, type CommunityTab } from './screens/Community'
 import { CardViewerProvider } from './ui/CardViewer'
 import { ErrorBoundary } from './ui/ErrorBoundary'
@@ -42,11 +43,12 @@ export const App = () => {
         {tab === 'play' && <Play onRebirth={toRebirth} onProfile={toProfile} start={playAt} />}
         {tab === 'contracts' && <Contracts start={questAt} />}
         {tab === 'bazaar' && <Bazaar />}
-        {tab === 'community' && <Community start={communityAt} />}
+        {tab === 'community' && <Community start={communityAt} onProfile={toProfile} />}
         {tab === 'collection' && <Collection onSummon={() => go('banners')} tab={colTab} onTab={setColTab} />}
         </ErrorBoundary>
       </main>
       <Dock tab={tab} onTab={nav} profileOn={tab === 'collection' && colTab === 'profile'} />
+      <Chat />
       </CardViewerProvider>
     </StoreProvider>
   )

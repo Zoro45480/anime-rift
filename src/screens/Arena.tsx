@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { arenaOpponents, isOnlineNow, useOnline, type PublicPlayer } from '../state/online'
+import { heroById } from '../data/heroes'
 import { gateArt, uiArt } from '../assets/manifest'
 import { RARITIES } from '../data/rarities'
 import { ROUNDS, tourneyRival, DUELS_PER_DAY, LEAGUES, leagueOf, PVP_GOALS, rivalsFor, rollWeek, WIN_SOULS, type LeagueId } from '../game/arena'
@@ -20,6 +22,9 @@ export const Arena = ({ onBack }: { onBack: () => void }) => {
   const next = LEAGUES[LEAGUES.findIndex((l) => l.id === lg.id) + 1]
   const rivals = rivalsFor(a.elo, a.seed)
   const w = rollWeek(a, new Date())
+  const online = useOnline()
+  const [real, setReal] = useState<PublicPlayer[] | null>(null)
+  useEffect(() => { if (online.session) void arenaOpponents(a.elo).then(setReal) }, [online.session]) // eslint-disable-line react-hooks/exhaustive-deps
   const fight = (id: string) => { const r = store.duel(id); if (r) { setResult(r); setCup(false) } }
   const [cup, setCup] = useState(false)
   const today = dayKey(new Date())
@@ -45,10 +50,27 @@ export const Arena = ({ onBack }: { onBack: () => void }) => {
         </ul>
       </header>
 
-      <p className="ar__note">Tes rivaux sont des équipes contrôlées par le jeu, réglées sur ta force : un rival mieux classé que toi est plus fort. Les bonus de Renaissance ne comptent pas ici. Le jeu en ligne contre de vrais joueurs demandera un serveur.</p>
+      <p className="ar__note">Connecté, tu affrontes les équipes des vrais joueurs (leur équipe affichée, sans bonus de Renaissance). Les Rivaux du Rift, joués par le jeu, sont toujours là pour s'entraîner. Les bonus de Renaissance ne comptent pas ici.</p>
 
       <TeamPanel />
       <p className="ar__power">Puissance en arène (sans Renaissance) : <b>{n(store.arenaPower)}</b></p>
+
+      {online.session && <section className="ar-rivals">
+        <header><h3 className="sp-sub">Vrais joueurs</h3><span>Des joueurs proches de ta cote, avec leur équipe</span><button className="linkbtn" onClick={() => void arenaOpponents(a.elo).then(setReal)}>Actualiser</button></header>
+        {real === null ? <p className="ar__note">Recherche d'adversaires…</p> : real.length === 0 ? <p className="ar__note">Aucun autre joueur proche de ta cote pour l'instant : affronte les Rivaux du Rift en attendant.</p> : <ul>
+          {real.slice(0, 5).map((p) => {
+            const rl = leagueOf(p.arena)
+            return (
+              <li key={p.id} className="ar-rival ar-rival--real" style={{ ['--rl' as string]: rl.hue }}>
+                <Emblem id={rl.id} size={54} />
+                <div className="ar-rival__id"><b>{p.name} <i>#{p.player_no}</i></b><small>{rl.label} · {n(p.arena)} · {isOnlineNow(p) ? 'en ligne' : 'hors ligne'}</small>
+                  <span className="ar-rival__team">{p.team.map((t) => heroById(t.id)).filter(Boolean).map((h, i) => <i key={i} style={{ ['--rc' as string]: RARITIES[h.rarity].color }}>{RARITIES[h.rarity].short} {h.name} · Nv {p.team[i].level}</i>)}</span>
+                </div>
+                <button className="btn btn--gold ar-rival__go" disabled={store.duelsLeft < 1 || store.teamNow.length === 0} onClick={() => { const r = store.duel('', { id: p.id, name: p.name, no: p.player_no, elo: p.arena, team: p.team }); if (r) { setResult(r); setCup(false) } }}>Défier</button>
+              </li>
+            )
+          })}</ul>}
+      </section>}
 
       <section className="ar-rivals">
         <header><h3 className="sp-sub">Choisis ton rival</h3><span>Duels aujourd'hui : <b>{store.duelsLeft} / {DUELS_PER_DAY}</b></span><button className="linkbtn" onClick={store.newRivals}>Autres rivaux</button></header>

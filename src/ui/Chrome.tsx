@@ -28,6 +28,7 @@ export const TopBar = ({ onPlay, onSummon, onProfile, onGo, nav }: { onPlay: () 
   const [open, setOpen] = useState(false)
   const [shop, setShop] = useState(false)
   const online = useOnline()
+  useEffect(() => { const f = () => setSettings(true); window.addEventListener('anime-rift:settings', f); return () => window.removeEventListener('anime-rift:settings', f) }, [])
   const [settings, setSettings] = useState(false)
   const unread = notifs.filter((x) => !x.read).length
   const full = energyLeft >= ENERGY_MAX

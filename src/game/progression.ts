@@ -12,6 +12,8 @@ export const MAX_LEVEL = 100
 // XP nécessaire pour passer du niveau `level` au suivant.
 export const xpToNext = (level: number) => 60 + 40 * level
 
+// XP totale qu'il faut pour atteindre un niveau donné.
+export const xpForLevel = (level: number) => { let xp = 0; for (let l = 1; l < level; l++) xp += xpToNext(l); return xp }
 export const levelFromXp = (xp: number, cap = MAX_LEVEL): { level: number; into: number; need: number } => {
   let level = 1
   let rest = xp
