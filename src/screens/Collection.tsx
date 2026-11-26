@@ -1,10 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { iconArt } from '../assets/manifest'
+import { extraArt, iconArt } from '../assets/manifest'
+import { BANNERS } from '../data/banners'
 import { heroById, HEROES, ROLE_KINDS, roleKind, type Hero, type RoleKind } from '../data/heroes'
 import { AFFINITY_LIST, type AffinityId } from '../data/affinities'
 import { RARITIES, RARITY_ORDER, type RarityId } from '../data/rarities'
 import { fileToCardImage } from '../state/customArt'
-import { SCROLL_IDS, SCROLLS } from '../game/progression'
+import { levelFromXp, MAX_LEVEL, SCROLL_IDS, SCROLLS } from '../game/progression'
 import { SHOWCASE_MAX, useStore } from '../state/store'
 import { AffinityIcon } from '../ui/AffinityIcon'
 import { Card, LazyCard } from '../ui/Card'
@@ -77,8 +78,10 @@ const ArtPicker = ({ hero }: { hero: Hero }) => {
 
 // Anneau de progression de la collection.
 
-type OwnedFilter = 'all' | 'owned' | 'missing' | 'fav' | 'wish'
-const OWNED_LABELS: Record<OwnedFilter, string> = { all: 'Toutes', owned: 'Obtenues', missing: 'Manquantes', fav: '★ Favorites', wish: '♥ Envies' }
+type OwnedFilter = 'all' | 'owned' | 'missing' | 'dupes' | 'fav' | 'wish'
+const OWNED_LABELS: Record<OwnedFilter, string> = { all: 'Toutes', owned: 'Obtenues', missing: 'Manquantes', dupes: 'Doublons', fav: '★ Favorites', wish: '♥ Envies' }
+type SortId = 'rarity' | 'level' | 'copies' | 'name' | 'no'
+const SORTS: [SortId, string][] = [['rarity', 'Rareté'], ['level', 'Niveau'], ['copies', 'Exemplaires'], ['name', 'Nom'], ['no', 'Numéro']]
 
 // Ignore la casse et les accents, pour que « celestine » trouve « Célestine ».
 const fold = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
@@ -88,8 +91,10 @@ const toggle = <T,>(list: T[], item: T): T[] => (list.includes(item) ? list.filt
 const Cards = ({ onSummon }: { onSummon: () => void }) => {
   const { markVisit } = useStore()
   useEffect(() => { markVisit() }, []) // contrat du jour « passe voir ta collection »
-  const { owned, wish, favs, toggleFav, pinned, scrolls, remoteStatus, remoteArt, dupes, mergeAll } = useStore()
-  const [more, setMore] = useState(false) // filtres avancés (affinité, rôle)
+  const { xp, owned, wish, favs, toggleFav, pinned, scrolls, remoteStatus, remoteArt, dupes, mergeAll } = useStore()
+  const [more, setMore] = useState(true) // filtres avancés (univers, affinité, rôle, tri)
+  const [worlds, setWorlds] = useState<string[]>([]) // vide = tous
+  const [sort, setSort] = useState<SortId>('rarity')
   const [merged, setMerged] = useState('')
   const [query, setQuery] = useState('')
   const [rarities, setRarities] = useState<RarityId[]>([]) // vide = toutes
@@ -103,13 +108,18 @@ const Cards = ({ onSummon }: { onSummon: () => void }) => {
     (rarities.length === 0 || rarities.includes(h.rarity)) &&
     (affinities.length === 0 || affinities.includes(h.affinity)) &&
     (roles.length === 0 || roles.includes(roleKind(h.role))) &&
-    (ownedFilter === 'all' || (ownedFilter === 'wish' ? wish.includes(h.id) : ownedFilter === 'fav' ? favs.includes(h.id) : (ownedFilter === 'owned') === Boolean(owned[h.id]))) &&
+    (worlds.length === 0 || worlds.includes(h.world)) &&
+    (ownedFilter === 'all' || (ownedFilter === 'wish' ? wish.includes(h.id) : ownedFilter === 'fav' ? favs.includes(h.id) : ownedFilter === 'dupes' ? (owned[h.id] ?? 0) >= 2 : (ownedFilter === 'owned') === Boolean(owned[h.id]))) &&
     (q === '' || fold(`${h.name} ${h.title} ${h.world} ${h.role}`).includes(q)))
-  const filtering = q !== '' || rarities.length > 0 || affinities.length > 0 || roles.length > 0 || ownedFilter !== 'all'
-  const reset = () => { setQuery(''); setRarities([]); setAffinities([]); setRoles([]); setOwnedFilter('all') }
+  const filtering = q !== '' || rarities.length > 0 || affinities.length > 0 || roles.length > 0 || worlds.length > 0 || ownedFilter !== 'all' || sort !== 'rarity'
+  const reset = () => { setQuery(''); setRarities([]); setAffinities([]); setRoles([]); setWorlds([]); setOwnedFilter('all'); setSort('rarity') }
+  const lv = (h: Hero) => (owned[h.id] ? levelFromXp(xp[h.id] ?? 0, MAX_LEVEL).level : 0)
+  const order = (list: Hero[]) => sort === 'rarity' ? list : [...list].sort(sort === 'name' ? (a, b) => a.name.localeCompare(b.name, 'fr') : sort === 'no' ? (a, b) => a.no - b.no : sort === 'level' ? (a, b) => lv(b) - lv(a) || a.no - b.no : (a, b) => (owned[b.id] ?? 0) - (owned[a.id] ?? 0) || a.no - b.no)
 
   const all = RARITY_ORDER.map((id) => ({ rarity: RARITIES[id], cards: HEROES.filter((h) => h.rarity === id) })).filter((g) => g.cards.length > 0)
-  const groups = all.map((g) => ({ ...g, shown: g.cards.filter((h) => visible.includes(h)) })).filter((g) => g.shown.length > 0)
+  const groups = sort === 'rarity' || sort === 'level' || sort === 'copies'
+    ? all.map((g) => ({ ...g, shown: order(g.cards.filter((h) => visible.includes(h))) })).filter((g) => g.shown.length > 0)
+    : [{ rarity: { ...RARITIES.common, id: 'common' as RarityId, short: '', label: sort === 'name' ? 'Par nom (A → Z)' : 'Par numéro' }, cards: HEROES, shown: order(visible) }].filter((g) => g.shown.length > 0)
   const usedAffinities = AFFINITY_LIST.filter((a) => HEROES.some((h) => h.affinity === a.id))
 
   return (
@@ -142,7 +152,7 @@ const Cards = ({ onSummon }: { onSummon: () => void }) => {
             <label htmlFor="col-search" className="filters__label">Recherche</label>
             <input id="col-search" type="search" placeholder="Rechercher un perso, un univers…" value={query} onChange={(e) => setQuery(e.target.value)} />
           </div>
-          <button className={`filters__more ${more ? 'is-on' : ''}`} aria-expanded={more} onClick={() => setMore(!more)}>Filtres ☰{affinities.length + roles.length > 0 ? ` (${affinities.length + roles.length})` : ''}</button>
+          <button className={`filters__more ${more ? 'is-on' : ''}`} aria-expanded={more} onClick={() => setMore(!more)}>{more ? 'Moins de filtres' : 'Plus de filtres'} ☰{affinities.length + roles.length + worlds.length > 0 ? ` (${affinities.length + roles.length + worlds.length})` : ''}</button>
         </div>
 
         <div className="filters__row">
@@ -158,6 +168,16 @@ const Cards = ({ onSummon }: { onSummon: () => void }) => {
         </div>
 
         {more && <>
+        <div className="filters__row">
+          <span className="filters__label">Univers</span>
+          <div className="filters__chips">
+            {BANNERS.map((b) => (
+              <button key={b.id} className={`fchip fchip--world ${worlds.includes(b.world) ? 'is-on' : ''}`} style={{ ['--rc' as string]: b.hue }} aria-pressed={worlds.includes(b.world)} onClick={() => setWorlds(toggle(worlds, b.world))}>
+                <img src={extraArt(`emblem-${b.id}`)} alt="" />{b.world}<i>{HEROES.filter((h) => h.world === b.world && owned[h.id]).length}/{HEROES.filter((h) => h.world === b.world).length}</i>
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="filters__row">
           <span className="filters__label">Affinité</span>
           <div className="filters__chips">
@@ -181,6 +201,12 @@ const Cards = ({ onSummon }: { onSummon: () => void }) => {
           </div>
         </div>
 
+        <div className="filters__row">
+          <span className="filters__label">Trier par</span>
+          <div className="filters__chips" role="radiogroup" aria-label="Tri">
+            {SORTS.map(([id, label]) => <button key={id} role="radio" aria-checked={sort === id} className={`fchip ${sort === id ? 'is-on' : ''}`} onClick={() => setSort(id)}>{label}</button>)}
+          </div>
+        </div>
         </>}
 
         <div className="filters__row">

@@ -64,6 +64,8 @@ export const Rebirth = () => {
     <div className="rb">
       <section className="rb-hero">
         <img className="rb-hero__art" src={gateArt('rebirth')} alt="" />
+        {/* image d'animé (AniList) : Dragon Ball, où l'on revient toujours plus fort */}
+        {store.bannerArt.dragonball && <img className="rb-hero__anime" src={store.bannerArt.dragonball} alt="" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
         <span className="rb-hero__kanji" lang="ja" aria-hidden="true">転生</span>
         <p className="rb-hero__kicker">Anime Rift · Renaissance</p>
         <h1>Tout recommencer, plus fort</h1>
