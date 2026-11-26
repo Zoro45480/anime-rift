@@ -4,6 +4,7 @@ import type { Hero } from '../data/heroes'
 import { RARITIES } from '../data/rarities'
 import { CARD_ODDS, claimableTiers, PATH_XP, rollPath, seasonOf, TIER_REWARDS, TIER_XP, tierOf, TIERS, type PathReward } from '../game/riftpath'
 import { SCROLLS } from '../game/progression'
+import { CHALLENGES, CHALLENGE_TIMES, challengeState, msToDayEnd } from '../game/contracts'
 import { useStore } from '../state/store'
 import { Card } from '../ui/Card'
 import { Coin } from '../ui/Coin'
@@ -92,11 +93,33 @@ export const RiftPath = ({ now }: { now: Date }) => {
       </div>
       <p className="pt__legend"><span className="is-done">Récupéré</span><span className="is-ready">Prêt</span><span className="is-next">À venir</span></p>
 
+      <div className="pt__ch">
+        <h3>Défis du Chemin <small>chacun {CHALLENGE_TIMES} fois par jour · nouveaux dans {left(msToDayEnd(now))}</small></h3>
+        <ul>
+          {CHALLENGES.map((c) => {
+            const st = challengeState(c, store.quests, now)
+            return (
+              <li key={c.id} className={`ct ${st.ready ? 'is-ready' : ''} ${st.finished ? 'is-done' : ''}`}>
+                <div className="ct__main">
+                  <b>{c.title}</b>
+                  <div className="ct__bar"><i style={{ width: `${st.finished ? 100 : (st.value / c.target) * 100}%` }} /></div>
+                  <small>{st.finished ? 'Terminé pour aujourd’hui' : `${st.value.toLocaleString('fr-FR')} / ${c.target.toLocaleString('fr-FR')}`} · <span className="pt__times">{Array.from({ length: CHALLENGE_TIMES }, (_, i) => <i key={i} className={i < st.done ? 'is-on' : ''} />)}</span></small>
+                </div>
+                <span className="rw"><span className="pt__xpchip">+{c.xp} XP</span><span><Coin name="soul" size={18} />{c.gems}</span></span>
+                {st.finished ? <span className="ct__state">✓ {CHALLENGE_TIMES} / {CHALLENGE_TIMES}</span>
+                  : st.ready ? <button className="ct__claim" onClick={() => store.claimChallenge(c.id)}>Récupérer</button>
+                    : <span className="ct__state">{st.done} / {CHALLENGE_TIMES}</span>}
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+
       <div className="pt__how">
         <h3>Comment avancer</h3>
         <ul>
           {([['Récompense du jour', PATH_XP.daily], ['Contrat du jour récupéré', PATH_XP.dayContract], ['Bonus « tous les contrats du jour »', PATH_XP.dayBonus], ['Contrat de la semaine récupéré', PATH_XP.weekContract],
-            ["Contrat d'histoire récupéré", PATH_XP.storyContract], ['Combat gagné', PATH_XP.win], ['Invocation', PATH_XP.pull]] as [string, number][])
+            ["Contrat d'histoire récupéré", PATH_XP.storyContract], ['Combat gagné', PATH_XP.win], ['Invocation', PATH_XP.pull], ['Étage de La Spire', PATH_XP.floor]] as [string, number][])
             .map(([label, xp]) => <li key={label}><span>{label}</span><b>+{xp} XP</b></li>)}
         </ul>
         <p className="set__note">Un palier tous les {TIER_XP} XP. Tous les 10 paliers : une carte ({CARD_ODDS.map(([id, p]) => `${RARITIES[id].short} ${Math.round(p * 100)} %`).join(', ')}), 10 sceaux et un grand parchemin. À la fin de la saison, le chemin repart de zéro avec un nouveau thème : récupère tes récompenses avant !</p>

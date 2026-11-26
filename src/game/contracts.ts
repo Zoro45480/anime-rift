@@ -8,7 +8,7 @@ import { STAGES, STAGES_PER_ARC } from './saga'
 export type Reward = { gems?: number; energy?: number; tickets?: number; shards?: number; scrolls?: Partial<Record<ScrollId, number>> }
 export type Counter = 'pulls' | 'newCards' | 'featuredPull' | 'wins' | 'win3' | 'levels' | 'visit' | 'merges' | 'dailyAll' | 'gemsSpent' | 'damage' | 'bosses' | 'floors' | 'claims' | 'dailies'
 export type Counts = Partial<Record<Counter, number>>
-export type Period = { key: string; c: Counts; claimed: string[] }
+export type Period = { key: string; c: Counts; claimed: string[]; ch?: Record<string, number> } // ch : défis du Chemin récupérés aujourd'hui
 export type Quests = { day: Period; week: Period; story: string[]; life: Counts; daily: { last: string | null; streak: number } }
 export type Contract = { id: string; period: 'day' | 'week' | 'story'; title: string; target: number; reward: Reward; counter?: Counter; arc?: number; perfect?: boolean }
 
@@ -110,4 +110,27 @@ export const markClaimed = (c: Contract, q: Quests, now: Date): Quests => {
   if (c.period === 'week') return { ...r, week: { ...r.week, claimed: [...r.week.claimed, c.id] } }
   const next = { ...r, day: { ...r.day, claimed: [...r.day.claimed, c.id] } }
   return c.id === DAILY_BONUS.id ? addCounts(next, { dailyAll: 1 }, now) : next
+}
+
+// ───── Défis du Chemin : chacun se refait 3 fois par jour et fait avancer le Chemin du Rift ─────
+export type Challenge = { id: string; title: string; counter: Counter; target: number; xp: number; gems: number }
+export const CHALLENGE_TIMES = 3
+export const CHALLENGES: Challenge[] = [
+  { id: 'c-wins', title: 'Gagne 3 combats (tous modes)', counter: 'wins', target: 3, xp: 40, gems: 10 },
+  { id: 'c-floors', title: 'Monte 2 étages de La Spire', counter: 'floors', target: 2, xp: 50, gems: 10 },
+  { id: 'c-damage', title: 'Inflige 30 000 dégâts', counter: 'damage', target: 30000, xp: 40, gems: 10 },
+  { id: 'c-pulls', title: 'Fais 10 invocations', counter: 'pulls', target: 10, xp: 40, gems: 10 },
+  { id: 'c-merges', title: 'Fusionne 2 doublons', counter: 'merges', target: 2, xp: 30, gems: 10 },
+]
+// Combien de fois le défi a été récupéré aujourd'hui, et où en est la prochaine fois.
+export const challengeState = (c: Challenge, q: Quests, now: Date) => {
+  const r = roll(q, now)
+  const done = r.day.ch?.[c.id] ?? 0
+  const total = r.day.c[c.counter] ?? 0
+  const value = Math.max(0, Math.min(c.target, total - done * c.target))
+  return { done, value, ready: done < CHALLENGE_TIMES && value >= c.target, finished: done >= CHALLENGE_TIMES }
+}
+export const markChallenge = (c: Challenge, q: Quests, now: Date): Quests => {
+  const r = roll(q, now)
+  return { ...r, day: { ...r.day, ch: { ...(r.day.ch ?? {}), [c.id]: (r.day.ch?.[c.id] ?? 0) + 1 } } }
 }

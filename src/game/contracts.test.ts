@@ -55,3 +55,20 @@ describe('contrats', () => {
     expect(claimable(q, { '0-0': 3, '0-1': 3, '0-2': 3, '0-3': 3, '0-4': 3 }, now).map((c) => c.id)).toEqual([clear.id, perfect.id])
   })
 })
+
+describe('défis du Chemin', () => {
+  it('se refont 3 fois par jour, chaque fois avec un nouvel objectif', async () => {
+    const { CHALLENGES, challengeState, markChallenge, addCounts, emptyQuests } = await import('./contracts')
+    const now = new Date(2026, 10, 26, 12)
+    const c = CHALLENGES.find((x) => x.id === 'c-pulls')!
+    let q = addCounts(emptyQuests(), { pulls: 25 }, now)
+    expect(challengeState(c, q, now)).toMatchObject({ done: 0, value: 10, ready: true })
+    q = markChallenge(c, q, now)
+    expect(challengeState(c, q, now)).toMatchObject({ done: 1, value: 10, ready: true })
+    q = markChallenge(c, q, now)
+    expect(challengeState(c, q, now)).toMatchObject({ done: 2, value: 5, ready: false })
+    q = markChallenge(c, addCounts(q, { pulls: 5 }, now), now)
+    expect(challengeState(c, q, now).finished).toBe(true)
+    expect(challengeState(c, q, new Date(2026, 10, 27, 9)).done).toBe(0)
+  })
+})

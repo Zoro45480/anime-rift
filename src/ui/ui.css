@@ -1858,3 +1858,13 @@ h1.pf-name { font-size: clamp(34px, 8vw, 52px); line-height: 1; overflow-wrap: a
 .nt-toast__more { margin-left: auto; padding: 2px 8px; border-radius: 99px; font-style: normal; font-size: 12px; font-weight: 800; color: #fff; background: var(--nc); }
 .nt[role='button'] { cursor: pointer; }
 .nt[role='button']:hover { background: rgba(255, 255, 255, 0.04); }
+
+/* ───────── Défis du Chemin ───────── */
+.pt__ch { display: grid; gap: 10px; }
+.pt__ch h3 { font-size: 13px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-dim); }
+.pt__ch h3 small { display: block; margin-top: 3px; font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+.pt__ch ul { display: grid; gap: 8px; list-style: none; padding: 0; }
+.pt__times { display: inline-flex; gap: 3px; vertical-align: -1px; }
+.pt__times i { width: 10px; height: 10px; border-radius: 3px; background: rgba(255, 255, 255, 0.14); }
+.pt__times i.is-on { background: var(--season); box-shadow: 0 0 6px var(--season); }
+.pt__xpchip { padding: 4px 9px !important; color: #04101a !important; background: var(--season) !important; }

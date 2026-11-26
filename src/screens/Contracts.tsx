@@ -3,7 +3,7 @@ import { iconArt, uiArt } from '../assets/manifest'
 import { BANNERS } from '../data/banners'
 import { HEROES } from '../data/heroes'
 import { RARITY_ORDER } from '../data/rarities'
-import { DAILY_BONUS, DAILY_REWARDS, dailyContracts, dailyStatus, featuredWorld, isClaimed, msToDayEnd, msToWeekEnd, progress, STORY, WEEKLY, type Contract, type Reward } from '../game/contracts'
+import { CHALLENGES, challengeState, DAILY_BONUS, DAILY_REWARDS, dailyContracts, dailyStatus, featuredWorld, isClaimed, msToDayEnd, msToWeekEnd, progress, STORY, WEEKLY, type Contract, type Reward } from '../game/contracts'
 import { SCROLLS } from '../game/progression'
 import { useStore } from '../state/store'
 import { Card } from '../ui/Card'
@@ -79,7 +79,7 @@ export const Contracts = () => {
         <div><p className="eyebrow">Tes objectifs</p><h1>Contrats</h1><p>Accomplis-les en jouant, puis récupère tes récompenses.</p></div>
       </header>
       <div className="coltabs__bar" role="tablist" aria-label="Sections des contrats">
-        {([['daily', 'Chaque jour', st.claimed ? 0 : 1], ['contracts', 'Contrats', readyIn([...daily, DAILY_BONUS, ...WEEKLY, ...STORY])], ['rift', 'Chemin du Rift', claimableTiers(rollPath(store.path, now)).length], ['path', 'Parcours', 0]] as [Tab, string, number][]).map(([id, label, dot]) => (
+        {([['daily', 'Chaque jour', st.claimed ? 0 : 1], ['contracts', 'Contrats', readyIn([...daily, DAILY_BONUS, ...WEEKLY, ...STORY])], ['rift', 'Chemin du Rift', claimableTiers(rollPath(store.path, now)).length + CHALLENGES.filter((c) => challengeState(c, store.quests, now).ready).length], ['path', 'Parcours', 0]] as [Tab, string, number][]).map(([id, label, dot]) => (
           <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>{label}{dot > 0 && <i className="dot" aria-label={`${dot} à récupérer`} />}</button>
         ))}
       </div>
