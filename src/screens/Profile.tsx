@@ -5,7 +5,9 @@ import { BANNERS } from '../data/banners'
 import { HEROES } from '../data/heroes'
 import { RARITIES, RARITY_ORDER } from '../data/rarities'
 import { ACHIEVEMENTS, DEFAULT_TITLE, progressOf, unlockedTitles, type AchState } from '../game/achievements'
+import { canBuy, COSMETICS, cosmeticById, hasCosmetic, KIND_LABEL, type Cosmetic, type CosmeticKind } from '../game/cosmetics'
 import { accountLevel, cardState } from '../game/progression'
+import { Coin } from '../ui/Coin'
 import { STAGES } from '../game/saga'
 import { SHOWCASE_MAX, useStore } from '../state/store'
 import { Card, LazyCard } from '../ui/Card'
@@ -14,6 +16,7 @@ import { Avatar, FramedAvatar } from '../ui/Settings'
 
 const n = (x: number) => x.toLocaleString('fr-FR')
 const fold = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+export const BADGE_MAX = 6
 const COLORS = ['#16233f', '#3a2a66', '#5a1f4a', '#124a4a', '#1f4a2a', '#5c3418', '#4a1c22', '#23262e']
 
 // Réduit une image du joueur (photo ou bannière) avant de la garder dans la sauvegarde.
@@ -31,8 +34,47 @@ const shrink = (file: File, w: number, h: number) => new Promise<string>((resolv
   img.src = URL.createObjectURL(file)
 })
 
-type EditTab = 'id' | 'banner' | 'cards' | 'titles' | 'ach'
-const EDIT_TABS: [EditTab, string][] = [['id', 'Identité'], ['banner', 'Bannière'], ['cards', 'Cartes favorites'], ['titles', 'Titres'], ['ach', 'Succès']]
+// Apparence choisie par le joueur (ou celle par défaut).
+const useLook = () => {
+  const { profile, cosmetics, accountXp, rebirths } = useStore()
+  const level = accountLevel(accountXp, rebirths).level
+  const pick = (id: string, kind: CosmeticKind) => {
+    const c = cosmeticById(id)
+    return c && c.kind === kind && hasCosmetic(c, cosmetics, level, rebirths) ? c : undefined
+  }
+  const frame = pick(profile.frame, 'frame')?.value ?? levelStyle(level, rebirths)
+  const color = pick(profile.color, 'color')?.value ?? '#ffffff'
+  const effect = pick(profile.effect, 'effect')?.value ?? 'none'
+  const theme = pick(profile.theme, 'theme')?.value ?? '#7d5cff'
+  return { frame, color, effect, theme, level }
+}
+
+// Le pseudo, avec sa couleur et son effet.
+const Name = ({ tag: Tag = 'h1' }: { tag?: 'h1' | 'b' }) => {
+  const { profile } = useStore()
+  const look = useLook()
+  return <Tag className={`pf-name pf-name--${look.effect} ${look.color === 'rainbow' ? 'pf-name--rainbow' : ''}`} style={{ ['--nc' as string]: look.color === 'rainbow' ? '#fff' : look.color }}>{profile.name.trim() || 'Joueur'}</Tag>
+}
+
+// Carte d'aperçu du profil, dans la fenêtre de modification.
+const Preview = () => {
+  const { profile } = useStore()
+  const look = useLook()
+  return (
+    <div className="pe__card" style={{ ['--tc' as string]: look.theme }}>
+      <FramedAvatar size={130} style={look.frame} />
+      <div><Name tag="b" /><small>#{profile.tag}</small><span>{profile.title || DEFAULT_TITLE}</span></div>
+    </div>
+  )
+}
+
+const swatch = (c: Cosmetic) => c.kind === 'frame' ? <img src={extraArt(`frame-${c.value}`)} alt="" />
+  : c.kind === 'effect' ? <i className={`pf-name pf-name--${c.value}`} style={{ ['--nc' as string]: '#fff' }}>Aa</i>
+    : <i className="pe__dot" style={{ background: c.value === 'rainbow' ? 'conic-gradient(#ff5d7a, #ffd24d, #4be3a4, #5ee6ff, #b78bff, #ff5d7a)' : c.value }} />
+const need = (c: Cosmetic) => (c.needRebirth ? 'Après une Renaissance' : c.needLevel ? `Niveau ${c.needLevel} ou ${c.price} âmes` : `${c.price} âmes`)
+
+type EditTab = 'id' | 'banner' | 'cards' | 'look' | 'titles' | 'ach' | 'shop'
+const EDIT_TABS: [EditTab, string][] = [['id', 'Identité'], ['banner', 'Bannière'], ['cards', 'Cartes favorites'], ['look', 'Apparence'], ['titles', 'Titres'], ['ach', 'Succès'], ['shop', 'Boutique']]
 
 const Edit = ({ ach, start, onClose }: { ach: AchState; start: EditTab; onClose: () => void }) => {
   const store = useStore()
@@ -42,6 +84,11 @@ const Edit = ({ ach, start, onClose }: { ach: AchState; start: EditTab; onClose:
   const [query, setQuery] = useState('')
   const [error, setError] = useState('')
   const titles = unlockedTitles(ach)
+  const look = useLook()
+  const [kind, setKind] = useState<CosmeticKind>('frame')
+  const field = { frame: 'frame', color: 'color', effect: 'effect', theme: 'theme' } as const
+  const badges = ACHIEVEMENTS.filter((a) => progressOf(a, ach).done)
+  const toggleBadge = (id: string) => store.setProfile({ badges: profile.badges.includes(id) ? profile.badges.filter((x) => x !== id) : profile.badges.length < BADGE_MAX ? [...profile.badges, id] : profile.badges })
   const ownedCards = HEROES.filter((h) => store.owned[h.id]).sort((a, b) => RARITY_ORDER.indexOf(a.rarity) - RARITY_ORDER.indexOf(b.rarity) || a.no - b.no)
   const shown = ownedCards.filter((h) => fold(`${h.name} ${h.world}`).includes(fold(query.trim())))
   const pick = async (file: File | undefined, kind: 'avatar' | 'banner') => {
@@ -138,6 +185,60 @@ const Edit = ({ ach, start, onClose }: { ach: AchState; start: EditTab; onClose:
           </section>
         )}
 
+        {tab === 'look' && (
+          <section className="pe__sec">
+            <Preview />
+            <div className="pe__kinds" role="tablist" aria-label="Catégories d'apparence">
+              {(Object.keys(KIND_LABEL) as CosmeticKind[]).map((k) => {
+                const list = COSMETICS.filter((c) => c.kind === k)
+                return <button key={k} role="tab" aria-selected={kind === k} className={kind === k ? 'is-on' : ''} onClick={() => setKind(k)}>{KIND_LABEL[k]} <small>{list.filter((c) => hasCosmetic(c, store.cosmetics, look.level, store.rebirths)).length}/{list.length}</small></button>
+              })}
+            </div>
+            <ul className="pe__items">
+              {COSMETICS.filter((c) => c.kind === kind).map((c) => {
+                const ok = hasCosmetic(c, store.cosmetics, look.level, store.rebirths)
+                const worn = profile[field[kind]] === c.id
+                return (
+                  <li key={c.id}><button disabled={!ok} className={worn ? 'is-on' : ''} aria-pressed={worn} onClick={() => store.setProfile({ [field[kind]]: worn ? '' : c.id })}>
+                    {swatch(c)}<b>{c.name}</b><small>{worn ? 'Équipé' : ok ? 'Disponible' : need(c)}</small>
+                  </button></li>
+                )
+              })}
+            </ul>
+            <p className="set__note">{kind === 'frame' ? 'Sans cadre choisi, ton profil porte celui de ton niveau.' : 'Touche un objet équipé pour revenir à l’apparence par défaut.'}</p>
+            <h3>Badges épinglés <small>{profile.badges.length} / {BADGE_MAX}</small></h3>
+            {badges.length === 0 ? <p className="set__note">Chaque succès obtenu donne un badge. Tu n'en as pas encore.</p> : (
+              <ul className="pe__badges">
+                {badges.map((a) => <li key={a.id}><button className={profile.badges.includes(a.id) ? 'is-on' : ''} aria-pressed={profile.badges.includes(a.id)} onClick={() => toggleBadge(a.id)}><i lang="ja">{a.kanji}</i><span>{a.name}</span></button></li>)}
+              </ul>
+            )}
+          </section>
+        )}
+
+        {tab === 'shop' && (
+          <section className="pe__sec">
+            <Preview />
+            <p className="pe__wallet"><Coin name="soul" size={26} /><b>{n(store.gems)}</b> âmes</p>
+            <p className="set__note">Les objets se paient en âmes, gagnées en jouant. Les cadres se gagnent aussi avec ton niveau ; le cadre Arc-en-ciel ne s'obtient qu'avec une Renaissance.</p>
+            {(Object.keys(KIND_LABEL) as CosmeticKind[]).map((k) => {
+              const list = COSMETICS.filter((c) => c.price > 0 && !c.needRebirth && c.kind === k && !hasCosmetic(c, store.cosmetics, look.level, store.rebirths))
+              return list.length === 0 ? null : (
+                <div key={k}>
+                  <h3>{KIND_LABEL[k]}</h3>
+                  <ul className="pe__items">
+                    {list.map((c) => (
+                      <li key={c.id}><button disabled={!canBuy(c, store.cosmetics, look.level, store.rebirths, store.gems)} onClick={() => store.buyCosmetic(c.id)} aria-label={`Acheter ${c.name} pour ${c.price} âmes`}>
+                        {swatch(c)}<b>{c.name}</b><small className="pe__price"><Coin name="soul" size={16} />{n(c.price)}</small>
+                      </button></li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            })}
+            {COSMETICS.every((c) => c.price === 0 || c.needRebirth || hasCosmetic(c, store.cosmetics, look.level, store.rebirths)) && <p className="set__note">Tu possèdes déjà tout ce que vend la boutique.</p>}
+          </section>
+        )}
+
         {tab === 'titles' && (
           <section className="pe__sec">
             <h3>Titre affiché <small>{titles.length} / {ACHIEVEMENTS.length + 1} débloqués</small></h3>
@@ -205,6 +306,7 @@ type View = 'overview' | 'collection' | 'stats'
 export const Profile = ({ onCollection }: { onCollection: () => void }) => {
   const store = useStore()
   const { profile, owned, bannerArt } = store
+  const look = useLook()
   const [view, setView] = useState<View>('overview')
   const [edit, setEdit] = useState<EditTab | null>(null)
   const acc = accountLevel(store.accountXp, store.rebirths)
@@ -229,12 +331,12 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
 
   return (
     <div className="pf">
-      <section className="pf-hero">
+      <section className="pf-hero" style={{ ['--tc' as string]: look.theme }}>
         <Banner className="pf-hero__bg" />
         <div className="pf-hero__id">
-          <FramedAvatar size={190} style={levelStyle(acc.level, store.rebirths)} />
+          <FramedAvatar size={190} style={look.frame} />
           <div>
-            <h1>{profile.name.trim() || 'Joueur'}</h1>
+            <Name />
             <p className="pf-hero__chips"><span className="pf-title">{profile.title || DEFAULT_TITLE}</span><span>#{profile.tag}</span></p>
             <p className="pf-hero__bio">{profile.bio.trim() || 'Aucune bio pour l’instant. Présente-toi dans « Modifier le profil ».'}</p>
           </div>
@@ -245,8 +347,17 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
         </div>
         <div className="pf-hero__actions">
           <button className="cd-btn cd-btn--small" onClick={() => setEdit('id')}>✎ Modifier le profil</button>
-          <button className="cd-btn cd-btn--small" onClick={() => setEdit('titles')}>✦ Titres et succès</button>
+          <button className="cd-btn cd-btn--small" onClick={() => setEdit('look')}>✦ Apparence</button>
         </div>
+      </section>
+
+      <section className="pf-box">
+        <header className="pf-box__head"><h2>Badges épinglés <small>{profile.badges.filter((id) => ACHIEVEMENTS.some((a) => a.id === id && progressOf(a, ach).done)).length} / {BADGE_MAX}</small></h2><button className="linkbtn" onClick={() => setEdit('look')}>Choisir</button></header>
+        {profile.badges.length === 0 ? <p className="pf-empty">Épingle jusqu'à {BADGE_MAX} badges depuis « Apparence ». Chaque succès obtenu en donne un.</p> : (
+          <ul className="pf-badges">
+            {ACHIEVEMENTS.filter((a) => profile.badges.includes(a.id) && progressOf(a, ach).done).map((a) => <li key={a.id}><i lang="ja">{a.kanji}</i><b>{a.name}</b><span>{a.title}</span></li>)}
+          </ul>
+        )}
       </section>
 
       <section className="pf-box">

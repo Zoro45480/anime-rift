@@ -1526,3 +1526,55 @@ button.nx-gate { width: 100%; text-align: left; cursor: pointer; min-height: 210
 .ach h3 { display: flex; align-items: center; gap: 8px; }
 .ach h3 img { width: 34px; height: 34px; }
 @media (max-width: 480px) { .pf-hero__id { grid-template-columns: 1fr; justify-items: center; text-align: center; } .pf-hero__id .avatar-frame { margin: -10px 0 -20px; } .pf-hero__chips { justify-content: center; } .pf-hero { padding-top: 90px; } }
+
+/* ───────── Profil : apparence, badges, boutique ───────── */
+.pf-hero { --tc: #7d5cff; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--tc) 65%, rgba(255, 255, 255, 0.1)), 0 20px 50px -24px var(--tc); }
+.pf-hero__level .cd-bar i { background: linear-gradient(90deg, var(--tc), color-mix(in srgb, var(--tc) 50%, #fff)); }
+.pf-name { --nc: #fff; color: var(--nc); font-family: var(--font-display); font-style: italic; text-transform: uppercase; }
+h1.pf-name { font-size: clamp(34px, 8vw, 52px); line-height: 1; overflow-wrap: anywhere; text-shadow: 0 2px 0 #000; }
+.pf-name--glow { text-shadow: 0 0 14px var(--nc), 0 0 30px var(--nc), 0 2px 0 #000 !important; }
+.pf-name--pulse { animation: name-pulse 1.8s ease-in-out infinite; }
+.pf-name--flame { text-shadow: 0 -2px 6px #ffd24d, 0 -6px 14px #ff8a2a, 0 -12px 26px #ff3d2a, 0 2px 0 #000 !important; animation: name-flame 1.1s ease-in-out infinite alternate; }
+.pf-name--rainbow { background: linear-gradient(90deg, #ff5d7a, #ffd24d, #4be3a4, #5ee6ff, #b78bff, #ff5d7a); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent !important; text-shadow: none !important; animation: name-rainbow 4s linear infinite; }
+@keyframes name-pulse { 50% { text-shadow: 0 0 22px var(--nc), 0 0 44px var(--nc); transform: scale(1.03); } }
+@keyframes name-flame { to { text-shadow: 0 -3px 8px #ffd24d, 0 -9px 18px #ff8a2a, 0 -16px 34px #ff3d2a, 0 2px 0 #000; } }
+@keyframes name-rainbow { to { background-position: 200% 0; } }
+:root[data-fx='low'] .pf-name { animation: none !important; }
+.pf-badges, .pe__badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; list-style: none; padding: 0; }
+.pf-badges li { display: grid; grid-template-columns: auto 1fr; gap: 0 10px; align-items: center; padding: 10px 12px; border-radius: 14px; background: linear-gradient(120deg, rgba(255, 201, 77, 0.18), #000 70%); box-shadow: inset 0 0 0 1.5px rgba(255, 201, 77, 0.6); }
+.pf-badges i, .pe__badges i { grid-row: span 2; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; font-style: normal; font-size: 20px; font-weight: 800; color: #2a1800; background: radial-gradient(circle at 35% 30%, #fff3c4, #ffc94d 55%, #b9791d); box-shadow: 0 0 0 2px #2a1800, 0 0 14px rgba(255, 190, 70, 0.6); }
+.pf-badges b { font-size: 13.5px; color: #fff; }
+.pf-badges span { font-size: 12px; color: #ffc94d; }
+.pe__badges button { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; width: 100%; padding: 8px 10px; border-radius: 12px; text-align: left; font-size: 13px; font-weight: 700; color: var(--cream); background: #000; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14); }
+.pe__badges i { grid-row: auto; width: 36px; height: 36px; font-size: 17px; }
+.pe__badges button.is-on { box-shadow: inset 0 0 0 2px #ffc94d; background: rgba(255, 201, 77, 0.14); }
+.pe__card { --tc: #7d5cff; display: grid; grid-template-columns: auto 1fr; gap: 4px; align-items: center; padding: 6px 16px 6px 2px; border-radius: 18px; background: linear-gradient(120deg, color-mix(in srgb, var(--tc) 40%, #07080d), #07080d 75%); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--tc) 70%, transparent), 0 0 24px color-mix(in srgb, var(--tc) 25%, transparent); }
+.pe__card div { display: grid; gap: 3px; min-width: 0; }
+.pe__card b.pf-name { font-size: 28px; line-height: 1; overflow-wrap: anywhere; }
+.pe__card small { font-size: 13px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.pe__card div > span { justify-self: start; padding: 4px 12px; border-radius: 99px; font-size: 12.5px; font-weight: 800; color: #2a1800; background: linear-gradient(100deg, #ffe07a, #ffab2e); }
+.pe__kinds { display: flex; flex-wrap: wrap; gap: 6px; }
+.pe__kinds button { min-height: 44px; padding: 6px 14px; border-radius: 12px; font-size: 14px; font-weight: 800; color: var(--text-dim); background: #000; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16); }
+.pe__kinds button small { font-weight: 600; color: var(--text-faint); }
+.pe__kinds button.is-on { color: #fff; box-shadow: inset 0 0 0 1.5px #ff5d7a; }
+.pe__items { display: grid; grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); gap: 8px; list-style: none; padding: 0; }
+.pe__items button { display: grid; gap: 4px; justify-items: center; width: 100%; padding: 12px 8px; border-radius: 14px; background: #000; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14); text-align: center; }
+.pe__items img { width: 84px; height: 84px; object-fit: contain; }
+.pe__items i.pf-name { font-size: 38px; line-height: 84px; height: 84px; }
+.pe__dot { display: block; width: 58px; height: 58px; margin: 13px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.35); }
+.pe__items b { font-size: 14px; color: var(--cream); }
+.pe__items small { font-size: 11.5px; color: var(--text-dim); }
+.pe__items button:disabled { opacity: 0.5; cursor: not-allowed; }
+.pe__items button.is-on { box-shadow: inset 0 0 0 2px #ffc94d, 0 0 16px rgba(255, 190, 70, 0.35); }
+.pe__items button.is-on small { color: #ffc94d; font-weight: 800; }
+.pe__price { display: inline-flex; align-items: center; gap: 4px; font-size: 13.5px !important; font-weight: 800; color: #fff !important; }
+.pe__wallet { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-dim); }
+.pe__wallet b { font-family: var(--font-display); font-size: 26px; color: #fff; }
+
+/* Bouton profil dans la barre du haut */
+.bell--me { padding: 0; overflow: hidden; box-shadow: 0 0 0 2px #ffc94d, 0 0 12px rgba(255, 190, 70, 0.45); }
+.bell--me .avatar { width: 100% !important; height: 100% !important; box-shadow: none; font-size: 16px !important; }
+@media (max-width: 480px) { .wallet .lvl { --lh: 15px !important; } .wallet span, .wallet__energy { padding: 4px 9px 5px 7px !important; font-size: 12.5px; } .wallet small { display: none; } .topbar__in { gap: 4px; padding-left: 8px; padding-right: 8px; } .topbar .logo { transform: scale(0.78); transform-origin: left center; margin-right: -12px; } }
+@media (max-width: 370px) { .bell { width: 26px !important; height: 26px !important; margin-left: 0 !important; } .bell svg { width: 15px; height: 15px; } .wallet span, .wallet__energy { padding: 4px 6px 5px 5px !important; font-size: 11.5px; } .wallet .coin { width: 15px !important; height: 15px !important; } }
+@media (max-width: 370px) { .topbar .logo { display: none; } .topbar__in { justify-content: flex-end; } .wallet { flex-wrap: nowrap; } .wallet__lvl { flex: none; } }
+.bell--me .avatar { display: grid; }

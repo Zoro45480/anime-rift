@@ -6,6 +6,7 @@ import { pullMany } from '../game/gacha'
 import { ENERGY_OVER, ENERGY_REFILL, ENERGY_REFILL_COST, cardState, power, ENERGY_MAX, ENERGY_REGEN_MS, energyNow, ACCOUNT_XP, accountLevel, AWAKEN_COST, LEVEL_CAP, REBIRTH_SHARDS, levelFromXp, MAX_LEVEL, MERGE_XP, REBIRTH_KEEP, REBIRTH_LEVEL, REBIRTH_REFUND, REBIRTH_SEALS, REBIRTH_XP, SCROLLS, type ScrollId } from '../game/progression'
 import { makeUnit, simulate, type BattleEvent, type Unit } from '../game/battle'
 import { foeUnits, isUnlocked, rollDrops, SOULS_PER_STAR, stageById, starsFor, TEAM_SIZE, type Stage } from '../game/saga'
+import { canBuy, cosmeticById } from '../game/cosmetics'
 import { loadAllArt, removeArt, saveArt } from './customArt'
 import { loadBannerArt, loadRemoteArt, type RemoteStatus } from './remoteArt'
 
@@ -36,13 +37,15 @@ type State = {
   profile: Profile // pseudo, photo, bio, titre affiché et bannière du profil, gardés sur cet appareil
   pulls: number // invocations réalisées depuis le début
   wins: number // combats gagnés depuis le début
+  cosmetics: string[] // objets d'apparence achetés
   arcHeroes: Record<string, boolean> // cartes qui étaient dans l'équipe quand le boss de leur arc est tombé (titre d'arc)
   tutorialSeen: string[] // écrans dont l'explication de Kiri a déjà été lue
   awakened: string[] // cartes libérées (niveau maximum 100)
 }
 
 // bannière du profil : l'image d'un animé (identifiant de bannière), une couleur ou une image du joueur
-export type Profile = { name: string; avatar: string; bio: string; tag: string; title: string; banner: { kind: 'anime' | 'color' | 'image'; value: string } }
+// frame / color / effect / theme : identifiants d'objets d'apparence ('' = automatique ou par défaut) ; badges : succès épinglés
+export type Profile = { name: string; avatar: string; bio: string; tag: string; title: string; banner: { kind: 'anime' | 'color' | 'image'; value: string }; frame: string; color: string; effect: string; theme: string; badges: string[] }
 
 // Notification affichée sous la cloche de la barre du haut. Elles naissent d'événements réels de la partie.
 export type Notif = { id: number; t: number; kind: 'pull' | 'level' | 'saga' | 'drop' | 'rebirth' | 'free'; text: string; read: boolean }
@@ -59,6 +62,7 @@ type Store = State & {
   seeTutorial: (id: string) => void
   resetTutorial: () => void
   setProfile: (profile: Partial<Profile>) => void
+  buyCosmetic: (id: string) => boolean // achat en âmes ; l'objet est équipé aussitôt
   resetGame: () => void // efface toute la progression
   readNotifs: () => void // tout marquer comme lu
   clearNotifs: () => void
@@ -91,7 +95,7 @@ const LOG_MAX = 30
 // Dotation de départ du compte.
 export const START_GEMS = 600
 const START: State = {
-  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' } }, pulls: 0, wins: 0, arcHeroes: {}, tutorialSeen: [],
+  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' }, frame: '', color: '', effect: '', theme: '', badges: [] }, pulls: 0, wins: 0, cosmetics: [], arcHeroes: {}, tutorialSeen: [],
   tickets: 20, gems: START_GEMS, pity: Object.fromEntries(BANNERS.map((b) => [b.id, 0])), owned: {},
   xp: {}, scrolls: { small: 0, medium: 0, large: 0 }, wish: [], pinned: [], log: {},
 }
@@ -158,7 +162,14 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     const readNotifs = () => { if (state.notifs.some((x) => !x.read)) setState({ ...state, notifs: state.notifs.map((x) => ({ ...x, read: true })) }) }
     const clearNotifs = () => setState({ ...state, notifs: [] })
     const setProfile = (profile: Partial<Profile>) => setState({ ...state, profile: { ...state.profile, ...profile } })
-    const resetGame = () => setState({ ...START, profile: state.profile, tutorialSeen: state.tutorialSeen })
+    const buyCosmetic = (id: string) => {
+      const c = cosmeticById(id)
+      if (!c || !canBuy(c, state.cosmetics, accountLevel(state.accountXp, state.rebirths).level, state.rebirths, state.gems)) return false
+      // l'achat et l'équipement se font d'un seul geste (deux mises à jour séparées s'écraseraient)
+      setState({ ...state, gems: state.gems - c.price, gemsSpent: state.gemsSpent + c.price, cosmetics: [...state.cosmetics, id], profile: { ...state.profile, [c.kind]: id } })
+      return true
+    }
+    const resetGame = () => setState({ ...START, profile: state.profile, tutorialSeen: state.tutorialSeen, cosmetics: state.cosmetics })
 
     const summon = (banner: Banner, currency: Currency, count: number) => {
       if (!canAfford(currency, count)) return null
@@ -307,7 +318,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setArt((a) => Object.fromEntries(Object.entries(a).filter(([k]) => k !== heroId)))
       void removeArt(heroId)
     }
-    return { ...state, canAfford, summon, merge, useScroll, toggleWish, togglePin, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
+    return { ...state, canAfford, summon, merge, useScroll, toggleWish, togglePin, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
   }, [state, customArt, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, now])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>
