@@ -11,6 +11,7 @@ const KINDS: Record<Notif['kind'] | 'energy', { title: string; hue: string; icon
   saga: { title: 'La Saga', hue: '#2bc8d9', icon: gateArt('saga') },
   drop: { title: 'Parchemin obtenu', hue: '#a56bff', icon: iconArt('scroll-medium') },
   rebirth: { title: 'Renaissance', hue: '#ff9a4a', icon: gateArt('rebirth') },
+  ach: { title: 'Succès débloqué', hue: '#b78bff', icon: extraArt('dist-trophy') },
   quest: { title: 'Contrat accompli', hue: '#4be3a4', icon: uiArt('nav-contracts') },
   free: { title: 'Carte libérée', hue: '#7ff0ff', icon: iconArt('shard') },
   energy: { title: 'Énergie pleine', hue: '#ffd24d', icon: iconArt('bolt') },

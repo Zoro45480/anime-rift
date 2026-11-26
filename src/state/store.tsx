@@ -10,6 +10,7 @@ import { canBuy, cosmeticById } from '../game/cosmetics'
 import { addCounts, claimable, DAILY_REWARDS, dailyStatus, dayKey, emptyQuests, featuredWorld, markClaimed, roll, type Counts, type Quests, type Reward } from '../game/contracts'
 import { claimableTiers, PATH_XP, rollCard, rollPath, tierOf, tierReward, type PathState } from '../game/riftpath'
 import { applyRule, floor as spireFloor, spireFoes, type Floor } from '../game/spire'
+import { ACHIEVEMENTS, doneIds, METAL_LABEL } from '../game/achievements'
 import { loadAllArt, removeArt, saveArt } from './customArt'
 import { loadBannerArt, loadRemoteArt, type RemoteStatus } from './remoteArt'
 
@@ -42,6 +43,8 @@ type State = {
   pulls: number // invocations réalisées depuis le début
   wins: number // combats gagnés depuis le début
   cosmetics: string[] // objets d'apparence achetés
+  seen: { last: string; days: number } // jours de jeu différents (succès d'ancienneté)
+  achDone: string[] | null // succès déjà annoncés (null : ancienne sauvegarde, on les marque sans notification)
   spire: { best: number } // La Spire : plus haut étage gagné
   path: PathState // Chemin du Rift : saison, XP, paliers récupérés
   quests: Quests // contrats : compteurs du jour, de la semaine, à vie, série quotidienne
@@ -55,7 +58,7 @@ type State = {
 export type Profile = { name: string; avatar: string; bio: string; tag: string; title: string; banner: { kind: 'anime' | 'color' | 'image'; value: string }; frame: string; ornament: string; aura: string; color: string; effect: string; theme: string; badges: string[] }
 
 // Notification affichée sous la cloche de la barre du haut. Elles naissent d'événements réels de la partie.
-export type Notif = { id: number; t: number; kind: 'pull' | 'level' | 'saga' | 'drop' | 'rebirth' | 'free' | 'quest'; text: string; read: boolean }
+export type Notif = { id: number; t: number; kind: 'pull' | 'level' | 'saga' | 'drop' | 'rebirth' | 'free' | 'quest' | 'ach'; text: string; read: boolean }
 const NOTIF_MAX = 30
 
 // Ce qu'un combat a donné : de quoi le rejouer à l'écran et afficher les récompenses.
@@ -112,7 +115,7 @@ const LOG_MAX = 30
 // Dotation de départ du compte.
 export const START_GEMS = 600
 const START: State = {
-  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' }, frame: '', ornament: '', aura: '', color: '', effect: '', theme: '', badges: [] }, pulls: 0, wins: 0, cosmetics: [], quests: emptyQuests(), path: { season: 0, xp: 0, claimed: [] }, spire: { best: 0 }, arcHeroes: {}, tutorialSeen: [],
+  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' }, frame: '', ornament: '', aura: '', color: '', effect: '', theme: '', badges: [] }, pulls: 0, wins: 0, cosmetics: [], quests: emptyQuests(), path: { season: 0, xp: 0, claimed: [] }, spire: { best: 0 }, seen: { last: '', days: 0 }, achDone: [], arcHeroes: {}, tutorialSeen: [],
   tickets: 20, gems: START_GEMS, pity: Object.fromEntries(BANNERS.map((b) => [b.id, 0])), owned: {},
   xp: {}, scrolls: { small: 0, medium: 0, large: 0 }, wish: [], pinned: [], favs: [], log: {},
 }
@@ -126,7 +129,7 @@ const load = (): State => {
     const raw = localStorage.getItem(SAVE_KEY)
     if (!raw) return { ...START, profile: { ...START.profile, tag: newTag() } }
     const s = JSON.parse(raw) as Partial<State>
-    const merged = { ...START, ...s, pity: { ...START.pity, ...s.pity }, scrolls: { ...START.scrolls, ...s.scrolls }, profile: { ...START.profile, ...s.profile }, quests: { ...emptyQuests(), ...s.quests } }
+    const merged = { ...START, achDone: null, ...s, pity: { ...START.pity, ...s.pity }, scrolls: { ...START.scrolls, ...s.scrolls }, profile: { ...START.profile, ...s.profile }, quests: { ...emptyQuests(), ...s.quests } }
     return merged.profile.tag ? merged : { ...merged, profile: { ...merged.profile, tag: newTag() } }
   } catch {
     return START
@@ -154,6 +157,20 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     void loadRemoteArt((urls, fans, seiyu) => { setRemote(urls); setFans(fans); setSeiyu(seiyu) }).then(setRemoteStatus)
   }, [])
   useEffect(() => save(state), [state])
+  // Jours de jeu et succès : on compte un nouveau jour, et on annonce chaque succès qui vient d'être obtenu.
+  useEffect(() => {
+    const today = dayKey(new Date())
+    const done = doneIds(state)
+    const seenNew = state.seen.last !== today
+    const fresh = state.achDone ? done.filter((id) => !state.achDone!.includes(id)) : []
+    if (!seenNew && state.achDone && fresh.length === 0) return
+    setState((s) => {
+      const seen = s.seen.last !== today ? { last: today, days: s.seen.days + 1 } : s.seen
+      const news = ACHIEVEMENTS.filter((a) => fresh.includes(a.id))
+      const notifs = news.length ? [...news.map((a, i) => ({ id: Date.now() * 100 + i, t: Date.now(), kind: 'ach' as const, text: `Succès ${METAL_LABEL[a.metal].toLowerCase()} : ${a.name}. Titre « ${a.title} » débloqué.`, read: false })), ...s.notifs].slice(0, NOTIF_MAX) : s.notifs
+      return { ...s, seen, achDone: [...new Set([...(s.achDone ?? []), ...done])], notifs }
+    })
+  }, [state])
   const [now, setNow] = useState(Date.now()) // fait remonter l'énergie à l'écran
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 15000)
@@ -369,14 +386,14 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       const c = claimable(state.quests, state.saga, t).find((x) => x.id === id)
       if (!c) return false
       const xp = c.id === 'd-all' ? PATH_XP.dayBonus : c.period === 'day' ? PATH_XP.dayContract : c.period === 'week' ? PATH_XP.weekContract : PATH_XP.storyContract
-      setState(withPath({ ...grant(state, c.reward), quests: markClaimed(c, state.quests, t) }, xp))
+      setState(withPath({ ...grant(state, c.reward), quests: addCounts(markClaimed(c, state.quests, t), { claims: 1 }, t) }, xp))
       return true
     }
     const claimDaily = () => {
       const t = new Date()
       const st = dailyStatus(state.quests.daily, t)
       if (st.claimed) return false
-      setState(withPath({ ...grant(state, DAILY_REWARDS[st.day - 1]), quests: { ...roll(state.quests, t), daily: { last: dayKey(t), streak: st.day } } }, PATH_XP.daily))
+      setState(withPath({ ...grant(state, DAILY_REWARDS[st.day - 1]), quests: { ...addCounts(state.quests, { dailies: 1 }, t), daily: { last: dayKey(t), streak: st.day } } }, PATH_XP.daily))
       return true
     }
     const markVisit = () => { if (!roll(state.quests, new Date()).day.c.visit) setState(tracked(state, { visit: 1 })) }

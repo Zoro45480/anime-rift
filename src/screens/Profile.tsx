@@ -4,7 +4,7 @@ import { cosmeticArt, extraArt } from '../assets/manifest'
 import { BANNERS } from '../data/banners'
 import { HEROES } from '../data/heroes'
 import { RARITIES, RARITY_ORDER } from '../data/rarities'
-import { ACHIEVEMENTS, DEFAULT_TITLE, medalOf, progressOf, unlockedTitles, type AchState } from '../game/achievements'
+import { ACHIEVEMENTS, DEFAULT_TITLE, GROUPS, METAL_LABEL, medalOf, progressOf, unlockedTitles, type AchState } from '../game/achievements'
 import { canBuy, COSMETICS, cosmeticById, hasCosmetic, howToGet, RARITY_HUE, RARITY_LABEL, type Cosmetic, type CosmeticKind, type Owned, type Rarity } from '../game/cosmetics'
 import { accountLevel, cardState } from '../game/progression'
 import { Coin } from '../ui/Coin'
@@ -309,7 +309,7 @@ const Edit = ({ ach, start, onClose }: { ach: AchState; start: EditTab; onClose:
 
 const Achievements = ({ ach }: { ach: AchState }) => (
   <>
-    {(['Collection', 'Invocation', 'Combat', 'Maîtrise'] as const).map((group) => {
+    {GROUPS.map((group) => {
       const list = ACHIEVEMENTS.filter((a) => a.group === group)
       return (
         <div key={group} className="ach">
@@ -322,7 +322,7 @@ const Achievements = ({ ach }: { ach: AchState }) => (
                   <img className="ach__medal" src={cosmeticArt(medalOf(a))} alt="" />
                   <div><b>{a.name}</b><span>{a.goal}</span><div className="cd-bar"><i style={{ width: `${(p.value / a.target) * 100}%` }} /></div></div>
                   <em>{p.done ? '✓' : `${n(p.value)} / ${n(a.target)}`}</em>
-                  <small>Titre : {a.title}</small>
+                  <small><i className={`ach__rar ach__rar--${a.metal}`}>{METAL_LABEL[a.metal]}</i> Titre : {a.title}</small>
                 </li>
               )
             })}
@@ -355,7 +355,7 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
   const [view, setView] = useState<View>('overview')
   const [edit, setEdit] = useState<EditTab | null>(null)
   const acc = accountLevel(store.accountXp, store.rebirths)
-  const ach: AchState = { owned, xp: store.xp, saga: store.saga, awakened: store.awakened, rebirths: store.rebirths, pulls: store.pulls, wins: store.wins }
+  const ach: AchState = store
   const mine = HEROES.filter((h) => owned[h.id])
   const legends = mine.filter((h) => h.rarity === 'legend' || h.rarity === 'rift').length
   const stars = Object.values(store.saga).reduce((a, b) => a + b, 0)
@@ -406,7 +406,7 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
       </section>
 
       <section className="pf-box">
-        <h2>Distinctions</h2>
+        <header className="pf-box__head"><h2>Distinctions</h2><button className="linkbtn" onClick={() => setEdit('ach')}>Voir mes {ACHIEVEMENTS.length} succès</button></header>
         <ul className="pf-dist">
           <li style={{ ['--dc' as string]: '#ff9a4a' }}><img src={extraArt('dist-rebirth')} alt="" /><b>{store.rebirths}</b><span>Renaissance{store.rebirths > 1 ? 's' : ''}</span></li>
           <li style={{ ['--dc' as string]: '#ff7ab8' }}><img src={extraArt('dist-legend')} alt="" /><b>{legends}</b><span>Cartes LR et MR</span></li>

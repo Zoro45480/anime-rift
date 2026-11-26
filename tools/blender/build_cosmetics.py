@@ -299,14 +299,15 @@ def aura(key):
 AURAS = ['fire', 'frost', 'spark', 'shadow', 'rainbow', 'volt']
 
 # ───── Médailles des badges ─────
-METALS = {'bronze': (0.8, 0.45, 0.25), 'silver': (0.8, 0.84, 0.93), 'gold': GOLD}
-SHAPES = ['shield', 'portal', 'swords', 'gem']
+METALS = {'bronze': (0.8, 0.45, 0.25), 'silver': (0.8, 0.84, 0.93), 'gold': GOLD, 'prism': (0.86, 0.78, 1.0)}
+SHAPES = ['shield', 'portal', 'swords', 'gem', 'tower', 'scroll', 'orb', 'hourglass']
 
 
 def medal(shape, tier):
     m = metal_of(METALS[tier], 0.18)
     dark = mat('Dark', (0.05, 0.06, 0.12), metallic=0.6, rough=0.3)
-    accent = glow_of({'shield': (0.3, 0.9, 0.6), 'portal': (0.4, 0.65, 1.0), 'swords': (1.0, 0.3, 0.35), 'gem': (0.75, 0.4, 1.0)}[shape], 2.2)
+    accent = glow_of({'shield': (0.3, 0.9, 0.6), 'portal': (0.4, 0.65, 1.0), 'swords': (1.0, 0.3, 0.35), 'gem': (0.75, 0.4, 1.0),
+                      'tower': (1.0, 0.7, 0.2), 'scroll': (0.3, 0.95, 0.65), 'orb': (0.3, 0.85, 1.0), 'hourglass': (1.0, 0.85, 0.5)}[shape], 2.2)
     if shape == 'shield':
         cyl(m, (0, 0, 0.1), 1.0, 0.22, verts=6)
         cyl(dark, (0, -0.1, 0.1), 0.8, 0.1, verts=6)
@@ -324,13 +325,44 @@ def medal(shape, tier):
         for sx in (-1, 1):
             box(accent, (0, -0.14, 0), (0.1, 0.04, 1.35), rot=(0, sx * 0.75, 0), bevel=0.01)
             box(m, (sx * 0.34, -0.15, -0.37), (0.36, 0.05, 0.08), rot=(0, sx * 0.75, 0), bevel=0.01)
+    elif shape == 'tower':  # La Spire : une tour de disques empilés sur un médaillon
+        cyl(m, (0, 0.08, 0), 0.95, 0.18)
+        cyl(dark, (0, -0.02, 0), 0.8, 0.08)
+        for k in range(5):
+            r = 0.42 - k * 0.07
+            cyl(m if k % 2 == 0 else accent, (0, -0.18, -0.62 + k * 0.27), r, 0.24, rot=(0, 0, 0), r2=r - 0.05)
+        bpy.ops.mesh.primitive_cone_add(vertices=24, radius1=0.12, radius2=0, depth=0.35, location=(0, -0.18, 0.8)); add(accent)
+    elif shape == 'scroll':  # Contrats : parchemin roulé et cachet
+        cyl(m, (0, 0.08, 0), 0.95, 0.18)
+        cyl(dark, (0, -0.02, 0), 0.8, 0.08)
+        box(mat('Paper', (0.95, 0.88, 0.7), metallic=0.0, rough=0.5), (0, -0.14, 0), (0.95, 0.05, 0.7), bevel=0.02)
+        for z in (0.38, -0.38):
+            cyl(m, (0, -0.18, z), 0.09, 1.2, rot=(0, math.pi / 2, 0))
+        cyl(accent, (0.25, -0.22, -0.12), 0.17, 0.08)
+    elif shape == 'orb':  # Univers : un monde et son anneau
+        cyl(m, (0, 0.08, 0), 0.95, 0.18)
+        cyl(dark, (0, -0.02, 0), 0.8, 0.08)
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.45, location=(0, -0.3, 0), segments=48, ring_count=24); add(accent)
+        torus(m, 0.68, 0.05, y=-0.3, rot=(math.pi / 2 - 0.35, 0.5, 0))
+    elif shape == 'hourglass':  # Ancienneté : un sablier
+        cyl(m, (0, 0.08, 0), 0.95, 0.18)
+        cyl(dark, (0, -0.02, 0), 0.8, 0.08)
+        for z in (0.62, -0.62):
+            cyl(m, (0, -0.2, z), 0.45, 0.1, rot=(0, 0, 0))
+        cyl(accent, (0, -0.2, 0.3), 0.36, 0.55, rot=(0, 0, 0), r2=0.03)
+        cyl(accent, (0, -0.2, -0.3), 0.03, 0.55, rot=(0, 0, 0), r2=0.36)
+        for x in (-0.4, 0.4):
+            cyl(m, (x, -0.2, 0), 0.035, 1.2, rot=(0, 0, 0))
     else:
         torus(m, 0.9, 0.11)
         for k in range(4):
             blade(m, k * math.pi / 2 + math.pi / 4, 0.95, 0.3, 0.14)
         bpy.ops.mesh.primitive_cone_add(vertices=6, radius1=0.5, radius2=0, depth=0.85, location=(0, -0.05, 0.3)); add(accent, smooth=False)
         bpy.ops.mesh.primitive_cone_add(vertices=6, radius1=0.5, radius2=0, depth=0.6, location=(0, -0.05, -0.42), rotation=(math.pi, 0, 0)); add(accent, smooth=False)
-    if tier == 'gold':
+    if tier == 'prism':  # Légendaire : couronne d'étoiles et halo irisé
+        torus(glow_of((1.0, 0.45, 0.95), 2.5), 1.12, 0.03, y=0.05)
+        torus(glow_of((0.4, 0.95, 1.0), 2.5), 1.2, 0.02, y=0.06)
+    if tier in ('gold', 'prism'):
         for k in range(3):
             star(glow_of((1, 1, 0.8), 3.0), -0.4 + k * 0.4, 1.12 - abs(k - 1) * 0.12, 0.13, y=-0.1)
 

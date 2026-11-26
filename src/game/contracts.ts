@@ -6,7 +6,7 @@ import { STAGES, STAGES_PER_ARC } from './saga'
 // et compteurs à vie pour le Parcours. Fonctions pures : la date est toujours passée en argument.
 
 export type Reward = { gems?: number; energy?: number; tickets?: number; shards?: number; scrolls?: Partial<Record<ScrollId, number>> }
-export type Counter = 'pulls' | 'newCards' | 'featuredPull' | 'wins' | 'win3' | 'levels' | 'visit' | 'merges' | 'dailyAll' | 'gemsSpent' | 'damage' | 'bosses' | 'floors'
+export type Counter = 'pulls' | 'newCards' | 'featuredPull' | 'wins' | 'win3' | 'levels' | 'visit' | 'merges' | 'dailyAll' | 'gemsSpent' | 'damage' | 'bosses' | 'floors' | 'claims' | 'dailies'
 export type Counts = Partial<Record<Counter, number>>
 export type Period = { key: string; c: Counts; claimed: string[] }
 export type Quests = { day: Period; week: Period; story: string[]; life: Counts; daily: { last: string | null; streak: number } }

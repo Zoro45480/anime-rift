@@ -8,7 +8,7 @@ import os
 from PIL import Image
 
 ROOT = os.path.join(os.path.dirname(__file__), '..', 'src', 'assets')
-QUALITY = {'frames': 86, 'art': 88, 'logo': 90, 'icons': 92, 'ui': 90}
+QUALITY = {'frames': 86, 'art': 88, 'logo': 90, 'icons': 92, 'ui': 90, 'cosmetics': 90}
 
 before = after = 0
 for folder, quality in QUALITY.items():
