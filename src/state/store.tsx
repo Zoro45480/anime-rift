@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { BANNERS, BIG_PITY, COST, type Banner } from '../data/banners'
-import { heroById, type Hero } from '../data/heroes'
+import { HEROES, heroById, type Hero } from '../data/heroes'
+import { pushCloud, startOnline } from './online'
 import { isPityRarity, RARITIES } from '../data/rarities'
 import { pullMany } from '../game/gacha'
 import { ENERGY_OVER, ENERGY_REFILL, ENERGY_REFILL_COST, cardState, power, ENERGY_MAX, ENERGY_REGEN_MS, energyNow, ACCOUNT_XP, accountLevel, AWAKEN_COST, LEVEL_CAP, REBIRTH_SHARDS, levelFromXp, MAX_LEVEL, MERGE_XP, REBIRTH_KEEP, REBIRTH_LEVEL, REBIRTH_REFUND, REBIRTH_SEALS, REBIRTH_XP, SCROLLS, type ScrollId } from '../game/progression'
@@ -184,11 +185,19 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
   const [remoteStatus, setRemoteStatus] = useState<RemoteStatus>('loading')
 
   useEffect(() => {
+    startOnline()
     void loadAllArt().then(setArt)
     void loadBannerArt().then(setBannerArt)
     void loadRemoteArt((urls, fans, seiyu) => { setRemote(urls); setFans(fans); setSeiyu(seiyu) }).then(setRemoteStatus)
   }, [])
-  useEffect(() => save(state), [state])
+  useEffect(() => {
+    save(state)
+    // en ligne : la partie et le profil public partent vers le serveur (quelques secondes après le dernier changement)
+    const owned = HEROES.filter((h) => (state.owned[h.id] ?? 0) > 0)
+    pushCloud(state, { name: state.profile.name.trim() || 'Joueur', avatar: state.profile.avatar.startsWith('http') ? state.profile.avatar : '', title: state.profile.title, bio: state.profile.bio,
+      level: accountLevel(state.accountXp, state.rebirths).level, rebirths: state.rebirths, collection: owned.length, mr: owned.filter((h) => h.rarity === 'rift').length, lr: owned.filter((h) => h.rarity === 'legend').length,
+      achievements: doneIds(state).length, spire: state.spire.best, arena: state.arena.best })
+  }, [state])
   // Jours de jeu et succès : on compte un nouveau jour, et on annonce chaque succès qui vient d'être obtenu.
   useEffect(() => {
     const today = dayKey(new Date())

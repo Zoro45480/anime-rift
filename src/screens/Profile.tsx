@@ -4,6 +4,7 @@ import { cosmeticArt, extraArt } from '../assets/manifest'
 import { BANNERS } from '../data/banners'
 import { HEROES } from '../data/heroes'
 import { RARITIES, RARITY_ORDER } from '../data/rarities'
+import { useOnline } from '../state/online'
 import { ACHIEVEMENTS, DEFAULT_TITLE, GROUPS, METAL_LABEL, medalOf, progressOf, unlockedTitles, type AchState } from '../game/achievements'
 import { canBuy, COSMETICS, cosmeticById, hasCosmetic, howToGet, RARITY_HUE, RARITY_LABEL, type Cosmetic, type CosmeticKind, type Owned, type Rarity } from '../game/cosmetics'
 import { accountLevel, cardState } from '../game/progression'
@@ -85,11 +86,12 @@ const Photo = ({ size }: { size: number }) => {
 // Carte d'aperçu du profil, dans la fenêtre de modification.
 const Preview = () => {
   const { profile } = useStore()
+  const playerNo = usePlayerNo()
   const look = useLook()
   return (
     <div className="pe__card" style={{ ['--tc' as string]: look.theme }}>
       <Photo size={150} />
-      <div><Name tag="b" /><small>#{profile.tag}</small><TitlePlate title={profile.title || DEFAULT_TITLE} small /></div>
+      <div><Name tag="b" /><small>#{playerNo(profile.tag)}</small><TitlePlate title={profile.title || DEFAULT_TITLE} small /></div>
     </div>
   )
 }
@@ -352,6 +354,8 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
   const store = useStore()
   const { profile, owned, bannerArt } = store
   const look = useLook()
+  const online = useOnline()
+  const playerNo = usePlayerNo()
   const [view, setView] = useState<View>('overview')
   const [edit, setEdit] = useState<EditTab | null>(null)
   const acc = accountLevel(store.accountXp, store.rebirths)
@@ -383,7 +387,7 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
           <Photo size={220} />
           <div>
             <Name />
-            <p className="pf-hero__chips"><TitlePlate title={profile.title || DEFAULT_TITLE} /><span>#{profile.tag}</span></p>
+            <p className="pf-hero__chips"><TitlePlate title={profile.title || DEFAULT_TITLE} /><span title={online.me ? 'Ton numéro de joueur : l’ordre dans lequel tu as rejoint le jeu' : 'Crée un compte (Réglages) pour recevoir ton vrai numéro de joueur'}>#{playerNo(profile.tag)}</span></p>
             <p className="pf-hero__bio">{profile.bio.trim() || 'Aucune bio pour l’instant. Présente-toi dans « Modifier le profil ».'}</p>
           </div>
         </div>
@@ -492,3 +496,6 @@ const Price = ({ text }: { text: string }) => {
   const parts = text.split(/([\d\s\u202f]+) âmes/)
   return <span className="pe__cost">{parts.map((x, i) => (i % 2 ? <span key={i} className="pe__cost-n">{x.trim()}<Coin name="soul" size={15} /></span> : x))}</span>
 }
+
+// Numéro de joueur : celui du serveur quand on est connecté (ordre d'inscription), sinon le numéro local.
+const usePlayerNo = () => { const { me } = useOnline(); return (local: string) => (me ? String(me.player_no) : local) }

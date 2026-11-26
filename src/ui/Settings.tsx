@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { signIn, signOut, signUp, useOnline } from '../state/online'
 import { createPortal } from 'react-dom'
 import { cosmeticArt, extraArt } from '../assets/manifest'
 import { accountLevel } from '../game/progression'
@@ -159,6 +160,7 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
           </button>
         </section>
 
+        <AccountCard />
         <SaveCard />
 
         <section className="set-card set__danger" style={{ ['--sc' as string]: '#ff5d7a' }}>
@@ -213,6 +215,50 @@ const SaveCard = () => {
         <button className="cd-btn cd-btn--small" type="submit" disabled={!paste.trim()}>Charger</button>
       </form>
       <p className="set__note" role="status">{msg || 'Attention : charger une sauvegarde remplace la partie de cet appareil.'}</p>
+    </section>
+  )
+}
+
+// Compte en ligne : la partie est sauvegardée sur le serveur et retrouvée sur tous les appareils.
+const AccountCard = () => {
+  const { session, me, ready } = useOnline()
+  const store = useStore()
+  const [mode, setMode] = useState<'in' | 'up'>('up')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [msg, setMsg] = useState('')
+  const [busy, setBusy] = useState(false)
+  const submit = async (e: FormEvent) => {
+    e.preventDefault()
+    setBusy(true)
+    const r = mode === 'up' ? await signUp(email.trim(), password, store.profile.name.trim() || 'Joueur') : await signIn(email.trim(), password)
+    setMsg(r.message); setBusy(false)
+  }
+  return (
+    <section className="set-card set-account" style={{ ['--sc' as string]: '#7d9bff' }}>
+      <header className="set-card__head"><img src={extraArt('set-profile')} alt="" /><h3>Compte en ligne</h3></header>
+      {!ready ? <p className="set__note">Connexion au serveur…</p> : session ? (
+        <>
+          <p className="set-account__me"><b>{me?.name ?? 'Joueur'}</b> <span>#{me?.player_no ?? '…'}</span></p>
+          <p className="set__note">Connecté avec {session.user.email}. Ta partie est sauvegardée en ligne toute seule, et tu la retrouves en te connectant sur un autre appareil. Ton numéro de joueur dit dans quel ordre tu as rejoint le jeu.</p>
+          <button className="cd-btn cd-btn--small" onClick={() => void signOut()}>Se déconnecter</button>
+        </>
+      ) : (
+        <>
+          <p className="set__note">Crée un compte pour sauvegarder ta partie en ligne, recevoir ton numéro de joueur et apparaître dans le Hall of Fame.</p>
+          <div className="set__seg set__seg--two" role="radiogroup" aria-label="Compte">
+            <button role="radio" aria-checked={mode === 'up'} className={mode === 'up' ? 'is-on' : ''} onClick={() => setMode('up')}><b>Créer un compte</b></button>
+            <button role="radio" aria-checked={mode === 'in'} className={mode === 'in' ? 'is-on' : ''} onClick={() => setMode('in')}><b>Se connecter</b></button>
+          </div>
+          <form className="set-account__form" onSubmit={(e) => void submit(e)}>
+            <input className="set__input" type="email" required autoComplete="email" placeholder="Adresse e-mail" aria-label="Adresse e-mail" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <input className="set__input" type="password" required minLength={6} autoComplete={mode === 'up' ? 'new-password' : 'current-password'} placeholder="Mot de passe (6 caractères ou plus)" aria-label="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <button className="btn btn--gold" type="submit" disabled={busy}>{busy ? '…' : mode === 'up' ? 'Créer mon compte' : 'Me connecter'}</button>
+          </form>
+          {mode === 'up' && <p className="set__note">Ton pseudo actuel ({store.profile.name.trim() || 'Joueur'}) sera celui du compte. Ta partie de cet appareil part avec toi.</p>}
+        </>
+      )}
+      {msg && <p className="cd__notice" role="status">{msg}</p>}
     </section>
   )
 }
