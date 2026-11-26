@@ -7,7 +7,7 @@ import { ENERGY_OVER, ENERGY_REFILL, ENERGY_REFILL_COST, cardState, power, ENERG
 import { makeUnit, simulate, type BattleEvent, type Unit } from '../game/battle'
 import { foeUnits, isUnlocked, rollDrops, SOULS_PER_STAR, stageById, starsFor, TEAM_SIZE, type Stage } from '../game/saga'
 import { loadAllArt, removeArt, saveArt } from './customArt'
-import { loadRemoteArt, type RemoteStatus } from './remoteArt'
+import { loadBannerArt, loadRemoteArt, type RemoteStatus } from './remoteArt'
 
 export type Currency = 'ticket' | 'gems'
 
@@ -72,6 +72,7 @@ type Store = State & {
   rebirth: (keep: string[]) => boolean // Renaissance : repart du niveau 1 en gardant ces cartes
   remoteArt: Record<string, string> // adresses des portraits officiels sur AniList, par identifiant de personnage
   remoteStatus: RemoteStatus
+  bannerArt: Record<string, string> // image de fond de chaque bannière (bannière officielle de l'animé sur AniList)
   remoteSeiyu: Record<string, string> // voix japonaise de chaque personnage, d'après AniList
   remoteFans: Record<string, number> // popularité de chaque personnage sur AniList (nombre de favoris)
   customArt: Record<string, string> // images personnelles du joueur, par identifiant de personnage
@@ -115,10 +116,12 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
   const [remoteArt, setRemote] = useState<Record<string, string>>({})
   const [remoteFans, setFans] = useState<Record<string, number>>({})
   const [remoteSeiyu, setSeiyu] = useState<Record<string, string>>({})
+  const [bannerArt, setBannerArt] = useState<Record<string, string>>({})
   const [remoteStatus, setRemoteStatus] = useState<RemoteStatus>('loading')
 
   useEffect(() => {
     void loadAllArt().then(setArt)
+    void loadBannerArt().then(setBannerArt)
     void loadRemoteArt((urls, fans, seiyu) => { setRemote(urls); setFans(fans); setSeiyu(seiyu) }).then(setRemoteStatus)
   }, [])
   useEffect(() => save(state), [state])
@@ -296,8 +299,8 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setArt((a) => Object.fromEntries(Object.entries(a).filter(([k]) => k !== heroId)))
       void removeArt(heroId)
     }
-    return { ...state, canAfford, summon, merge, useScroll, toggleWish, togglePin, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, customArt, setCustomArt, clearCustomArt }
-  }, [state, customArt, remoteArt, remoteStatus, remoteFans, remoteSeiyu, now])
+    return { ...state, canAfford, summon, merge, useScroll, toggleWish, togglePin, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
+  }, [state, customArt, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, now])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>
 }

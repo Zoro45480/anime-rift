@@ -52,3 +52,26 @@ export const loadRemoteArt = async (onUrls: (urls: Record<string, string>, fans:
   try { localStorage.setItem(KEY, JSON.stringify({ t: Date.now(), urls, fans, seiyu })) } catch { /* pas de mémoire locale : on redemandera */ }
   return 'ok'
 }
+
+// Image de fond de chaque bannière : la bannière officielle de l'animé sur AniList, chargée par le navigateur du joueur.
+export const BANNER_MEDIA: Record<string, number> = { naruto: 1735, onepiece: 21, dragonball: 813, bleach: 269, demonslayer: 101922, jujutsu: 113415, hunter: 11061 }
+const BANNER_KEY = 'anime-rift-anilist-banners-v1'
+export const loadBannerArt = async (): Promise<Record<string, string>> => {
+  try {
+    const c = JSON.parse(localStorage.getItem(BANNER_KEY) ?? 'null') as { t: number; urls: Record<string, string> } | null
+    if (c && Date.now() - c.t < WEEK) return c.urls
+  } catch { /* pas de mémoire locale */ }
+  try {
+    const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ query: 'query($ids:[Int]){Page(perPage:20){media(id_in:$ids){id bannerImage}}}', variables: { ids: Object.values(BANNER_MEDIA) } }) })
+    if (!res.ok) return {}
+    const json = (await res.json()) as { data: { Page: { media: { id: number; bannerImage: string | null }[] } } }
+    const urls: Record<string, string> = {}
+    for (const [banner, id] of Object.entries(BANNER_MEDIA)) {
+      const url = json.data.Page.media.find((m) => m.id === id)?.bannerImage
+      if (url) urls[banner] = url
+    }
+    try { localStorage.setItem(BANNER_KEY, JSON.stringify({ t: Date.now(), urls })) } catch { /* on redemandera */ }
+    return urls
+  } catch { return {} }
+}

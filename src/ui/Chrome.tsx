@@ -1,6 +1,7 @@
 import { accountLevel, ENERGY_MAX } from '../game/progression'
 import { LevelBadge } from './LevelBadge'
 import { Settings } from './Settings'
+import { NotifPanel, NotifToast } from './Notifs'
 import { useState } from 'react'
 import { useStore } from '../state/store'
 import { Coin } from './Coin'
@@ -24,7 +25,6 @@ export const TopBar = ({ onPlay, onSummon }: { onPlay: () => void; onSummon: () 
   const unread = notifs.filter((x) => !x.read).length
   const full = energyLeft >= ENERGY_MAX
   const toggle = () => { if (open) readNotifs(); setOpen(!open) } // lues quand on referme le panneau
-  const ago = (t: number) => { const m = Math.floor((Date.now() - t) / 60000); return m < 1 ? 'à l’instant' : m < 60 ? `il y a ${m} min` : m < 1440 ? `il y a ${Math.floor(m / 60)} h` : `il y a ${Math.floor(m / 1440)} j` }
   return (
     <header className="topbar">
       <div className="topbar__in">
@@ -44,16 +44,8 @@ export const TopBar = ({ onPlay, onSummon }: { onPlay: () => void; onSummon: () 
         </div>
       </div>
       {settings && <Settings onClose={() => setSettings(false)} />}
-      {open && (
-        <div className="notifs" role="dialog" aria-label="Notifications">
-          <header><h2>Notifications</h2>{notifs.length > 0 && <button className="linkbtn" onClick={clearNotifs}>Tout effacer</button>}<button className="notifs__close" onClick={toggle} aria-label="Fermer">×</button></header>
-          <ul>
-            {full && <li className="notifs--energy"><b>Énergie pleine</b><span>Tes {ENERGY_MAX} éclairs sont prêts : La Saga t'attend.</span></li>}
-            {notifs.map((x) => <li key={x.id} className={`notifs--${x.kind} ${x.read ? '' : 'is-new'}`}><span>{x.text}</span><time>{ago(x.t)}</time></li>)}
-            {notifs.length === 0 && !full && <li className="notifs__empty">Rien de nouveau. Les gros tirages, les niveaux, les arcs terminés et les parchemins rares s'afficheront ici.</li>}
-          </ul>
-        </div>
-      )}
+      {open && <NotifPanel notifs={notifs} full={full} onClear={clearNotifs} onClose={toggle} />}
+      <NotifToast notifs={notifs} muted={open} />
     </header>
   )
 }

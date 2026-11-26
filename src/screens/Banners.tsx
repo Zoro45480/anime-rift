@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { BANNERS, COST, PITY_MAX } from '../data/banners'
 import { heroById, type Hero } from '../data/heroes'
 import { RARITIES, RARITY_ORDER } from '../data/rarities'
-import { heroArt, iconArt } from '../assets/manifest'
+import { extraArt, heroArt, iconArt } from '../assets/manifest'
 import { HEROES } from '../data/heroes'
 import { isPityRarity } from '../data/rarities'
 import { LEVEL_CAP, MAX_LEVEL } from '../game/progression'
@@ -78,6 +78,7 @@ export const Banners = ({ onRebirth }: { onRebirth: () => void }) => {
       {focus && <button className="summon__back" onClick={() => { setFocus(false); window.scrollTo({ top: 0 }) }}>← Toutes les invocations</button>}
       {/* Affiche de la bannière */}
       <section className="poster" key={banner.id}>
+        {store.bannerArt[banner.id] && <img className="poster__bg" src={store.bannerArt[banner.id]} alt="" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
         <div className="poster__slash" aria-hidden="true" />
         <span className="poster__glyph" aria-hidden="true">{banner.glyph}</span>
         {starArt && <img className={`poster__art ${store.customArt[star.id] || store.remoteArt[star.id] ? 'poster__art--custom' : ''}`} src={starArt} alt={star.name} referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
@@ -100,7 +101,7 @@ export const Banners = ({ onRebirth }: { onRebirth: () => void }) => {
           const have = b.featured.filter((id) => store.owned[id]).length
           return (
             <button key={b.id} role="tab" aria-selected={i === index} className={`rail__item ${i === index ? 'is-active' : ''}`} style={{ ['--hue' as string]: b.hue }} onClick={() => setIndex(i)}>
-              {heroArt(heroById(b.star).model, 'bust') ? <img src={heroArt(heroById(b.star).model, 'bust')} alt="" /> : <i className="rail__glyph" lang="ja">{b.glyph}</i>}
+              <img className="rail__emblem" src={extraArt(`emblem-${b.id}`)} alt="" />
               <span><b>{b.world}</b><small>{have}/{b.featured.length} cartes · pity {store.pity[b.id]}/{PITY_MAX}</small></span>
             </button>
           )
@@ -221,10 +222,11 @@ export const Banners = ({ onRebirth }: { onRebirth: () => void }) => {
             const have = b.featured.filter((id) => store.owned[id]).length
             return (
               <article key={b.id} className={`show ${i === index ? 'is-current' : ''}`} style={{ ['--hue' as string]: b.hue }}>
+                {store.bannerArt[b.id] && <img className="show__bg" src={store.bannerArt[b.id]} alt="" loading="lazy" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
                 <div className="show__top">
                   <span className="show__glyph" lang="ja" aria-hidden="true">{b.glyph}</span>
                   <div className="show__text">
-                    <p className="show__kicker">Bannière limitée</p>
+                    <p className="show__kicker"><img className="show__emblem" src={extraArt(`emblem-${b.id}`)} alt="" />Bannière limitée</p>
                     <h3>{b.world}</h3>
                     <p className="show__star"><b>{RARITIES[s.rarity].short}</b>{s.name} ({s.title})</p>
                     <button className="show__link" onClick={() => { setIndex(i); setFocus(true); window.scrollTo({ top: 0 }) }}>Voir la bannière ↗</button>
