@@ -11,7 +11,7 @@ Produit dans src/assets/ui/ :
   btn-gold      plaque du bouton principal (or)       btn-pink    plaque d'action (améthyste)
   btn-indigo    plaque neutre (verre bleu nuit)       btn-ghost   plaque discrète (verre noir)
   panel         cadre des panneaux et des fenêtres
-  nav-nexus, nav-summon, nav-cards                     icônes de la barre de navigation
+  nav-nexus, nav-summon, nav-cards, nav-contracts, nav-profile   icônes de la barre de navigation
 
 Les plaques et le cadre sont faits pour être étirés par leurs bords (border-image) : seuls les coins gardent leurs
 détails, le centre est uni.
@@ -223,6 +223,62 @@ def nav_cards():
     return 3.2, 3.2
 
 
+def nav_contracts():
+    """Les contrats : un parchemin tenu par deux baguettes d'or, scellé d'un cachet de cire rouge."""
+    paper = pbr((0.96, 0.89, 0.7), 0.0, 0.55)
+    gold = pbr((1.0, 0.76, 0.28), 1, 0.14)
+    ink = pbr((0.32, 0.22, 0.16), 0.0, 0.7)
+    wax = pbr((0.78, 0.07, 0.13), 0.2, 0.22, (0.6, 0.02, 0.06), 0.25, coat=1)
+    solid(rounded(1.46, 1.96, 0.06, 0, 0, 0), 0.06, paper, bevel=0.02)
+    for z in (1.02, -1.02):
+        solid(rounded(1.86, 0.2, 0.1, 0, 0, z), 0.2, gold, bevel=0.06, back=-0.04)
+    for i, z in enumerate((0.58, 0.32, 0.06, -0.2)):
+        solid(rounded(1.0 - 0.22 * (i % 2), 0.07, 0.03, 0, -0.1 - 0.11 * (i % 2), z), 0.02, ink, bevel=0.005, back=-0.06)
+    solid(circle(0.42, -0.56, 0.34), 0.14, wax, bevel=0.05, back=-0.08)
+    star = []
+    for i in range(10):
+        a = math.pi / 2 + i * math.pi / 5
+        r = 0.19 if i % 2 == 0 else 0.08
+        star.append((0.42 + math.cos(a) * r, -0.56 + math.sin(a) * r))
+    solid(star, 0.04, pbr((1.0, 0.82, 0.35), 1, 0.14), bevel=0.01, back=-0.22)
+    return 3.2, 3.2
+
+
+def nav_profile():
+    """Le profil : un médaillon d'or, une silhouette de cristal violet."""
+    gold = pbr((1.0, 0.78, 0.3), 1, 0.14)
+    dark = pbr((0.05, 0.05, 0.14), 0.6, 0.3)
+    violet = pbr((0.62, 0.38, 1.0), 0.4, 0.1, (0.5, 0.3, 1.0), 0.5, coat=1)
+    solid(circle(0, 0, 1.25), 0.16, gold, bevel=0.06)
+    solid(circle(0, 0, 1.06), 0.2, dark, bevel=0.04)
+    solid(circle(0, 0.34, 0.4), 0.18, violet, bevel=0.1, back=-0.2)
+    body = [(math.cos(a) * 0.72, -0.74 + math.sin(a) * 0.5) for a in [math.pi * i / 24 for i in range(25)]]
+    solid(body, 0.18, violet, bevel=0.1, back=-0.2)
+    for k in range(4):
+        a = math.pi / 4 + k * math.pi / 2
+        solid(circle(math.cos(a) * 1.16, math.sin(a) * 1.16, 0.09), 0.1, pbr((0.5, 0.95, 1.0), 0.3, 0.1, (0.4, 0.9, 1.0), 1.5), bevel=0.03, back=-0.18)
+    return 3.2, 3.2
+
+
+def chest():
+    """Le coffre du 7e jour : bois laqué violet, cerclages et serrure d'or, lueur qui s'échappe du couvercle."""
+    wood = pbr((0.32, 0.14, 0.55), 0.3, 0.3, coat=1)
+    gold = pbr((1.0, 0.78, 0.3), 1, 0.14)
+    solid(rounded(2.2, 1.2, 0.1, 0, 0, -0.45), 0.9, wood, bevel=0.06)
+    solid([(math.cos(a) * 1.1, 0.15 + math.sin(a) * 0.62) for a in [math.pi * i / 24 for i in range(25)]], 0.9, wood, bevel=0.06)
+    flat_shape(rounded(2.0, 0.08, 0.02, 0, 0, 0.16), glow((1.0, 0.85, 0.4), 6.0), -1.0)
+    for x in (-0.72, 0.72):
+        solid(rounded(0.2, 1.24, 0.04, 0, x, -0.45), 0.08, gold, bevel=0.03, back=-0.9)
+        solid([(x - 0.1 + 0.2 * (i / 24 > 0.5), 0) for i in range(1)] and [(x - 0.1, 0.15), (x + 0.1, 0.15), (x + 0.1, 0.7), (x - 0.1, 0.7)], 0.08, gold, bevel=0.03, back=-0.9)
+    solid(rounded(2.3, 0.14, 0.05, 0, 0, 0.12), 0.1, gold, bevel=0.03, back=-0.88)
+    solid(rounded(0.42, 0.52, 0.08, 0, 0, -0.18), 0.14, gold, bevel=0.04, back=-0.92)
+    solid(circle(0, -0.12, 0.08), 0.05, pbr((0.08, 0.04, 0.12), 0.5, 0.3), bevel=0.01, back=-1.06)
+    for k in range(5):
+        a = math.radians(30 + k * 30)
+        solid([(math.cos(a) * 0.3, 0.25 + math.sin(a) * 0.3), (math.cos(a) * 1.4, 0.25 + math.sin(a) * 1.0), (math.cos(a + 0.06) * 1.4, 0.25 + math.sin(a + 0.06) * 1.0)], 0.01, glow((1.0, 0.85, 0.45), 2.5), bevel=0.0, back=0.3)
+    return 3.4, 3.0
+
+
 # --- fond des menus -----------------------------------------------------------------------------------------------------
 def background():
     """Ciel nocturne en dégradés doux. L'image est ensuite légèrement floutée : elle doit rester en retrait."""
@@ -323,8 +379,11 @@ ELEMENTS = {
     'nav-nexus': nav_nexus,
     'nav-summon': nav_summon,
     'nav-cards': nav_cards,
+    'nav-contracts': nav_contracts,
+    'nav-profile': nav_profile,
+    'chest': chest,
 }
-SCALE = {'nav-nexus': 60, 'nav-summon': 60, 'nav-cards': 60}  # pixels par unité, quand ce n'est pas PX
+SCALE = {'nav-nexus': 60, 'nav-summon': 60, 'nav-cards': 60, 'nav-contracts': 60, 'nav-profile': 60, 'chest': 60}  # pixels par unité, quand ce n'est pas PX
 
 os.makedirs(OUT, exist_ok=True)
 for name in [a for a in sys.argv[1:] if a in ELEMENTS] or list(ELEMENTS):

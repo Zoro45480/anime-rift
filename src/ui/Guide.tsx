@@ -21,6 +21,11 @@ const TALKS: Record<string, { title: string; lines: string[] }> = {
     'Mets ensemble des cartes du même collectif (Équipe 7, Chapeaux de paille…) : elles gagnent un bonus.',
     'Chaque victoire donne de l’XP, des âmes pour tes nouvelles étoiles, et parfois un parchemin.',
   ] },
+  contracts: { title: 'Les Contrats', lines: [
+    'Ici, tes objectifs. Chaque jour, une récompense t’attend : reviens sept jours de suite pour ouvrir le coffre.',
+    'Les contrats du jour et de la semaine se remplissent tout seuls en jouant : invoquer, combattre, améliorer tes cartes.',
+    'Quand une barre est pleine, touche « Récupérer ». Le Parcours garde tes records pour toujours.',
+  ] },
   collection: { title: 'La Collection', lines: [
     'Toutes tes cartes sont ici. Touche une carte, retourne-la, puis « En savoir plus » pour sa fiche.',
     'Sur la fiche : fusionne tes doublons, utilise tes parchemins et gagne les titres de son univers.',

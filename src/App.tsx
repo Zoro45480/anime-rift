@@ -6,6 +6,7 @@ import { ErrorBoundary } from './ui/ErrorBoundary'
 import { Splash } from './screens/Splash'
 import { Banners } from './screens/Banners'
 import { Play } from './screens/Play'
+import { Contracts } from './screens/Contracts'
 import { Collection, type CollectionTab } from './screens/Collection'
 
 export const App = () => {
@@ -24,10 +25,11 @@ export const App = () => {
         <ErrorBoundary>
         {tab === 'banners' && <Banners onRebirth={toRebirth} />}
         {tab === 'play' && <Play onRebirth={toRebirth} onProfile={toProfile} />}
+        {tab === 'contracts' && <Contracts />}
         {tab === 'collection' && <Collection onSummon={() => go('banners')} tab={colTab} onTab={setColTab} />}
         </ErrorBoundary>
       </main>
-      <Dock tab={tab} onTab={go} />
+      <Dock tab={tab} onTab={(t) => { if (t === 'collection' && colTab === 'profile') setColTab('cards'); go(t) }} onProfile={toProfile} profileOn={tab === 'collection' && colTab === 'profile'} />
       </CardViewerProvider>
     </StoreProvider>
   )

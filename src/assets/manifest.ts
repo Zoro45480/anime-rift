@@ -41,7 +41,7 @@ export const frameFx = (rarity: string, theme = 'naruto', hd = false): string =>
 const ui = import.meta.glob('./ui/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 
 // Habillage de l'interface en style anime, dessiné dans Blender (tools/blender/build_ui.py).
-export type UiName = 'bg' | 'btn-gold' | 'btn-pink' | 'btn-indigo' | 'btn-ghost' | 'panel' | 'nav-nexus' | 'nav-summon' | 'nav-cards'
+export type UiName = 'bg' | 'btn-gold' | 'btn-pink' | 'btn-indigo' | 'btn-ghost' | 'panel' | 'nav-nexus' | 'nav-summon' | 'nav-cards' | 'nav-contracts' | 'nav-profile' | 'chest'
 export const uiArt = (name: UiName): string => ui[`./ui/${name}.webp`] ?? ''
 
 const gates = import.meta.glob('./gates/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>

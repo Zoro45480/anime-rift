@@ -7,7 +7,7 @@ import { useStore } from '../state/store'
 import { Coin } from './Coin'
 import { logoArt, uiArt } from '../assets/manifest'
 
-export type TabId = 'banners' | 'play' | 'collection'
+export type TabId = 'banners' | 'play' | 'collection' | 'contracts'
 
 // Logo 3D : complet sur grand écran, emblème seul sur téléphone.
 export const Logo = () => (
@@ -52,17 +52,26 @@ export const TopBar = ({ onPlay, onSummon, onProfile }: { onPlay: () => void; on
 }
 
 // Dock flottant : l'invocation au centre dans un losange, les deux autres écrans de part et d'autre.
-export const Dock = ({ tab, onTab }: { tab: TabId; onTab: (t: TabId) => void }) => (
-  <nav className="dock" aria-label="Navigation">
-    <div className="dock__bg" />
-    <button className={`dock__side ${tab === 'play' ? 'is-active' : ''}`} onClick={() => onTab('play')} aria-current={tab === 'play' ? 'page' : undefined}>
-      <img src={uiArt('nav-nexus')} alt="" /><span>Nexus</span>
+// Dock : l'invocation au centre ; Nexus et Contrats à gauche, Collection et Profil à droite.
+export const Dock = ({ tab, onTab, onProfile, profileOn }: { tab: TabId; onTab: (t: TabId) => void; onProfile: () => void; profileOn: boolean }) => {
+  const { questsReady } = useStore()
+  const side = (id: TabId, label: string, icon: 'nav-nexus' | 'nav-contracts' | 'nav-cards', dot = 0) => (
+    <button className={`dock__side ${tab === id && !profileOn ? 'is-active' : ''}`} onClick={() => onTab(id)} aria-current={tab === id && !profileOn ? 'page' : undefined} aria-label={dot ? `${label} (${dot} à récupérer)` : label}>
+      <img src={uiArt(icon)} alt="" /><span>{label}</span>{dot > 0 && <i className="dot dock__dot" />}
     </button>
-    <button className={`dock__main ${tab === 'banners' ? 'is-active' : ''}`} onClick={() => onTab('banners')} aria-current={tab === 'banners' ? 'page' : undefined}>
-      <i><img src={uiArt('nav-summon')} alt="" /></i><span>Invoquer</span>
-    </button>
-    <button className={`dock__side ${tab === 'collection' ? 'is-active' : ''}`} onClick={() => onTab('collection')} aria-current={tab === 'collection' ? 'page' : undefined}>
-      <img src={uiArt('nav-cards')} alt="" /><span>Collection</span>
-    </button>
-  </nav>
-)
+  )
+  return (
+    <nav className="dock dock--five" aria-label="Navigation">
+      <div className="dock__bg" />
+      {side('play', 'Nexus', 'nav-nexus')}
+      {side('contracts', 'Contrats', 'nav-contracts', questsReady)}
+      <button className={`dock__main ${tab === 'banners' ? 'is-active' : ''}`} onClick={() => onTab('banners')} aria-current={tab === 'banners' ? 'page' : undefined}>
+        <i><img src={uiArt('nav-summon')} alt="" /></i><span>Invoquer</span>
+      </button>
+      {side('collection', 'Collection', 'nav-cards')}
+      <button className={`dock__side ${profileOn ? 'is-active' : ''}`} onClick={onProfile} aria-current={profileOn ? 'page' : undefined}>
+        <img src={uiArt('nav-profile')} alt="" /><span>Profil</span>
+      </button>
+    </nav>
+  )
+}

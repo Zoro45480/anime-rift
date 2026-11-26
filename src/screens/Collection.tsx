@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { iconArt } from '../assets/manifest'
 import { heroById, HEROES, ROLE_KINDS, roleKind, type Hero, type RoleKind } from '../data/heroes'
 import { AFFINITY_LIST, type AffinityId } from '../data/affinities'
@@ -100,6 +100,8 @@ const fold = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g,
 const toggle = <T,>(list: T[], item: T): T[] => (list.includes(item) ? list.filter((x) => x !== item) : [...list, item])
 
 const Cards = ({ onSummon }: { onSummon: () => void }) => {
+  const { markVisit } = useStore()
+  useEffect(() => { markVisit() }, []) // contrat du jour « passe voir ta collection »
   const { owned, wish, pinned, scrolls, remoteStatus, remoteArt } = useStore()
   const [query, setQuery] = useState('')
   const [rarities, setRarities] = useState<RarityId[]>([]) // vide = toutes
