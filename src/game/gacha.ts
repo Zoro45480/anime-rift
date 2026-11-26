@@ -27,9 +27,9 @@ const rollRarity = (rng: Rng, pity: number): RarityId => {
 
 const pick = <T,>(rng: Rng, list: T[]): T => list[Math.floor(rng() * list.length)]
 
-// Les cartes qu'une bannière peut donner : les N, R et SR de tous les univers sont mélangées ;
-// les SSR, LR et MR restent dans la bannière de leur propre univers.
-export const LOCAL_RARITIES: RarityId[] = ['ultra', 'legend', 'rift']
+// Les cartes qu'une bannière peut donner : toutes les cartes des 7 univers sont mélangées,
+// sauf les MR qui restent dans la bannière de leur propre univers.
+export const LOCAL_RARITIES: RarityId[] = ['rift']
 export const isLocal = (rarity: RarityId) => LOCAL_RARITIES.includes(rarity)
 const POOLS = new Map<string, Hero[]>() // calculé une fois par bannière
 export const bannerPool = (banner: Banner): Hero[] => {
@@ -83,3 +83,7 @@ export const cardRate = (banner: Banner, hero: Hero): number => {
   const isFeatured = banner.featured.includes(hero.id)
   return rate * ((isFeatured ? 0.5 / featured.length : 0) + 0.5 / pool.length)
 }
+
+// L'index d'une bannière ne montre que ses têtes de série : les SSR, LR et MR de son univers.
+export const INDEX_RARITIES: RarityId[] = ['rift', 'legend', 'ultra']
+export const indexCards = (banner: Banner): Hero[] => bannerPool(banner).filter((h) => INDEX_RARITIES.includes(h.rarity) && banner.pool.includes(h.world))

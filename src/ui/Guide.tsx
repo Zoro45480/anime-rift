@@ -9,7 +9,7 @@ const TALKS: Record<string, { title: string; lines: string[] }> = {
   banners: { title: 'Les invocations', lines: [
     'Salut ! Moi c’est Kiri, l’esprit de la faille. Ici tu invoques de nouvelles cartes.',
     'Choisis une bannière, puis ×1, ×5 ou ×10. Un sceau ou 30 âmes par invocation.',
-    'Les cartes N, R et SR des 7 univers sortent sur chaque bannière. Les SSR, LR et MR, elles, ne sortent que sur la bannière de leur univers !',
+    'Toutes les cartes des 7 univers sortent sur chaque bannière. Seules les MR restent propres à la bannière de leur univers !',
     'Les cartes MR sont très rares. Au bout de 50 invocations sans carte SSR ou mieux, la suivante est garantie.',
   ] },
   play: { title: 'Le Nexus', lines: [

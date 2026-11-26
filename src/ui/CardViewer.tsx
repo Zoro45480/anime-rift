@@ -93,7 +93,7 @@ const Sheet = ({ hero, onClose, onMore }: { hero: Hero; onClose: () => void; onM
               <span><small>Défense</small><b>{state.stats.def.toLocaleString('fr-FR')}</b></span>
               <span><small>Niveau</small><b>{copies ? state.level : '—'}</b></span>
             </span>
-            <span className="cv__source">{!['ultra', 'legend', 'rift'].includes(hero.rarity) ? 'Toutes les bannières' : banner ? `Bannière ${banner.world} seulement` : 'Hors bannière'}{rate ? ` · 1 chance sur ${Math.round(1 / rate).toLocaleString('fr-FR')}` : ''}</span>
+            <span className="cv__source">{hero.rarity !== 'rift' ? 'Toutes les bannières' : banner ? `Bannière ${banner.world} seulement` : 'Hors bannière'}{rate ? ` · 1 chance sur ${Math.round(1 / rate).toLocaleString('fr-FR')}` : ''}</span>
             <span className="cv__actions">
               <button className={`cv__act ${wished ? 'is-on' : ''}`} aria-pressed={wished} onClick={(e) => { e.stopPropagation(); toggleWish(hero.id) }}>{wished ? '♥ Dans mes envies' : '♡ Ajouter aux envies'}</button>
               <button className="cv__act cv__act--main" onClick={(e) => { e.stopPropagation(); onMore() }}>En savoir plus ↗</button>

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { BANNERS, PITY_MAX } from '../data/banners'
 import { HEROES } from '../data/heroes'
 import { isPityRarity, RARITIES, RARITY_ORDER } from '../data/rarities'
-import { bannerPool, cardRate, pullMany, pullOne } from './gacha'
+import { bannerPool, cardRate, indexCards, pullMany, pullOne } from './gacha'
 
 const seeded = (seed: number) => () => {
   seed = (seed * 1664525 + 1013904223) % 4294967296
@@ -23,14 +23,16 @@ describe('gacha', () => {
     expect(new Set(HEROES.map((h) => h.no)).size).toBe(HEROES.length)
   })
 
-  it('N, R et SR sont mélangées ; SSR, LR et MR restent dans leur univers', () => {
+  it('toutes les cartes sont mélangées, sauf les MR qui restent dans leur univers', () => {
     const pool = bannerPool(BANNERS[0])
     expect(pool.length).toBeGreaterThanOrEqual(30)
-    expect(pool.filter((h) => ['ultra', 'legend', 'rift'].includes(h.rarity)).every((h) => h.world === 'Naruto')).toBe(true)
+    expect(pool.filter((h) => h.rarity === 'rift').every((h) => h.world === 'Naruto')).toBe(true)
+    expect(new Set(pool.filter((h) => h.rarity === 'legend').map((h) => h.world)).size).toBe(BANNERS.length)
+    expect(indexCards(BANNERS[0]).every((h) => h.world === 'Naruto' && ['rift', 'legend', 'ultra'].includes(h.rarity))).toBe(true)
     expect(new Set(pool.map((h) => h.world)).size).toBe(BANNERS.length) // toutes les autres cartes sont mélangées
     const rng = seeded(5)
     const worlds = new Set<string>()
-    for (let i = 0; i < 20000; i++) { const h = pullOne(BANNERS[0], 0, rng).hero; worlds.add(h.world); if (['ultra', 'legend', 'rift'].includes(h.rarity)) expect(h.world).toBe('Naruto') }
+    for (let i = 0; i < 20000; i++) { const h = pullOne(BANNERS[0], 0, rng).hero; worlds.add(h.world); if (h.rarity === 'rift') expect(h.world).toBe('Naruto') }
     expect(worlds.size).toBe(BANNERS.length)
   })
 
