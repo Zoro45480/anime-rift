@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { uiArt } from '../assets/manifest'
-import { HEROES, heroById, type Hero } from '../data/heroes'
+import { extraArt, uiArt } from '../assets/manifest'
+import { BANNERS } from '../data/banners'
+import { AFFINITY_LIST, type AffinityId } from '../data/affinities'
+import { AffinityIcon } from '../ui/AffinityIcon'
+import { HEROES, heroById, ROLE_KINDS, roleKind, type Hero, type RoleKind } from '../data/heroes'
 import { RARITIES, RARITY_ORDER, type RarityId } from '../data/rarities'
 import { AUCTION_HOURS, auctionNow, coteOf, QUICK_SALE, quickPrice, stallOf, valueOf, type Trade } from '../game/bazaar'
 import { dayKey, msToDayEnd } from '../game/contracts'
@@ -24,14 +27,24 @@ export const Spark = ({ trades }: { trades: Trade[] }) => {
 }
 
 type Tab = 'buy' | 'sell' | 'auctions' | 'mine'
+type BzSort = 'value-desc' | 'price-asc' | 'rarity' | 'name'
+const BZ_SORTS: [BzSort, string][] = [['value-desc', 'Valeur décroissante'], ['price-asc', 'Valeur croissante'], ['rarity', 'Rareté'], ['name', 'Nom']]
+type Only = 'missing' | 'wish' | 'afford'
+const ONLY: [Only, string][] = [['missing', 'Pas encore obtenues'], ['wish', '♥ Mes envies'], ['afford', 'Dans mes moyens']]
+const tog = <T,>(list: T[], x: T) => (list.includes(x) ? list.filter((y) => y !== x) : [...list, x])
 
 export const Bazaar = () => {
   const store = useStore()
   const [tab, setTab] = useState<Tab>('buy')
   const [now, setNow] = useState(() => Date.now())
   const [msg, setMsg] = useState('')
-  const [rar, setRar] = useState<RarityId | 'all'>('all')
   const [q, setQ] = useState('')
+  const [rars, setRars] = useState<RarityId[]>([])
+  const [worlds, setWorlds] = useState<string[]>([])
+  const [roles, setRoles] = useState<RoleKind[]>([])
+  const [affs, setAffs] = useState<AffinityId[]>([])
+  const [sort, setSort] = useState<BzSort>('value-desc')
+  const [only, setOnly] = useState<Only[]>([])
   const [starts, setStarts] = useState<Record<string, string>>({})
   const [alertQ, setAlertQ] = useState('')
   const [alertPrice, setAlertPrice] = useState('')
@@ -41,7 +54,41 @@ export const Bazaar = () => {
   const bought = store.bazaar.day === day ? store.bazaar.bought : []
   const dupes = useMemo(() => HEROES.filter((h) => (store.owned[h.id] ?? 0) >= 2)
     .sort((a, b) => valueOf(b, store.levelOf(b.id), day) - valueOf(a, store.levelOf(a.id), day)), [store.owned, day, store])
-  const shownDupes = dupes.filter((h) => (rar === 'all' || h.rarity === rar) && (!q || fold(`${h.name} ${h.world}`).includes(fold(q))))
+  const keep = (h: Hero, price: number, buy = false) => (rars.length === 0 || rars.includes(h.rarity)) && (worlds.length === 0 || worlds.includes(h.world)) &&
+    (roles.length === 0 || roles.includes(roleKind(h.role))) && (affs.length === 0 || affs.includes(h.affinity)) && (!q || fold(`${h.name} ${h.title} ${h.world}`).includes(fold(q))) &&
+    (!buy || ((!only.includes('missing') || !store.owned[h.id]) && (!only.includes('wish') || store.wish.includes(h.id)) && (!only.includes('afford') || price <= store.gems)))
+  const sorter = <T,>(get: (x: T) => { h: Hero; p: number }) => (a: T, b: T) => {
+    const A = get(a), B = get(b)
+    return sort === 'price-asc' ? A.p - B.p : sort === 'value-desc' ? B.p - A.p : sort === 'name' ? A.h.name.localeCompare(B.h.name, 'fr') : RARITY_ORDER.indexOf(A.h.rarity) - RARITY_ORDER.indexOf(B.h.rarity) || B.p - A.p
+  }
+  const shownDupes = dupes.filter((h) => keep(h, valueOf(h, store.levelOf(h.id), day))).sort(sorter((h: Hero) => ({ h, p: valueOf(h, store.levelOf(h.id), day) })))
+  const shownStall = stall.filter((x) => keep(x.hero, x.price, true)).sort(sorter((x: (typeof stall)[number]) => ({ h: x.hero, p: x.price })))
+  const nFilters = rars.length + worlds.length + roles.length + affs.length + only.length + (q ? 1 : 0)
+  const resetF = () => { setQ(''); setRars([]); setWorlds([]); setRoles([]); setAffs([]); setOnly([]); setSort('value-desc') }
+  const Filters = ({ buy }: { buy: boolean }) => (
+    <section className="filters bz-filters" aria-label="Filtres du Bazar">
+      <div className="filters__search"><label className="filters__label" htmlFor="bz-q">Recherche</label><input id="bz-q" type="search" placeholder="Nom, titre ou univers…" value={q} onChange={(e) => setQ(e.target.value)} /></div>
+      <div className="filters__row"><span className="filters__label">Rareté</span><div className="filters__chips">
+        {RARITY_ORDER.map((r) => <button key={r} className={`fchip ${rars.includes(r) ? 'is-on' : ''}`} style={{ ['--rc' as string]: RARITIES[r].color }} aria-pressed={rars.includes(r)} onClick={() => setRars(tog(rars, r))}><b>{RARITIES[r].short}</b></button>)}
+      </div></div>
+      <div className="filters__row"><span className="filters__label">Univers</span><div className="filters__chips">
+        {BANNERS.map((b) => <button key={b.id} className={`fchip fchip--world ${worlds.includes(b.world) ? 'is-on' : ''}`} style={{ ['--rc' as string]: b.hue }} aria-pressed={worlds.includes(b.world)} onClick={() => setWorlds(tog(worlds, b.world))}><img src={extraArt(`emblem-${b.id}`)} alt="" />{b.world}</button>)}
+      </div></div>
+      <div className="filters__row"><span className="filters__label">Rôle</span><div className="filters__chips">
+        {(Object.keys(ROLE_KINDS) as RoleKind[]).map((id) => <button key={id} className={`fchip role role--${id} ${roles.includes(id) ? 'is-on' : ''}`} aria-pressed={roles.includes(id)} onClick={() => setRoles(tog(roles, id))}>{ROLE_KINDS[id]}</button>)}
+      </div></div>
+      <div className="filters__row"><span className="filters__label">Affinité</span><div className="filters__chips">
+        {AFFINITY_LIST.filter((a) => HEROES.some((h) => h.affinity === a.id)).map((a) => <button key={a.id} className={`fchip fchip--affinity ${affs.includes(a.id) ? 'is-on' : ''}`} style={{ ['--rc' as string]: a.color }} aria-pressed={affs.includes(a.id)} onClick={() => setAffs(tog(affs, a.id))}><AffinityIcon id={a.id} size={14} />{a.label}</button>)}
+      </div></div>
+      <div className="filters__row"><span className="filters__label">Trier par</span><div className="filters__chips" role="radiogroup" aria-label="Tri">
+        {BZ_SORTS.map(([id, label]) => <button key={id} role="radio" aria-checked={sort === id} className={`fchip ${sort === id ? 'is-on' : ''}`} onClick={() => setSort(id)}>{buy ? label.replace('Valeur', 'Prix') : label}</button>)}
+      </div></div>
+      {buy && <div className="filters__row"><span className="filters__label">Afficher</span><div className="filters__chips">
+        {ONLY.map(([id, label]) => <button key={id} className={`fchip ${only.includes(id) ? 'is-on' : ''}`} aria-pressed={only.includes(id)} onClick={() => setOnly(tog(only, id))}>{label}</button>)}
+      </div></div>}
+      <div className="filters__foot"><p role="status">{buy ? `${shownStall.length} carte${shownStall.length > 1 ? 's' : ''} sur ${stall.length} à l'étal` : `${shownDupes.length} doublon${shownDupes.length > 1 ? 's' : ''} sur ${dupes.length}`}</p>{nFilters > 0 && <button className="linkbtn" onClick={resetF}>Réinitialiser les filtres</button>}</div>
+    </section>
+  )
   const traded = [...new Set(store.bazaar.trades.map((t) => t.heroId))].map(heroById).filter(Boolean)
   const alertHero = alertQ.length >= 2 ? HEROES.find((h) => fold(h.name).includes(fold(alertQ))) : undefined
   const flash = (text: string) => { setMsg(text); setTimeout(() => setMsg(''), 3000) }
@@ -66,8 +113,10 @@ export const Bazaar = () => {
 
       {tab === 'buy' && <section className="bz-sec">
         <p className="cn__meta">L'étal du jour · nouveaux marchands dans <b>{clock(msToDayEnd(new Date(now)))}</b>{store.wish.length ? ' · les cartes de ta liste d’envies passent en premier' : ' · ajoute des cartes à tes envies pour les voir ici'}</p>
+        {Filters({ buy: true })}
+        {shownStall.length === 0 && <p className="pf-empty">Aucune carte de l'étal ne correspond à ces filtres. Les marchands changent chaque jour.</p>}
         <ul className="bz-grid">
-          {stall.map((x) => {
+          {shownStall.map((x) => {
             const done = bought.includes(x.id), value = valueOf(x.hero, 1, day)
             return (
               <li key={x.id} className={`bz-item ${done ? 'is-done' : ''} ${x.wished ? 'is-wish' : ''}`}>
@@ -83,14 +132,9 @@ export const Bazaar = () => {
       </section>}
 
       {tab === 'sell' && <section className="bz-sec">
-        <div className="bz-filters">
-          <input className="set__input" type="search" placeholder="Chercher une carte ou un univers…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Chercher dans mes doublons" />
-          <div className="filters__chips">
-            {(['all', ...RARITY_ORDER] as const).map((r) => <button key={r} className={`fchip ${rar === r ? 'is-on' : ''}`} style={r === 'all' ? undefined : { ['--rc' as string]: RARITIES[r].color }} onClick={() => setRar(r)}>{r === 'all' ? 'Toutes' : RARITIES[r].short}</button>)}
-          </div>
-        </div>
+        {Filters({ buy: false })}
         <p className="cn__meta">Tes doublons : <b>{dupes.length}</b> carte{dupes.length > 1 ? 's' : ''}, {n(dupes.reduce((s, h) => s + store.owned[h.id] - 1, 0))} exemplaires en trop.</p>
-        {shownDupes.length === 0 ? <p className="pf-empty">Aucun doublon à vendre{q || rar !== 'all' ? ' avec ces filtres' : ' pour l’instant : invoque pour en obtenir'}.</p> : (
+        {shownDupes.length === 0 ? <p className="pf-empty">Aucun doublon à vendre{nFilters ? ' avec ces filtres' : ' pour l’instant : invoque pour en obtenir'}.</p> : (
           <ul className="bz-list">
             {shownDupes.map((h) => {
               const lv = store.levelOf(h.id), value = valueOf(h, lv, day), quick = quickPrice(h, lv, day)
