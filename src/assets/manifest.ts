@@ -41,7 +41,7 @@ export const frameFx = (rarity: string, theme = 'naruto', hd = false): string =>
 const ui = import.meta.glob('./ui/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 
 // Habillage de l'interface en style anime, dessiné dans Blender (tools/blender/build_ui.py).
-export type UiName = 'bg' | 'btn-gold' | 'btn-pink' | 'btn-indigo' | 'btn-ghost' | 'panel' | 'nav-nexus' | 'nav-summon' | 'nav-cards' | 'nav-contracts' | 'nav-profile' | 'chest' | 'rift-path' | 'card-pack' | 'floor-plate' | 'floor-boss' | 'shop' | 'nav-bazaar' | 'crown' | 'league-bronze' | 'league-silver' | 'league-gold' | 'league-platinum' | 'league-diamond' | 'league-legend'
+export type UiName = 'bg' | 'btn-gold' | 'btn-pink' | 'btn-indigo' | 'btn-ghost' | 'panel' | 'nav-nexus' | 'nav-summon' | 'nav-cards' | 'nav-contracts' | 'nav-profile' | 'chest' | 'rift-path' | 'card-pack' | 'floor-plate' | 'floor-boss' | 'shop' | 'nav-bazaar' | 'role-dps' | 'role-tank' | 'role-heal' | 'role-hybrid' | 'crown' | 'league-bronze' | 'league-silver' | 'league-gold' | 'league-platinum' | 'league-diamond' | 'league-legend'
 export const uiArt = (name: UiName): string => ui[`./ui/${name}.webp`] ?? ''
 
 const gates = import.meta.glob('./gates/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>

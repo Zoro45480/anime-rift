@@ -456,6 +456,42 @@ def crown():
     return 3.4, 2.6
 
 
+def role_icon(kind):
+    """Logos des rôles : épée (DPS), bouclier (Tank), croix de soin (Soigneur), épée + bouclier (Hybride)."""
+    gold = pbr((1.0, 0.78, 0.3), 1, 0.14)
+    steel = pbr((0.85, 0.88, 0.95), 1, 0.12)
+    col = {'dps': (1.0, 0.25, 0.35), 'tank': (0.3, 0.55, 1.0), 'heal': (0.25, 0.9, 0.55), 'hybrid': (1.0, 0.72, 0.2)}[kind]
+    gem = pbr(col, 0.2, 0.05, col, 1.4, coat=1)
+    def sword(angle=0.0, cx=0.0, scale=1.0, front=0.0):
+        blade = [(-0.13, -0.35), (0.13, -0.35), (0.13, 0.95), (0, 1.2), (-0.13, 0.95)]
+        guard = rounded(0.8, 0.14, 0.06, 0, 0, -0.42)
+        grip = rounded(0.14, 0.45, 0.05, 0, 0, -0.72)
+        pom = circle(0, -0.98, 0.1)
+        for pts, m, th, bk in ((blade, steel, 0.08, 0), (guard, gold, 0.16, -0.04), (grip, pbr((0.25, 0.12, 0.08), 0.2, 0.5), 0.12, -0.02), (pom, gem, 0.14, -0.06)):
+            pts = rotated([(x * scale + 0, z * scale) for x, z in pts], angle)
+            solid([(x + cx, z) for x, z in pts], th, m, bevel=0.03, back=bk - front)
+    def shield(m, cx=0.0, cz=0.0, sc=1.0, back=0.0):
+        sh = [(0, -1.1), (0.85, -0.45), (0.9, 0.75), (0, 0.95), (-0.9, 0.75), (-0.85, -0.45)]
+        inner = [(0, -0.88), (0.68, -0.38), (0.72, 0.6), (0, 0.76), (-0.72, 0.6), (-0.68, -0.38)]
+        solid([(x * sc + cx, z * sc + cz) for x, z in sh], 0.2, gold, bevel=0.06, back=back)
+        solid([(x * sc + cx, z * sc + cz) for x, z in inner], 0.24, m, bevel=0.04, back=back)
+    if kind == 'dps':
+        sword(0.0, 0, 1.15)
+        solid(rotated([(-0.05, -0.3), (0.05, -0.3), (0.05, 1.05), (0, 1.25), (-0.05, 1.05)], 0), 0.02, glow((1.0, 0.25, 0.35), 3.0), bevel=0.0, back=-0.1)
+    elif kind == 'tank':
+        shield(gem)
+        solid([(0, 0.4), (0.25, 0), (0, -0.45), (-0.25, 0)], 0.1, steel, bevel=0.04, back=-0.24)
+    elif kind == 'heal':
+        solid(circle(0, 0, 1.0), 0.16, gold, bevel=0.06)
+        solid(circle(0, 0, 0.84), 0.2, pbr((0.04, 0.08, 0.06), 0.5, 0.3), bevel=0.03)
+        solid(rounded(0.36, 1.2, 0.08, 0, 0, 0) , 0.24, gem, bevel=0.08, back=-0.12)
+        solid(rounded(1.2, 0.36, 0.08, 0, 0, 0), 0.24, gem, bevel=0.08, back=-0.12)
+    else:
+        shield(pbr((0.3, 0.55, 1.0), 0.3, 0.1, (0.3, 0.55, 1.0), 0.8, coat=1), 0.28, -0.1, 0.8, 0.1)
+        sword(0.6, -0.1, 1.0, 0.45)
+    return 2.8, 2.8
+
+
 # --- fond des menus -----------------------------------------------------------------------------------------------------
 def background():
     """Ciel nocturne en dégradés doux. L'image est ensuite légèrement floutée : elle doit rester en retrait."""
@@ -563,6 +599,10 @@ ELEMENTS = {
     'card-pack': card_pack,
     'floor-plate': floor_plate,
     'shop': shop,
+    'role-dps': lambda k='dps': role_icon(k),
+    'role-tank': lambda k='tank': role_icon(k),
+    'role-heal': lambda k='heal': role_icon(k),
+    'role-hybrid': lambda k='hybrid': role_icon(k),
     'crown': crown,
     'nav-bazaar': nav_bazaar,
     'league-bronze': lambda k='bronze': league(k),
@@ -573,7 +613,7 @@ ELEMENTS = {
     'league-legend': lambda k='legend': league(k),
     'floor-boss': lambda: floor_plate(True),
 }
-SCALE = {'nav-nexus': 60, 'nav-summon': 60, 'nav-cards': 60, 'nav-contracts': 60, 'nav-profile': 60, 'chest': 60, 'rift-path': 90, 'card-pack': 80, 'floor-plate': 70, 'floor-boss': 70, 'shop': 70, 'crown': 70, 'nav-bazaar': 60, 'league-bronze': 70, 'league-silver': 70, 'league-gold': 70, 'league-platinum': 70, 'league-diamond': 70, 'league-legend': 70}  # pixels par unité, quand ce n'est pas PX
+SCALE = {'nav-nexus': 60, 'nav-summon': 60, 'nav-cards': 60, 'nav-contracts': 60, 'nav-profile': 60, 'chest': 60, 'rift-path': 90, 'card-pack': 80, 'floor-plate': 70, 'floor-boss': 70, 'shop': 70, 'role-dps': 50, 'role-tank': 50, 'role-heal': 50, 'role-hybrid': 50, 'crown': 70, 'nav-bazaar': 60, 'league-bronze': 70, 'league-silver': 70, 'league-gold': 70, 'league-platinum': 70, 'league-diamond': 70, 'league-legend': 70}  # pixels par unité, quand ce n'est pas PX
 
 os.makedirs(OUT, exist_ok=True)
 for name in [a for a in sys.argv[1:] if a in ELEMENTS] or list(ELEMENTS):
