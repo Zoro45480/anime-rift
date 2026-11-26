@@ -1987,3 +1987,7 @@ h1.pf-name { font-size: clamp(34px, 8vw, 52px); line-height: 1; overflow-wrap: a
 .sh .sh__head > img { width: 84px !important; height: 84px !important; }
 .sh .sh-gift > img { width: 64px !important; height: auto !important; }
 @media (max-width: 420px) { .sh .sh__head > img { width: 60px !important; height: 60px !important; } .sh .sh-gift > img { width: 48px !important; } }
+
+.set__row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.set__row .set__input { flex: 1 1 180px; min-width: 0; }
+.set__code { width: 100%; min-height: 70px; font-family: ui-monospace, monospace; font-size: 11px; word-break: break-all; resize: vertical; }
