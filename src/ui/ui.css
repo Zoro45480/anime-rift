@@ -1381,3 +1381,11 @@ button.nx-gate { width: 100%; text-align: left; cursor: pointer; min-height: 210
 .set__steps li::marker { color: var(--sc); font-weight: 800; }
 .set__replay { grid-template-columns: 1fr; box-shadow: inset 0 0 0 1px rgba(90, 168, 255, 0.5); background: rgba(0, 0, 0, 0.6); }
 :root[data-fx='low'] .set__gear { animation: none !important; }
+
+/* ───────── Nexus : image de l'animé dans chaque porte, traitée comme les bannières ───────── */
+.nx-gate__anime { position: absolute; z-index: -3; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 70% 30%; opacity: 1; filter: saturate(1.2) contrast(1.05) brightness(1.08); transition: transform 900ms var(--ease-out), filter 400ms; -webkit-mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.25), #000 55%); mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.25), #000 55%); }
+.nx-gate__slash { display: none; }
+.nx-gate--anime .nx-gate__slash { display: block; position: absolute; z-index: -2; inset: 0; opacity: 0.55; mix-blend-mode: screen; background: linear-gradient(115deg, transparent 0 46%, color-mix(in srgb, var(--hue) 55%, transparent) 46% 52%, transparent 52% 58%, color-mix(in srgb, var(--hue) 30%, transparent) 58% 61%, transparent 61%); }
+.nx-gate--anime { background: #04050a; }
+.nx-gate--anime::after { background: linear-gradient(90deg, rgba(4, 5, 10, 0.9) 0%, rgba(4, 5, 10, 0.45) 40%, transparent 72%), linear-gradient(0deg, rgba(4, 5, 10, 0.6), transparent 45%), radial-gradient(90% 80% at 100% 0%, color-mix(in srgb, var(--hue) 30%, transparent), transparent 60%); }
+.nx-gate--anime:hover .nx-gate__anime, .nx-gate--anime:focus-visible .nx-gate__anime { transform: scale(1.07); filter: saturate(1.35) contrast(1.08) brightness(1.1); }
