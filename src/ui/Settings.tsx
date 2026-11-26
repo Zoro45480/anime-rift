@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { createPortal } from 'react-dom'
+import { extraArt } from '../assets/manifest'
 import { accountLevel } from '../game/progression'
 import { useStore } from '../state/store'
 import { getVolume, isSoundOn, setSoundOn, setVolume } from '../summon/audio'
@@ -71,6 +72,7 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
     <div className="modal" role="dialog" aria-modal="true" aria-label="Paramètres" onClick={onClose}>
       <div className="modal__box set" onClick={(e) => e.stopPropagation()}>
         <header className="set__head">
+          <img className="set__gear" src={extraArt('set-gear')} alt="" />
           <div><p>Réglages</p><h2>Paramètres</h2></div>
           <button className="notifs__close" onClick={onClose} aria-label="Fermer">×</button>
         </header>
@@ -81,10 +83,11 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
         </section>
         <p className="set__note">Ta partie est gardée sur cet appareil : il n'y a pas encore de compte en ligne ni de connexion.</p>
 
-        <section>
-          <h3>Pseudo</h3>
+        <section className="set-card" style={{ ['--sc' as string]: '#b78bff' }}>
+          <header className="set-card__head"><img src={extraArt('set-profile')} alt="" /><h3>Profil</h3></header>
+          <h4>Pseudo</h4>
           <input className="set__input" type="text" maxLength={20} placeholder="Joueur" aria-label="Pseudo" value={name} onChange={(e) => { setName(e.target.value); store.setProfile({ name: e.target.value }) }} />
-          <h3>Photo de profil</h3>
+          <h4>Photo de profil</h4>
           <div className="set__row">
             <label className="cd-btn cd-btn--small" htmlFor="set-avatar">Choisir une image</label>
             <input id="set-avatar" className="artpick__input" type="file" accept="image/*" onChange={(e) => { void onFile(e.target.files?.[0]); e.target.value = '' }} />
@@ -97,8 +100,8 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
           {error && <p className="artpick__error" role="alert">{error}</p>}
         </section>
 
-        <section>
-          <h3>Son</h3>
+        <section className="set-card" style={{ ['--sc' as string]: '#5ee6ff' }}>
+          <header className="set-card__head"><img src={extraArt('set-sound')} alt="" /><h3>Son</h3></header>
           <label className="set__slider"><span>Bruitages</span><b>{Math.round(volume * 100)} %</b>
             <input type="range" min={0} max={100} step={5} value={Math.round(volume * 100)} onChange={(e) => { const v = Number(e.target.value) / 100; setVol(v); setVolume(v) }} />
           </label>
@@ -106,8 +109,8 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
           <p className="set__note">Le jeu n'a pas encore de musique : ce réglage concerne les bruitages d'invocation.</p>
         </section>
 
-        <section>
-          <h3>Graphismes</h3>
+        <section className="set-card" style={{ ['--sc' as string]: '#a56bff' }}>
+          <header className="set-card__head"><img src={extraArt('set-graphics')} alt="" /><h3>Graphismes</h3></header>
           <div className="set__seg" role="radiogroup" aria-label="Qualité graphique">
             {GRAPHICS.map(([id, label, sub]) => (
               <button key={id} role="radio" aria-checked={graphics === id} className={graphics === id ? 'is-on' : ''} onClick={() => { setGraphics(id); setGfx(id) }}><b>{label}</b><small>{sub}</small></button>
@@ -116,8 +119,8 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
           <p className="set__note">Qualité en ce moment : <b>{effectiveGraphics(graphics) === 'low' ? 'Fluide' : 'Maximale'}</b>. Le mode Fluide fige les lueurs animées, retire les flous et allège l'animation d'invocation : idéal si le jeu saccade.</p>
         </section>
 
-        <section>
-          <h3>Ajouter à l'écran d'accueil</h3>
+        <section className="set-card" style={{ ['--sc' as string]: '#4be3a4' }}>
+          <header className="set-card__head"><img src={extraArt('set-phone')} alt="" /><h3>Ajouter à l'écran d'accueil</h3></header>
           <ol className="set__steps">
             <li>Ouvre le jeu dans le navigateur de ton téléphone (Safari sur iPhone, Chrome sur Android).</li>
             <li>Touche le bouton de partage (iPhone) ou le menu ⋮ (Android).</li>
@@ -125,13 +128,13 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
           </ol>
         </section>
 
-        <section>
-          <h3>Doublons</h3>
+        <section className="set-card" style={{ ['--sc' as string]: '#ffc94d' }}>
+          <header className="set-card__head"><img src={extraArt('set-cards')} alt="" /><h3>Doublons</h3></header>
           <p className="set__note">Tes doublons restent dans ta collection. À toi de choisir quand les fusionner, depuis la fiche d'une carte.</p>
         </section>
 
-        <section>
-          <h3>Titres des cartes</h3>
+        <section className="set-card" style={{ ['--sc' as string]: '#ff9a4a' }}>
+          <header className="set-card__head"><img src={extraArt('set-medal')} alt="" /><h3>Titres des cartes</h3></header>
           <div className="set__seg set__seg--two" role="radiogroup" aria-label="Affichage des titres">
             <button role="radio" aria-checked={titles === 'all'} className={titles === 'all' ? 'is-on' : ''} onClick={() => { setTitleMode('all'); setTitles('all') }}><b>Partout</b><small>Par défaut</small></button>
             <button role="radio" aria-checked={titles === 'big'} className={titles === 'big' ? 'is-on' : ''} onClick={() => { setTitleMode('big'); setTitles('big') }}><b>Carte ouverte</b><small>Mini-cartes épurées</small></button>
@@ -139,15 +142,15 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
           <p className="set__note">Le ruban du titre gagné s'affiche sur la carte. « Carte ouverte » le retire des petites cartes des grilles.</p>
         </section>
 
-        <section>
-          <h3>Didacticiel</h3>
+        <section className="set-card" style={{ ['--sc' as string]: '#5aa8ff' }}>
+          <header className="set-card__head"><Kiri size={54} /><h3>Didacticiel</h3></header>
           <button className="set__replay" onClick={() => { store.resetTutorial(); setReplay(true) }}>
-            <Kiri size={64} /><span><b>Revoir les explications de Kiri</b><small>{replay ? 'C’est noté : Kiri réexpliquera chaque écran.' : 'Kiri réexplique chaque écran la prochaine fois que tu l’ouvres.'}</small></span>
+            <span><b>Revoir les explications de Kiri</b><small>{replay ? 'C’est noté : Kiri réexpliquera chaque écran.' : 'Kiri réexplique chaque écran la prochaine fois que tu l’ouvres.'}</small></span>
           </button>
         </section>
 
-        <section className="set__danger">
-          <h3>Recommencer la partie</h3>
+        <section className="set-card set__danger" style={{ ['--sc' as string]: '#ff5d7a' }}>
+          <header className="set-card__head"><img src={extraArt('set-reset')} alt="" /><h3>Recommencer la partie</h3></header>
           <p className="set__note">Efface toutes tes cartes, tes niveaux, tes Renaissances et ta progression sur cet appareil. Ton pseudo et ta photo sont gardés.</p>
           <button className="cd-btn cd-btn--small" onClick={reset}>{armed ? 'Appuie encore pour tout effacer : c’est définitif' : 'Effacer ma partie'}</button>
         </section>

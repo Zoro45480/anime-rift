@@ -58,4 +58,4 @@ export const digitArt = (style: string, glyph: string): string => digits[`./digi
 const extras = import.meta.glob('./extras/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 
 // Bandeaux de titre (un par univers, inspiré de son animé), Kiri (planche de 16 images, 4×4) et micro du seiyū — rendus Blender (tools/blender/build_extras.py).
-export const extraArt = (name: `ribbon-${string}` | `emblem-${string}` | 'guide' | 'mic'): string => extras[`./extras/${name}.webp`] ?? ''
+export const extraArt = (name: `ribbon-${string}` | `emblem-${string}` | `set-${string}` | 'guide' | 'mic'): string => extras[`./extras/${name}.webp`] ?? ''
