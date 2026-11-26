@@ -239,7 +239,7 @@ const Edit = ({ ach, start, onClose }: { ach: AchState; start: EditTab; onClose:
                   const a = ACHIEVEMENTS.find((x) => x.title === t)
                   const shop = COSMETICS.find((x) => x.kind === 'title' && x.name === t)
                   return <li key={t}><button disabled={!ok} className={worn ? 'is-on' : ''} aria-pressed={worn} aria-label={`Titre ${t}`} onClick={() => store.setProfile({ title: t })}>
-                    <TitlePlate title={t} small /><small>{worn ? 'Équipé' : ok ? RARITY_LABEL[titleRarity(t)] : a ? `Succès « ${a.name} »` : shop ? `${n(shop.price)} âmes en boutique` : ''}</small>
+                    <TitlePlate title={t} small /><small>{worn ? 'Équipé' : ok ? RARITY_LABEL[titleRarity(t)] : a ? `Succès « ${a.name} »` : shop ? <Price text={`${n(shop.price)} âmes en boutique`} /> : ''}</small>
                   </button></li>
                 })}
               </ul>
@@ -265,7 +265,7 @@ const Edit = ({ ach, start, onClose }: { ach: AchState; start: EditTab; onClose:
                   const worn = profile[c.kind as 'frame'] === c.id
                   return (
                     <li key={c.id}><button disabled={!ok} className={worn ? 'is-on' : ''} aria-pressed={worn} aria-label={`${c.name}${worn ? ' (équipé)' : ''}`} style={{ ['--rh' as string]: RARITY_HUE[c.rarity] }} onClick={() => equip(c)}>
-                      {swatch(c)}<b>{c.name}</b><small>{worn ? 'Équipé' : ok ? RARITY_LABEL[c.rarity] : howToGet(c)}</small>
+                      {swatch(c)}<b>{c.name}</b><small>{worn ? 'Équipé' : ok ? RARITY_LABEL[c.rarity] : <Price text={howToGet(c)} />}</small>
                     </button></li>
                   )
                 })}
@@ -485,4 +485,10 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
       {edit && <Edit ach={ach} start={edit} onClose={() => setEdit(null)} />}
     </div>
   )
+}
+
+// Remplace « 150 âmes » par 150 suivi du logo des âmes.
+const Price = ({ text }: { text: string }) => {
+  const parts = text.split(/([\d\s\u202f]+) âmes/)
+  return <span className="pe__cost">{parts.map((x, i) => (i % 2 ? <span key={i} className="pe__cost-n">{x.trim()}<Coin name="soul" size={15} /></span> : x))}</span>
 }

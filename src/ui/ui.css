@@ -2455,3 +2455,6 @@ h1.pf-name { font-size: clamp(34px, 8vw, 52px); line-height: 1; overflow-wrap: a
 .role--hybride::before { background-image: url('../assets/ui/role-hybrid.webp'); }
 .fchip.role::before { width: 26px; height: 26px; }
 .fchip.role { min-height: 40px; }
+.pe__cost { display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 3px; }
+.pe__cost-n { display: inline-flex; align-items: center; gap: 3px; font-weight: 800; color: var(--cream); }
+.pe__cost-n .coin { width: 19px !important; height: 19px !important; filter: drop-shadow(0 0 4px rgba(120, 180, 255, 0.6)); }
