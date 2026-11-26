@@ -15,6 +15,7 @@ export const BANNERS: Banner[] = [
 ]
 
 export const PITY_MAX = 50 // une carte SSR, LR ou MR est garantie à la 50e invocation sans en avoir obtenu
+export const BIG_PITY = 30 // grande garantie : une carte MR au 30e multi ×10 d'une bannière sans MR
 export const COST = { ticket: 1, gems: 30 } // prix d'une invocation
 
 // Famille de cadres d'un personnage : celle de la bannière de son univers.

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { BANNERS, COST, PITY_MAX } from '../data/banners'
+import { BANNERS, BIG_PITY, COST, PITY_MAX, type Banner } from '../data/banners'
 import { heroById, type Hero } from '../data/heroes'
 import { RARITIES, RARITY_ORDER } from '../data/rarities'
 import { extraArt, heroArt, iconArt } from '../assets/manifest'
@@ -32,15 +32,26 @@ const useCountdown = (iso: string) => {
   return ms === 0 ? 'Terminée' : `${d} j ${h} h ${m} min`
 }
 
-// Barre de pity : elle se remplit à chaque invocation sans carte SSR, LR ou MR ; pleine, la suivante en est une.
-const PityBar = ({ value }: { value: number }) => (
-  <div className="pity" role="meter" aria-valuemin={0} aria-valuemax={PITY_MAX} aria-valuenow={value} aria-label="Garantie">
-    <div className="pity__row">
-      <span className="pity__label">Garantie SSR ou mieux</span>
-      <b className="pity__count">{value}<i> / {PITY_MAX}</i></b>
+// Les deux garanties d'une bannière. Petite : une SSR ou mieux au plus tard à la 50e invocation.
+// Grande : une MR au 30e multi ×10 d'affilée sans MR sur cette bannière.
+const PityBar = ({ value, multis, banner }: { value: number; multis: number; banner: Banner }) => (
+  <div className="pity" role="group" aria-label="Garanties">
+    <div role="meter" aria-valuemin={0} aria-valuemax={PITY_MAX} aria-valuenow={value} aria-label="Garantie SSR ou mieux">
+      <div className="pity__row">
+        <span className="pity__label">Garantie SSR ou mieux</span>
+        <b className="pity__count">{value}<i> / {PITY_MAX}</i></b>
+      </div>
+      <div className="pity__track"><i style={{ width: `${(value / PITY_MAX) * 100}%` }} /></div>
+      <p className="pity__note">{value + 1 >= PITY_MAX ? 'La prochaine invocation est garantie SSR, LR ou MR.' : `Encore ${PITY_MAX - value} invocations au plus avant une carte SSR, LR ou MR garantie.`}</p>
     </div>
-    <div className="pity__track"><i style={{ width: `${(value / PITY_MAX) * 100}%` }} /></div>
-    <p className="pity__note">{value + 1 >= PITY_MAX ? 'La prochaine invocation est garantie SSR, LR ou MR.' : `Encore ${PITY_MAX - value} invocations au plus avant une carte SSR, LR ou MR garantie.`}</p>
+    <div className="pity__big" role="meter" aria-valuemin={0} aria-valuemax={BIG_PITY} aria-valuenow={multis} aria-label="Grande garantie MR">
+      <div className="pity__row">
+        <span className="pity__label">Grande garantie <b>MR</b></span>
+        <b className="pity__count">{multis}<i> / {BIG_PITY} multis</i></b>
+      </div>
+      <ol className="pity__steps" aria-hidden="true">{Array.from({ length: BIG_PITY }, (_, i) => <li key={i} className={i < multis ? 'is-on' : ''} />)}</ol>
+      <p className="pity__note">{multis + 1 >= BIG_PITY ? <>Ton prochain <b>×10</b> sur {banner.world} contient une carte MR garantie !</> : <>Encore {BIG_PITY - multis} invocations ×10 sur {banner.world} au plus avant une MR garantie. Le compteur repart à zéro quand une MR sort.</>}</p>
+    </div>
   </div>
 )
 
@@ -136,7 +147,11 @@ export const Banners = ({ onRebirth }: { onRebirth: () => void }) => {
             </button>
           </div>
         </div>
-        <PityBar value={pity} />
+        <ul className="owned-count">
+          <li><b>{banner.featured.filter((id) => store.owned[id]).length}<i> / {banner.featured.length}</i></b><span>têtes d'affiche possédées</span></li>
+          <li><b>{bannerPool(banner).filter((h) => store.owned[h.id]).length}<i> / {bannerPool(banner).length}</i></b><span>cartes de la bannière possédées</span></li>
+        </ul>
+        <PityBar value={pity} multis={store.multis[banner.id] ?? 0} banner={banner} />
         <div className="console__pulls">
           {[1, 5, 10].map((n) => (
             <button key={n} className={`pull ${n === 10 ? 'pull--gold' : ''}`} disabled={!store.canAfford(currency, n)} onClick={() => summon(n)}>

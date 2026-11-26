@@ -53,12 +53,18 @@ export const pullOne = (banner: Banner, pity: number, rng: Rng): PullResult => {
   return { hero, pity: isPityRarity(rarity) ? 0 : pity + 1 }
 }
 
-export const pullMany = (banner: Banner, pity: number, count: number, rng: Rng): { heroes: Hero[]; pity: number } => {
+// `forceRift` : grande garantie, la dernière carte du multi devient une MR (une tête d'affiche si possible) s'il n'y en a pas eu.
+export const pullMany = (banner: Banner, pity: number, count: number, rng: Rng, forceRift = false): { heroes: Hero[]; pity: number } => {
   const heroes: Hero[] = []
   for (let i = 0; i < count; i++) {
     const r = pullOne(banner, pity, rng)
     heroes.push(r.hero)
     pity = r.pity
+  }
+  if (forceRift && !heroes.some((h) => h.rarity === 'rift')) {
+    const pool = poolOf(banner, 'rift')
+    const featured = pool.filter((h) => banner.featured.includes(h.id))
+    if (pool.length) { heroes[heroes.length - 1] = pick(rng, featured.length ? featured : pool); pity = 0 }
   }
   return { heroes, pity }
 }

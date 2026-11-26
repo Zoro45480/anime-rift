@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { BANNERS, COST, type Banner } from '../data/banners'
+import { BANNERS, BIG_PITY, COST, type Banner } from '../data/banners'
 import { heroById, type Hero } from '../data/heroes'
 import { isPityRarity, RARITIES } from '../data/rarities'
 import { pullMany } from '../game/gacha'
@@ -45,6 +45,7 @@ type State = {
   cosmetics: string[] // objets d'apparence achetés
   seen: { last: string; days: number } // jours de jeu différents (succès d'ancienneté)
   achDone: string[] | null // succès déjà annoncés (null : ancienne sauvegarde, on les marque sans notification)
+  multis: Record<string, number> // grande garantie : multis ×10 d'affilée sans MR, par bannière
   spire: { best: number } // La Spire : plus haut étage gagné
   path: PathState // Chemin du Rift : saison, XP, paliers récupérés
   quests: Quests // contrats : compteurs du jour, de la semaine, à vie, série quotidienne
@@ -115,7 +116,7 @@ const LOG_MAX = 30
 // Dotation de départ du compte.
 export const START_GEMS = 600
 const START: State = {
-  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' }, frame: '', ornament: '', aura: '', color: '', effect: '', theme: '', badges: [] }, pulls: 0, wins: 0, cosmetics: [], quests: emptyQuests(), path: { season: 0, xp: 0, claimed: [] }, spire: { best: 0 }, seen: { last: '', days: 0 }, achDone: [], arcHeroes: {}, tutorialSeen: [],
+  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' }, frame: '', ornament: '', aura: '', color: '', effect: '', theme: '', badges: [] }, pulls: 0, wins: 0, cosmetics: [], quests: emptyQuests(), path: { season: 0, xp: 0, claimed: [] }, spire: { best: 0 }, multis: {}, seen: { last: '', days: 0 }, achDone: [], arcHeroes: {}, tutorialSeen: [],
   tickets: 20, gems: START_GEMS, pity: Object.fromEntries(BANNERS.map((b) => [b.id, 0])), owned: {},
   xp: {}, scrolls: { small: 0, medium: 0, large: 0 }, wish: [], pinned: [], favs: [], log: {},
 }
@@ -234,7 +235,9 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
 
     const summon = (banner: Banner, currency: Currency, count: number) => {
       if (!canAfford(currency, count)) return null
-      const { heroes, pity } = pullMany(banner, state.pity[banner.id], count, Math.random)
+      const streak = (state.multis[banner.id] ?? 0) + (count === 10 ? 1 : 0)
+      const { heroes, pity } = pullMany(banner, state.pity[banner.id], count, Math.random, count === 10 && streak >= BIG_PITY)
+      const multis = { ...state.multis, [banner.id]: heroes.some((h) => h.rarity === 'rift') ? 0 : streak }
       const owned = { ...state.owned }
       let log = state.log
       let accountXp = state.accountXp
@@ -249,7 +252,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         ...state,
         tickets: state.tickets - (currency === 'ticket' ? price(currency, count) : 0),
         gems: state.gems - (currency === 'gems' ? price(currency, count) : 0),
-        pity: { ...state.pity, [banner.id]: pity },
+        pity: { ...state.pity, [banner.id]: pity }, multis,
         owned, log, accountXp, pulls: state.pulls + count,
         notifs: notify(state.notifs, [
           ...heroes.filter((h) => isPityRarity(h.rarity)).map((h): [Notif['kind'], string] => ['pull', `Gros tirage : ${h.name} (${RARITIES[h.rarity].short}) sur la bannière ${banner.world}.`]),

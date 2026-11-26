@@ -101,3 +101,15 @@ describe('gacha', () => {
     expect(pity).toBeLessThanOrEqual(10)
   })
 })
+
+describe('grande garantie MR', () => {
+  it('le multi forcé contient toujours une MR de la bannière', () => {
+    for (const banner of BANNERS) {
+      let seed = 7
+      const rng = () => ((seed = (seed * 16807) % 2147483647) / 2147483647)
+      const { heroes } = pullMany(banner, 0, 10, rng, true)
+      expect(heroes.some((h) => h.rarity === 'rift' && banner.pool.includes(h.world))).toBe(true)
+      expect(heroes).toHaveLength(10)
+    }
+  })
+})
