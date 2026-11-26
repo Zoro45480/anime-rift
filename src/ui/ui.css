@@ -1507,3 +1507,22 @@ button.nx-gate { width: 100%; text-align: left; cursor: pointer; min-height: 210
 .ach li.is-done small { color: #ffc94d; }
 .ach .cd-bar i { background: linear-gradient(90deg, #ffab2e, #ffe07a); }
 @media (max-width: 480px) { .coltabs > .coltabs__bar button { font-size: 14.5px; padding: 8px 9px; } .coltabs > .coltabs__bar { gap: 2px; } }
+
+/* ───────── Profil : cadre 3D de la photo et médaillons (Blender) ───────── */
+.avatar-frame { position: relative; flex: none; display: grid; place-items: center; }
+.avatar-frame > img { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7)); }
+.avatar-frame .avatar { box-shadow: none !important; }
+.avatar-frame--t4 > img { animation: frame-glow 3.4s ease-in-out infinite; }
+.avatar-frame--r > img { animation: frame-rainbow 8s linear infinite; }
+@keyframes frame-glow { 50% { filter: drop-shadow(0 0 16px rgba(255, 120, 220, 0.9)) brightness(1.12); } }
+@keyframes frame-rainbow { from { filter: hue-rotate(0deg) drop-shadow(0 0 14px rgba(255, 255, 255, 0.7)); } to { filter: hue-rotate(360deg) drop-shadow(0 0 14px rgba(255, 255, 255, 0.7)); } }
+@media (prefers-reduced-motion: reduce) { .avatar-frame > img { animation: none !important; } }
+.pf-hero__id { gap: 6px; }
+.pf-hero__id .avatar-frame { margin: -18px 0 -18px -22px; }
+.set .set__profile .avatar-frame { margin: -14px 0 -14px -14px; }
+.pf-dist li { grid-template-columns: 62px 1fr; padding: 8px 12px 8px 6px; }
+.pf-dist img { grid-row: span 2; width: 62px; height: 62px; object-fit: contain; filter: drop-shadow(0 0 10px color-mix(in srgb, var(--dc) 55%, transparent)); transition: transform 300ms var(--ease-out); }
+.pf-dist li:hover img { transform: scale(1.12) rotate(-6deg); }
+.ach h3 { display: flex; align-items: center; gap: 8px; }
+.ach h3 img { width: 34px; height: 34px; }
+@media (max-width: 480px) { .pf-hero__id { grid-template-columns: 1fr; justify-items: center; text-align: center; } .pf-hero__id .avatar-frame { margin: -10px 0 -20px; } .pf-hero__chips { justify-content: center; } .pf-hero { padding-top: 90px; } }

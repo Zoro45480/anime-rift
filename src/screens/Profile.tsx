@@ -9,8 +9,8 @@ import { accountLevel, cardState } from '../game/progression'
 import { STAGES } from '../game/saga'
 import { SHOWCASE_MAX, useStore } from '../state/store'
 import { Card, LazyCard } from '../ui/Card'
-import { LevelBadge } from '../ui/LevelBadge'
-import { Avatar } from '../ui/Settings'
+import { LevelBadge, levelStyle } from '../ui/LevelBadge'
+import { Avatar, FramedAvatar } from '../ui/Settings'
 
 const n = (x: number) => x.toLocaleString('fr-FR')
 const fold = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
@@ -167,7 +167,7 @@ const Achievements = ({ ach }: { ach: AchState }) => (
       const list = ACHIEVEMENTS.filter((a) => a.group === group)
       return (
         <div key={group} className="ach">
-          <h3>{group} <small>{list.filter((a) => progressOf(a, ach).done).length} / {list.length}</small></h3>
+          <h3><img src={extraArt('dist-trophy')} alt="" />{group} <small>{list.filter((a) => progressOf(a, ach).done).length} / {list.length}</small></h3>
           <ul>
             {list.map((a) => {
               const p = progressOf(a, ach)
@@ -232,7 +232,7 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
       <section className="pf-hero">
         <Banner className="pf-hero__bg" />
         <div className="pf-hero__id">
-          <Avatar size={104} />
+          <FramedAvatar size={190} style={levelStyle(acc.level, store.rebirths)} />
           <div>
             <h1>{profile.name.trim() || 'Joueur'}</h1>
             <p className="pf-hero__chips"><span className="pf-title">{profile.title || DEFAULT_TITLE}</span><span>#{profile.tag}</span></p>
@@ -252,12 +252,12 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
       <section className="pf-box">
         <h2>Distinctions</h2>
         <ul className="pf-dist">
-          <li style={{ ['--dc' as string]: '#ff9a4a' }}><i lang="ja">転</i><b>{store.rebirths}</b><span>Renaissance{store.rebirths > 1 ? 's' : ''}</span></li>
-          <li style={{ ['--dc' as string]: '#ff7ab8' }}><i lang="ja">光</i><b>{legends}</b><span>Cartes LR et MR</span></li>
-          <li style={{ ['--dc' as string]: '#4be3a4' }}><i lang="ja">集</i><b>{((mine.length / HEROES.length) * 100).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} %</b><span>{n(mine.length)} persos</span></li>
-          <li style={{ ['--dc' as string]: '#ffc94d' }}><i lang="ja">星</i><b>{stars}</b><span>Étoiles de La Saga</span></li>
-          <li style={{ ['--dc' as string]: '#b78bff' }}><i lang="ja">誉</i><b>{done} / {ACHIEVEMENTS.length}</b><span>Succès</span></li>
-          <li style={{ ['--dc' as string]: '#5aa8ff' }}><i lang="ja">召</i><b>{n(store.pulls)}</b><span>Invocations</span></li>
+          <li style={{ ['--dc' as string]: '#ff9a4a' }}><img src={extraArt('dist-rebirth')} alt="" /><b>{store.rebirths}</b><span>Renaissance{store.rebirths > 1 ? 's' : ''}</span></li>
+          <li style={{ ['--dc' as string]: '#ff7ab8' }}><img src={extraArt('dist-legend')} alt="" /><b>{legends}</b><span>Cartes LR et MR</span></li>
+          <li style={{ ['--dc' as string]: '#4be3a4' }}><img src={extraArt('dist-collection')} alt="" /><b>{((mine.length / HEROES.length) * 100).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} %</b><span>{n(mine.length)} persos</span></li>
+          <li style={{ ['--dc' as string]: '#ffc94d' }}><img src={extraArt('dist-stars')} alt="" /><b>{stars}</b><span>Étoiles de La Saga</span></li>
+          <li style={{ ['--dc' as string]: '#b78bff' }}><img src={extraArt('dist-trophy')} alt="" /><b>{done} / {ACHIEVEMENTS.length}</b><span>Succès</span></li>
+          <li style={{ ['--dc' as string]: '#5aa8ff' }}><img src={extraArt('dist-summon')} alt="" /><b>{n(store.pulls)}</b><span>Invocations</span></li>
         </ul>
       </section>
 
