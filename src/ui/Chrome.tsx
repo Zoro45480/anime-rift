@@ -2,7 +2,6 @@ import { accountLevel, ENERGY_MAX } from '../game/progression'
 import { LevelBadge } from './LevelBadge'
 import { Avatar, Settings } from './Settings'
 import { NotifPanel, NotifToast, type NotifGo } from './Notifs'
-import { Shop } from './Shop'
 import { COMMUNITY, type CommunityTab } from '../screens/Community'
 import { useEffect, useState } from 'react'
 import { useStore } from '../state/store'
@@ -23,9 +22,8 @@ export const Logo = () => (
 export type QuestTab = 'daily' | 'contracts' | 'rift' | 'path'
 export type NavProps = { tab: TabId; profileOn: boolean; onTab: (t: TabId) => void; onQuest: (t: QuestTab) => void; onCommunity: (t: CommunityTab) => void }
 export const TopBar = ({ onPlay, onSummon, onProfile, onGo, nav }: { onPlay: () => void; onSummon: () => void; onProfile: () => void; onGo: NotifGo; nav: NavProps }) => {
-  const { tickets, gems, energyLeft, accountXp, rebirths, notifs, readNotifs, clearNotifs, giftReady } = useStore()
+  const { tickets, gems, energyLeft, accountXp, rebirths, notifs, readNotifs, clearNotifs } = useStore()
   const [open, setOpen] = useState(false)
-  const [shop, setShop] = useState(false)
   useEffect(() => { const f = () => setSettings(true); window.addEventListener('anime-rift:settings', f); return () => window.removeEventListener('anime-rift:settings', f) }, [])
   const [settings, setSettings] = useState(false)
   const unread = notifs.filter((x) => !x.read).length
@@ -41,7 +39,6 @@ export const TopBar = ({ onPlay, onSummon, onProfile, onGo, nav }: { onPlay: () 
           <button className="wallet__energy" onClick={onPlay} aria-label={`Énergie : ${energyLeft} sur ${ENERGY_MAX}. Aller au Nexus`}><Coin name="bolt" size={24} /><b>{energyLeft}<small>/{ENERGY_MAX}</small></b></button>
           <button className="wallet__energy" onClick={onSummon} aria-label={`Flammes d'âme : ${gems}. Aller aux invocations`}><Coin name="soul" size={24} /><b>{gems}</b></button>
           <button className="wallet__energy" onClick={onSummon} aria-label={`Sceaux d'invocation : ${tickets}. Aller aux invocations`}><Coin name="seal" size={24} /><b>{tickets}</b></button>
-          <button className={`bell bell--shop ${giftReady ? 'has-unread' : ''}`} onClick={() => setShop(true)} aria-label={`Boutique${giftReady ? ' : cadeau du jour à récupérer' : ''}`}><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8L5 8Z" /><path d="M9 10V7a3 3 0 0 1 6 0v3" /></svg>{giftReady && <i>1</i>}</button>
           <button className={`bell ${unread ? 'has-unread' : ''}`} onClick={toggle} aria-expanded={open} aria-label={`Notifications${unread ? ` : ${unread} non lue${unread > 1 ? 's' : ''}` : ''}`}>
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z" /><path d="M10 20a2.2 2.2 0 0 0 4 0" /></svg>
             {unread > 0 && <i>{unread > 9 ? '9+' : unread}</i>}
@@ -55,7 +52,6 @@ export const TopBar = ({ onPlay, onSummon, onProfile, onGo, nav }: { onPlay: () 
       {settings && <Settings onClose={() => setSettings(false)} />}
       {open && <NotifPanel notifs={notifs} full={full} onClear={clearNotifs} onClose={toggle} onGo={onGo} />}
       <NotifToast notifs={notifs} muted={open} onGo={onGo} />
-      {shop && <Shop onClose={() => setShop(false)} />}
     </header>
   )
 }
