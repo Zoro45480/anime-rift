@@ -83,9 +83,10 @@ describe('progression des cartes', () => {
   })
 
   it('le compte monte jusqu’au niveau 100, deux fois plus lentement après chaque Renaissance', () => {
-    expect(accountLevel(0, 0)).toEqual({ level: 1, into: 0, need: 120 })
-    expect(accountLevel(120, 0).level).toBe(2)
-    expect(accountLevel(120, 1).level).toBe(1)
+    expect(accountLevel(0, 0)).toEqual({ level: 1, into: 0, need: 400 })
+    expect(accountLevel(399, 0).level).toBe(1)
+    expect(accountLevel(400, 0).level).toBe(2)
+    expect(accountLevel(400, 1).level).toBe(1)
     let total = 0
     for (let l = 1; l < REBIRTH_LEVEL; l++) total += accountNeed(l, 0)
     expect(accountLevel(total - 1, 0).level).toBe(99)

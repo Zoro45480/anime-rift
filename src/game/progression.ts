@@ -112,9 +112,10 @@ export const REBIRTH_STAT = 6 // % de PV, d'attaque et de défense en plus sur t
 export const REBIRTH_XP = 50 // % d'XP en plus des parchemins et des fusions, par Renaissance
 export const REBIRTH_SEALS = 10 // sceaux d'invocation offerts
 export const REBIRTH_REFUND = 0.25 // part des âmes dépensées qui est rendue
-export const ACCOUNT_XP: Record<RarityId, number> = { common: 20, rare: 30, epic: 60, ultra: 150, legend: 400, rift: 2000 }
+export const ACCOUNT_XP: Record<RarityId, number> = { common: 5, rare: 8, epic: 15, ultra: 40, legend: 100, rift: 500 }
 // XP de compte pour passer au niveau suivant : deux fois plus à chaque Renaissance.
-export const accountNeed = (level: number, rebirths: number) => (100 + 20 * level) * 2 ** rebirths
+// La montée est volontairement lente : une dizaine de combats pour le niveau 2, de plus en plus ensuite.
+export const accountNeed = (level: number, rebirths: number) => (300 + 100 * level) * 2 ** rebirths
 export const accountLevel = (xp: number, rebirths: number): { level: number; into: number; need: number } => {
   let level = 1
   let rest = xp

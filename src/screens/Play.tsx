@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
-import { gateArt } from '../assets/manifest'
+import { gateArt, heroArt } from '../assets/manifest'
 import { ENERGY_OVER, ENERGY_REFILL, ENERGY_REFILL_COST, ENERGY_MAX, ENERGY_REGEN_MS, accountLevel, REBIRTH_KEEP, REBIRTH_LEVEL, REBIRTH_STAT, REBIRTH_XP } from '../game/progression'
 import { useStore } from '../state/store'
 import { Guide } from '../ui/Guide'
@@ -12,28 +12,31 @@ import { LEVEL_STYLE_NAME, LevelBadge, levelStyle } from '../ui/LevelBadge'
 
 // Les portes du Nexus. Aucune n'est encore ouverte : chaque fiche dit ce que le mode contiendra.
 const GATES = [
-  { id: 'saga', numeral: 'I', kanji: '物語', title: 'La Saga', tag: 'Histoire', text: 'Traverse chaque univers, combat après combat. Gagne de l’XP, des âmes et des parchemins.', hue: '#2bc8d9',
+  { id: 'saga', model: 'Vita', numeral: 'I', kanji: '物語', title: 'La Saga', tag: 'Histoire', text: 'Traverse chaque univers, combat après combat. Gagne de l’XP, des âmes et des parchemins.', hue: '#2bc8d9',
     points: ['Des chapitres à traverser avec ton équipe de cartes', 'Des combats au tour par tour avec les techniques de tes personnages', 'De l’XP de compte et des parchemins à chaque victoire'] },
-  { id: 'raids', numeral: 'II', kanji: '巨人', title: 'Les Colosses', tag: 'Boss', text: 'Des boss à plusieurs phases qui demandent une vraie préparation.', hue: '#ff3d8b',
+  { id: 'raids', model: 'Darkness_Shibu', numeral: 'II', kanji: '巨人', title: 'Les Colosses', tag: 'Boss', text: 'Des boss à plusieurs phases qui demandent une vraie préparation.', hue: '#ff3d8b',
     points: ['Des boss géants qui changent de comportement à chaque phase', 'Tanks, DPS et soigneurs deviennent tous utiles', 'Des coffres de raid à ouvrir dans ton inventaire'] },
-  { id: 'spire', numeral: 'III', kanji: '塔', title: 'La Spire', tag: 'Tour', text: 'Une tour sans fin, dont les règles changent à chaque étage.', hue: '#ffb829',
+  { id: 'spire', model: 'Victoria_Rubin', numeral: 'III', kanji: '塔', title: 'La Spire', tag: 'Tour', text: 'Une tour sans fin, dont les règles changent à chaque étage.', hue: '#ffb829',
     points: ['Un étage après l’autre, de plus en plus dur', 'Une règle spéciale par étage', 'Jusqu’où ira ta meilleure équipe ?'] },
-  { id: 'arena', numeral: 'IV', kanji: '闘', title: 'L’Arène', tag: 'Duel', text: 'Affronte les équipes des autres joueurs.', hue: '#ff6a2b',
+  { id: 'arena', model: 'Sendagaya_Shibu', numeral: 'IV', kanji: '闘', title: 'L’Arène', tag: 'Duel', text: 'Affronte les équipes des autres joueurs.', hue: '#ff6a2b',
     points: ['Ton équipe contre celle d’un autre joueur', 'Un classement à grimper', 'Les bonus de Renaissance n’y comptent pas : seul le talent parle'] },
 ] as const
 
 type Gate = (typeof GATES)[number]
 
+// Une porte : panneau de verre noir, lueur à sa couleur, personnage en fondu devant le décor 3D de son mode.
 const GateTile = ({ gate, featured, playable, onOpen }: { gate: Gate; featured?: boolean; playable?: boolean; onOpen: () => void }) => (
-  <button className={`gate ${featured ? 'gate--hero' : ''} ${playable ? 'gate--play' : ''}`} style={{ ['--hue' as string]: gate.hue }} onClick={onOpen} aria-label={`${gate.title} : ${playable ? 'jouer' : 'voir le mode'}`}>
-    <img className="gate__art" src={gateArt(gate.id)} alt="" loading="lazy" />
-    <span className="gate__kanji" lang="ja" aria-hidden="true">{gate.kanji}</span>
-    <span className="gate__slash" aria-hidden="true" />
-    <span className="gate__text">
-      <span className="gate__kicker">Porte {gate.numeral} · {gate.tag}</span>
-      <span className="gate__title">{gate.title}</span>
-      <span className="gate__desc">{gate.text}</span>
-      <span className="gate__cta">{playable ? '▶ Jouer' : <><IconLock />Bientôt · voir le mode</>}</span>
+  <button className={`nx-gate ${featured ? 'nx-gate--hero' : ''} ${playable ? 'nx-gate--play' : ''}`} style={{ ['--hue' as string]: gate.hue }} onClick={onOpen} aria-label={`${gate.title} : ${playable ? 'jouer' : 'voir le mode'}`}>
+    <img className="nx-gate__scene" src={gateArt(gate.id)} alt="" loading="lazy" />
+    <img className="nx-gate__art" src={heroArt(gate.model, 'full')} alt="" loading="lazy" />
+    <span className="nx-gate__numeral" aria-hidden="true">{gate.numeral}</span>
+    <span className="nx-gate__kanji" lang="ja" aria-hidden="true">{gate.kanji}</span>
+    <span className="nx-gate__shine" aria-hidden="true" />
+    <span className="nx-gate__text">
+      <span className="nx-gate__kicker">Porte {gate.numeral} · {gate.tag}</span>
+      <span className="nx-gate__title">{gate.title}</span>
+      <span className="nx-gate__desc">{gate.text}</span>
+      <span className="nx-gate__lock">{playable ? '▶ Jouer' : <><IconLock />Bientôt · voir le mode</>}</span>
     </span>
   </button>
 )
@@ -58,7 +61,7 @@ export const Play = ({ onRebirth }: { onRebirth: () => void }) => {
       </section>
       <header className="nx__head">
         <p className="eyebrow">Le Nexus</p>
-        <h1>Choisis ta porte.</h1>
+        <h1>Quatre portes.<br />Une seule s'ouvre à la fois.</h1>
         <p className="nx__who"><Avatar size={40} /><b>{profile.name.trim() || 'Joueur'}</b></p>
         <p className="nx__level"><LevelBadge level={acc.level} rebirths={rebirths} size={40} /><span>Style {LEVEL_STYLE_NAME[levelStyle(acc.level, rebirths)]} · {acc.need ? `${acc.into.toLocaleString('fr-FR')} / ${acc.need.toLocaleString('fr-FR')} XP de compte` : 'Niveau maximum'}</span></p>
       </header>
