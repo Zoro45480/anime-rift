@@ -84,3 +84,17 @@ export const PVP_GOALS: PvpGoal[] = [
   { id: 'p-gold', title: 'Atteins la ligue Or (1 250)', target: 1250, gems: 200, tickets: 2, value: (a) => a.elo },
   { id: 'p-wins20', title: 'Gagne 20 duels', target: 20, gems: 250, tickets: 2, value: (_a, w) => w.wins },
 ]
+
+// ───── Le Grand Rift : un tournoi par jour, en 3 tours (quart, demie, finale) contre des rivaux de plus en plus forts ─────
+export const ROUNDS = [
+  { label: 'Quart de finale', elo: 0, reward: { gems: 30 } },
+  { label: 'Demi-finale', elo: 90, reward: { gems: 60, tickets: 1 } },
+  { label: 'Finale', elo: 180, reward: { gems: 150, tickets: 2, shards: 5 } },
+] as const
+export type Tourney = { day: string; round: number; out: boolean; titles: number; finals: number }
+export const emptyTourney = (): Tourney => ({ day: '', round: 0, out: false, titles: 0, finals: 0 })
+export const tourneyRival = (elo: number, day: string, round: number): Rival => {
+  const seed = day.split('-').reduce((s, x) => s * 31 + Number(x), 7) + round * 101
+  const r = rivalsFor(elo + ROUNDS[round].elo, seed)[1]
+  return { ...r, id: `t-${day}-${round}`, elo: elo + ROUNDS[round].elo }
+}

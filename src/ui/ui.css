@@ -1993,3 +1993,19 @@ h1.pf-name { font-size: clamp(34px, 8vw, 52px); line-height: 1; overflow-wrap: a
 .set__code { width: 100%; min-height: 70px; font-family: ui-monospace, monospace; font-size: 11px; word-break: break-all; resize: vertical; }
 .cv__gyro { justify-self: center; margin-top: 6px; min-height: 44px; padding: 0 18px; border-radius: 99px; font-size: 13.5px; font-weight: 800; color: #fff; background: rgba(255, 255, 255, 0.08); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2); }
 .cv__gyro.is-on { color: #1a0f2e; background: linear-gradient(100deg, #ffe08a, #b78bff, #7fd8ff); }
+
+/* ───────── Le Grand Rift ───────── */
+.gr { display: grid; gap: 10px; padding: 16px; border-radius: 22px; background: radial-gradient(80% 80% at 50% 0%, rgba(255, 201, 77, 0.16), transparent 60%), #07080d; box-shadow: inset 0 0 0 1.5px rgba(255, 201, 77, 0.5); }
+.gr header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px; }
+.gr header span { font-size: 13px; color: var(--text-dim); }
+.gr header b { color: #ffc94d; }
+.gr__bracket { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; list-style: none; padding: 0; }
+.gr__round { display: grid; gap: 3px; align-content: start; padding: 10px 8px; border-radius: 14px; background: #000; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1); min-width: 0; }
+.gr__round small { font-size: 10.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); }
+.gr__round b { font-size: 13px; color: #fff; overflow-wrap: anywhere; }
+.gr__round span { font-size: 11.5px; color: var(--text-dim); }
+.gr__round em { font-style: normal; font-size: 11px; color: #ffc94d; }
+.gr__round--won { box-shadow: inset 0 0 0 1.5px #4be3a4; }
+.gr__round--won span { color: #4be3a4; }
+.gr__round--lost { box-shadow: inset 0 0 0 1.5px #ff3d5e; opacity: 0.7; }
+.gr__round--now { box-shadow: inset 0 0 0 2px #ffc94d, 0 0 16px rgba(255, 201, 77, 0.3); }

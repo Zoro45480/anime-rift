@@ -9,7 +9,7 @@ import { STAGES, STAGES_PER_ARC } from './saga'
 // à afficher sur le profil, et une médaille 3D (forme = catégorie, métal = rareté du succès).
 export type AchState = {
   owned: Record<string, number>; xp: Record<string, number>; saga: Record<string, number>; awakened: string[]; rebirths: number; pulls: number; wins: number
-  gemsSpent: number; accountXp: number; quests: Quests; spire: { best: number }; path: PathState; seen: { days: number }; arena?: { wins: number; best: number }
+  gemsSpent: number; accountXp: number; quests: Quests; spire: { best: number }; path: PathState; seen: { days: number }; arena?: { wins: number; best: number }; tourney?: { titles: number }
 }
 export const GROUPS = ['Collection', 'Univers', 'Invocations', 'Aventure', 'La Spire', 'Contrats', 'Maîtrise', 'Ancienneté'] as const
 export type Group = (typeof GROUPS)[number]
@@ -65,6 +65,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   one('Aventure', '闘', 'league-gold', 'Ligue Or', 'Atteins la ligue Or en arène (1 250).', 'Lame d’or', 1250, 'silver', (s) => s.arena?.best ?? 0),
   one('Aventure', '闘', 'league-diamond', 'Ligue Diamant', 'Atteins la ligue Diamant (1 700).', 'Éclat de diamant', 1700, 'gold', (s) => s.arena?.best ?? 0),
   one('Aventure', '闘', 'league-legend', 'Légende de l’Arène', 'Atteins la ligue Légende (2 000).', 'Légende de l’Arène', 2000, 'prism', (s) => s.arena?.best ?? 0),
+  ...tiers('Aventure', '冠', 'rift-cup', [[1, 'Vainqueur du Grand Rift', 'Remporte un Grand Rift.', 'Champion du Grand Rift'], [10, 'Maître du Grand Rift', 'Remporte 10 Grands Rifts.', 'Seigneur du tournoi']], (s) => s.tourney?.titles ?? 0),
   // ── La Spire (7)
   ...tiers('La Spire', '塔', 'spire', [[1, 'Premier étage', 'Franchis l’étage 1 de La Spire.', 'Grimpeur'], [5, 'Cinq marches', 'Atteins l’étage 5.', 'Alpiniste'], [10, 'Premier gardien', 'Bats le gardien de l’étage 10.', 'Tueur de gardien'],
     [20, 'Au-dessus des nuages', 'Atteins l’étage 20.', 'Habitant des cimes'], [30, 'Vertige', 'Atteins l’étage 30.', 'Sans vertige'], [50, 'Cœur de la Spire', 'Atteins l’étage 50.', 'Seigneur de la Spire'],

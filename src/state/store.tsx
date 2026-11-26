@@ -12,7 +12,7 @@ import { claimableTiers, PATH_XP, rollCard, rollPath, tierOf, tierReward, type P
 import { applyRule, floor as spireFloor, spireFoes, type Floor } from '../game/spire'
 import { ACHIEVEMENTS, doneIds, METAL_LABEL } from '../game/achievements'
 import { colossusFoes, colossusOf, DIFFICULTIES, eventDone, isOpen as colOpen, rollCol, TRIES_PER_DAY, WIN_SOULS, type ColState, type Difficulty } from '../game/colossus'
-import { DUELS_PER_DAY, eloChange, emptyArena, PVP_GOALS, rivalsFor, rivalUnits, rollWeek, WIN_SOULS as DUEL_SOULS, type ArenaState, type Rival } from '../game/arena'
+import { emptyTourney, ROUNDS, tourneyRival, type Tourney, DUELS_PER_DAY, eloChange, emptyArena, PVP_GOALS, rivalsFor, rivalUnits, rollWeek, WIN_SOULS as DUEL_SOULS, type ArenaState, type Rival } from '../game/arena'
 import { emptyShop, giftOf, rollAtLeast, weeklyOffers, type ShopState } from '../game/shop'
 import { loadAllArt, removeArt, saveArt } from './customArt'
 import { loadBannerArt, loadRemoteArt, type RemoteStatus } from './remoteArt'
@@ -49,6 +49,7 @@ type State = {
   seen: { last: string; days: number } // jours de jeu différents (succès d'ancienneté)
   achDone: string[] | null // succès déjà annoncés (null : ancienne sauvegarde, on les marque sans notification)
   shop: ShopState // boutique : offres achetées cette semaine, cadeau du jour, historique
+  tourney: Tourney // Le Grand Rift : tournoi du jour, titres gagnés
   arena: ArenaState // L'Arène : cote, ligue, duels du jour, défis de la semaine
   col: ColState // Les Colosses : semaine, difficultés battues, essais du jour, objectifs d'événement
   multis: Record<string, number> // grande garantie : multis ×10 d'affilée sans MR, par bannière
@@ -102,6 +103,7 @@ type Store = State & {
   claimGift: () => boolean // cadeau gratuit du jour
   giftReady: boolean
   duel: (rivalId: string) => DuelResult | null // duel d'arène contre un rival du jeu
+  tourneyFight: () => DuelResult | null // combat du tour suivant du Grand Rift
   newRivals: () => void // propose trois autres rivaux
   claimPvp: (id: string) => boolean // défi d'arène de la semaine
   duelsLeft: number
@@ -136,7 +138,7 @@ const LOG_MAX = 30
 // Dotation de départ du compte.
 export const START_GEMS = 600
 const START: State = {
-  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' }, frame: '', ornament: '', aura: '', color: '', effect: '', theme: '', badges: [] }, pulls: 0, wins: 0, cosmetics: [], quests: emptyQuests(), path: { season: 0, xp: 0, claimed: [] }, spire: { best: 0 }, shop: emptyShop(), arena: emptyArena(), col: { week: '', cleared: [], tries: { day: '', n: 0 }, wins: 0, pulls: 0, final: false }, multis: {}, seen: { last: '', days: 0 }, achDone: [], arcHeroes: {}, tutorialSeen: [],
+  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' }, frame: '', ornament: '', aura: '', color: '', effect: '', theme: '', badges: [] }, pulls: 0, wins: 0, cosmetics: [], quests: emptyQuests(), path: { season: 0, xp: 0, claimed: [] }, spire: { best: 0 }, shop: emptyShop(), tourney: emptyTourney(), arena: emptyArena(), col: { week: '', cleared: [], tries: { day: '', n: 0 }, wins: 0, pulls: 0, final: false }, multis: {}, seen: { last: '', days: 0 }, achDone: [], arcHeroes: {}, tutorialSeen: [],
   tickets: 20, gems: START_GEMS, pity: Object.fromEntries(BANNERS.map((b) => [b.id, 0])), owned: {},
   xp: {}, scrolls: { small: 0, medium: 0, large: 0 }, wish: [], pinned: [], favs: [], log: {},
 }
@@ -150,7 +152,7 @@ const load = (): State => {
     const raw = localStorage.getItem(SAVE_KEY)
     if (!raw) return { ...START, profile: { ...START.profile, tag: newTag() } }
     const s = JSON.parse(raw) as Partial<State>
-    const merged = { ...START, achDone: null, ...s, arena: { ...emptyArena(), ...s.arena }, shop: { ...emptyShop(), ...s.shop }, pity: { ...START.pity, ...s.pity }, scrolls: { ...START.scrolls, ...s.scrolls }, profile: { ...START.profile, ...s.profile }, quests: { ...emptyQuests(), ...s.quests } }
+    const merged = { ...START, achDone: null, ...s, arena: { ...emptyArena(), ...s.arena }, tourney: { ...emptyTourney(), ...s.tourney }, shop: { ...emptyShop(), ...s.shop }, pity: { ...START.pity, ...s.pity }, scrolls: { ...START.scrolls, ...s.scrolls }, profile: { ...START.profile, ...s.profile }, quests: { ...emptyQuests(), ...s.quests } }
     return merged.profile.tag ? merged : { ...merged, profile: { ...merged.profile, tag: newTag() } }
   } catch {
     return START
@@ -462,6 +464,23 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setState(tracked(next, { damage, ...(win ? { wins: 1 } : {}) }))
       return { rival, allies, foes, events, win, delta, elo }
     }
+    // Le Grand Rift : un tournoi par jour ; une défaite élimine, la récompense de chaque tour gagné est donnée tout de suite.
+    const tourneyFight = (): DuelResult | null => {
+      const t = new Date(), day = dayKey(t)
+      const tr = state.tourney.day === day ? state.tourney : { ...state.tourney, day, round: 0, out: false }
+      if (tr.out || tr.round >= ROUNDS.length || teamNow.length === 0) return null
+      const rival = tourneyRival(state.arena.elo, day, tr.round)
+      const allies = arenaUnits()
+      const foes = rivalUnits(rival, state.arena.elo, arenaPower)
+      const { events, win } = simulate(allies, foes, Math.random)
+      const damage = events.filter((e) => e.actor.startsWith('0-')).reduce((n, e) => n + e.hits.reduce((m, h) => m + h.amount, 0), 0)
+      const final = tr.round === ROUNDS.length - 1
+      let next: State = { ...state, tourney: { ...tr, round: win ? tr.round + 1 : tr.round, out: !win, titles: tr.titles + (win && final ? 1 : 0), finals: tr.finals + (final ? 1 : 0) }, wins: state.wins + (win ? 1 : 0) }
+      if (win) next = grant(next, ROUNDS[tr.round].reward)
+      if (win && final) next = { ...next, notifs: notify(next.notifs, [['saga', 'Tu remportes le Grand Rift du jour !']]) }
+      setState(tracked(next, { damage, ...(win ? { wins: 1 } : {}) }))
+      return { rival, allies, foes, events, win, delta: 0, elo: state.arena.elo }
+    }
     const newRivals = () => setState({ ...state, arena: { ...state.arena, seed: state.arena.seed + 1 } })
     const claimPvp = (id: string) => {
       const a = state.arena, w = rollWeek(a, new Date())
@@ -588,7 +607,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setArt((a) => Object.fromEntries(Object.entries(a).filter(([k]) => k !== heroId)))
       void removeArt(heroId)
     }
-    return { ...state, canAfford, summon, merge, useScroll, scrollsUseful, toggleFav, toggleWish, togglePin, fightSpire, buyOffer, claimGift, giftReady, duel, newRivals, claimPvp, duelsLeft, arenaPower, fightColossus, claimEvent, colTries, claimContract, claimDaily, claimChallenge, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
+    return { ...state, canAfford, summon, merge, useScroll, scrollsUseful, toggleFav, toggleWish, togglePin, fightSpire, tourneyFight, buyOffer, claimGift, giftReady, duel, newRivals, claimPvp, duelsLeft, arenaPower, fightColossus, claimEvent, colTries, claimContract, claimDaily, claimChallenge, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
   }, [state, customArt, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, now])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>

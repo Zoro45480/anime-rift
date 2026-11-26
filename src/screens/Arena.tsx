@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { gateArt, uiArt } from '../assets/manifest'
 import { RARITIES } from '../data/rarities'
-import { DUELS_PER_DAY, LEAGUES, leagueOf, PVP_GOALS, rivalsFor, rollWeek, WIN_SOULS, type LeagueId } from '../game/arena'
-import { msToWeekEnd } from '../game/contracts'
+import { ROUNDS, tourneyRival, DUELS_PER_DAY, LEAGUES, leagueOf, PVP_GOALS, rivalsFor, rollWeek, WIN_SOULS, type LeagueId } from '../game/arena'
+import { dayKey, msToWeekEnd } from '../game/contracts'
 import { useStore, type DuelResult } from '../state/store'
 import { Coin } from '../ui/Coin'
 import { Guide } from '../ui/Guide'
@@ -20,7 +20,10 @@ export const Arena = ({ onBack }: { onBack: () => void }) => {
   const next = LEAGUES[LEAGUES.findIndex((l) => l.id === lg.id) + 1]
   const rivals = rivalsFor(a.elo, a.seed)
   const w = rollWeek(a, new Date())
-  const fight = (id: string) => { const r = store.duel(id); if (r) setResult(r) }
+  const fight = (id: string) => { const r = store.duel(id); if (r) { setResult(r); setCup(false) } }
+  const [cup, setCup] = useState(false)
+  const today = dayKey(new Date())
+  const tr = store.tourney.day === today ? store.tourney : { ...store.tourney, round: 0, out: false }
 
   return (
     <div className="ar" style={{ ['--lg' as string]: lg.hue }}>
@@ -66,6 +69,28 @@ export const Arena = ({ onBack }: { onBack: () => void }) => {
         {store.duelsLeft < 1 && <p className="ar__note">Plus de duel aujourd'hui : reviens demain.</p>}
       </section>
 
+      <section className="gr">
+        <header><h3 className="sp-sub">Le Grand Rift · tournoi du jour</h3><span>Titres gagnés : <b>{tr.titles}</b></span></header>
+        <ol className="gr__bracket">
+          {ROUNDS.map((r, i) => {
+            const st = i < tr.round ? 'won' : i === tr.round && tr.out ? 'lost' : i === tr.round ? 'now' : 'next'
+            const rv = tourneyRival(a.elo, today, i)
+            return (
+              <li key={r.label} className={`gr__round gr__round--${st}`}>
+                <small>{r.label}</small>
+                <b>{st === 'next' ? '???' : rv.name}</b>
+                <span>{n(rv.elo)} · {st === 'won' ? '✓ gagné' : st === 'lost' ? '✗ éliminé' : st === 'now' ? 'à jouer' : 'à venir'}</span>
+                <em>+{r.reward.gems} âmes{'tickets' in r.reward ? ` · ${r.reward.tickets} sceau${r.reward.tickets > 1 ? 'x' : ''}` : ''}{'shards' in r.reward ? ` · ${r.reward.shards} fragments` : ''}</em>
+              </li>
+            )
+          })}
+        </ol>
+        {tr.round >= ROUNDS.length ? <p className="sp-win">Champion du jour ! Reviens demain pour un nouveau tournoi.</p>
+          : tr.out ? <p className="ar__note">Éliminé aujourd'hui. Un nouveau Grand Rift commence demain.</p>
+            : <button className="btn btn--gold" disabled={store.teamNow.length === 0} onClick={() => { const r = store.tourneyFight(); if (r) { setResult(r); setCup(true) } }}>Jouer : {ROUNDS[tr.round].label}</button>}
+        <p className="ar__note">Trois combats de plus en plus durs, sans toucher à ta cote ni à tes 5 duels. Une défaite élimine pour la journée.</p>
+      </section>
+
       <section className="co-event">
         <h3 className="sp-sub">Défis d'arène de la semaine <small>· nouveaux dans {left(msToWeekEnd(new Date()))}</small></h3>
         <ul>
@@ -88,9 +113,9 @@ export const Arena = ({ onBack }: { onBack: () => void }) => {
       </section>
 
       <Guide id="arena" />
-      {result && <Battle result={result} kicker={`Arène · ${leagueOf(result.rival.elo).label}`} title={result.rival.name}
-        winBody={<p className="sp-win">+{result.delta} de cote ({n(result.elo)}) · +{WIN_SOULS} âmes</p>}
-        loseBody={<p>{result.delta} de cote ({n(result.elo)}). Change d'équipe ou choisis un rival moins bien classé.</p>}
+      {result && <Battle result={result} kicker={cup ? 'Le Grand Rift' : `Arène · ${leagueOf(result.rival.elo).label}`} title={result.rival.name}
+        winBody={<p className="sp-win">{cup ? 'Tour gagné : récompense reçue !' : `+${result.delta} de cote (${n(result.elo)}) · +${WIN_SOULS} âmes`}</p>}
+        loseBody={<p>{cup ? 'Éliminé du Grand Rift pour aujourd’hui.' : `${result.delta} de cote (${n(result.elo)}). Change d'équipe ou choisis un rival moins bien classé.`}</p>}
         onClose={() => setResult(null)} />}
     </div>
   )
