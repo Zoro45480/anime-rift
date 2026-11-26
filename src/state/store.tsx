@@ -7,12 +7,13 @@ import { ENERGY_OVER, ENERGY_REFILL, ENERGY_REFILL_COST, cardState, power, ENERG
 import { makeUnit, simulate, type BattleEvent, type Unit } from '../game/battle'
 import { foeUnits, isUnlocked, rollDrops, SOULS_PER_STAR, stageById, starsFor, TEAM_SIZE, type Stage } from '../game/saga'
 import { canBuy, cosmeticById } from '../game/cosmetics'
-import { CHALLENGES, challengeState, markChallenge, addCounts, claimable, DAILY_REWARDS, dailyStatus, dayKey, emptyQuests, featuredWorld, markClaimed, roll, type Counts, type Quests, type Reward } from '../game/contracts'
+import { CHALLENGES, challengeState, markChallenge, weekKey, addCounts, claimable, DAILY_REWARDS, dailyStatus, dayKey, emptyQuests, featuredWorld, markClaimed, roll, type Counts, type Quests, type Reward } from '../game/contracts'
 import { claimableTiers, PATH_XP, rollCard, rollPath, tierOf, tierReward, type PathState } from '../game/riftpath'
 import { applyRule, floor as spireFloor, spireFoes, type Floor } from '../game/spire'
 import { ACHIEVEMENTS, doneIds, METAL_LABEL } from '../game/achievements'
 import { colossusFoes, colossusOf, DIFFICULTIES, eventDone, isOpen as colOpen, rollCol, TRIES_PER_DAY, WIN_SOULS, type ColState, type Difficulty } from '../game/colossus'
 import { DUELS_PER_DAY, eloChange, emptyArena, PVP_GOALS, rivalsFor, rivalUnits, rollWeek, WIN_SOULS as DUEL_SOULS, type ArenaState, type Rival } from '../game/arena'
+import { emptyShop, giftOf, rollAtLeast, weeklyOffers, type ShopState } from '../game/shop'
 import { loadAllArt, removeArt, saveArt } from './customArt'
 import { loadBannerArt, loadRemoteArt, type RemoteStatus } from './remoteArt'
 
@@ -47,6 +48,7 @@ type State = {
   cosmetics: string[] // objets d'apparence achetés
   seen: { last: string; days: number } // jours de jeu différents (succès d'ancienneté)
   achDone: string[] | null // succès déjà annoncés (null : ancienne sauvegarde, on les marque sans notification)
+  shop: ShopState // boutique : offres achetées cette semaine, cadeau du jour, historique
   arena: ArenaState // L'Arène : cote, ligue, duels du jour, défis de la semaine
   col: ColState // Les Colosses : semaine, difficultés battues, essais du jour, objectifs d'événement
   multis: Record<string, number> // grande garantie : multis ×10 d'affilée sans MR, par bannière
@@ -96,6 +98,9 @@ type Store = State & {
   fightColossus: (diff: Difficulty['id']) => ColResult | null // combat contre le Colosse de la semaine
   claimEvent: () => Hero | null // récompense finale de l'événement : une carte SR ou mieux
   colTries: number // essais restants aujourd'hui
+  buyOffer: (id: string) => Hero | true | null // achète une offre de la semaine (la carte garantie s'il y en a une)
+  claimGift: () => boolean // cadeau gratuit du jour
+  giftReady: boolean
   duel: (rivalId: string) => DuelResult | null // duel d'arène contre un rival du jeu
   newRivals: () => void // propose trois autres rivaux
   claimPvp: (id: string) => boolean // défi d'arène de la semaine
@@ -131,7 +136,7 @@ const LOG_MAX = 30
 // Dotation de départ du compte.
 export const START_GEMS = 600
 const START: State = {
-  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' }, frame: '', ornament: '', aura: '', color: '', effect: '', theme: '', badges: [] }, pulls: 0, wins: 0, cosmetics: [], quests: emptyQuests(), path: { season: 0, xp: 0, claimed: [] }, spire: { best: 0 }, arena: emptyArena(), col: { week: '', cleared: [], tries: { day: '', n: 0 }, wins: 0, pulls: 0, final: false }, multis: {}, seen: { last: '', days: 0 }, achDone: [], arcHeroes: {}, tutorialSeen: [],
+  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' }, frame: '', ornament: '', aura: '', color: '', effect: '', theme: '', badges: [] }, pulls: 0, wins: 0, cosmetics: [], quests: emptyQuests(), path: { season: 0, xp: 0, claimed: [] }, spire: { best: 0 }, shop: emptyShop(), arena: emptyArena(), col: { week: '', cleared: [], tries: { day: '', n: 0 }, wins: 0, pulls: 0, final: false }, multis: {}, seen: { last: '', days: 0 }, achDone: [], arcHeroes: {}, tutorialSeen: [],
   tickets: 20, gems: START_GEMS, pity: Object.fromEntries(BANNERS.map((b) => [b.id, 0])), owned: {},
   xp: {}, scrolls: { small: 0, medium: 0, large: 0 }, wish: [], pinned: [], favs: [], log: {},
 }
@@ -145,7 +150,7 @@ const load = (): State => {
     const raw = localStorage.getItem(SAVE_KEY)
     if (!raw) return { ...START, profile: { ...START.profile, tag: newTag() } }
     const s = JSON.parse(raw) as Partial<State>
-    const merged = { ...START, achDone: null, ...s, arena: { ...emptyArena(), ...s.arena }, pity: { ...START.pity, ...s.pity }, scrolls: { ...START.scrolls, ...s.scrolls }, profile: { ...START.profile, ...s.profile }, quests: { ...emptyQuests(), ...s.quests } }
+    const merged = { ...START, achDone: null, ...s, arena: { ...emptyArena(), ...s.arena }, shop: { ...emptyShop(), ...s.shop }, pity: { ...START.pity, ...s.pity }, scrolls: { ...START.scrolls, ...s.scrolls }, profile: { ...START.profile, ...s.profile }, quests: { ...emptyQuests(), ...s.quests } }
     return merged.profile.tag ? merged : { ...merged, profile: { ...merged.profile, tag: newTag() } }
   } catch {
     return START
@@ -466,6 +471,32 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       return true
     }
 
+    // Boutique : tout en âmes, chaque offre une fois par semaine.
+    const giftReady = state.shop.gift !== today
+    const claimGift = () => {
+      const t = new Date()
+      if (state.shop.gift === dayKey(t)) return false
+      setState({ ...grant(state, giftOf(t)), shop: { ...state.shop, gift: dayKey(t) } })
+      return true
+    }
+    const buyOffer = (id: string) => {
+      const t = new Date()
+      const o = weeklyOffers(t).find((x) => x.id === id)
+      const wk = weekKey(t)
+      const bought = state.shop.week === wk ? state.shop.bought : []
+      if (!o || bought.includes(id) || state.gems < o.price) return null
+      let next: State = grant({ ...state, gems: state.gems - o.price, gemsSpent: state.gemsSpent + o.price }, o.reward)
+      let card: Hero | null = null
+      if (o.card) {
+        card = rollAtLeast(o.card, Math.random)
+        next = { ...next, owned: { ...next.owned, [card.id]: (next.owned[card.id] ?? 0) + 1 }, log: withLog(next.log, card.id, { k: 'pull', note: `Obtenue · boutique, ${o.name}` }),
+          notifs: notify(next.notifs, [['pull', `Boutique : ${card.name} (${RARITIES[card.rarity].short}) rejoint ta collection.`]]) }
+      }
+      next = { ...next, shop: { ...next.shop, week: wk, bought: [...bought, id], history: [{ t: Date.now(), name: o.name, price: o.price }, ...next.shop.history].slice(0, 50) } }
+      setState(tracked(next, { gemsSpent: o.price }))
+      return card ?? true
+    }
+
     const buyEnergy = () => {
       const left = energyNow(state.energy, state.energyAt, Date.now())
       if (state.gems < ENERGY_REFILL_COST || left + ENERGY_REFILL > ENERGY_OVER) return false
@@ -557,7 +588,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setArt((a) => Object.fromEntries(Object.entries(a).filter(([k]) => k !== heroId)))
       void removeArt(heroId)
     }
-    return { ...state, canAfford, summon, merge, useScroll, scrollsUseful, toggleFav, toggleWish, togglePin, fightSpire, duel, newRivals, claimPvp, duelsLeft, arenaPower, fightColossus, claimEvent, colTries, claimContract, claimDaily, claimChallenge, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
+    return { ...state, canAfford, summon, merge, useScroll, scrollsUseful, toggleFav, toggleWish, togglePin, fightSpire, buyOffer, claimGift, giftReady, duel, newRivals, claimPvp, duelsLeft, arenaPower, fightColossus, claimEvent, colTries, claimContract, claimDaily, claimChallenge, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
   }, [state, customArt, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, now])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>

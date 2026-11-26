@@ -399,6 +399,25 @@ def league(kind):
     return (3.6 if wings else 2.6), 3.0
 
 
+def shop():
+    """La boutique : une bourse de velours violet nouée d'or, d'où s'échappent des flammes d'âme bleues."""
+    velvet = pbr((0.36, 0.13, 0.62), 0.2, 0.35, coat=0.6)
+    gold = pbr((1.0, 0.78, 0.3), 1, 0.14)
+    body = [(math.cos(a) * 1.05, -0.35 + math.sin(a) * 0.95) for a in [math.pi * (i / 40) * 2 for i in range(40)]]
+    solid(body, 0.9, velvet, bevel=0.25)
+    neck = [(-0.42, 0.5), (0.42, 0.5), (0.62, 0.95), (0.3, 0.85), (0, 1.0), (-0.3, 0.85), (-0.62, 0.95)]
+    solid(neck, 0.5, velvet, bevel=0.12, back=0.1)
+    solid(rounded(1.05, 0.18, 0.08, 0, 0, 0.55), 1.1, gold, bevel=0.05, back=0.05)
+    solid(circle(0.35, 0.42, 0.12), 0.1, gold, bevel=0.04, back=-0.8)
+    solid([(0.3, 0.38), (0.4, 0.38), (0.5, -0.05), (0.36, -0.02)], 0.06, gold, bevel=0.02, back=-0.8)
+    # emblème : une pièce d'or sertie d'une gemme d'âme bleue
+    solid(circle(0, -0.45, 0.38), 0.1, gold, bevel=0.04, back=-0.82)
+    solid([(0, -0.17), (0.2, -0.45), (0, -0.73), (-0.2, -0.45)], 0.1, pbr((0.45, 0.8, 1.0), 0.2, 0.05, (0.4, 0.75, 1.0), 2.0, coat=1), bevel=0.04, back=-0.9)
+    for x, z, r in ((-0.95, 1.05, 0.16), (0.9, 1.2, 0.12), (-0.55, 1.45, 0.1), (0.5, 1.55, 0.09)):
+        solid([(x, z + r * 1.8), (x + r, z), (x, z - r * 0.6), (x - r, z)], 0.1, pbr((0.45, 0.8, 1.0), 0.2, 0.05, (0.4, 0.75, 1.0), 2.5, coat=1), bevel=0.04, back=-0.2)
+    return 3.2, 3.6
+
+
 # --- fond des menus -----------------------------------------------------------------------------------------------------
 def background():
     """Ciel nocturne en dégradés doux. L'image est ensuite légèrement floutée : elle doit rester en retrait."""
@@ -505,6 +524,7 @@ ELEMENTS = {
     'rift-path': rift_path,
     'card-pack': card_pack,
     'floor-plate': floor_plate,
+    'shop': shop,
     'league-bronze': lambda k='bronze': league(k),
     'league-silver': lambda k='silver': league(k),
     'league-gold': lambda k='gold': league(k),
@@ -513,7 +533,7 @@ ELEMENTS = {
     'league-legend': lambda k='legend': league(k),
     'floor-boss': lambda: floor_plate(True),
 }
-SCALE = {'nav-nexus': 60, 'nav-summon': 60, 'nav-cards': 60, 'nav-contracts': 60, 'nav-profile': 60, 'chest': 60, 'rift-path': 90, 'card-pack': 80, 'floor-plate': 70, 'floor-boss': 70, 'league-bronze': 70, 'league-silver': 70, 'league-gold': 70, 'league-platinum': 70, 'league-diamond': 70, 'league-legend': 70}  # pixels par unité, quand ce n'est pas PX
+SCALE = {'nav-nexus': 60, 'nav-summon': 60, 'nav-cards': 60, 'nav-contracts': 60, 'nav-profile': 60, 'chest': 60, 'rift-path': 90, 'card-pack': 80, 'floor-plate': 70, 'floor-boss': 70, 'shop': 70, 'league-bronze': 70, 'league-silver': 70, 'league-gold': 70, 'league-platinum': 70, 'league-diamond': 70, 'league-legend': 70}  # pixels par unité, quand ce n'est pas PX
 
 os.makedirs(OUT, exist_ok=True)
 for name in [a for a in sys.argv[1:] if a in ELEMENTS] or list(ELEMENTS):

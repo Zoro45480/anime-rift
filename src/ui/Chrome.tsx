@@ -2,6 +2,7 @@ import { accountLevel, ENERGY_MAX } from '../game/progression'
 import { LevelBadge } from './LevelBadge'
 import { Avatar, Settings } from './Settings'
 import { NotifPanel, NotifToast, type NotifGo } from './Notifs'
+import { Shop } from './Shop'
 import { useState } from 'react'
 import { useStore } from '../state/store'
 import { Coin } from './Coin'
@@ -19,8 +20,9 @@ export const Logo = () => (
 
 // Barre du haut : logo et ressources du joueur, chaque ressource dans sa plaquette en biais.
 export const TopBar = ({ onPlay, onSummon, onProfile, onGo }: { onPlay: () => void; onSummon: () => void; onProfile: () => void; onGo: NotifGo }) => {
-  const { tickets, gems, energyLeft, accountXp, rebirths, notifs, readNotifs, clearNotifs } = useStore()
+  const { tickets, gems, energyLeft, accountXp, rebirths, notifs, readNotifs, clearNotifs, giftReady } = useStore()
   const [open, setOpen] = useState(false)
+  const [shop, setShop] = useState(false)
   const [settings, setSettings] = useState(false)
   const unread = notifs.filter((x) => !x.read).length
   const full = energyLeft >= ENERGY_MAX
@@ -34,6 +36,7 @@ export const TopBar = ({ onPlay, onSummon, onProfile, onGo }: { onPlay: () => vo
           <button className="wallet__energy" onClick={onPlay} aria-label={`Énergie : ${energyLeft} sur ${ENERGY_MAX}. Aller au Nexus`}><Coin name="bolt" size={24} /><b>{energyLeft}<small>/{ENERGY_MAX}</small></b></button>
           <button className="wallet__energy" onClick={onSummon} aria-label={`Flammes d'âme : ${gems}. Aller aux invocations`}><Coin name="soul" size={24} /><b>{gems}</b></button>
           <button className="wallet__energy" onClick={onSummon} aria-label={`Sceaux d'invocation : ${tickets}. Aller aux invocations`}><Coin name="seal" size={24} /><b>{tickets}</b></button>
+          <button className={`bell bell--shop ${giftReady ? 'has-unread' : ''}`} onClick={() => setShop(true)} aria-label={`Boutique${giftReady ? ' : cadeau du jour à récupérer' : ''}`}><img src={uiArt('shop')} alt="" /></button>
           <button className={`bell ${unread ? 'has-unread' : ''}`} onClick={toggle} aria-expanded={open} aria-label={`Notifications${unread ? ` : ${unread} non lue${unread > 1 ? 's' : ''}` : ''}`}>
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z" /><path d="M10 20a2.2 2.2 0 0 0 4 0" /></svg>
             {unread > 0 && <i>{unread > 9 ? '9+' : unread}</i>}
@@ -47,6 +50,7 @@ export const TopBar = ({ onPlay, onSummon, onProfile, onGo }: { onPlay: () => vo
       {settings && <Settings onClose={() => setSettings(false)} />}
       {open && <NotifPanel notifs={notifs} full={full} onClear={clearNotifs} onClose={toggle} onGo={onGo} />}
       <NotifToast notifs={notifs} muted={open} onGo={onGo} />
+      {shop && <Shop onClose={() => setShop(false)} />}
     </header>
   )
 }
