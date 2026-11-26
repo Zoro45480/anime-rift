@@ -492,6 +492,40 @@ def role_icon(kind):
     return 2.8, 2.8
 
 
+def top_bell():
+    """Cloche des notifications : or massif, battant et petite gemme rouge."""
+    gold = pbr((1.0, 0.78, 0.3), 1, 0.12)
+    ruby = pbr((1.0, 0.25, 0.35), 0.2, 0.05, (1.0, 0.2, 0.3), 1.6, coat=1)
+    body = [(-0.15, 1.0), (0.15, 1.0), (0.55, 0.7), (0.7, 0.1), (0.85, -0.45), (1.05, -0.62), (1.05, -0.78), (-1.05, -0.78), (-1.05, -0.62), (-0.85, -0.45), (-0.7, 0.1), (-0.55, 0.7)]
+    solid(body, 0.9, gold, bevel=0.22)
+    solid(rounded(2.2, 0.16, 0.08, 0, 0, -0.74), 0.95, gold, bevel=0.06, back=-0.02)
+    solid(circle(0, 1.12, 0.17), 0.3, gold, bevel=0.08)
+    solid(circle(0, -0.98, 0.22), 0.4, gold, bevel=0.1)
+    solid([(0, 0.25), (0.2, 0), (0, -0.25), (-0.2, 0)], 0.12, ruby, bevel=0.04, back=-0.48)
+    return 2.8, 2.8
+
+
+def top_shop():
+    """Boutique : un coffret cadeau violet, ruban et nœud d'or, une étoile qui brille."""
+    box = pbr((0.45, 0.2, 0.85), 0.3, 0.2, coat=1)
+    lid = pbr((0.55, 0.28, 0.95), 0.3, 0.18, coat=1)
+    gold = pbr((1.0, 0.78, 0.3), 1, 0.12)
+    solid(rounded(1.7, 1.15, 0.1, 0, 0, -0.45), 1.0, box, bevel=0.1)
+    solid(rounded(1.95, 0.4, 0.1, 0, 0, 0.3), 1.1, lid, bevel=0.1, back=-0.05)
+    solid(rounded(0.3, 1.6, 0.05, 0, 0, -0.2), 1.15, gold, bevel=0.05, back=-0.08)
+    for side in (-1, 1):
+        loop = [(side * 0.08, 0.5), (side * 0.75, 1.05), (side * 0.85, 0.75), (side * 0.6, 0.5)]
+        solid(loop, 0.25, gold, bevel=0.08, back=-0.2)
+    solid(circle(0, 0.55, 0.16), 0.3, gold, bevel=0.08, back=-0.3)
+    star = []
+    for i in range(10):
+        a = math.pi / 2 + i * math.pi / 5
+        r = 0.32 if i % 2 == 0 else 0.13
+        star.append((0.95 + math.cos(a) * r, 1.05 + math.sin(a) * r))
+    solid(star, 0.05, glow((1.0, 0.92, 0.6), 4.0), bevel=0.0, back=-0.4)
+    return 2.8, 2.8
+
+
 # --- fond des menus -----------------------------------------------------------------------------------------------------
 def background():
     """Ciel nocturne en dégradés doux. L'image est ensuite légèrement floutée : elle doit rester en retrait."""
@@ -599,6 +633,8 @@ ELEMENTS = {
     'card-pack': card_pack,
     'floor-plate': floor_plate,
     'shop': shop,
+    'top-bell': top_bell,
+    'top-shop': top_shop,
     'role-dps': lambda k='dps': role_icon(k),
     'role-tank': lambda k='tank': role_icon(k),
     'role-heal': lambda k='heal': role_icon(k),
@@ -613,7 +649,7 @@ ELEMENTS = {
     'league-legend': lambda k='legend': league(k),
     'floor-boss': lambda: floor_plate(True),
 }
-SCALE = {'nav-nexus': 60, 'nav-summon': 60, 'nav-cards': 60, 'nav-contracts': 60, 'nav-profile': 60, 'chest': 60, 'rift-path': 90, 'card-pack': 80, 'floor-plate': 70, 'floor-boss': 70, 'shop': 70, 'role-dps': 50, 'role-tank': 50, 'role-heal': 50, 'role-hybrid': 50, 'crown': 70, 'nav-bazaar': 60, 'league-bronze': 70, 'league-silver': 70, 'league-gold': 70, 'league-platinum': 70, 'league-diamond': 70, 'league-legend': 70}  # pixels par unité, quand ce n'est pas PX
+SCALE = {'nav-nexus': 60, 'nav-summon': 60, 'nav-cards': 60, 'nav-contracts': 60, 'nav-profile': 60, 'chest': 60, 'rift-path': 90, 'card-pack': 80, 'floor-plate': 70, 'floor-boss': 70, 'shop': 70, 'top-bell': 60, 'top-shop': 60, 'role-dps': 50, 'role-tank': 50, 'role-heal': 50, 'role-hybrid': 50, 'crown': 70, 'nav-bazaar': 60, 'league-bronze': 70, 'league-silver': 70, 'league-gold': 70, 'league-platinum': 70, 'league-diamond': 70, 'league-legend': 70}  # pixels par unité, quand ce n'est pas PX
 
 os.makedirs(OUT, exist_ok=True)
 for name in [a for a in sys.argv[1:] if a in ELEMENTS] or list(ELEMENTS):
