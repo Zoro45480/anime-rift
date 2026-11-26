@@ -27,11 +27,12 @@ const rollRarity = (rng: Rng, pity: number): RarityId => {
 
 const pick = <T,>(rng: Rng, list: T[]): T => list[Math.floor(rng() * list.length)]
 
-// Les cartes qu'une bannière peut donner.
+// Les cartes qu'une bannière peut donner : toutes les cartes de tous les univers, sauf les MR,
+// qui restent dans la bannière de leur propre univers.
 const POOLS = new Map<string, Hero[]>() // calculé une fois par bannière
 export const bannerPool = (banner: Banner): Hero[] => {
   let pool = POOLS.get(banner.id)
-  if (!pool) POOLS.set(banner.id, (pool = HEROES.filter((h) => banner.pool.includes(h.world))))
+  if (!pool) POOLS.set(banner.id, (pool = HEROES.filter((h) => h.rarity !== 'rift' || banner.pool.includes(h.world))))
   return pool
 }
 
@@ -72,7 +73,7 @@ export const pullMany = (banner: Banner, pity: number, count: number, rng: Rng, 
 // Probabilité exacte d'obtenir CETTE carte en une invocation sur cette bannière (hors garantie).
 // C'est le chiffre affiché dans l'index ; il découle directement de la règle de tirage ci-dessus.
 export const cardRate = (banner: Banner, hero: Hero): number => {
-  if (!banner.pool.includes(hero.world)) return 0
+  if (hero.rarity === 'rift' && !banner.pool.includes(hero.world)) return 0
   const pool = poolOf(banner, hero.rarity)
   const featured = pool.filter((h) => banner.featured.includes(h.id))
   const rate = RARITIES[hero.rarity].rate

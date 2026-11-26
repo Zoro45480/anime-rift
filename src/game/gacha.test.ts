@@ -23,12 +23,15 @@ describe('gacha', () => {
     expect(new Set(HEROES.map((h) => h.no)).size).toBe(HEROES.length)
   })
 
-  it('la première bannière ne donne que des personnages de Naruto', () => {
+  it('toutes les cartes sont mélangées, sauf les MR qui restent dans leur univers', () => {
     const pool = bannerPool(BANNERS[0])
     expect(pool.length).toBeGreaterThanOrEqual(30)
-    expect(pool.every((h) => h.world === 'Naruto')).toBe(true)
+    expect(pool.filter((h) => h.rarity === 'rift').every((h) => h.world === 'Naruto')).toBe(true)
+    expect(new Set(pool.map((h) => h.world)).size).toBe(BANNERS.length) // toutes les autres cartes sont mélangées
     const rng = seeded(5)
-    for (let i = 0; i < 20000; i++) expect(pullOne(BANNERS[0], 0, rng).hero.world).toBe('Naruto')
+    const worlds = new Set<string>()
+    for (let i = 0; i < 20000; i++) { const h = pullOne(BANNERS[0], 0, rng).hero; worlds.add(h.world); if (h.rarity === 'rift') expect(h.world).toBe('Naruto') }
+    expect(worlds.size).toBe(BANNERS.length)
   })
 
   it('compte six raretés, dont chacune a au moins une carte dans chaque bannière', () => {

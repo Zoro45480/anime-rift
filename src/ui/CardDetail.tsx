@@ -226,7 +226,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
 
         <Section hue="#4be3a4" title="Où l'obtenir">
           <ul className="cd-where">
-            <li><img src={extraArt(`emblem-${frameOf(hero.world)}`)} alt="" onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} /><div><b>Invocation · bannière {banner ? banner.world : hero.world}</b><small>{rate ? `${pct(rate)} par invocation, soit environ 1 sur ${n(Math.round(1 / rate))}.` : 'Cette carte n’est sur aucune bannière en ce moment.'} Avec des âmes ou des sceaux, dans Invoquer.</small></div></li>
+            <li><img src={extraArt(`emblem-${frameOf(hero.world)}`)} alt="" onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} /><div><b>Invocation · {hero.rarity === 'rift' ? `bannière ${banner ? banner.world : hero.world} seulement` : 'toutes les bannières'}</b><small>{rate ? `${pct(rate)} par invocation, soit environ 1 sur ${n(Math.round(1 / rate))}.` : 'Cette carte n’est sur aucune bannière en ce moment.'} {hero.rarity === 'rift' ? 'Les cartes MR ne sortent que sur la bannière de leur univers.' : 'Toutes les cartes (sauf MR) sont mélangées : elle peut sortir sur n’importe quelle bannière.'} Avec des âmes ou des sceaux, dans Invoquer.</small></div></li>
             {['epic', 'ultra', 'legend'].includes(hero.rarity) && <li><img src={uiArt('card-pack')} alt="" /><div><b>Chemin du Rift</b><small>Les paliers 10, 20, 30 et 40 donnent une carte {RARITIES.epic.short} ou mieux, tirée au hasard parmi toutes les cartes de cette rareté.</small></div></li>}
             <li><img src={iconArt('scroll-medium')} alt="" /><div><b>Doublons</b><small>Chaque nouvel exemplaire peut être fusionné pour faire monter la carte de niveau (+{n(MERGE_XP[hero.rarity])} XP).</small></div></li>
           </ul>
@@ -239,7 +239,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
             <div><dt>Rareté</dt><dd>{rarity.label} ({rarity.short}) · {rarity.stars} étoiles</dd></div>
             <div><dt>Rôle</dt><dd>{hero.role}</dd></div>
             <div><dt>Affinité</dt><dd>{AFFINITIES[hero.affinity].label}</dd></div>
-            <div><dt>Bannière</dt><dd>{banner ? banner.world : 'Hors bannière'}</dd></div>
+            <div><dt>Bannière</dt><dd>{hero.rarity === 'rift' ? (banner ? banner.world : 'Hors bannière') : 'Toutes'}</dd></div>
             <div><dt>Chance par invocation</dt><dd>{rate ? `${pct(rate)} · 1 sur ${n(Math.round(1 / rate))}` : '—'}</dd></div>
             <div><dt>Exemplaires</dt><dd>{copies}</dd></div>
             <div><dt><img className="cd-mic" src={extraArt('mic')} alt="" />Seiyū (voix japonaise)</dt><dd>{remoteSeiyu[hero.id] ?? '—'}</dd></div>
