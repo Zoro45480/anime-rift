@@ -7,6 +7,7 @@ import type { Unit } from '../game/battle'
 import { ENERGY_OVER, ENERGY_REFILL, ENERGY_REFILL_COST, cardState, ENERGY_MAX, power, SCROLL_IDS, SCROLLS, STAT_LABEL } from '../game/progression'
 import { foeUnits, isUnlocked, SOULS_PER_STAR, STAGES, STAGES_PER_ARC, TEAM_SIZE } from '../game/saga'
 import { Guide } from '../ui/Guide'
+import { useHoldNotifs } from '../ui/busy'
 import { useStore, type FightResult } from '../state/store'
 import { Coin } from '../ui/Coin'
 
@@ -17,6 +18,7 @@ const Stars = ({ value }: { value: number }) => <span className="sg-stars" aria-
 // Rejoue le combat action par action : barres de vie, boucliers, texte de l'action.
 type Fight = Pick<FightResult, 'allies' | 'foes' | 'events' | 'win'>
 export const Battle = ({ result, onClose, kicker, title, winBody, loseBody }: { result: Fight; onClose: () => void; kicker: string; title: string; winBody: ReactNode; loseBody: ReactNode }) => {
+  useHoldNotifs() // pas de notification pendant le combat : elle dévoilerait l'issue
   const [step, setStep] = useState(0) // nombre d'actions déjà montrées
   const [fast, setFast] = useState(false)
   const total = result.events.length

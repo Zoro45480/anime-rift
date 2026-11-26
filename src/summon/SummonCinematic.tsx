@@ -1,3 +1,4 @@
+import { useHoldNotifs } from '../ui/busy'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Hero } from '../data/heroes'
 import { RARITIES, type RarityId } from '../data/rarities'
@@ -40,6 +41,7 @@ const CutIn = ({ hero, art }: { hero: Hero; art: string }) => (
 )
 
 export const SummonCinematic = ({ heroes, onClose }: { heroes: Hero[]; onClose: () => void }) => {
+  useHoldNotifs() // les notifications attendent la fin de l'invocation
   const canvas = useRef<HTMLCanvasElement>(null)
   const flash = useRef<HTMLDivElement>(null)
   const dark = useRef<HTMLDivElement>(null)

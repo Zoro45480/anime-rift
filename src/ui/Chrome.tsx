@@ -1,7 +1,7 @@
 import { accountLevel, ENERGY_MAX } from '../game/progression'
 import { LevelBadge } from './LevelBadge'
 import { Avatar, Settings } from './Settings'
-import { NotifPanel, NotifToast } from './Notifs'
+import { NotifPanel, NotifToast, type NotifGo } from './Notifs'
 import { useState } from 'react'
 import { useStore } from '../state/store'
 import { Coin } from './Coin'
@@ -18,7 +18,7 @@ export const Logo = () => (
 )
 
 // Barre du haut : logo et ressources du joueur, chaque ressource dans sa plaquette en biais.
-export const TopBar = ({ onPlay, onSummon, onProfile }: { onPlay: () => void; onSummon: () => void; onProfile: () => void }) => {
+export const TopBar = ({ onPlay, onSummon, onProfile, onGo }: { onPlay: () => void; onSummon: () => void; onProfile: () => void; onGo: NotifGo }) => {
   const { tickets, gems, energyLeft, accountXp, rebirths, notifs, readNotifs, clearNotifs } = useStore()
   const [open, setOpen] = useState(false)
   const [settings, setSettings] = useState(false)
@@ -45,8 +45,8 @@ export const TopBar = ({ onPlay, onSummon, onProfile }: { onPlay: () => void; on
         </div>
       </div>
       {settings && <Settings onClose={() => setSettings(false)} />}
-      {open && <NotifPanel notifs={notifs} full={full} onClear={clearNotifs} onClose={toggle} />}
-      <NotifToast notifs={notifs} muted={open} />
+      {open && <NotifPanel notifs={notifs} full={full} onClear={clearNotifs} onClose={toggle} onGo={onGo} />}
+      <NotifToast notifs={notifs} muted={open} onGo={onGo} />
     </header>
   )
 }

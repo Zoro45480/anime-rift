@@ -20,7 +20,14 @@ export const App = () => {
   return (
     <StoreProvider>
       <CardViewerProvider>
-      <TopBar onPlay={() => go('play')} onSummon={() => go('banners')} onProfile={toProfile} />
+      <TopBar onPlay={() => go('play')} onSummon={() => go('banners')} onProfile={toProfile} onGo={(k) => {
+        // chaque notification mène à sa page
+        if (k === 'quest') go('contracts')
+        else if (k === 'ach' || k === 'level') toProfile()
+        else if (k === 'rebirth') toRebirth()
+        else if (k === 'pull' || k === 'free') { setColTab('cards'); go('collection') }
+        else go('play')
+      }} />
       <main className="screen" key={tab}>
         <ErrorBoundary>
         {tab === 'banners' && <Banners onRebirth={toRebirth} />}
