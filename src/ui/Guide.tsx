@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { extraArt } from '../assets/manifest'
 import { useStore } from '../state/store'
 
@@ -37,7 +38,8 @@ export const Guide = ({ id }: { id: keyof typeof TALKS }) => {
   if (tutorialSeen.includes(id)) return null
   const talk = TALKS[id]
   const last = step >= talk.lines.length - 1
-  return (
+  // posé directement sur la page : à l'intérieur d'un écran animé, un élément « fixe » partirait avec lui hors de vue
+  return createPortal(
     <aside className="guide" role="dialog" aria-label={`Explications : ${talk.title}`}>
       <Kiri />
       <div className="guide__bubble">
@@ -48,6 +50,7 @@ export const Guide = ({ id }: { id: keyof typeof TALKS }) => {
           <button className="guide__next" onClick={() => (last ? seeTutorial(id) : setStep(step + 1))}>{last ? 'Compris !' : 'Suivant →'}</button>
         </div>
       </div>
-    </aside>
+    </aside>,
+    document.body,
   )
 }

@@ -6,7 +6,8 @@ import { useStore } from '../state/store'
 import { Card } from '../ui/Card'
 import { PRESETS } from './presets'
 import { pickHeadliner } from './timeline'
-import { isSoundOn, setSoundOn, SummonAudio } from './audio'
+import { SummonAudio } from './audio'
+import { effectiveGraphics } from '../ui/graphics'
 import type { Quality, SummonStage } from './SummonStage'
 
 // Cinématique d'invocation. `heroes` est exactement ce que le tirage réel a renvoyé : 1, 5 ou 10 cartes.
@@ -17,17 +18,9 @@ import type { Quality, SummonStage } from './SummonStage'
 //                   annoncées par un plan d'anime (bande en biais, personnage, mot qui claque).
 //   4. Bilan      — la carte seule en grand, ou la grille de toutes les cartes.
 
-const QUALITY_KEY = 'anime-rift-fx'
 const CARD_MS: Record<RarityId, number> = { common: 520, rare: 620, epic: 800, ultra: 1300, legend: 1700, rift: 2100 }
 const CUTIN_MS: Partial<Record<RarityId, number>> = { ultra: 1100, legend: 1300, rift: 1650 } // seules ces raretés ont un plan d'annonce
 
-const readQuality = (): Quality => {
-  try {
-    const saved = localStorage.getItem(QUALITY_KEY)
-    if (saved === 'high' || saved === 'low') return saved
-  } catch { /* stockage indisponible */ }
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'low' : 'high'
-}
 
 const hex = (n: number) => `#${n.toString(16).padStart(6, '0')}`
 
@@ -56,8 +49,7 @@ export const SummonCinematic = ({ heroes, onClose }: { heroes: Hero[]; onClose: 
   const [step, setStep] = useState<Step>('loading')
   const [index, setIndex] = useState(0)
   const [sub, setSub] = useState<Sub>('card')
-  const [quality, setQuality] = useState<Quality>(readQuality)
-  const [sound, setSound] = useState(isSoundOn)
+  const [quality] = useState<Quality>(effectiveGraphics) // réglé dans les Paramètres (Graphismes)
   const { customArt } = useStore()
 
   const single = heroes.length === 1
@@ -163,18 +155,7 @@ export const SummonCinematic = ({ heroes, onClose }: { heroes: Hero[]; onClose: 
     return () => window.removeEventListener('keydown', onKey)
   })
 
-  const toggleQuality = () => {
-    const nextQuality: Quality = quality === 'high' ? 'low' : 'high'
-    setQuality(nextQuality)
-    try { localStorage.setItem(QUALITY_KEY, nextQuality) } catch { /* non enregistré */ }
-  }
 
-  const toggleSound = () => {
-    const on = !sound
-    setSound(on)
-    setSoundOn(on)
-    if (!on) audio.current.stop(0.1)
-  }
 
   const shown = step === 'cards' ? hero : star
   const tint = PRESETS[shown.rarity].colors
@@ -216,8 +197,6 @@ export const SummonCinematic = ({ heroes, onClose }: { heroes: Hero[]; onClose: 
 
       {(step === 'intro' || step === 'cards') && (
         <div className="sc__controls">
-          <button className="sc__btn" onClick={toggleSound} aria-pressed={sound}>Son : {sound ? 'activé' : 'coupé'}</button>
-          <button className="sc__btn" onClick={toggleQuality} title="S'applique à la prochaine invocation">Effets : {quality === 'high' ? 'complets' : 'réduits'}</button>
           <button className="sc__btn sc__btn--skip" onClick={skipAll}>Passer ▸▸</button>
         </div>
       )}
