@@ -13,16 +13,17 @@ export const App = () => {
   const [tab, setTab] = useState<TabId>('banners')
   const [colTab, setColTab] = useState<CollectionTab>('cards')
   const go = (t: TabId) => { setTab(t); window.scrollTo(0, 0) }
+  const toProfile = () => { setColTab('profile'); go('collection') }
   const toRebirth = () => { setColTab('rebirth'); go('collection') }
   if (!entered) return <Splash onEnter={() => setEntered(true)} />
   return (
     <StoreProvider>
       <CardViewerProvider>
-      <TopBar onPlay={() => go('play')} onSummon={() => go('banners')} />
+      <TopBar onPlay={() => go('play')} onSummon={() => go('banners')} onProfile={toProfile} />
       <main className="screen" key={tab}>
         <ErrorBoundary>
         {tab === 'banners' && <Banners onRebirth={toRebirth} />}
-        {tab === 'play' && <Play onRebirth={toRebirth} />}
+        {tab === 'play' && <Play onRebirth={toRebirth} onProfile={toProfile} />}
         {tab === 'collection' && <Collection onSummon={() => go('banners')} tab={colTab} onTab={setColTab} />}
         </ErrorBoundary>
       </main>

@@ -49,7 +49,7 @@ const GateTile = ({ gate, featured, playable, onOpen }: { gate: Gate; featured?:
   )
 }
 
-export const Play = ({ onRebirth }: { onRebirth: () => void }) => {
+export const Play = ({ onRebirth, onProfile }: { onRebirth: () => void; onProfile: () => void }) => {
   const { accountXp, rebirths, energyLeft, profile, gems, buyEnergy } = useStore()
   const [open, setOpen] = useState<Gate | null>(null)
   const [saga, setSaga] = useState(false)
@@ -70,7 +70,7 @@ export const Play = ({ onRebirth }: { onRebirth: () => void }) => {
       <header className="nx__head">
         <p className="eyebrow">Le Nexus</p>
         <h1>Quatre portes.<br />Une seule s'ouvre à la fois.</h1>
-        <p className="nx__who"><Avatar size={40} /><b>{profile.name.trim() || 'Joueur'}</b></p>
+        <button className="nx__who" onClick={onProfile} aria-label="Voir mon profil"><Avatar size={40} /><b>{profile.name.trim() || 'Joueur'}</b><span>Voir mon profil →</span></button>
         <p className="nx__level"><LevelBadge level={acc.level} rebirths={rebirths} size={40} /><span>Style {LEVEL_STYLE_NAME[levelStyle(acc.level, rebirths)]} · {acc.need ? `${acc.into.toLocaleString('fr-FR')} / ${acc.need.toLocaleString('fr-FR')} XP de compte` : 'Niveau maximum'}</span></p>
       </header>
       <GateTile gate={GATES[0]} featured playable onOpen={() => { setSaga(true); window.scrollTo(0, 0) }} />

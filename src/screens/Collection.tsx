@@ -10,6 +10,7 @@ import { AffinityIcon } from '../ui/AffinityIcon'
 import { Card, LazyCard } from '../ui/Card'
 import { Guide } from '../ui/Guide'
 import { Inventory, Rebirth } from './Rebirth'
+import { Profile } from './Profile'
 
 // Vérifie qu'un lien mène bien à une image que le navigateur peut afficher.
 const canLoad = (url: string) =>
@@ -235,8 +236,8 @@ const Cards = ({ onSummon }: { onSummon: () => void }) => {
   )
 }
 
-export type CollectionTab = 'cards' | 'inventory' | 'rebirth'
-const TABS: [CollectionTab, string][] = [['cards', 'Cartes'], ['inventory', 'Inventaire'], ['rebirth', 'Renaissance']]
+export type CollectionTab = 'cards' | 'inventory' | 'rebirth' | 'profile'
+const TABS: [CollectionTab, string][] = [['cards', 'Cartes'], ['inventory', 'Inventaire'], ['rebirth', 'Renaissance'], ['profile', 'Profil']]
 
 // La Collection et ses onglets : les cartes, la réserve d'objets et la Renaissance.
 export const Collection = ({ onSummon, tab, onTab }: { onSummon: () => void; tab: CollectionTab; onTab: (t: CollectionTab) => void }) => (
@@ -247,6 +248,7 @@ export const Collection = ({ onSummon, tab, onTab }: { onSummon: () => void; tab
     {tab === 'cards' && <Cards onSummon={onSummon} />}
     {tab === 'inventory' && <Inventory />}
     {tab === 'rebirth' && <Rebirth />}
+    {tab === 'profile' && <Profile onCollection={() => onTab('cards')} />}
     <Guide id="collection" />
   </div>
 )

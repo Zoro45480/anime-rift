@@ -33,11 +33,16 @@ type State = {
   saga: Record<string, number> // étoiles gagnées à chaque combat de la Saga
   team: string[] // équipe de combat (3 cartes au plus)
   notifs: Notif[] // les plus récentes d'abord
-  profile: { name: string; avatar: string } // pseudo et photo de profil (image réduite ou lien), gardés sur cet appareil
+  profile: Profile // pseudo, photo, bio, titre affiché et bannière du profil, gardés sur cet appareil
+  pulls: number // invocations réalisées depuis le début
+  wins: number // combats gagnés depuis le début
   arcHeroes: Record<string, boolean> // cartes qui étaient dans l'équipe quand le boss de leur arc est tombé (titre d'arc)
   tutorialSeen: string[] // écrans dont l'explication de Kiri a déjà été lue
   awakened: string[] // cartes libérées (niveau maximum 100)
 }
+
+// bannière du profil : l'image d'un animé (identifiant de bannière), une couleur ou une image du joueur
+export type Profile = { name: string; avatar: string; bio: string; tag: string; title: string; banner: { kind: 'anime' | 'color' | 'image'; value: string } }
 
 // Notification affichée sous la cloche de la barre du haut. Elles naissent d'événements réels de la partie.
 export type Notif = { id: number; t: number; kind: 'pull' | 'level' | 'saga' | 'drop' | 'rebirth' | 'free'; text: string; read: boolean }
@@ -53,7 +58,7 @@ type Store = State & {
   buyEnergy: () => boolean // recharge d'éclairs contre des âmes
   seeTutorial: (id: string) => void
   resetTutorial: () => void
-  setProfile: (profile: { name?: string; avatar?: string }) => void
+  setProfile: (profile: Partial<Profile>) => void
   resetGame: () => void // efface toute la progression
   readNotifs: () => void // tout marquer comme lu
   clearNotifs: () => void
@@ -86,19 +91,22 @@ const LOG_MAX = 30
 // Dotation de départ du compte.
 export const START_GEMS = 600
 const START: State = {
-  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '' }, arcHeroes: {}, tutorialSeen: [],
+  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' } }, pulls: 0, wins: 0, arcHeroes: {}, tutorialSeen: [],
   tickets: 20, gems: START_GEMS, pity: Object.fromEntries(BANNERS.map((b) => [b.id, 0])), owned: {},
   xp: {}, scrolls: { small: 0, medium: 0, large: 0 }, wish: [], pinned: [], log: {},
 }
 
 // La progression est gardée dans le navigateur de cet appareil (pas de compte en ligne pour l'instant).
 const SAVE_KEY = 'anime-rift-save-v1'
+// numéro de joueur à quatre chiffres, tiré une fois
+const newTag = () => String(1000 + Math.floor(Math.random() * 9000))
 const load = (): State => {
   try {
     const raw = localStorage.getItem(SAVE_KEY)
-    if (!raw) return START
+    if (!raw) return { ...START, profile: { ...START.profile, tag: newTag() } }
     const s = JSON.parse(raw) as Partial<State>
-    return { ...START, ...s, pity: { ...START.pity, ...s.pity }, scrolls: { ...START.scrolls, ...s.scrolls }, profile: { ...START.profile, ...s.profile } }
+    const merged = { ...START, ...s, pity: { ...START.pity, ...s.pity }, scrolls: { ...START.scrolls, ...s.scrolls }, profile: { ...START.profile, ...s.profile } }
+    return merged.profile.tag ? merged : { ...merged, profile: { ...merged.profile, tag: newTag() } }
   } catch {
     return START
   }
@@ -149,7 +157,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     }
     const readNotifs = () => { if (state.notifs.some((x) => !x.read)) setState({ ...state, notifs: state.notifs.map((x) => ({ ...x, read: true })) }) }
     const clearNotifs = () => setState({ ...state, notifs: [] })
-    const setProfile = (profile: { name?: string; avatar?: string }) => setState({ ...state, profile: { ...state.profile, ...profile } })
+    const setProfile = (profile: Partial<Profile>) => setState({ ...state, profile: { ...state.profile, ...profile } })
     const resetGame = () => setState({ ...START, profile: state.profile, tutorialSeen: state.tutorialSeen })
 
     const summon = (banner: Banner, currency: Currency, count: number) => {
@@ -168,7 +176,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         tickets: state.tickets - (currency === 'ticket' ? price(currency, count) : 0),
         gems: state.gems - (currency === 'gems' ? price(currency, count) : 0),
         pity: { ...state.pity, [banner.id]: pity },
-        owned, log, accountXp,
+        owned, log, accountXp, pulls: state.pulls + count,
         notifs: notify(state.notifs, [
           ...heroes.filter((h) => isPityRarity(h.rarity)).map((h): [Notif['kind'], string] => ['pull', `Gros tirage : ${h.name} (${RARITIES[h.rarity].short}) sur la bannière ${banner.world}.`]),
           ...levelNote(accountXp),
@@ -246,7 +254,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       const xp = { ...state.xp }
       for (const id of teamNow) xp[id] = (xp[id] ?? 0) + cardXp
       setState({
-        ...state, ...energy, scrolls, xp,
+        ...state, ...energy, scrolls, xp, wins: state.wins + 1,
         saga: { ...state.saga, [stage.id]: Math.max(stars, state.saga[stage.id] ?? 0) },
         // titre d'arc : les cartes de cet univers présentes dans l'équipe quand son boss tombe
         arcHeroes: stage.boss ? { ...state.arcHeroes, ...Object.fromEntries(teamNow.filter((id) => heroById(id).world === stage.world).map((id) => [id, true])) } : state.arcHeroes,
