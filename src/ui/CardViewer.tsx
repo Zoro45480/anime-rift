@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useRef, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { AFFINITIES } from '../data/affinities'
 import { BANNERS } from '../data/banners'
@@ -31,6 +31,32 @@ const Sheet = ({ hero, onClose, onMore }: { hero: Hero; onClose: () => void; onM
   const state = cardState(hero, xp, owned, rebirths, awakened, teamNow)
   const wished = wish.includes(hero.id)
 
+  // Gyroscope : sur téléphone, la carte s'incline et ses reflets bougent quand on penche l'appareil.
+  const front = useRef<HTMLSpanElement>(null)
+  const [gyro, setGyro] = useState(false)
+  const canGyro = typeof window !== 'undefined' && 'DeviceOrientationEvent' in window && matchMedia('(pointer: coarse)').matches
+  useEffect(() => {
+    if (!gyro) return
+    const card = front.current?.querySelector<HTMLElement>('.card')
+    if (!card) return
+    const onTilt = (e: DeviceOrientationEvent) => {
+      const x = Math.min(1, Math.max(0, ((e.gamma ?? 0) + 30) / 60))
+      const y = Math.min(1, Math.max(0, ((e.beta ?? 45) - 15) / 60))
+      card.classList.add('is-live')
+      card.style.setProperty('--px', `${x * 100}%`); card.style.setProperty('--py', `${y * 100}%`)
+      card.style.setProperty('--ang', `${x * 300 + y * 60}deg`)
+      card.style.setProperty('--rx', `${(0.5 - y) * 16}deg`); card.style.setProperty('--ry', `${(x - 0.5) * 18}deg`)
+    }
+    window.addEventListener('deviceorientation', onTilt)
+    return () => { window.removeEventListener('deviceorientation', onTilt); card.classList.remove('is-live') }
+  }, [gyro])
+  const toggleGyro = async () => {
+    if (gyro) return setGyro(false)
+    const ask = (DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> }).requestPermission
+    if (ask) { try { if ((await ask()) === 'denied') return } catch { return } } // iPhone : il faut l'autorisation
+    setGyro(true)
+  }
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') { e.stopPropagation(); onClose() }
@@ -46,7 +72,7 @@ const Sheet = ({ hero, onClose, onMore }: { hero: Hero; onClose: () => void; onM
         <div className={`cv__flip ${flipped ? 'is-flipped' : ''}`} role="button" tabIndex={0} onClick={() => setFlipped(!flipped)}
           onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); setFlipped(!flipped) } }}
           aria-label={flipped ? 'Revoir la carte' : 'Retourner la carte pour voir sa fiche'}>
-          <span className="cv__face cv__face--front"><Card hero={hero} inert hd /></span>
+          <span className="cv__face cv__face--front" ref={front}><Card hero={hero} inert hd /></span>
           <span className="cv__face cv__face--back" style={{ ['--rc' as string]: rarity.color }}>
             <span className="cv__head"><b>{rarity.short}</b><i>N° {String(hero.no).padStart(4, '0')}</i></span>
             <span className="cv__name">{hero.name}</span>
@@ -75,6 +101,7 @@ const Sheet = ({ hero, onClose, onMore }: { hero: Hero; onClose: () => void; onM
           </span>
         </div>
         <p className="cv__hint">{flipped ? 'Touche la fiche pour revoir la carte' : 'Touche la carte pour la retourner'}</p>
+        {canGyro && !flipped && <button className={`cv__gyro ${gyro ? 'is-on' : ''}`} aria-pressed={gyro} onClick={() => void toggleGyro()}>{gyro ? '✦ Penche ton téléphone' : '✦ Bouger avec le téléphone'}</button>}
       </div>
     </div>,
     document.body,
