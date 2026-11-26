@@ -34,7 +34,7 @@ describe('contrats', () => {
 
   it('un contrat se récupère une fois par période ; le bonus du jour demande les 6', () => {
     const now = at('2026-11-26')
-    let q = addCounts(emptyQuests(), { visit: 1, wins: 3, win3: 1, levels: 4, newCards: 2, featuredPull: 1 }, now)
+    let q = addCounts(emptyQuests(), Object.fromEntries(dailyContracts(now).map((c) => [c.counter!, c.target])), now)
     expect(claimable(q, {}, now).map((c) => c.id).sort()).toEqual(dailyContracts(now).map((c) => c.id).sort())
     for (const c of dailyContracts(now)) q = markClaimed(c, q, now)
     expect(progress(DAILY_BONUS, q, {}, now)).toBe(6)
@@ -58,7 +58,7 @@ describe('contrats', () => {
 
 describe('défis du Chemin', () => {
   it('se refont 3 fois par jour, chaque fois avec un nouvel objectif', async () => {
-    const { CHALLENGES, challengeState, markChallenge, addCounts, emptyQuests } = await import('./contracts')
+    const { CHALLENGE_POOL: CHALLENGES, challengeState, markChallenge, addCounts, emptyQuests } = await import('./contracts')
     const now = new Date(2026, 10, 26, 12)
     const c = CHALLENGES.find((x) => x.id === 'c-pulls')!
     let q = addCounts(emptyQuests(), { pulls: 25 }, now)
@@ -70,5 +70,24 @@ describe('défis du Chemin', () => {
     q = markChallenge(c, addCounts(q, { pulls: 5 }, now), now)
     expect(challengeState(c, q, now).finished).toBe(true)
     expect(challengeState(c, q, new Date(2026, 10, 27, 9)).done).toBe(0)
+  })
+})
+
+describe('quêtes qui changent', () => {
+  it('6 quêtes du jour, différentes d’un jour à l’autre, identiques dans la journée', async () => {
+    const { dailyContracts } = await import('./contracts')
+    const a = dailyContracts(new Date(2026, 10, 26, 9)).map((c) => c.id)
+    expect(a).toHaveLength(6)
+    expect(dailyContracts(new Date(2026, 10, 26, 22)).map((c) => c.id)).toEqual(a)
+    const days = new Set(Array.from({ length: 7 }, (_, i) => dailyContracts(new Date(2026, 10, 20 + i)).map((c) => c.id).join()))
+    expect(days.size).toBeGreaterThan(4)
+  })
+  it('les quêtes du pass restent toute la saison et changent à la saison suivante', async () => {
+    const { challengesFor } = await import('./contracts')
+    const s1 = challengesFor(new Date(2026, 10, 26)).map((c) => c.id)
+    expect(s1).toHaveLength(5)
+    expect(challengesFor(new Date(2026, 11, 18)).map((c) => c.id)).toEqual(s1)
+    const later = [1, 2, 3].map((k) => challengesFor(new Date(2026, 11, 22 + 28 * (k - 1))).map((c) => c.id).join())
+    expect(later.some((x) => x !== s1.join())).toBe(true)
   })
 })

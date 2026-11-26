@@ -7,7 +7,7 @@ import { ENERGY_OVER, ENERGY_REFILL, ENERGY_REFILL_COST, cardState, power, ENERG
 import { makeUnit, simulate, type BattleEvent, type Unit } from '../game/battle'
 import { foeUnits, isUnlocked, rollDrops, SOULS_PER_STAR, stageById, starsFor, TEAM_SIZE, type Stage } from '../game/saga'
 import { canBuy, cosmeticById } from '../game/cosmetics'
-import { CHALLENGES, challengeState, markChallenge, weekKey, addCounts, claimable, DAILY_REWARDS, dailyStatus, dayKey, emptyQuests, featuredWorld, markClaimed, roll, type Counts, type Quests, type Reward } from '../game/contracts'
+import { challengesFor, challengeState, markChallenge, weekKey, addCounts, claimable, DAILY_REWARDS, dailyStatus, dayKey, emptyQuests, featuredWorld, markClaimed, roll, type Counts, type Quests, type Reward } from '../game/contracts'
 import { claimableTiers, PATH_XP, rollCard, rollPath, tierOf, tierReward, type PathState } from '../game/riftpath'
 import { applyRule, floor as spireFloor, spireFoes, type Floor } from '../game/spire'
 import { ACHIEVEMENTS, doneIds, METAL_LABEL } from '../game/achievements'
@@ -615,7 +615,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     }
     const claimChallenge = (id: string) => {
       const t = new Date()
-      const c = CHALLENGES.find((x) => x.id === id)
+      const c = challengesFor(t).find((x) => x.id === id)
       if (!c || !challengeState(c, state.quests, t).ready) return false
       setState(withPath({ ...grant(state, { gems: c.gems }), quests: markChallenge(c, state.quests, t) }, c.xp))
       return true
@@ -657,7 +657,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setState(s)
       return cards
     }
-    const questsReady = claimable(state.quests, state.saga, new Date(now)).length + (dailyStatus(state.quests.daily, new Date(now)).claimed ? 0 : 1) + claimableTiers(rollPath(state.path, new Date(now))).length + CHALLENGES.filter((c) => challengeState(c, state.quests, new Date(now)).ready).length + (eventDone(colNow) && !colNow.final ? 1 : 0) + PVP_GOALS.filter((g) => { const w = rollWeek(state.arena, new Date(now)); return !w.claimed.includes(g.id) && g.value(state.arena, w) >= g.target }).length
+    const questsReady = claimable(state.quests, state.saga, new Date(now)).length + (dailyStatus(state.quests.daily, new Date(now)).claimed ? 0 : 1) + claimableTiers(rollPath(state.path, new Date(now))).length + challengesFor(new Date(now)).filter((c) => challengeState(c, state.quests, new Date(now)).ready).length + (eventDone(colNow) && !colNow.final ? 1 : 0) + PVP_GOALS.filter((g) => { const w = rollWeek(state.arena, new Date(now)); return !w.claimed.includes(g.id) && g.value(state.arena, w) >= g.target }).length
     const seeTutorial = (id: string) => { if (!state.tutorialSeen.includes(id)) setState({ ...state, tutorialSeen: [...state.tutorialSeen, id] }) }
     const resetTutorial = () => setState({ ...state, tutorialSeen: [] })
     const awaken = (heroId: string) => {

@@ -5,7 +5,7 @@ import { RARITIES } from '../data/rarities'
 import { BANNERS } from '../data/banners'
 import { premiumReward, CARD_ODDS, claimableTiers, PATH_XP, rollPath, seasonOf, TIER_REWARDS, TIER_XP, tierOf, TIERS, type PathReward } from '../game/riftpath'
 import { SCROLLS } from '../game/progression'
-import { CHALLENGES, CHALLENGE_TIMES, challengeState, msToDayEnd } from '../game/contracts'
+import { challengesFor, CHALLENGE_TIMES, challengeState, msToDayEnd } from '../game/contracts'
 import { useStore } from '../state/store'
 import { Card } from '../ui/Card'
 import { Coin } from '../ui/Coin'
@@ -104,9 +104,9 @@ export const RiftPath = ({ now }: { now: Date }) => {
       </div>
 
       <div className="pt__ch">
-        <h3 className="pt__qtitle">Quêtes de saison <small>Chaque défi se refait {CHALLENGE_TIMES} fois par jour et fait avancer le Chemin · nouveaux dans {left(msToDayEnd(now))}</small></h3>
+        <h3 className="pt__qtitle">Quêtes de saison <small>Les quêtes de la saison changent quand le pass se termine (dans {left(season.msLeft)}). Chacune se refait {CHALLENGE_TIMES} fois par jour · compteurs remis à zéro dans {left(msToDayEnd(now))}</small></h3>
         <ul>
-          {CHALLENGES.map((c) => {
+          {challengesFor(now).map((c) => {
             const st = challengeState(c, store.quests, now)
             return (
               <li key={c.id} className={`ct ${st.ready ? 'is-ready' : ''} ${st.finished ? 'is-done' : ''}`}>
