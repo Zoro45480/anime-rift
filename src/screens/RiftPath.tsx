@@ -55,7 +55,6 @@ export const RiftPath = ({ now }: { now: Date }) => {
     <section className="pt" style={{ ['--season' as string]: season.hue }}>
       <header className="pt__hero">
         {store.bannerArt[seasonWorld.id] && <img className="pt__hero-bg" src={store.bannerArt[seasonWorld.id]} alt="" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
-        <img className="pt__hero-path" src={uiArt('rift-path')} alt="" />
         <div className="pt__hero-text">
           <h2><img src={uiArt('crown')} alt="" />Chemin du Rift</h2>
           <p className="pt__ribbon">Saison {season.number} · {season.name}</p>
