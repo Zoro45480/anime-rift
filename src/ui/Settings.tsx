@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { signIn, signOut, signUp, useOnline } from '../state/online'
+import { signInWith, signOut, useOnline } from '../state/online'
 import { createPortal } from 'react-dom'
 import { cosmeticArt, extraArt } from '../assets/manifest'
 import { accountLevel } from '../game/progression'
@@ -94,6 +94,8 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
         </section>
         <p className="set__note">Ta partie est gardée sur cet appareil : il n'y a pas encore de compte en ligne ni de connexion.</p>
 
+        <AccountCard />
+
         <section className="set-card" style={{ ['--sc' as string]: '#b78bff' }}>
           <header className="set-card__head"><img src={extraArt('set-profile')} alt="" /><h3>Profil</h3></header>
           <h4>Pseudo</h4>
@@ -160,7 +162,6 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
           </button>
         </section>
 
-        <AccountCard />
         <SaveCard />
 
         <section className="set-card set__danger" style={{ ['--sc' as string]: '#ff5d7a' }}>
@@ -222,40 +223,24 @@ const SaveCard = () => {
 // Compte en ligne : la partie est sauvegardée sur le serveur et retrouvée sur tous les appareils.
 const AccountCard = () => {
   const { session, me, ready } = useOnline()
-  const store = useStore()
-  const [mode, setMode] = useState<'in' | 'up'>('up')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [msg, setMsg] = useState('')
-  const [busy, setBusy] = useState(false)
-  const submit = async (e: FormEvent) => {
-    e.preventDefault()
-    setBusy(true)
-    const r = mode === 'up' ? await signUp(email.trim(), password, store.profile.name.trim() || 'Joueur') : await signIn(email.trim(), password)
-    setMsg(r.message); setBusy(false)
-  }
+  const go = async (p: 'google' | 'discord') => { setMsg(''); const e = await signInWith(p); if (e) setMsg(e) }
   return (
     <section className="set-card set-account" style={{ ['--sc' as string]: '#7d9bff' }}>
       <header className="set-card__head"><img src={extraArt('set-profile')} alt="" /><h3>Compte en ligne</h3></header>
       {!ready ? <p className="set__note">Connexion au serveur…</p> : session ? (
         <>
           <p className="set-account__me"><b>{me?.name ?? 'Joueur'}</b> <span>#{me?.player_no ?? '…'}</span></p>
-          <p className="set__note">Connecté avec {session.user.email}. Ta partie est sauvegardée en ligne toute seule, et tu la retrouves en te connectant sur un autre appareil. Ton numéro de joueur dit dans quel ordre tu as rejoint le jeu.</p>
+          <p className="set__note">Connecté avec {session.user.app_metadata.provider === 'discord' ? 'Discord' : session.user.app_metadata.provider === 'google' ? 'Google' : 'ton compte'}. Ta partie est sauvegardée en ligne toute seule : tu la retrouves en te connectant sur un autre appareil. Ton numéro de joueur dit dans quel ordre tu as rejoint le jeu.</p>
           <button className="cd-btn cd-btn--small" onClick={() => void signOut()}>Se déconnecter</button>
         </>
       ) : (
         <>
-          <p className="set__note">Crée un compte pour sauvegarder ta partie en ligne, recevoir ton numéro de joueur et apparaître dans le Hall of Fame.</p>
-          <div className="set__seg set__seg--two" role="radiogroup" aria-label="Compte">
-            <button role="radio" aria-checked={mode === 'up'} className={mode === 'up' ? 'is-on' : ''} onClick={() => setMode('up')}><b>Créer un compte</b></button>
-            <button role="radio" aria-checked={mode === 'in'} className={mode === 'in' ? 'is-on' : ''} onClick={() => setMode('in')}><b>Se connecter</b></button>
+          <p className="set__note">Connecte-toi pour sauvegarder ta partie en ligne, recevoir ton numéro de joueur et apparaître dans le Hall of Fame. Ta partie de cet appareil part avec toi.</p>
+          <div className="set-account__oauth">
+            <button className="oauth oauth--discord" onClick={() => void go('discord')}><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M20.3 4.4A19.6 19.6 0 0 0 15.4 3l-.6 1.3a18 18 0 0 0-5.6 0L8.6 3a19.6 19.6 0 0 0-4.9 1.4C.6 9 0 13.6.3 18.1a19.8 19.8 0 0 0 6 3l1.3-2a12.8 12.8 0 0 1-2-1l.5-.4a14 14 0 0 0 11.8 0l.5.4c-.6.4-1.3.7-2 1l1.3 2a19.7 19.7 0 0 0 6-3c.4-5.2-.7-9.7-3.4-13.7ZM8.5 15.3c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Z" /></svg>Se connecter avec Discord</button>
+            <button className="oauth oauth--google" onClick={() => void go('google')}><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5a5.6 5.6 0 0 1-2.4 3.6v3h3.9c2.2-2.1 3.5-5.2 3.5-8.8Z" /><path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-2.9l-3.9-3c-1.1.7-2.5 1.2-4.1 1.2-3.1 0-5.8-2.1-6.7-5H1.3v3.1A12 12 0 0 0 12 24Z" /><path fill="#FBBC05" d="M5.3 14.3a7.2 7.2 0 0 1 0-4.6V6.6h-4a12 12 0 0 0 0 10.8l4-3.1Z" /><path fill="#EA4335" d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4A12 12 0 0 0 1.3 6.6l4 3.1c.9-2.9 3.6-4.9 6.7-4.9Z" /></svg>Se connecter avec Google</button>
           </div>
-          <form className="set-account__form" onSubmit={(e) => void submit(e)}>
-            <input className="set__input" type="email" required autoComplete="email" placeholder="Adresse e-mail" aria-label="Adresse e-mail" value={email} onChange={(e) => setEmail(e.target.value)} />
-            <input className="set__input" type="password" required minLength={6} autoComplete={mode === 'up' ? 'new-password' : 'current-password'} placeholder="Mot de passe (6 caractères ou plus)" aria-label="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} />
-            <button className="btn btn--gold" type="submit" disabled={busy}>{busy ? '…' : mode === 'up' ? 'Créer mon compte' : 'Me connecter'}</button>
-          </form>
-          {mode === 'up' && <p className="set__note">Ton pseudo actuel ({store.profile.name.trim() || 'Joueur'}) sera celui du compte. Ta partie de cet appareil part avec toi.</p>}
         </>
       )}
       {msg && <p className="cd__notice" role="status">{msg}</p>}

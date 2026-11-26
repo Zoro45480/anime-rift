@@ -74,6 +74,16 @@ export const signIn = async (email: string, password: string) => {
   return error ? { ok: false, message: frError(error.message) } : { ok: true, message: 'Connecté !' }
 }
 export const signOut = () => supa.auth.signOut()
+// Connexion avec Google ou Discord : on part sur leur page, puis on revient dans le jeu déjà connecté.
+export const signInWith = async (provider: 'google' | 'discord') => {
+  const { error } = await supa.auth.signInWithOAuth({ provider, options: { redirectTo: window.location.origin + window.location.pathname } })
+  return error ? (/not enabled|Unsupported provider/i.test(error.message) ? `La connexion ${provider === 'google' ? 'Google' : 'Discord'} n'est pas encore activée sur le serveur.` : error.message) : ''
+}
+// Pseudo du compte Google ou Discord, utilisé si le joueur n'en a pas encore choisi.
+export const accountName = (s: Session | null) => {
+  const m = s?.user.user_metadata ?? {}
+  return String(m.custom_claims?.global_name ?? m.full_name ?? m.name ?? m.user_name ?? '').slice(0, 20)
+}
 
 const frError = (m: string) =>
   /Invalid login/i.test(m) ? 'E-mail ou mot de passe incorrect.'
@@ -92,7 +102,8 @@ export const pushCloud = (data: unknown, stats: Stats) => {
   timer = setTimeout(async () => {
     const now = new Date().toISOString()
     await supa.from('saves').upsert({ id: uid, data, updated_at: now })
-    const row = { ...stats, score: scoreOf(stats), updated_at: now }
+    const name = stats.name === 'Joueur' && accountName(current.session) ? accountName(current.session) : stats.name
+    const row = { ...stats, name, score: scoreOf(stats), updated_at: now }
     const { data: me } = await supa.from('profiles').update(row).eq('id', uid).select('*').maybeSingle()
     if (me) set({ me: me as OnlineProfile })
   }, 3000)
