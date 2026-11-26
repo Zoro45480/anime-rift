@@ -5,7 +5,6 @@ import { Home } from './screens/Home'
 import { Community, type CommunityTab } from './screens/Community'
 import { CardViewerProvider } from './ui/CardViewer'
 import { ErrorBoundary } from './ui/ErrorBoundary'
-import { Splash } from './screens/Splash'
 import { Banners } from './screens/Banners'
 import { Play } from './screens/Play'
 import { Contracts } from './screens/Contracts'
@@ -13,7 +12,6 @@ import { Bazaar } from './screens/Bazaar'
 import { Collection, type CollectionTab } from './screens/Collection'
 
 export const App = () => {
-  const [entered, setEntered] = useState(false)
   const [tab, setTab] = useState<TabId>('home')
   const [visit, setVisit] = useState(0) // change à chaque navigation : l'écran repart de son point de départ
   const [bannerAt, setBannerAt] = useState(0)
@@ -25,7 +23,6 @@ export const App = () => {
   const nav = (t: TabId) => { if (t === 'collection' && colTab === 'profile') setColTab('cards'); if (t === 'contracts') setQuestAt('daily'); if (t === 'play') setPlayAt(undefined); go(t) }
   const toProfile = () => { setColTab('profile'); go('collection') }
   const toRebirth = () => { setColTab('rebirth'); go('collection') }
-  if (!entered) return <Splash onEnter={() => setEntered(true)} />
   return (
     <StoreProvider>
       <CardViewerProvider>
