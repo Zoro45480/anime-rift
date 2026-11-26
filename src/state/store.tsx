@@ -11,6 +11,7 @@ import { CHALLENGES, challengeState, markChallenge, addCounts, claimable, DAILY_
 import { claimableTiers, PATH_XP, rollCard, rollPath, tierOf, tierReward, type PathState } from '../game/riftpath'
 import { applyRule, floor as spireFloor, spireFoes, type Floor } from '../game/spire'
 import { ACHIEVEMENTS, doneIds, METAL_LABEL } from '../game/achievements'
+import { colossusFoes, colossusOf, DIFFICULTIES, eventDone, isOpen as colOpen, rollCol, TRIES_PER_DAY, WIN_SOULS, type ColState, type Difficulty } from '../game/colossus'
 import { loadAllArt, removeArt, saveArt } from './customArt'
 import { loadBannerArt, loadRemoteArt, type RemoteStatus } from './remoteArt'
 
@@ -45,6 +46,7 @@ type State = {
   cosmetics: string[] // objets d'apparence achetés
   seen: { last: string; days: number } // jours de jeu différents (succès d'ancienneté)
   achDone: string[] | null // succès déjà annoncés (null : ancienne sauvegarde, on les marque sans notification)
+  col: ColState // Les Colosses : semaine, difficultés battues, essais du jour, objectifs d'événement
   multis: Record<string, number> // grande garantie : multis ×10 d'affilée sans MR, par bannière
   spire: { best: number } // La Spire : plus haut étage gagné
   path: PathState // Chemin du Rift : saison, XP, paliers récupérés
@@ -63,6 +65,7 @@ export type Notif = { id: number; t: number; kind: 'pull' | 'level' | 'saga' | '
 const NOTIF_MAX = 30
 
 // Ce qu'un combat a donné : de quoi le rejouer à l'écran et afficher les récompenses.
+export type ColResult = { diff: Difficulty; allies: Unit[]; foes: Unit[]; events: BattleEvent[]; win: boolean; first: boolean; card: Hero | null }
 export type SpireResult = { floor: Floor; allies: Unit[]; foes: Unit[]; events: BattleEvent[]; win: boolean; first: boolean }
 export type FightResult = {
   stage: Stage; allies: Unit[]; foes: Unit[]; events: BattleEvent[]; win: boolean
@@ -87,6 +90,9 @@ type Store = State & {
   clearNotifs: () => void
   teamNow: string[] // l'équipe réellement utilisée : celle choisie, sinon les 3 cartes les plus puissantes
   setTeam: (ids: string[]) => void
+  fightColossus: (diff: Difficulty['id']) => ColResult | null // combat contre le Colosse de la semaine
+  claimEvent: () => Hero | null // récompense finale de l'événement : une carte SR ou mieux
+  colTries: number // essais restants aujourd'hui
   fightSpire: () => SpireResult | null // combat l'étage suivant de La Spire (sans éclair)
   fight: (stageId: string) => FightResult | null // null = combat impossible (verrouillé, pas d'énergie ou pas d'équipe)
   canAfford: (currency: Currency, count: number) => boolean
@@ -117,7 +123,7 @@ const LOG_MAX = 30
 // Dotation de départ du compte.
 export const START_GEMS = 600
 const START: State = {
-  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' }, frame: '', ornament: '', aura: '', color: '', effect: '', theme: '', badges: [] }, pulls: 0, wins: 0, cosmetics: [], quests: emptyQuests(), path: { season: 0, xp: 0, claimed: [] }, spire: { best: 0 }, multis: {}, seen: { last: '', days: 0 }, achDone: [], arcHeroes: {}, tutorialSeen: [],
+  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' }, frame: '', ornament: '', aura: '', color: '', effect: '', theme: '', badges: [] }, pulls: 0, wins: 0, cosmetics: [], quests: emptyQuests(), path: { season: 0, xp: 0, claimed: [] }, spire: { best: 0 }, col: { week: '', cleared: [], tries: { day: '', n: 0 }, wins: 0, pulls: 0, final: false }, multis: {}, seen: { last: '', days: 0 }, achDone: [], arcHeroes: {}, tutorialSeen: [],
   tickets: 20, gems: START_GEMS, pity: Object.fromEntries(BANNERS.map((b) => [b.id, 0])), owned: {},
   xp: {}, scrolls: { small: 0, medium: 0, large: 0 }, wish: [], pinned: [], favs: [], log: {},
 }
@@ -253,7 +259,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         ...state,
         tickets: state.tickets - (currency === 'ticket' ? price(currency, count) : 0),
         gems: state.gems - (currency === 'gems' ? price(currency, count) : 0),
-        pity: { ...state.pity, [banner.id]: pity }, multis,
+        pity: { ...state.pity, [banner.id]: pity }, multis, col: { ...rollCol(state.col, new Date()), pulls: rollCol(state.col, new Date()).pulls + count },
         owned, log, accountXp, pulls: state.pulls + count,
         notifs: notify(state.notifs, [
           ...heroes.filter((h) => isPityRarity(h.rarity)).map((h): [Notif['kind'], string] => ['pull', `Gros tirage : ${h.name} (${RARITIES[h.rarity].short}) sur la bannière ${banner.world}.`]),
@@ -379,6 +385,45 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       return { floor: f, allies, foes, events, win, first: true }
     }
 
+    // Les Colosses : 3 essais par jour, la récompense d'une difficulté une fois par semaine.
+    const colNow = rollCol(state.col, new Date(now))
+    const today = dayKey(new Date(now))
+    const colTries = TRIES_PER_DAY - (colNow.tries.day === today ? colNow.tries.n : 0)
+    const fightColossus = (id: Difficulty['id']): ColResult | null => {
+      const t = new Date()
+      const col = rollCol(state.col, t)
+      const diff = DIFFICULTIES.find((d) => d.id === id)!
+      const day = dayKey(t)
+      const used = col.tries.day === day ? col.tries.n : 0
+      if (teamNow.length === 0 || used >= TRIES_PER_DAY || !colOpen(col, diff)) return null
+      const { boss, minions } = colossusOf(t)
+      const allies = teamNow.map((hid, i) => makeUnit(heroById(hid), cardState(heroById(hid), state.xp, state.owned, state.rebirths, state.awakened, teamNow).stats, 0, i))
+      const foes = colossusFoes(boss, minions, diff)
+      const { events, win } = simulate(allies, foes, Math.random)
+      const damage = events.filter((e) => e.actor.startsWith('0-')).reduce((n, e) => n + e.hits.reduce((m, h) => m + h.amount, 0), 0)
+      const tries = { day, n: used + 1 }
+      if (!win) { setState(tracked({ ...state, col: { ...col, tries } }, { damage })); return { diff, allies, foes, events, win, first: false, card: null } }
+      const first = !col.cleared.includes(diff.id)
+      let next: State = { ...state, col: { ...col, tries, wins: col.wins + 1, cleared: first ? [...col.cleared, diff.id] : col.cleared }, wins: state.wins + 1 }
+      next = grant(next, first ? { ...diff.reward, gems: (diff.reward.gems ?? 0) + WIN_SOULS } : { gems: WIN_SOULS })
+      let card: Hero | null = null
+      if (first && diff.card) {
+        card = rollCard(Math.random)
+        next = { ...next, owned: { ...next.owned, [card.id]: (next.owned[card.id] ?? 0) + 1 }, log: withLog(next.log, card.id, { k: 'pull', note: `Obtenue · Colosse ${boss.name}, ${diff.label}` }) }
+      }
+      next = { ...next, notifs: notify(next.notifs, [['saga', `Colosse ${boss.name} vaincu en ${diff.label} !`], ...(card ? [['pull', `Récompense Ultime : ${card.name} (${RARITIES[card.rarity].short}).`] as [Notif['kind'], string]] : [])]) }
+      setState(tracked(next, { wins: 1, bosses: 1, damage }))
+      return { diff, allies, foes, events, win, first, card }
+    }
+    const claimEvent = () => {
+      const col = rollCol(state.col, new Date())
+      if (col.final || !eventDone(col)) return null
+      const card = rollCard(Math.random)
+      setState({ ...state, col: { ...col, final: true }, owned: { ...state.owned, [card.id]: (state.owned[card.id] ?? 0) + 1 }, accountXp: state.accountXp + ACCOUNT_XP[card.rarity],
+        log: withLog(state.log, card.id, { k: 'pull', note: 'Obtenue · événement des Colosses' }), notifs: notify(state.notifs, [['pull', `Événement terminé : ${card.name} (${RARITIES[card.rarity].short}) rejoint ta collection.`]]) })
+      return card
+    }
+
     const buyEnergy = () => {
       const left = energyNow(state.energy, state.energyAt, Date.now())
       if (state.gems < ENERGY_REFILL_COST || left + ENERGY_REFILL > ENERGY_OVER) return false
@@ -437,7 +482,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setState(s)
       return cards
     }
-    const questsReady = claimable(state.quests, state.saga, new Date(now)).length + (dailyStatus(state.quests.daily, new Date(now)).claimed ? 0 : 1) + claimableTiers(rollPath(state.path, new Date(now))).length + CHALLENGES.filter((c) => challengeState(c, state.quests, new Date(now)).ready).length
+    const questsReady = claimable(state.quests, state.saga, new Date(now)).length + (dailyStatus(state.quests.daily, new Date(now)).claimed ? 0 : 1) + claimableTiers(rollPath(state.path, new Date(now))).length + CHALLENGES.filter((c) => challengeState(c, state.quests, new Date(now)).ready).length + (eventDone(colNow) && !colNow.final ? 1 : 0)
     const seeTutorial = (id: string) => { if (!state.tutorialSeen.includes(id)) setState({ ...state, tutorialSeen: [...state.tutorialSeen, id] }) }
     const resetTutorial = () => setState({ ...state, tutorialSeen: [] })
     const awaken = (heroId: string) => {
@@ -470,7 +515,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setArt((a) => Object.fromEntries(Object.entries(a).filter(([k]) => k !== heroId)))
       void removeArt(heroId)
     }
-    return { ...state, canAfford, summon, merge, useScroll, scrollsUseful, toggleFav, toggleWish, togglePin, fightSpire, claimContract, claimDaily, claimChallenge, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
+    return { ...state, canAfford, summon, merge, useScroll, scrollsUseful, toggleFav, toggleWish, togglePin, fightSpire, fightColossus, claimEvent, colTries, claimContract, claimDaily, claimChallenge, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
   }, [state, customArt, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, now])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>

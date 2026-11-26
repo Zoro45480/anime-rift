@@ -21,6 +21,11 @@ const TALKS: Record<string, { title: string; lines: string[] }> = {
     'Mets ensemble des cartes du même collectif (Équipe 7, Chapeaux de paille…) : elles gagnent un bonus.',
     'Chaque victoire donne de l’XP, des âmes pour tes nouvelles étoiles, et parfois un parchemin.',
   ] },
+  colossus: { title: 'Les Colosses', lines: [
+    'Voici le Colosse de la semaine ! Un grand méchant, beaucoup plus solide que d’habitude, avec deux sbires.',
+    'Bats-le en Normal pour ouvrir Difficile, puis Extrême et Ultime. Chaque difficulté donne sa récompense une fois par semaine.',
+    'Tu as 3 essais par jour. Fais les trois objectifs de l’événement pour gagner une carte SR ou mieux !',
+  ] },
   spire: { title: 'La Spire', lines: [
     'Bienvenue dans La Spire ! Une tour sans fin : chaque étage est plus dur que le précédent.',
     'Lis bien la règle de l’étage : parfois elle aide tes Tanks, tes DPS ou tes Soigneurs. Change ton équipe pour en profiter !',

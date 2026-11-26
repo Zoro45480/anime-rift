@@ -7,6 +7,7 @@ import { Guide } from '../ui/Guide'
 import { Avatar } from '../ui/Settings'
 import { Saga } from './Saga'
 import { Spire } from './Spire'
+import { Colossus } from './Colossus'
 import { Coin } from '../ui/Coin'
 import { IconLock } from '../ui/icons'
 import { LEVEL_STYLE_NAME, LevelBadge, levelStyle } from '../ui/LevelBadge'
@@ -15,8 +16,8 @@ import { LEVEL_STYLE_NAME, LevelBadge, levelStyle } from '../ui/LevelBadge'
 const GATES = [
   { id: 'saga', anime: 'naruto', model: 'Vita', numeral: 'I', kanji: '物語', title: 'La Saga', tag: 'Histoire', text: 'Traverse chaque univers, combat après combat. Gagne de l’XP, des âmes et des parchemins.', hue: '#2bc8d9',
     points: ['Des chapitres à traverser avec ton équipe de cartes', 'Des combats au tour par tour avec les techniques de tes personnages', 'De l’XP de compte et des parchemins à chaque victoire'] },
-  { id: 'raids', anime: 'onepiece', model: 'Darkness_Shibu', numeral: 'II', kanji: '巨人', title: 'Les Colosses', tag: 'Boss', text: 'Des boss à plusieurs phases qui demandent une vraie préparation.', hue: '#ff3d8b',
-    points: ['Des boss géants qui changent de comportement à chaque phase', 'Tanks, DPS et soigneurs deviennent tous utiles', 'Des coffres de raid à ouvrir dans ton inventaire'] },
+  { id: 'raids', anime: 'onepiece', model: 'Darkness_Shibu', numeral: 'II', kanji: '巨人', title: 'Les Colosses', tag: 'Boss', text: 'Chaque semaine, un grand méchant devient un boss colossal. Quatre difficultés, jusqu’à Ultime.', hue: '#ff3d8b',
+    points: ['Un nouveau Colosse chaque lundi', 'Normal, Difficile, Extrême et Ultime', 'Un événement de la semaine avec une carte SR ou mieux garantie'] },
   { id: 'spire', anime: 'hunter', model: 'Victoria_Rubin', numeral: 'III', kanji: '塔', title: 'La Spire', tag: 'Tour', text: 'Une tour sans fin, dont les règles changent à chaque étage.', hue: '#ffb829',
     points: ['Un étage après l’autre, de plus en plus dur', 'Une règle spéciale par étage', 'Des fragments d’âme pour libérer tes cartes'] },
   { id: 'arena', anime: 'dragonball', model: 'Sendagaya_Shibu', numeral: 'IV', kanji: '闘', title: 'L’Arène', tag: 'Duel', text: 'Affronte les équipes des autres joueurs.', hue: '#ff6a2b',
@@ -55,7 +56,9 @@ export const Play = ({ onRebirth, onProfile }: { onRebirth: () => void; onProfil
   const [open, setOpen] = useState<Gate | null>(null)
   const [saga, setSaga] = useState(false)
   const [spire, setSpire] = useState(false)
+  const [colossus, setColossus] = useState(false)
   const acc = accountLevel(accountXp, rebirths)
+  if (colossus) return <Colossus onBack={() => { setColossus(false); window.scrollTo(0, 0) }} />
   if (spire) return <Spire onBack={() => { setSpire(false); window.scrollTo(0, 0) }} />
   if (saga) return <Saga onBack={() => { setSaga(false); window.scrollTo(0, 0) }} />
   return (
@@ -72,14 +75,14 @@ export const Play = ({ onRebirth, onProfile }: { onRebirth: () => void; onProfil
       </section>
       <header className="nx__head">
         <p className="eyebrow">Le Nexus</p>
-        <h1>Quatre portes.<br />Deux sont ouvertes.</h1>
+        <h1>Quatre portes.<br />Trois sont ouvertes.</h1>
         <button className="nx__who" onClick={onProfile} aria-label="Voir mon profil"><Avatar size={40} /><b>{profile.name.trim() || 'Joueur'}</b><span>Voir mon profil →</span></button>
         <p className="nx__level"><LevelBadge level={acc.level} rebirths={rebirths} size={40} /><span>Style {LEVEL_STYLE_NAME[levelStyle(acc.level, rebirths)]} · {acc.need ? `${acc.into.toLocaleString('fr-FR')} / ${acc.need.toLocaleString('fr-FR')} XP de compte` : 'Niveau maximum'}</span></p>
       </header>
       <GateTile gate={GATES[0]} featured playable onOpen={() => { setSaga(true); window.scrollTo(0, 0) }} />
       <div className="nx__row">
-        {GATES.slice(1).map((g) => g.id === 'spire'
-          ? <GateTile key={g.id} gate={g} playable onOpen={() => { setSpire(true); window.scrollTo(0, 0) }} />
+        {GATES.slice(1).map((g) => g.id === 'spire' || g.id === 'raids'
+          ? <GateTile key={g.id} gate={g} playable onOpen={() => { if (g.id === 'spire') setSpire(true); else setColossus(true); window.scrollTo(0, 0) }} />
           : <GateTile key={g.id} gate={g} onOpen={() => setOpen(g)} />)}
       </div>
 
