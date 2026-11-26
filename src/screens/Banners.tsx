@@ -149,7 +149,7 @@ export const Banners = ({ onRebirth }: { onRebirth: () => void }) => {
         </div>
         <ul className="owned-count">
           <li><b>{banner.featured.filter((id) => store.owned[id]).length}<i> / {banner.featured.length}</i></b><span>têtes d'affiche possédées</span></li>
-          <li><b>{bannerPool(banner).filter((h) => store.owned[h.id]).length}<i> / {bannerPool(banner).length}</i></b><span>cartes possédées (tous univers + MR {banner.world})</span></li>
+          <li><b>{bannerPool(banner).filter((h) => store.owned[h.id]).length}<i> / {bannerPool(banner).length}</i></b><span>cartes possédées (N, R, SR de tous univers + SSR, LR, MR {banner.world})</span></li>
         </ul>
         <PityBar value={pity} multis={store.multis[banner.id] ?? 0} banner={banner} />
         <div className="console__pulls">
@@ -192,7 +192,7 @@ export const Banners = ({ onRebirth }: { onRebirth: () => void }) => {
       {/* Bannière seule : toutes ses cartes par rareté, avec la chance de chacune, puis ses « plus » */}
       {focus && (
         <section className="bcards">
-          <header className="section__head"><span>{two(bannerPool(banner).length)}</span><div><h2>Toutes les cartes</h2><p>Toutes les cartes des 7 univers sont mélangées ici ; seules les MR sont propres à cette bannière. Touche une carte pour l'ouvrir. La chance indiquée est celle d'une invocation.</p></div></header>
+          <header className="section__head"><span>{two(bannerPool(banner).length)}</span><div><h2>Toutes les cartes</h2><p>Les N, R et SR des 7 univers sont mélangées ici ; les SSR, LR et MR sont propres à cette bannière. Touche une carte pour l'ouvrir. La chance indiquée est celle d'une invocation.</p></div></header>
           {RARITY_ORDER.map((rid) => {
             const cards = bannerPool(banner).filter((h) => h.rarity === rid)
             if (cards.length === 0) return null
@@ -303,7 +303,7 @@ export const Banners = ({ onRebirth }: { onRebirth: () => void }) => {
         <div className="modal" role="dialog" aria-modal="true" aria-label="Index de la bannière" onClick={() => setShowIndex(false)}>
           <div className="modal__box index" onClick={(e) => e.stopPropagation()}>
             <h2 className="modal__title">Index — {banner.world}</h2>
-            <p className="modal__note">Toutes les cartes que cette bannière peut donner, avec la chance exacte d'obtenir chacune en une invocation. Toutes les cartes des 7 univers sont mélangées dans chaque bannière, sauf les MR : elles ne sortent que sur la bannière de leur univers. Les cartes marquées ★ sont à l'affiche : elles sortent plus souvent que les autres cartes de leur rareté. Une carte SSR, LR ou MR est garantie au plus tard à la {PITY_MAX}e invocation.</p>
+            <p className="modal__note">Toutes les cartes que cette bannière peut donner, avec la chance exacte d'obtenir chacune en une invocation. Les cartes N, R et SR des 7 univers sont mélangées dans chaque bannière. Les SSR, LR et MR ne sortent que sur la bannière de leur univers. Les cartes marquées ★ sont à l'affiche : elles sortent plus souvent que les autres cartes de leur rareté. Une carte SSR, LR ou MR est garantie au plus tard à la {PITY_MAX}e invocation.</p>
             {RARITY_ORDER.map((rid) => {
               const cards = bannerPool(banner).filter((h) => h.rarity === rid)
               if (cards.length === 0) return null
