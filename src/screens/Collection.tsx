@@ -91,8 +91,8 @@ const Ring = ({ value, total }: { value: number; total: number }) => {
   )
 }
 
-type OwnedFilter = 'all' | 'owned' | 'missing' | 'wish'
-const OWNED_LABELS: Record<OwnedFilter, string> = { all: 'Toutes', owned: 'Obtenues', missing: 'Manquantes', wish: '♥ Envies' }
+type OwnedFilter = 'all' | 'owned' | 'missing' | 'fav' | 'wish'
+const OWNED_LABELS: Record<OwnedFilter, string> = { all: 'Toutes', owned: 'Obtenues', missing: 'Manquantes', fav: '★ Favorites', wish: '♥ Envies' }
 
 // Ignore la casse et les accents, pour que « celestine » trouve « Célestine ».
 const fold = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
@@ -102,7 +102,7 @@ const toggle = <T,>(list: T[], item: T): T[] => (list.includes(item) ? list.filt
 const Cards = ({ onSummon }: { onSummon: () => void }) => {
   const { markVisit } = useStore()
   useEffect(() => { markVisit() }, []) // contrat du jour « passe voir ta collection »
-  const { owned, wish, pinned, scrolls, remoteStatus, remoteArt } = useStore()
+  const { owned, wish, favs, toggleFav, pinned, scrolls, remoteStatus, remoteArt } = useStore()
   const [query, setQuery] = useState('')
   const [rarities, setRarities] = useState<RarityId[]>([]) // vide = toutes
   const [affinities, setAffinities] = useState<AffinityId[]>([]) // vide = toutes
@@ -115,7 +115,7 @@ const Cards = ({ onSummon }: { onSummon: () => void }) => {
     (rarities.length === 0 || rarities.includes(h.rarity)) &&
     (affinities.length === 0 || affinities.includes(h.affinity)) &&
     (roles.length === 0 || roles.includes(roleKind(h.role))) &&
-    (ownedFilter === 'all' || (ownedFilter === 'wish' ? wish.includes(h.id) : (ownedFilter === 'owned') === Boolean(owned[h.id]))) &&
+    (ownedFilter === 'all' || (ownedFilter === 'wish' ? wish.includes(h.id) : ownedFilter === 'fav' ? favs.includes(h.id) : (ownedFilter === 'owned') === Boolean(owned[h.id]))) &&
     (q === '' || fold(`${h.name} ${h.title} ${h.world} ${h.role}`).includes(q)))
   const filtering = q !== '' || rarities.length > 0 || affinities.length > 0 || roles.length > 0 || ownedFilter !== 'all'
   const reset = () => { setQuery(''); setRarities([]); setAffinities([]); setRoles([]); setOwnedFilter('all') }
@@ -225,6 +225,7 @@ const Cards = ({ onSummon }: { onSummon: () => void }) => {
               {shown.map((h) => (
                 <div key={h.id} className="col-item">
                   <LazyCard hero={h} count={owned[h.id]} locked={!owned[h.id]} />
+                  <button className={`col-fav ${favs.includes(h.id) ? 'is-on' : ''}`} aria-pressed={favs.includes(h.id)} aria-label={`${h.name} : ${favs.includes(h.id) ? 'retirer des favorites' : 'ajouter aux favorites'}`} onClick={() => toggleFav(h.id)}>{favs.includes(h.id) ? '★' : '☆'}</button>
                   <ArtPicker hero={h} />
                 </div>
               ))}

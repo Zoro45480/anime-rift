@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import { extraArt, iconArt } from '../assets/manifest'
+import { extraArt, iconArt, uiArt } from '../assets/manifest'
 import { AFFINITIES } from '../data/affinities'
 import { frameOf } from '../data/banners'
 import { HEROES, roleKind, type Hero } from '../data/heroes'
 import { RARITIES, RARITY_ORDER } from '../data/rarities'
 import { cardRate } from '../game/gacha'
-import { titleRank, TITLE_RULES, TITLES, MARKET_BASE, marketFloor, STAT_SCALE, AWAKEN_COST, AWAKEN_STAT, LEVEL_CAP, baseRank, baseStats, cardState, kitOf, MAX_GROUPS, STAT_LABEL, MAX_LEVEL, MERGE_XP, SCROLL_IDS, SCROLLS, type Collectif } from '../game/progression'
+import { titleRank, TITLE_RULES, TITLES, MARKET_BASE, marketFloor, STAT_SCALE, AWAKEN_COST, AWAKEN_STAT, LEVEL_CAP, baseRank, baseStats, cardState, kitOf, MAX_GROUPS, STAT_LABEL, MAX_LEVEL, MERGE_XP, SCROLL_IDS, SCROLLS, REBIRTH_XP, type Collectif, type ScrollId } from '../game/progression'
 import { SHOWCASE_MAX, useStore } from '../state/store'
 import { AffinityIcon } from './AffinityIcon'
 import { Card, LazyCard } from './Card'
@@ -43,7 +43,8 @@ const Group = ({ group, owned, team, current, onOpen }: { group: Collectif; owne
 )
 
 export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () => void; onOpen: (hero: Hero) => void }) => {
-  const { remoteSeiyu, teamNow, arcHeroes, remoteFans, awakened, shards, awaken, rebirths, owned, xp, scrolls, wish, pinned, log, merge, useScroll, toggleWish, togglePin } = useStore()
+  const { remoteSeiyu, teamNow, arcHeroes, remoteFans, awakened, shards, awaken, rebirths, owned, xp, scrolls, wish, pinned, favs, log, merge, useScroll, scrollsUseful, toggleFav, toggleWish, togglePin } = useStore()
+  const [qty, setQty] = useState<Record<ScrollId, 1 | 10 | 0>>({ small: 1, medium: 1, large: 1 }) // 0 = le maximum utile
   const [notice, setNotice] = useState('')
   const top = useRef<HTMLDivElement>(null)
   const rarity = RARITIES[hero.rarity]
@@ -58,6 +59,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
   const cost = AWAKEN_COST[hero.rarity]
   const wished = wish.includes(hero.id)
   const isPinned = pinned.includes(hero.id)
+  const isFav = favs.includes(hero.id)
   const kit = kitOf(hero, state.stats)
   const history = log[hero.id] ?? []
   const first = history.filter((e) => e.k === 'pull').at(-1)
@@ -97,7 +99,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
           <div className="cd__card"><Card hero={hero} inert hd /></div>
           <div className="cd__id">
             <p className="cd__rar"><b>{rarity.short}</b>{rarity.label} · N° {String(hero.no).padStart(4, '0')}</p>
-            <h1>{hero.name}</h1>
+            <h1>{hero.name}<button className={`cd-fav ${isFav ? 'is-on' : ''}`} aria-pressed={isFav} aria-label={isFav ? 'Retirer des favorites' : 'Ajouter aux favorites'} onClick={() => toggleFav(hero.id)}>{isFav ? '★' : '☆'}</button></h1>
             <p className="cd__kana" lang="ja">{hero.kana}</p>
             <p className="cd__title">{hero.title}</p>
             <ul className="cd__chips">
@@ -151,13 +153,23 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
 
         {has && <Section hue="#ffc94d" title="Amélioration" aside={`${n(scrolls.small + scrolls.medium + scrolls.large)} parchemin${scrolls.small + scrolls.medium + scrolls.large > 1 ? 's' : ''}`}>
           <ul className="cd-scrolls">
-            {SCROLL_IDS.map((id) => (
-              <li key={id}>
-                <img className={`cd-scroll cd-scroll--${id}`} src={iconArt(`scroll-${id}`)} alt="" />
-                <div><b>{SCROLLS[id].label}</b><small>+{n(SCROLLS[id].xp)} XP · en réserve : {n(scrolls[id])}</small></div>
-                <button className="cd-btn cd-btn--small" disabled={!has || maxed || scrolls[id] < 1} onClick={() => { if (useScroll(hero.id, id)) setNotice(`${SCROLLS[id].label} utilisé : +${n(SCROLLS[id].xp)} XP.`) }}>Utiliser</button>
-              </li>
-            ))}
+            {SCROLL_IDS.map((id) => {
+              const useful = scrollsUseful(hero.id, id)
+              const want = qty[id] === 0 ? useful : Math.min(qty[id], useful)
+              const per = Math.round(SCROLLS[id].xp * (1 + (rebirths * REBIRTH_XP) / 100))
+              return (
+                <li key={id}>
+                  <img className={`cd-scroll cd-scroll--${id}`} src={iconArt(`scroll-${id}`)} alt="" />
+                  <div><b>{SCROLLS[id].label}</b><small>+{n(per)} XP chacun · en réserve : {n(scrolls[id])}</small></div>
+                  <div className="cd-qty" role="radiogroup" aria-label={`Quantité de ${SCROLLS[id].label}`}>
+                    {([1, 10, 0] as const).map((q) => <button key={q} role="radio" aria-checked={qty[id] === q} className={qty[id] === q ? 'is-on' : ''} onClick={() => setQty({ ...qty, [id]: q })}>{q === 0 ? 'Max' : `×${q}`}</button>)}
+                  </div>
+                  <button className="cd-btn cd-btn--small cd-use" disabled={!has || maxed || want < 1} onClick={() => { const u = useScroll(hero.id, id, want); if (u) setNotice(`${u} × ${SCROLLS[id].label} utilisé${u > 1 ? 's' : ''} : +${n(u * per)} XP.`) }}>
+                    Utiliser{want > 0 ? ` ${want}` : ''}<small>{want > 0 ? `+${n(want * per)} XP` : maxed ? 'Niveau max' : 'Aucun'}</small>
+                  </button>
+                </li>
+              )
+            })}
           </ul>
           <div className={`cd-free ${state.freed ? 'is-free' : ''}`}>
             <img src={iconArt('shard')} alt="" />
@@ -169,7 +181,8 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
             </div>
             {!state.freed && <button className="cd-btn cd-btn--small" disabled={rebirths < 1 || shards < cost} onClick={() => { if (awaken(hero.id)) setNotice('Carte libérée : niveau maximum 100.') }}>Libérer</button>}
           </div>
-          <p className="cd-note">Les Fragments d'âme se gagneront dans La Spire (pas encore jouable) ; chaque Renaissance en offre aussi quelques-uns.</p>
+          <p className="cd-note">Les Fragments d'âme se gagnent dans La Spire (Nexus), sur le Chemin du Rift et dans les contrats ; chaque Renaissance en offre aussi quelques-uns.</p>
+          <p className="cd-note">« Max » utilise juste ce qu'il faut pour atteindre le niveau maximum : aucun parchemin n'est gaspillé.</p>
           <p className="cd-note">Les parchemins se gagnent dans La Saga (Nexus) : chaque combat affiche son taux de drop.{!has ? ' Il faut posséder la carte pour l’améliorer.' : ''}</p>
         </Section>}
 
@@ -203,6 +216,14 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
             <div><small>Exemplaires chez toi</small><b>{copies}</b></div>
           </div>
           <p className="cd-note">Aucune vente conclue pour le moment : le marché entre joueurs n'est pas encore ouvert (il demande un jeu en ligne). Le barème et la fourchette sont les règles prévues pour cette rareté ; aucune cote n'est inventée.</p>
+        </Section>
+
+        <Section hue="#4be3a4" title="Où l'obtenir">
+          <ul className="cd-where">
+            <li><img src={extraArt(`emblem-${frameOf(hero.world)}`)} alt="" onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} /><div><b>Invocation · bannière {banner ? banner.world : hero.world}</b><small>{rate ? `${pct(rate)} par invocation, soit environ 1 sur ${n(Math.round(1 / rate))}.` : 'Cette carte n’est sur aucune bannière en ce moment.'} Avec des âmes ou des sceaux, dans Invoquer.</small></div></li>
+            {['epic', 'ultra', 'legend'].includes(hero.rarity) && <li><img src={uiArt('card-pack')} alt="" /><div><b>Chemin du Rift</b><small>Les paliers 10, 20, 30 et 40 donnent une carte {RARITIES.epic.short} ou mieux, tirée au hasard parmi toutes les cartes de cette rareté.</small></div></li>}
+            <li><img src={iconArt('scroll-medium')} alt="" /><div><b>Doublons</b><small>Chaque nouvel exemplaire peut être fusionné pour faire monter la carte de niveau (+{n(MERGE_XP[hero.rarity])} XP).</small></div></li>
+          </ul>
         </Section>
 
         <Section hue="#7d9bff" title="Informations">

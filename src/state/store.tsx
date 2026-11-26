@@ -27,6 +27,7 @@ type State = {
   scrolls: Record<ScrollId, number> // parchemins d'XP en réserve
   wish: string[] // liste d'envies
   pinned: string[] // cartes épinglées dans la vitrine
+  favs: string[] // cartes favorites (étoile)
   log: Record<string, LogEntry[]> // historique de chaque carte, du plus récent au plus ancien
   accountXp: number // XP du compte depuis la dernière Renaissance
   rebirths: number // nombre de Renaissances
@@ -86,7 +87,9 @@ type Store = State & {
   canAfford: (currency: Currency, count: number) => boolean
   summon: (banner: Banner, currency: Currency, count: number) => Hero[] | null
   merge: (heroId: string) => boolean // consomme un doublon contre de l'XP
-  useScroll: (heroId: string, scroll: ScrollId) => boolean
+  useScroll: (heroId: string, scroll: ScrollId, count?: number) => number // parchemins réellement utilisés (s'arrête au niveau maximum)
+  scrollsUseful: (heroId: string, scroll: ScrollId) => number // combien de parchemins servent encore avant le niveau maximum
+  toggleFav: (heroId: string) => void
   toggleWish: (heroId: string) => void
   togglePin: (heroId: string) => boolean // false = vitrine pleine
   energyLeft: number // éclairs disponibles maintenant
@@ -111,7 +114,7 @@ export const START_GEMS = 600
 const START: State = {
   accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' }, frame: '', ornament: '', aura: '', color: '', effect: '', theme: '', badges: [] }, pulls: 0, wins: 0, cosmetics: [], quests: emptyQuests(), path: { season: 0, xp: 0, claimed: [] }, spire: { best: 0 }, arcHeroes: {}, tutorialSeen: [],
   tickets: 20, gems: START_GEMS, pity: Object.fromEntries(BANNERS.map((b) => [b.id, 0])), owned: {},
-  xp: {}, scrolls: { small: 0, medium: 0, large: 0 }, wish: [], pinned: [], log: {},
+  xp: {}, scrolls: { small: 0, medium: 0, large: 0 }, wish: [], pinned: [], favs: [], log: {},
 }
 
 // La progression est gardée dans le navigateur de cet appareil (pas de compte en ligne pour l'instant).
@@ -257,11 +260,21 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       gain(heroId, MERGE_XP[hero.rarity], { k: 'merge' }, 'Doublon fusionné', { owned: { ...state.owned, [heroId]: state.owned[heroId] - 1 } }, { merges: 1 })
       return true
     }
-    const useScroll = (heroId: string, scroll: ScrollId) => {
-      if (!state.owned[heroId] || state.scrolls[scroll] < 1 || maxed(heroId)) return false
-      gain(heroId, SCROLLS[scroll].xp, { k: 'scroll' }, SCROLLS[scroll].label, { scrolls: { ...state.scrolls, [scroll]: state.scrolls[scroll] - 1 } })
-      return true
+    // Nombre de parchemins qui servent encore : on s'arrête dès que la carte atteint son niveau maximum.
+    const scrollsUseful = (heroId: string, scroll: ScrollId) => {
+      const per = Math.round(SCROLLS[scroll].xp * (1 + (state.rebirths * REBIRTH_XP) / 100))
+      let xp = state.xp[heroId] ?? 0, k = 0
+      while (k < state.scrolls[scroll] && levelFromXp(xp, capOf(heroId)).level < capOf(heroId)) { xp += per; k++ }
+      return k
     }
+    const useScroll = (heroId: string, scroll: ScrollId, count = 1) => {
+      if (!state.owned[heroId]) return 0
+      const used = Math.min(count, scrollsUseful(heroId, scroll))
+      if (used < 1) return 0
+      gain(heroId, SCROLLS[scroll].xp * used, { k: 'scroll' }, used > 1 ? `${used} × ${SCROLLS[scroll].label}` : SCROLLS[scroll].label, { scrolls: { ...state.scrolls, [scroll]: state.scrolls[scroll] - used } })
+      return used
+    }
+    const toggleFav = (heroId: string) => setState({ ...state, favs: state.favs.includes(heroId) ? state.favs.filter((x) => x !== heroId) : [...state.favs, heroId] })
     const toggleWish = (heroId: string) =>
       setState({ ...state, wish: state.wish.includes(heroId) ? state.wish.filter((x) => x !== heroId) : [...state.wish, heroId] })
     const togglePin = (heroId: string) => {
@@ -429,7 +442,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setArt((a) => Object.fromEntries(Object.entries(a).filter(([k]) => k !== heroId)))
       void removeArt(heroId)
     }
-    return { ...state, canAfford, summon, merge, useScroll, toggleWish, togglePin, fightSpire, claimContract, claimDaily, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
+    return { ...state, canAfford, summon, merge, useScroll, scrollsUseful, toggleFav, toggleWish, togglePin, fightSpire, claimContract, claimDaily, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
   }, [state, customArt, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, now])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>
