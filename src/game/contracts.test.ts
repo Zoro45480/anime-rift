@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { addCounts, addDays, claimable, DAILY_BONUS, dailyContracts, dailyStatus, dayKey, emptyQuests, isClaimed, markClaimed, msToDayEnd, progress, roll, STORY, weekKey, WEEKLY } from './contracts'
+import { addCounts, addDays, claimable, DAILY_BONUS, dailyContracts, dailyStatus, dayKey, emptyQuests, isClaimed, markClaimed, msToDayEnd, progress, roll, STORY, weekKey, weeklyContracts } from './contracts'
 
 const at = (s: string) => new Date(`${s}T12:00:00`)
 
@@ -32,27 +32,27 @@ describe('contrats', () => {
     expect(roll(q, at('2026-11-30')).life.pulls).toBe(8)
   })
 
-  it('un contrat se récupère une fois par période ; le bonus du jour demande les 6', () => {
+  it('un contrat se récupère une fois par période ; le bonus du jour demande toutes les quêtes du jour', () => {
     const now = at('2026-11-26')
     let q = addCounts(emptyQuests(), Object.fromEntries(dailyContracts(now).map((c) => [c.counter!, c.target])), now)
     expect(claimable(q, {}, now).map((c) => c.id).sort()).toEqual(dailyContracts(now).map((c) => c.id).sort())
     for (const c of dailyContracts(now)) q = markClaimed(c, q, now)
-    expect(progress(DAILY_BONUS, q, {}, now)).toBe(6)
+    expect(progress(DAILY_BONUS, q, {}, now)).toBe(dailyContracts(now).length)
     expect(claimable(q, {}, now).map((c) => c.id)).toEqual([DAILY_BONUS.id])
     q = markClaimed(DAILY_BONUS, q, now)
     expect(q.week.c.dailyAll).toBe(1)
     expect(claimable(q, {}, now)).toEqual([])
     expect(isClaimed(dailyContracts(now)[0], q, at('2026-11-27'))).toBe(false) // un nouveau jour
-    expect(WEEKLY).toHaveLength(7)
+    expect(weeklyContracts(now)).toHaveLength(10)
   })
 
   it('contrats d’histoire : arc terminé, puis 3 étoiles partout', () => {
     const now = at('2026-11-26')
     const q = emptyQuests()
-    const clear = STORY[0], perfect = STORY[1]
+    const clear = STORY.find((c) => c.id === 's-0-clear')!, perfect = STORY.find((c) => c.id === 's-0-perfect')!
     expect(progress(clear, q, { '0-4': 1 }, now)).toBe(1)
     expect(progress(perfect, q, { '0-0': 3, '0-1': 3, '0-2': 3, '0-3': 3, '0-4': 2 }, now)).toBe(14)
-    expect(claimable(q, { '0-0': 3, '0-1': 3, '0-2': 3, '0-3': 3, '0-4': 3 }, now).map((c) => c.id)).toEqual([clear.id, perfect.id])
+    expect(claimable(q, { '0-0': 3, '0-1': 3, '0-2': 3, '0-3': 3, '0-4': 3 }, now).map((c) => c.id).filter((id) => id.startsWith('s-0'))).toEqual(['s-0-0', 's-0-1', 's-0-2', 's-0-3', clear.id, perfect.id])
   })
 })
 
@@ -77,7 +77,7 @@ describe('quêtes qui changent', () => {
   it('6 quêtes du jour, différentes d’un jour à l’autre, identiques dans la journée', async () => {
     const { dailyContracts } = await import('./contracts')
     const a = dailyContracts(new Date(2026, 10, 26, 9)).map((c) => c.id)
-    expect(a).toHaveLength(6)
+    expect(a).toHaveLength(8)
     expect(dailyContracts(new Date(2026, 10, 26, 22)).map((c) => c.id)).toEqual(a)
     const days = new Set(Array.from({ length: 7 }, (_, i) => dailyContracts(new Date(2026, 10, 20 + i)).map((c) => c.id).join()))
     expect(days.size).toBeGreaterThan(4)
@@ -85,7 +85,7 @@ describe('quêtes qui changent', () => {
   it('les quêtes du pass restent toute la saison et changent à la saison suivante', async () => {
     const { challengesFor } = await import('./contracts')
     const s1 = challengesFor(new Date(2026, 10, 26)).map((c) => c.id)
-    expect(s1).toHaveLength(5)
+    expect(s1).toHaveLength(8)
     expect(challengesFor(new Date(2026, 11, 18)).map((c) => c.id)).toEqual(s1)
     const later = [1, 2, 3].map((k) => challengesFor(new Date(2026, 11, 22 + 28 * (k - 1))).map((c) => c.id).join())
     expect(later.some((x) => x !== s1.join())).toBe(true)

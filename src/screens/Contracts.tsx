@@ -3,12 +3,14 @@ import { iconArt, uiArt } from '../assets/manifest'
 import { BANNERS } from '../data/banners'
 import { HEROES } from '../data/heroes'
 import { RARITY_ORDER } from '../data/rarities'
-import { challengesFor, challengeState, DAILY_BONUS, DAILY_REWARDS, dailyContracts, dailyStatus, featuredWorld, isClaimed, msToDayEnd, msToWeekEnd, progress, STORY, WEEKLY, type Contract, type Reward } from '../game/contracts'
+import { CHALLENGE_TIMES, challengesFor, challengeState, DAILY_BONUS, DAILY_REWARDS, dailyContracts, dailyStatus, featuredWorld, isClaimed, msToDayEnd, msToWeekEnd, progress, STORY, CAREER, weeklyContracts, type Contract, type Reward } from '../game/contracts'
 import { SCROLLS } from '../game/progression'
 import { useStore } from '../state/store'
 import { Card } from '../ui/Card'
 import { Coin } from '../ui/Coin'
 import { Guide } from '../ui/Guide'
+import { colossusOf, EVENT_GOALS, eventDone, rollCol } from '../game/colossus'
+import { PVP_GOALS, rollWeek } from '../game/arena'
 import { RiftPath } from './RiftPath'
 import { claimableTiers, rollPath } from '../game/riftpath'
 
@@ -56,7 +58,7 @@ const Row = ({ c, now }: { c: Contract; now: Date }) => {
 }
 
 type Tab = 'daily' | 'contracts' | 'rift' | 'path'
-type Sub = 'day' | 'week' | 'story'
+type Sub = 'day' | 'week' | 'story' | 'career' | 'pass' | 'event' | 'pvp'
 
 export const Contracts = ({ start = 'daily' }: { start?: 'daily' | 'contracts' | 'rift' | 'path' }) => {
   const store = useStore()
@@ -66,6 +68,14 @@ export const Contracts = ({ start = 'daily' }: { start?: 'daily' | 'contracts' |
   const st = dailyStatus(store.quests.daily, now)
   const streak = st.claimed ? st.day : st.missed ? 0 : store.quests.daily.last ? store.quests.daily.streak : 0
   const daily = dailyContracts(now)
+  const weekly = weeklyContracts(now)
+  const passList = challengesFor(now)
+  const col = rollCol(store.col, now)
+  const pvpWeek = rollWeek(store.arena, now)
+  const passReady = passList.filter((c) => challengeState(c, store.quests, now).ready).length
+  const eventReady = eventDone(col) && !col.final ? 1 : 0
+  const pvpReady = PVP_GOALS.filter((g) => !pvpWeek.claimed.includes(g.id) && g.value(store.arena, pvpWeek) >= g.target).length
+  const [prize, setPrize] = useState('')
   const readyIn = (list: Contract[]) => list.filter((c) => !isClaimed(c, store.quests, now) && progress(c, store.quests, store.saga, now) >= c.target).length
   const mine = HEROES.filter((h) => store.owned[h.id])
   const best = [...mine].sort((a, b) => RARITY_ORDER.indexOf(a.rarity) - RARITY_ORDER.indexOf(b.rarity) || a.no - b.no)[0]
@@ -80,7 +90,7 @@ export const Contracts = ({ start = 'daily' }: { start?: 'daily' | 'contracts' |
         <div><p className="eyebrow">Tes objectifs</p><h1>Contrats</h1><p>Accomplis-les en jouant, puis récupère tes récompenses.</p></div>
       </header>
       <div className="coltabs__bar" role="tablist" aria-label="Sections des contrats">
-        {([['daily', 'Chaque jour', st.claimed ? 0 : 1], ['contracts', 'Contrats', readyIn([...daily, DAILY_BONUS, ...WEEKLY, ...STORY])], ['rift', 'Chemin du Rift', claimableTiers(rollPath(store.path, now)).length + challengesFor(now).filter((c) => challengeState(c, store.quests, now).ready).length], ['path', 'Parcours', 0]] as [Tab, string, number][]).map(([id, label, dot]) => (
+        {([['daily', 'Chaque jour', st.claimed ? 0 : 1], ['contracts', 'Contrats', readyIn([...daily, DAILY_BONUS, ...weekly, ...STORY, ...CAREER]) + passReady + eventReady + pvpReady], ['rift', 'Chemin du Rift', claimableTiers(rollPath(store.path, now)).length + challengesFor(now).filter((c) => challengeState(c, store.quests, now).ready).length], ['path', 'Parcours', 0]] as [Tab, string, number][]).map(([id, label, dot]) => (
           <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>{label}{dot > 0 && <i className="dot" aria-label={`${dot} à récupérer`} />}</button>
         ))}
       </div>
@@ -116,7 +126,7 @@ export const Contracts = ({ start = 'daily' }: { start?: 'daily' | 'contracts' |
       {tab === 'contracts' && (
         <section className="cn__list">
           <div className="pe__kinds" role="tablist" aria-label="Sortes de contrats">
-            {([['day', 'Quotidiens', readyIn([...daily, DAILY_BONUS])], ['week', 'Hebdomadaires', readyIn(WEEKLY)], ['story', 'Histoire', readyIn(STORY)]] as [Sub, string, number][]).map(([id, label, dot]) => (
+            {([['day', 'Quotidiennes', readyIn([...daily, DAILY_BONUS])], ['week', 'Hebdomadaires', readyIn(weekly)], ['story', 'Histoire', readyIn(STORY)], ['career', 'Carrière', readyIn(CAREER)], ['pass', 'Défis du pass', passReady], ['event', 'Événement', eventReady], ['pvp', 'PvP', pvpReady]] as [Sub, string, number][]).map(([id, label, dot]) => (
               <button key={id} role="tab" aria-selected={sub === id} className={sub === id ? 'is-on' : ''} onClick={() => setSub(id)}>{label}{dot > 0 && <i className="dot" />}</button>
             ))}
           </div>
@@ -126,8 +136,8 @@ export const Contracts = ({ start = 'daily' }: { start?: 'daily' | 'contracts' |
             <ul className="cn__bonus"><Row c={DAILY_BONUS} now={now} /></ul>
           </>}
           {sub === 'week' && <>
-            <p className="cn__meta">Renouvelés le lundi · dans <b>{clock(msToWeekEnd(now))}</b></p>
-            <ul>{WEEKLY.map((c) => <Row key={c.id} c={c} now={now} />)}</ul>
+            <p className="cn__meta">{weekly.length} quêtes, renouvelées chaque lundi · dans <b>{clock(msToWeekEnd(now))}</b></p>
+            <ul>{weekly.map((c) => <Row key={c.id} c={c} now={now} />)}</ul>
           </>}
           {sub === 'story' && <>
             <p className="cn__meta">Récompenses uniques, gagnées en avançant dans La Saga.</p>
@@ -140,6 +150,40 @@ export const Contracts = ({ start = 'daily' }: { start?: 'daily' | 'contracts' |
                 </div>
               )
             })}
+          </>}
+          {sub === 'career' && <>
+            <p className="cn__meta">Des paliers à vie : chaque quête de carrière se récupère une seule fois. {CAREER.filter((c) => isClaimed(c, store.quests, now)).length} / {CAREER.length} récupérées.</p>
+            <ul>{CAREER.map((c) => <Row key={c.id} c={c} now={now} />)}</ul>
+          </>}
+          {sub === 'pass' && <>
+            <p className="cn__meta">Les défis de la saison du Chemin du Rift : ils changent quand le pass se termine. Chacun se refait {CHALLENGE_TIMES} fois par jour et donne de l'XP de pass.</p>
+            <ul>{passList.map((c) => {
+              const st = challengeState(c, store.quests, now)
+              return (
+                <li key={c.id} className={`ct ${st.ready ? 'is-ready' : ''} ${st.finished ? 'is-done' : ''}`}>
+                  <div className="ct__main"><b>{c.title}</b><div className="ct__bar"><i style={{ width: `${st.finished ? 100 : (st.value / c.target) * 100}%` }} /></div><small>{st.finished ? 'Terminé pour aujourd’hui' : `${n(st.value)} / ${n(c.target)}`} · {st.done} / {CHALLENGE_TIMES} aujourd'hui</small></div>
+                  <span className="rw"><span>+{c.xp} XP</span><span><Coin name="soul" size={18} />{c.gems}</span></span>
+                  {st.finished ? <span className="ct__state">✓ {CHALLENGE_TIMES} / {CHALLENGE_TIMES}</span> : st.ready ? <button className="ct__claim" onClick={() => store.claimChallenge(c.id)}>Récupérer</button> : <span className="ct__state">En cours · {Math.floor((st.value / c.target) * 100)} %</span>}
+                </li>
+              )
+            })}</ul>
+          </>}
+          {sub === 'event' && <>
+            <p className="cn__meta">L'événement de la semaine : le Colosse <b>{colossusOf(now).boss.name}</b> · fin dans <b>{clock(msToWeekEnd(now))}</b></p>
+            <ul>{EVENT_GOALS.map((g) => { const v = Math.min(g.target, g.value(col)); return (
+              <li key={g.id} className={`ct ${v >= g.target ? 'is-done' : ''}`}><div className="ct__main"><b>{g.title}</b><div className="ct__bar"><i style={{ width: `${(v / g.target) * 100}%` }} /></div><small>{v} / {g.target}</small></div><span className="ct__state">{v >= g.target ? '✓ Fait' : `En cours · ${Math.floor((v / g.target) * 100)} %`}</span></li>
+            ) })}</ul>
+            <ul className="cn__bonus"><li className={`ct ${eventReady ? 'is-ready' : ''} ${col.final ? 'is-done' : ''}`}><div className="ct__main"><b>Termine toutes les quêtes de l'événement</b><small>Récompense : une carte SR ou mieux garantie</small></div>
+              {col.final ? <span className="ct__state">✓ Récupéré</span> : eventReady ? <button className="ct__claim" onClick={() => { const c = store.claimEvent(); if (c) setPrize(`${c.name} rejoint ta collection !`) }}>Récupérer</button> : <span className="ct__state">À venir</span>}</li></ul>
+            {prize && <p className="cd__notice" role="status">{prize}</p>}
+          </>}
+          {sub === 'pvp' && <>
+            <p className="cn__meta">Les défis d'Arène de la semaine · renouvelés lundi, dans <b>{clock(msToWeekEnd(now))}</b></p>
+            <ul>{PVP_GOALS.map((g) => { const v = Math.min(g.target, g.value(store.arena, pvpWeek)), done = pvpWeek.claimed.includes(g.id), ready = !done && v >= g.target; return (
+              <li key={g.id} className={`ct ${ready ? 'is-ready' : ''} ${done ? 'is-done' : ''}`}><div className="ct__main"><b>{g.title}</b><div className="ct__bar"><i style={{ width: `${(v / g.target) * 100}%` }} /></div><small>{n(v)} / {n(g.target)}</small></div>
+                <span className="rw"><span><Coin name="soul" size={18} />{g.gems}</span>{g.tickets ? <span><Coin name="seal" size={18} />{g.tickets}</span> : null}</span>
+                {done ? <span className="ct__state">✓ Récupéré</span> : ready ? <button className="ct__claim" onClick={() => store.claimPvp(g.id)}>Récupérer</button> : <span className="ct__state">En cours · {Math.floor((v / g.target) * 100)} %</span>}</li>
+            ) })}</ul>
           </>}
         </section>
       )}
