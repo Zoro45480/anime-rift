@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { StoreProvider } from './state/store'
-import { Dock, TopBar, type TabId } from './ui/Chrome'
+import { Dock, TopBar, type QuestTab, type TabId } from './ui/Chrome'
+import { Home } from './screens/Home'
+import { Community, type CommunityTab } from './screens/Community'
 import { CardViewerProvider } from './ui/CardViewer'
 import { ErrorBoundary } from './ui/ErrorBoundary'
 import { Splash } from './screens/Splash'
@@ -12,16 +14,22 @@ import { Collection, type CollectionTab } from './screens/Collection'
 
 export const App = () => {
   const [entered, setEntered] = useState(false)
-  const [tab, setTab] = useState<TabId>('banners')
+  const [tab, setTab] = useState<TabId>('home')
+  const [visit, setVisit] = useState(0) // change à chaque navigation : l'écran repart de son point de départ
+  const [bannerAt, setBannerAt] = useState(0)
+  const [questAt, setQuestAt] = useState<QuestTab>('daily')
+  const [communityAt, setCommunityAt] = useState<CommunityTab>('fame')
+  const [playAt, setPlayAt] = useState<'colossus' | undefined>(undefined)
   const [colTab, setColTab] = useState<CollectionTab>('cards')
-  const go = (t: TabId) => { setTab(t); window.scrollTo(0, 0) }
+  const go = (t: TabId) => { setTab(t); setVisit((v) => v + 1); window.scrollTo(0, 0) }
+  const nav = (t: TabId) => { if (t === 'collection' && colTab === 'profile') setColTab('cards'); if (t === 'contracts') setQuestAt('daily'); if (t === 'play') setPlayAt(undefined); go(t) }
   const toProfile = () => { setColTab('profile'); go('collection') }
   const toRebirth = () => { setColTab('rebirth'); go('collection') }
   if (!entered) return <Splash onEnter={() => setEntered(true)} />
   return (
     <StoreProvider>
       <CardViewerProvider>
-      <TopBar onPlay={() => go('play')} onSummon={() => go('banners')} onProfile={toProfile} onGo={(k) => {
+      <TopBar nav={{ tab, profileOn: tab === 'collection' && colTab === 'profile', onTab: nav, onQuest: (q) => { setQuestAt(q); go('contracts') }, onCommunity: (c) => { setCommunityAt(c); go('community') } }} onPlay={() => nav('play')} onSummon={() => go('banners')} onProfile={toProfile} onGo={(k) => {
         // chaque notification mène à sa page
         if (k === 'quest') go('contracts')
         else if (k === 'bazaar') go('bazaar')
@@ -30,16 +38,18 @@ export const App = () => {
         else if (k === 'pull' || k === 'free') { setColTab('cards'); go('collection') }
         else go('play')
       }} />
-      <main className="screen" key={tab}>
+      <main className="screen" key={`${tab}-${visit}`}>
         <ErrorBoundary>
-        {tab === 'banners' && <Banners onRebirth={toRebirth} />}
-        {tab === 'play' && <Play onRebirth={toRebirth} onProfile={toProfile} />}
-        {tab === 'contracts' && <Contracts />}
+        {tab === 'home' && <Home go={{ banner: (i) => { setBannerAt(i); go('banners') }, contracts: () => nav('contracts'), collection: () => nav('collection'), play: (m) => { setPlayAt(m); go('play') }, profile: toProfile, community: () => { setCommunityAt('fame'); go('community') } }} />}
+        {tab === 'banners' && <Banners onRebirth={toRebirth} start={bannerAt} />}
+        {tab === 'play' && <Play onRebirth={toRebirth} onProfile={toProfile} start={playAt} />}
+        {tab === 'contracts' && <Contracts start={questAt} />}
         {tab === 'bazaar' && <Bazaar />}
+        {tab === 'community' && <Community start={communityAt} />}
         {tab === 'collection' && <Collection onSummon={() => go('banners')} tab={colTab} onTab={setColTab} />}
         </ErrorBoundary>
       </main>
-      <Dock tab={tab} onTab={(t) => { if (t === 'collection' && colTab === 'profile') setColTab('cards'); go(t) }} profileOn={tab === 'collection' && colTab === 'profile'} />
+      <Dock tab={tab} onTab={nav} profileOn={tab === 'collection' && colTab === 'profile'} />
       </CardViewerProvider>
     </StoreProvider>
   )

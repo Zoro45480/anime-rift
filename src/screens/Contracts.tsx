@@ -58,10 +58,10 @@ const Row = ({ c, now }: { c: Contract; now: Date }) => {
 type Tab = 'daily' | 'contracts' | 'rift' | 'path'
 type Sub = 'day' | 'week' | 'story'
 
-export const Contracts = () => {
+export const Contracts = ({ start = 'daily' }: { start?: 'daily' | 'contracts' | 'rift' | 'path' }) => {
   const store = useStore()
   const now = useNow()
-  const [tab, setTab] = useState<Tab>('daily')
+  const [tab, setTab] = useState<Tab>(start)
   const [sub, setSub] = useState<Sub>('day')
   const st = dailyStatus(store.quests.daily, now)
   const streak = st.claimed ? st.day : st.missed ? 0 : store.quests.daily.last ? store.quests.daily.streak : 0

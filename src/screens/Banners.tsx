@@ -55,9 +55,9 @@ const PityBar = ({ value, multis, banner }: { value: number; multis: number; ban
   </div>
 )
 
-export const Banners = ({ onRebirth }: { onRebirth: () => void }) => {
+export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start?: number }) => {
   const store = useStore()
-  const [index, setIndex] = useState(0)
+  const [index, setIndex] = useState(start)
   const [currency, setCurrency] = useState<Currency>('ticket')
   const [results, setResults] = useState<Hero[] | null>(null)
   const [showIndex, setShowIndex] = useState(false)
@@ -87,7 +87,54 @@ export const Banners = ({ onRebirth }: { onRebirth: () => void }) => {
   return (
     <div className={`summon ${focus ? 'summon--focus' : ''}`} style={{ ['--hue' as string]: banner.hue }}>
       {focus && <button className="summon__back" onClick={() => { setFocus(false); window.scrollTo({ top: 0 }) }}>← Toutes les invocations</button>}
-      {/* Affiche de la bannière */}
+      {/* ═══ Ordinateur : grande bannière avec les univers en pastilles, l'invocation à gauche, les vedettes en éventail à droite ═══ */}
+      <section className="bh" key={`bh-${banner.id}`}>
+        {store.bannerArt[banner.id] && <img className="bh__bg" src={store.bannerArt[banner.id]} alt="" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
+        <span className="bh__glyph" aria-hidden="true">{banner.glyph}</span>
+        {!focus && <div className="bh__chips" role="tablist" aria-label="Bannières">
+          {BANNERS.map((b, i) => (
+            <button key={b.id} role="tab" aria-selected={i === index} className={i === index ? 'is-on' : ''} style={{ ['--hue' as string]: b.hue }} onClick={() => setIndex(i)}>
+              <img src={extraArt(`emblem-${b.id}`)} alt="" />{b.world}
+            </button>
+          ))}
+        </div>}
+        <div className="bh__main">
+          <div className="bh__left">
+            <p className="bh__kicker">✦ MR {pct(RARITIES.rift.rate)} · bannière ouverte pendant <b>{left}</b></p>
+            <h1>{banner.world}</h1>
+            <p className="bh__sub">{banner.subtitle}</p>
+            <div className="bh__links">
+              <button className="linkbtn" onClick={() => setShowIndex(true)}><IconInfo />Index de la bannière</button>
+              {!focus && <button className="linkbtn" onClick={() => { setFocus(true); window.scrollTo({ top: 0 }) }}>Voir la bannière ↗</button>}
+            </div>
+            <p className="bh__label">Moyen d'invocation</p>
+            <div className="bh__pay" role="radiogroup" aria-label="Moyen d'invocation">
+              <button role="radio" aria-checked={currency === 'ticket'} className={currency === 'ticket' ? 'is-on' : ''} onClick={() => setCurrency('ticket')}><Coin name="seal" size={26} />Sceaux<b>{store.tickets}</b></button>
+              <button role="radio" aria-checked={currency === 'gems'} className={currency === 'gems' ? 'is-on' : ''} onClick={() => setCurrency('gems')}><Coin name="soul" size={26} />Âmes<b>{store.gems}</b></button>
+            </div>
+            <div className="bh__pulls">
+              {[1, 5, 10].map((n) => (
+                <button key={n} className={n === 10 ? 'is-gold' : ''} disabled={!store.canAfford(currency, n)} onClick={() => summon(n)}>
+                  <span>Invoquer ×{n}</span><i /><b>{price(n)}<Coin name={coin} size={20} /></b>
+                </button>
+              ))}
+            </div>
+            <div className="bh__pity">
+              <span>Garantie SSR</span><div className="pity__track"><i style={{ width: `${(pity / PITY_MAX) * 100}%` }} /></div><b>{pity}/{PITY_MAX}</b>
+              <span>Grande garantie MR</span><div className="pity__track pity__track--mr"><i style={{ width: `${((store.multis[banner.id] ?? 0) / BIG_PITY) * 100}%` }} /></div><b>{store.multis[banner.id] ?? 0}/{BIG_PITY}</b>
+            </div>
+          </div>
+          <div className="bh__fan">
+            {banner.featured.map((id, i) => (
+              <div key={id} className={`bh__card bh__card--${i}`}><Card hero={heroById(id)} /><span className={store.owned[id] ? 'is-owned' : ''}>{store.owned[id] ? `Possédée ×${store.owned[id]}` : 'Non obtenue'}</span></div>
+            ))}
+          </div>
+        </div>
+        {!focus && <button className="bh__nav bh__nav--prev" onClick={() => turn(-1)} aria-label="Bannière précédente"><IconChevron left /></button>}
+        {!focus && <button className="bh__nav bh__nav--next" onClick={() => turn(1)} aria-label="Bannière suivante"><IconChevron /></button>}
+      </section>
+
+      {/* Affiche de la bannière (téléphone) */}
       <section className="poster" key={banner.id}>
         {store.bannerArt[banner.id] && <img className="poster__bg" src={store.bannerArt[banner.id]} alt="" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
         <div className="poster__slash" aria-hidden="true" />

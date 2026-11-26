@@ -52,13 +52,13 @@ const GateTile = ({ gate, featured, playable, onOpen }: { gate: Gate; featured?:
   )
 }
 
-export const Play = ({ onRebirth, onProfile }: { onRebirth: () => void; onProfile: () => void }) => {
+export const Play = ({ onRebirth, onProfile, start }: { onRebirth: () => void; onProfile: () => void; start?: 'saga' | 'spire' | 'colossus' | 'arena' }) => {
   const { accountXp, rebirths, energyLeft, profile, gems, buyEnergy } = useStore()
   const [open, setOpen] = useState<Gate | null>(null)
-  const [saga, setSaga] = useState(false)
-  const [spire, setSpire] = useState(false)
-  const [colossus, setColossus] = useState(false)
-  const [arena, setArena] = useState(false)
+  const [saga, setSaga] = useState(start === 'saga')
+  const [spire, setSpire] = useState(start === 'spire')
+  const [colossus, setColossus] = useState(start === 'colossus')
+  const [arena, setArena] = useState(start === 'arena')
   const acc = accountLevel(accountXp, rebirths)
   if (arena) return <Arena onBack={() => { setArena(false); window.scrollTo(0, 0) }} />
   if (colossus) return <Colossus onBack={() => { setColossus(false); window.scrollTo(0, 0) }} />

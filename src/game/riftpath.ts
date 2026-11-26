@@ -58,3 +58,11 @@ export const rollCard = (rng: () => number): Hero => {
 }
 
 export const claimableTiers = (p: PathState) => Array.from({ length: tierOf(p.xp) }, (_, i) => i + 1).filter((t) => !p.claimed.includes(t))
+
+// Piste premium (affichée, pas encore achetable : elle demande un vrai paiement, donc un serveur).
+export const premiumReward = (tier: number): PathReward => {
+  if (tier % 10 === 0) return { card: true, tickets: 10, shards: 10 }
+  if (tier % 5 === 0) return { tickets: 6 }
+  if (tier % 3 === 0) return { energy: 10 }
+  return { gems: 60 + Math.floor(tier / 5) * 15 }
+}

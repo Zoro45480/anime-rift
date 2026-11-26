@@ -372,6 +372,7 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
   const stats: [string, string, string][] = [
     ['集', 'Cartes collectées', `${n(mine.length)} / ${n(HEROES.length)}`], ['光', 'Cartes LR et MR', n(legends)], ['闘', 'Combats gagnés', n(store.wins)],
     ['界', 'Univers collectionnés', `${collected} / ${BANNERS.length}`], ['星', 'Étoiles de La Saga', `${stars} / ${STAGES.length * 3}`], ['召', 'Invocations réalisées', n(store.pulls)],
+    ['剣', 'Victoires en arène', n(store.arena.wins)], ['塔', 'Meilleur étage de La Spire', n(store.spire.best)],
   ]
 
   return (
@@ -396,7 +397,7 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
         </div>
       </section>
 
-      <section className="pf-box">
+      <section className="pf-box pf-box--badges">
         <header className="pf-box__head"><h2>Badges épinglés <small>{profile.badges.filter((id) => ACHIEVEMENTS.some((a) => a.id === id && progressOf(a, ach).done)).length} / {BADGE_MAX}</small></h2><button className="linkbtn" onClick={() => setEdit('look')}>Choisir</button></header>
         {profile.badges.length === 0 ? <p className="pf-empty">Épingle jusqu'à {BADGE_MAX} badges depuis « Apparence ». Chaque succès obtenu en donne un.</p> : (
           <ul className="pf-badges">
@@ -405,7 +406,7 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
         )}
       </section>
 
-      <section className="pf-box">
+      <section className="pf-box pf-box--dist">
         <header className="pf-box__head"><h2>Distinctions</h2><button className="linkbtn" onClick={() => setEdit('ach')}>Voir mes {ACHIEVEMENTS.length} succès</button></header>
         <ul className="pf-dist">
           <li style={{ ['--dc' as string]: '#ff9a4a' }}><img src={extraArt('dist-rebirth')} alt="" /><b>{store.rebirths}</b><span>Renaissance{store.rebirths > 1 ? 's' : ''}</span></li>
@@ -427,7 +428,7 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
           {store.pinned.length === 0 ? <p className="pf-empty">Aucune carte exposée. Touche « Choisir » pour mettre tes préférées en avant.</p>
             : <div className="pf-fav__row">{store.pinned.map((id) => <Card key={id} hero={HEROES.find((h) => h.id === id)!} />)}</div>}
         </section>
-        <section className="pf-box">
+        <section className="pf-box pf-box--brief">
           <h2>En bref</h2>
           <ul className="pf-brief">{stats.slice(0, 4).map(([k, label, value]) => <li key={label}><i lang="ja">{k}</i><span>{label}</span><b>{value}</b></li>)}</ul>
         </section>
@@ -477,7 +478,7 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
             {[...stats, ['解', 'Cartes libérées', n(store.awakened.length)] as [string, string, string], ['力', 'Carte la plus puissante', strongest ? `${strongest.h.name} · ${n(strongest.p)}` : '—'] as [string, string, string], ['魂', 'Âmes dépensées', n(store.gemsSpent)] as [string, string, string]]
               .map(([k, label, value]) => <li key={label}><i lang="ja">{k}</i><span>{label}</span><b>{value}</b></li>)}
           </ul>
-          <p className="set__note">Le classement, la guilde et les victoires en arène n'existent pas encore : ils demandent un jeu en ligne.</p>
+          <p className="set__note">Le classement contre les autres joueurs et la guilde demandent un jeu en ligne. L'Arène se joue contre les Rivaux du Rift.</p>
         </section>
       )}
 

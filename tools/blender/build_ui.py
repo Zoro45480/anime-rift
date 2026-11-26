@@ -440,6 +440,22 @@ def nav_bazaar():
     return 3.6, 3.2
 
 
+def crown():
+    """Couronne du Chemin du Rift : or massif, cinq pointes à perles, gemmes rouge et bleue sur le bandeau."""
+    gold = pbr((1.0, 0.78, 0.3), 1, 0.13)
+    ruby = pbr((1.0, 0.2, 0.35), 0.2, 0.05, (1.0, 0.15, 0.3), 1.3, coat=1)
+    sapph = pbr((0.35, 0.6, 1.0), 0.2, 0.05, (0.3, 0.55, 1.0), 1.3, coat=1)
+    pearl = pbr((1.0, 0.97, 0.9), 0.2, 0.2, coat=1)
+    body = [(-1.3, -0.7), (1.3, -0.7), (1.45, 0.55), (0.75, -0.05), (0.38, 0.75), (0, 0.05), (-0.38, 0.75), (-0.75, -0.05), (-1.45, 0.55)]
+    solid(body, 0.5, gold, bevel=0.08)
+    solid(rounded(2.7, 0.42, 0.1, 0, 0, -0.62), 0.62, gold, bevel=0.08, back=-0.04)
+    for x, z in ((-1.45, 0.55), (-0.38, 0.75), (0.38, 0.75), (1.45, 0.55), (0, 0.05)):
+        solid(circle(x, z + 0.12, 0.14), 0.2, pearl, bevel=0.07, back=-0.12)
+    for x, m in ((-0.85, sapph), (0, ruby), (0.85, sapph)):
+        solid([(x, -0.42), (x + 0.2, -0.62), (x, -0.82), (x - 0.2, -0.62)], 0.16, m, bevel=0.05, back=-0.6)
+    return 3.4, 2.6
+
+
 # --- fond des menus -----------------------------------------------------------------------------------------------------
 def background():
     """Ciel nocturne en dégradés doux. L'image est ensuite légèrement floutée : elle doit rester en retrait."""
@@ -547,6 +563,7 @@ ELEMENTS = {
     'card-pack': card_pack,
     'floor-plate': floor_plate,
     'shop': shop,
+    'crown': crown,
     'nav-bazaar': nav_bazaar,
     'league-bronze': lambda k='bronze': league(k),
     'league-silver': lambda k='silver': league(k),
@@ -556,7 +573,7 @@ ELEMENTS = {
     'league-legend': lambda k='legend': league(k),
     'floor-boss': lambda: floor_plate(True),
 }
-SCALE = {'nav-nexus': 60, 'nav-summon': 60, 'nav-cards': 60, 'nav-contracts': 60, 'nav-profile': 60, 'chest': 60, 'rift-path': 90, 'card-pack': 80, 'floor-plate': 70, 'floor-boss': 70, 'shop': 70, 'nav-bazaar': 60, 'league-bronze': 70, 'league-silver': 70, 'league-gold': 70, 'league-platinum': 70, 'league-diamond': 70, 'league-legend': 70}  # pixels par unité, quand ce n'est pas PX
+SCALE = {'nav-nexus': 60, 'nav-summon': 60, 'nav-cards': 60, 'nav-contracts': 60, 'nav-profile': 60, 'chest': 60, 'rift-path': 90, 'card-pack': 80, 'floor-plate': 70, 'floor-boss': 70, 'shop': 70, 'crown': 70, 'nav-bazaar': 60, 'league-bronze': 70, 'league-silver': 70, 'league-gold': 70, 'league-platinum': 70, 'league-diamond': 70, 'league-legend': 70}  # pixels par unité, quand ce n'est pas PX
 
 os.makedirs(OUT, exist_ok=True)
 for name in [a for a in sys.argv[1:] if a in ELEMENTS] or list(ELEMENTS):

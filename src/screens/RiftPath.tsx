@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { iconArt, uiArt } from '../assets/manifest'
 import type { Hero } from '../data/heroes'
 import { RARITIES } from '../data/rarities'
-import { CARD_ODDS, claimableTiers, PATH_XP, rollPath, seasonOf, TIER_REWARDS, TIER_XP, tierOf, TIERS, type PathReward } from '../game/riftpath'
+import { BANNERS } from '../data/banners'
+import { premiumReward, CARD_ODDS, claimableTiers, PATH_XP, rollPath, seasonOf, TIER_REWARDS, TIER_XP, tierOf, TIERS, type PathReward } from '../game/riftpath'
 import { SCROLLS } from '../game/progression'
 import { CHALLENGES, CHALLENGE_TIMES, challengeState, msToDayEnd } from '../game/contracts'
 import { useStore } from '../state/store'
@@ -26,13 +27,11 @@ const Loot = ({ r, big }: { r: PathReward; big?: boolean }) => (
   </span>
 )
 
-const lootText = (r: PathReward) => [r.card && 'une carte SR ou mieux', r.gems && `${r.gems} âmes`, r.energy && `${r.energy} éclairs`, r.tickets && `${r.tickets} sceaux`, r.shards && `${r.shards} fragments`,
-  ...Object.entries(r.scrolls ?? {}).map(([k, v]) => `${v} ${SCROLLS[k as 'small'].label.toLowerCase()}`)].filter(Boolean).join(', ')
-
 export const RiftPath = ({ now }: { now: Date }) => {
   const store = useStore()
   const path = rollPath(store.path, now)
   const season = seasonOf(now)
+  const seasonWorld = BANNERS[(season.number - 1) % BANNERS.length]
   const tier = tierOf(path.xp)
   const ready = claimableTiers(path)
   const inTier = tier >= TIERS ? TIER_XP : path.xp % TIER_XP
@@ -54,47 +53,59 @@ export const RiftPath = ({ now }: { now: Date }) => {
 
   return (
     <section className="pt" style={{ ['--season' as string]: season.hue }}>
-      <header className="pt__season">
-        <img src={uiArt('rift-path')} alt="" />
-        <div>
-          <p className="eyebrow">Chemin du Rift · saison {season.number}</p>
-          <h2>{season.name}</h2>
-          <p className="pt__end">Fin de la saison dans <b>{left(season.msLeft)}</b></p>
+      <header className="pt__hero">
+        {store.bannerArt[seasonWorld.id] && <img className="pt__hero-bg" src={store.bannerArt[seasonWorld.id]} alt="" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
+        <img className="pt__hero-path" src={uiArt('rift-path')} alt="" />
+        <div className="pt__hero-text">
+          <h2><img src={uiArt('crown')} alt="" />Chemin du Rift</h2>
+          <p className="pt__ribbon">Saison {season.number} · {season.name}</p>
         </div>
+        <div className="pt__end"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg><div><small>Fin de saison dans</small><b>{left(season.msLeft)}</b></div></div>
       </header>
 
-      <div className="pt__prog">
-        <div className="pt__lvl"><small>Palier</small><b>{tier}</b><small>/ {TIERS}</small></div>
-        <div className="pt__xp">
-          <div className="pt__bar"><i style={{ width: `${(inTier / TIER_XP) * 100}%` }} /></div>
-          <p>{tier >= TIERS ? 'Chemin terminé, bravo !' : <>{inTier} / {TIER_XP} XP · prochaine récompense : <b>{lootText(TIER_REWARDS[tier])}</b></>}</p>
-        </div>
-        {ready.length > 0 && <button className="pt__all" onClick={claimAll}>Tout récupérer ({ready.length})</button>}
+      <div className="pt__free"><img src={uiArt('rift-path')} alt="" /><div><b>Piste gratuite ouverte à tous</b><p>Chaque palier atteint donne sa récompense. Avance en faisant tes contrats, tes défis de saison, en combattant et en invoquant.</p></div>{ready.length > 0 && <button className="pt__all" onClick={claimAll}>Tout récupérer ({ready.length})</button>}</div>
+
+      <div className="pt__duo">
+        <section className="pt__prog2">
+          <div className="pt__lvl2"><small>Niveau</small><b>{tier}</b></div>
+          <div className="pt__xp2"><small>Progression</small><b>{tier >= TIERS ? 'Terminé !' : `${inTier} / ${TIER_XP} XP`}</b><div className="pt__bar"><i style={{ width: `${(inTier / TIER_XP) * 100}%` }} /></div></div>
+          <div className="pt__next"><small>Prochaine récompense</small>{tier < TIERS ? <Loot r={TIER_REWARDS[tier]} /> : <b>—</b>}
+            <p className="pt__wait"><b>{ready.length} palier{ready.length > 1 ? 's' : ''} t'attend{ready.length > 1 ? 'ent' : ''}</b><span>{ready.length ? 'Touche « Récupérer » sur la piste ou « Tout récupérer ».' : 'Fais tes quêtes de saison pour avancer.'}</span></p>
+          </div>
+        </section>
+        <section className="pt__prem">
+          <h3><img src={uiArt('crown')} alt="" />Pass premium</h3>
+          <p className="pt__prem-sub">Une 2e récompense à chaque palier</p>
+          <p className="pt__prem-txt">Valable toute la saison {season.number}. Tu peux déjà voir ses récompenses sur la piste ci-dessous.</p>
+          <button className="pt__prem-btn" disabled>Bientôt disponible</button>
+          <small>Le premium demande un vrai paiement en ligne, donc un serveur : il n'est pas encore achetable.</small>
+        </section>
       </div>
 
-      <div className="pt__rail">
-        <button className="pt__arrow" onClick={() => slide(-1)} aria-label="Paliers précédents">‹</button>
-        <ol className="pt__track" ref={track} aria-label="Paliers de la saison">
+      <div className="pt__head2">
+        <div><h3>Les paliers</h3><p>Un palier tous les {TIER_XP} XP. La récompense premium s'ajoutera à la gratuite.</p></div>
+        <p className="pt__legend"><span className="is-done">Récupéré</span><span className="is-ready">Prêt</span><span className="is-next">À venir</span></p>
+        <div className="pt__arrows"><button onClick={() => slide(-1)} aria-label="Paliers précédents">‹</button><button onClick={() => slide(1)} aria-label="Paliers suivants">›</button></div>
+      </div>
+      <div className="pt__board">
+        <div className="pt__rows"><span>Gratuit</span><span className="is-prem"><img src={uiArt('crown')} alt="" />Premium</span></div>
+        <ol className="pt__track2" ref={track} aria-label="Paliers de la saison">
           {TIER_REWARDS.map((r, i) => {
             const t = i + 1
             const state = path.claimed.includes(t) ? 'done' : t <= tier ? 'ready' : 'next'
             return (
-              <li key={t} data-tier={t} className={`pt-tier pt-tier--${state} ${t % 10 === 0 ? 'pt-tier--big' : t % 5 === 0 ? 'pt-tier--mid' : ''}`}>
-                <span className="pt-tier__no">{t}</span>
-                <div className="pt-tier__box">
-                  <Loot r={r} big={t % 10 === 0} />
-                  {state === 'ready' ? <button onClick={() => claim(t)}>Récupérer</button> : <small>{state === 'done' ? '✓ Récupéré' : 'À venir'}</small>}
-                </div>
+              <li key={t} data-tier={t} className={`pt-col pt-col--${state} ${t % 10 === 0 ? 'pt-col--big' : ''}`}>
+                <span className="pt-col__no">{t}</span>
+                <div className="pt-col__free"><Loot r={r} big={t % 10 === 0} />{state === 'ready' ? <button onClick={() => claim(t)}>Récupérer</button> : <small>{state === 'done' ? '✓ Récupéré' : '🔒'}</small>}</div>
+                <div className="pt-col__prem"><Loot r={premiumReward(t)} big={t % 10 === 0} /><small>🔒 Premium</small></div>
               </li>
             )
           })}
         </ol>
-        <button className="pt__arrow" onClick={() => slide(1)} aria-label="Paliers suivants">›</button>
       </div>
-      <p className="pt__legend"><span className="is-done">Récupéré</span><span className="is-ready">Prêt</span><span className="is-next">À venir</span></p>
 
       <div className="pt__ch">
-        <h3>Défis du Chemin <small>chacun {CHALLENGE_TIMES} fois par jour · nouveaux dans {left(msToDayEnd(now))}</small></h3>
+        <h3 className="pt__qtitle">Quêtes de saison <small>Chaque défi se refait {CHALLENGE_TIMES} fois par jour et fait avancer le Chemin · nouveaux dans {left(msToDayEnd(now))}</small></h3>
         <ul>
           {CHALLENGES.map((c) => {
             const st = challengeState(c, store.quests, now)

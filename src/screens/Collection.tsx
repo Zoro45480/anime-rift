@@ -76,20 +76,6 @@ const ArtPicker = ({ hero }: { hero: Hero }) => {
 }
 
 // Anneau de progression de la collection.
-const Ring = ({ value, total }: { value: number; total: number }) => {
-  const r = 44
-  const c = 2 * Math.PI * r
-  return (
-    <div className="col-ring" role="img" aria-label={`${value} cartes sur ${total}`}>
-      <svg viewBox="0 0 100 100" aria-hidden="true">
-        <defs><linearGradient id="col-ring-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#9b7bff" /><stop offset="1" stopColor="#5ee6ff" /></linearGradient></defs>
-        <circle cx="50" cy="50" r={r} className="col-ring__track" />
-        <circle cx="50" cy="50" r={r} className="col-ring__fill" stroke="url(#col-ring-g)" strokeDasharray={c} strokeDashoffset={c * (1 - value / total)} />
-      </svg>
-      <b>{Math.round((value / total) * 100)}<i>%</i></b>
-    </div>
-  )
-}
 
 type OwnedFilter = 'all' | 'owned' | 'missing' | 'fav' | 'wish'
 const OWNED_LABELS: Record<OwnedFilter, string> = { all: 'Toutes', owned: 'Obtenues', missing: 'Manquantes', fav: '★ Favorites', wish: '♥ Envies' }
@@ -102,7 +88,9 @@ const toggle = <T,>(list: T[], item: T): T[] => (list.includes(item) ? list.filt
 const Cards = ({ onSummon }: { onSummon: () => void }) => {
   const { markVisit } = useStore()
   useEffect(() => { markVisit() }, []) // contrat du jour « passe voir ta collection »
-  const { owned, wish, favs, toggleFav, pinned, scrolls, remoteStatus, remoteArt } = useStore()
+  const { owned, wish, favs, toggleFav, pinned, scrolls, remoteStatus, remoteArt, dupes, mergeAll } = useStore()
+  const [more, setMore] = useState(false) // filtres avancés (affinité, rôle)
+  const [merged, setMerged] = useState('')
   const [query, setQuery] = useState('')
   const [rarities, setRarities] = useState<RarityId[]>([]) // vide = toutes
   const [affinities, setAffinities] = useState<AffinityId[]>([]) // vide = toutes
@@ -126,13 +114,17 @@ const Cards = ({ onSummon }: { onSummon: () => void }) => {
 
   return (
     <div className="col">
-      <header className="col__head">
+      <header className="col__head col__head--pc">
         <div>
-          <p className="eyebrow">Collection</p>
-          <h1 className="section__head-title"><b>{String(have).padStart(2, '0')}</b><i> / {String(HEROES.length).padStart(2, '0')}</i></h1>
-          <p className="col__sub section__head-sub">{have} carte{have > 1 ? 's' : ''} sur {HEROES.length} obtenue{have > 1 ? 's' : ''}.</p>
+          <p className="eyebrow">Anime Rift · collection</p>
+          <h1 className="col__title">Ma collection</h1>
+          <p className="col__sub">{have} carte{have > 1 ? 's' : ''} sur {HEROES.length} obtenue{have > 1 ? 's' : ''}.</p>
         </div>
-        <Ring value={have} total={HEROES.length} />
+        <ul className="col__stats">
+          <li><b>{have}<i>/{HEROES.length}</i></b><span>Cartes uniques</span></li>
+          <li className="is-pct"><b>{Math.floor((have / HEROES.length) * 100)} %</b><span>Complétion</span></li>
+          <li><b>{dupes}</b><span>Doublons</span></li>
+        </ul>
       </header>
 
       <section className="vitrine" aria-label="Ma vitrine">
@@ -145,9 +137,12 @@ const Cards = ({ onSummon }: { onSummon: () => void }) => {
       </section>
 
       <section className="filters" aria-label="Filtres de la collection">
-        <div className="filters__search">
-          <label htmlFor="col-search" className="filters__label">Recherche</label>
-          <input id="col-search" type="search" placeholder="Nom, titre, univers ou rôle…" value={query} onChange={(e) => setQuery(e.target.value)} />
+        <div className="filters__top">
+          <div className="filters__search">
+            <label htmlFor="col-search" className="filters__label">Recherche</label>
+            <input id="col-search" type="search" placeholder="Rechercher un perso, un univers…" value={query} onChange={(e) => setQuery(e.target.value)} />
+          </div>
+          <button className={`filters__more ${more ? 'is-on' : ''}`} aria-expanded={more} onClick={() => setMore(!more)}>Filtres ☰{affinities.length + roles.length > 0 ? ` (${affinities.length + roles.length})` : ''}</button>
         </div>
 
         <div className="filters__row">
@@ -162,6 +157,7 @@ const Cards = ({ onSummon }: { onSummon: () => void }) => {
           </div>
         </div>
 
+        {more && <>
         <div className="filters__row">
           <span className="filters__label">Affinité</span>
           <div className="filters__chips">
@@ -185,6 +181,8 @@ const Cards = ({ onSummon }: { onSummon: () => void }) => {
           </div>
         </div>
 
+        </>}
+
         <div className="filters__row">
           <span className="filters__label">Cartes</span>
           <div className="filters__chips" role="radiogroup" aria-label="Possession">
@@ -199,6 +197,12 @@ const Cards = ({ onSummon }: { onSummon: () => void }) => {
           {filtering && <button className="linkbtn" onClick={reset}>Réinitialiser les filtres</button>}
         </div>
       </section>
+
+      <div className="col__dupes">
+        <b>Doublons</b>
+        <p>{merged || 'Tes doublons restent dans ta collection. À toi de choisir quand les fusionner (de l’XP pour la carte) ou les vendre au Bazar.'}</p>
+        <button disabled={dupes === 0} onClick={() => { const r = mergeAll(); setMerged(r.merged ? `${r.merged} doublon${r.merged > 1 ? 's' : ''} fusionné${r.merged > 1 ? 's' : ''} sur ${r.cards} carte${r.cards > 1 ? 's' : ''}.` : 'Rien à fusionner : ces cartes sont déjà au niveau maximum.') }}>⇪ Fusionner tous les doublons <i>×{dupes}</i></button>
+      </div>
 
       <p className="col__hint">
         {remoteStatus === 'loading' && 'Chargement des portraits officiels depuis AniList… '}

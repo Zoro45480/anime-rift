@@ -123,6 +123,8 @@ type Store = State & {
   useScroll: (heroId: string, scroll: ScrollId, count?: number) => number // parchemins réellement utilisés (s'arrête au niveau maximum)
   scrollsUseful: (heroId: string, scroll: ScrollId) => number // combien de parchemins servent encore avant le niveau maximum
   toggleFav: (heroId: string) => void
+  mergeAll: () => { merged: number; cards: number } // fusionne tous les doublons (jusqu'au niveau maximum de chaque carte)
+  dupes: number // exemplaires en trop dans toute la collection
   toggleWish: (heroId: string) => void
   togglePin: (heroId: string) => boolean // false = vitrine pleine
   energyLeft: number // éclairs disponibles maintenant
@@ -344,6 +346,27 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       if (used < 1) return 0
       gain(heroId, SCROLLS[scroll].xp * used, { k: 'scroll' }, used > 1 ? `${used} × ${SCROLLS[scroll].label}` : SCROLLS[scroll].label, { scrolls: { ...state.scrolls, [scroll]: state.scrolls[scroll] - used } })
       return used
+    }
+    const dupes = Object.values(state.owned).reduce((n, c) => n + Math.max(0, c - 1), 0)
+    const mergeAll = () => {
+      const owned = { ...state.owned }, xp = { ...state.xp }
+      let log = state.log, merged = 0, cards = 0, levels = 0
+      for (const [id, copies] of Object.entries(state.owned)) {
+        if (copies < 2) continue
+        const hero = heroById(id)
+        if (!hero) continue
+        const per = Math.round(MERGE_XP[hero.rarity] * (1 + (state.rebirths * REBIRTH_XP) / 100))
+        const before = levelFromXp(xp[id] ?? 0, capOf(id)).level
+        let n = 0
+        while (owned[id] > 1 && levelFromXp(xp[id] ?? 0, capOf(id)).level < capOf(id)) { xp[id] = (xp[id] ?? 0) + per; owned[id]--; n++ }
+        if (!n) continue
+        merged += n; cards++
+        const after = levelFromXp(xp[id], capOf(id)).level
+        levels += after - before
+        log = withLog(log, id, { k: 'merge', note: `${n} doublon${n > 1 ? 's' : ''} fusionné${n > 1 ? 's' : ''} · +${(per * n).toLocaleString('fr-FR')} XP${after > before ? ` · niveau ${after}` : ''}` })
+      }
+      if (merged) setState(tracked({ ...state, owned, xp, log }, { merges: merged, levels }))
+      return { merged, cards }
     }
     const toggleFav = (heroId: string) => setState({ ...state, favs: state.favs.includes(heroId) ? state.favs.filter((x) => x !== heroId) : [...state.favs, heroId] })
     const toggleWish = (heroId: string) =>
@@ -667,7 +690,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setArt((a) => Object.fromEntries(Object.entries(a).filter(([k]) => k !== heroId)))
       void removeArt(heroId)
     }
-    return { ...state, canAfford, summon, merge, useScroll, scrollsUseful, toggleFav, toggleWish, togglePin, fightSpire, tourneyFight, buyStall, quickSell, listAuction, setAlert, levelOf, buyOffer, claimGift, giftReady, duel, newRivals, claimPvp, duelsLeft, arenaPower, fightColossus, claimEvent, colTries, claimContract, claimDaily, claimChallenge, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
+    return { ...state, canAfford, summon, merge, mergeAll, dupes, useScroll, scrollsUseful, toggleFav, toggleWish, togglePin, fightSpire, tourneyFight, buyStall, quickSell, listAuction, setAlert, levelOf, buyOffer, claimGift, giftReady, duel, newRivals, claimPvp, duelsLeft, arenaPower, fightColossus, claimEvent, colTries, claimContract, claimDaily, claimChallenge, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
   }, [state, customArt, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, now])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>
