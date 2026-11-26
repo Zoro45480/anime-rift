@@ -1694,7 +1694,7 @@ h1.pf-name { font-size: clamp(34px, 8vw, 52px); line-height: 1; overflow-wrap: a
 .cn__path { display: grid; gap: 14px; }
 .pv { display: grid; grid-template-columns: minmax(0, 170px) 1fr; gap: 24px; align-items: center; padding: 30px 20px 20px; border-radius: 20px; background: linear-gradient(180deg, #0c0d14, #050508); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1); }
 .pv__best { display: grid; gap: 28px; justify-items: center; }
-.pv__best small { font-size: 12px; color: var(--text-dim); }
+.pv__best > small { font-size: 12px; color: var(--text-dim); }
 .pv__col { display: grid; gap: 8px; }
 .pv__col h3 { font-size: 12px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-dim); }
 .pv__col b { font-family: var(--font-display); font-size: 40px; line-height: 1; color: #fff; }
@@ -2210,9 +2210,9 @@ h1.pf-name { font-size: clamp(34px, 8vw, 52px); line-height: 1; overflow-wrap: a
 .home__live { display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: #ff3d5e; box-shadow: 0 0 8px #ff3d5e; animation: dot-pulse 1.6s infinite; }
 .home__pulls ul { display: grid; grid-auto-flow: column; grid-auto-columns: 150px; gap: 14px; overflow-x: auto; list-style: none; padding: 10px 2px 8px; }
 .home__pulls li { display: grid; gap: 4px; }
-.home__pulls li b { font-size: 13px; color: #fff; }
-.home__pulls li small { font-size: 11.5px; color: var(--text-dim); }
-.home__pulls li i { font-style: normal; font-weight: 800; }
+.home__pulls li > b { font-size: 13px; color: #fff; }
+.home__pulls li > small { font-size: 11.5px; color: var(--text-dim); }
+.home__pulls li > small i { font-style: normal; font-weight: 800; }
 .home__foot { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; padding: 22px 4px 6px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 13.5px; color: var(--text-dim); }
 .home__foot b { color: #fff; letter-spacing: 0.08em; }
 .home__foot button { font-weight: 700; color: var(--cream); }
@@ -2261,8 +2261,8 @@ h1.pf-name { font-size: clamp(34px, 8vw, 52px); line-height: 1; overflow-wrap: a
   .pity__track--mr i { background: linear-gradient(90deg, #ff5ad2, #7d9bff) !important; }
   .bh__fan { position: relative; height: 420px; }
   .bh__card { position: absolute; top: 50%; left: 50%; width: 220px; display: grid; gap: 8px; justify-items: center; transition: transform 300ms var(--ease-out); }
-  .bh__card span { font-size: 12px; font-weight: 800; color: var(--text-dim); }
-  .bh__card span.is-owned { color: #4be3a4; }
+  .bh__card > span { font-size: 12px; font-weight: 800; color: var(--text-dim); }
+  .bh__card > span.is-owned { color: #4be3a4; }
   .bh__card--0 { transform: translate(-115%, -50%) rotate(-12deg) scale(0.85); }
   .bh__card--1 { transform: translate(-50%, -54%); z-index: 2; }
   .bh__card--2 { transform: translate(15%, -50%) rotate(12deg) scale(0.85); }
@@ -2297,7 +2297,7 @@ h1.pf-name { font-size: clamp(34px, 8vw, 52px); line-height: 1; overflow-wrap: a
   .bgrid__past small { font-size: 13px; color: var(--text-dim); }
 }
 @media (min-width: 1100px) { .summon > .bh { grid-column: 1 / -1; } }
-@media (min-width: 1100px) { .bh__card { width: clamp(160px, 13vw, 220px); } .bh__pulls button span { white-space: nowrap; } .bh__card span { display: none; } }
+@media (min-width: 1100px) { .bh__card { width: clamp(160px, 13vw, 220px); } .bh__pulls button span { white-space: nowrap; } .bh__card > span { display: none; } }
 @media (min-width: 1100px) and (max-width: 1360px) { .bh { padding-inline: 64px; } .bh__pulls button { font-size: 13px; gap: 6px; padding: 0 8px; } .bh__main { grid-template-columns: minmax(340px, 1fr) minmax(300px, 0.9fr); } }
 
 /* ───────── Communauté ───────── */
@@ -2430,3 +2430,14 @@ h1.pf-name { font-size: clamp(34px, 8vw, 52px); line-height: 1; overflow-wrap: a
   .pf-box--brief .pf-brief { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (min-width: 1100px) { .pf-hero__level { margin-top: 34px; } }
+
+/* À l'affiche : l'image de l'animé derrière chaque bannière, sous un dégradé transparent */
+.show__top { background: linear-gradient(100deg, rgba(8, 9, 14, 0.96) 22%, rgba(8, 9, 14, 0.55) 55%, color-mix(in srgb, var(--hue) 35%, transparent) 100%); }
+.show__top .show__bg { position: absolute; z-index: -2; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 30%; opacity: 0.85; -webkit-mask-image: none; mask-image: none; }
+.show__top .show__glyph { z-index: -1; }
+.show__top::after { content: ''; position: absolute; z-index: -1; inset: 0; background: linear-gradient(100deg, rgba(8, 9, 14, 0.92) 25%, transparent 70%); pointer-events: none; }
+.bh > .bh__bg, .pt__hero > .pt__hero-bg { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; }
+.bh > .bh__glyph { position: absolute; }
+.bh::before, .pt__hero::before { z-index: 0; }
+.bh > *:not(.bh__bg):not(.bh__glyph), .pt__hero > *:not(.pt__hero-bg):not(.pt__hero-path) { z-index: 1; }
+.bh > .bh__nav { position: absolute; z-index: 2; }

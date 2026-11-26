@@ -284,8 +284,8 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
             const have = b.featured.filter((id) => store.owned[id]).length
             return (
               <article key={b.id} className={`show ${i === index ? 'is-current' : ''}`} style={{ ['--hue' as string]: b.hue }}>
-                {store.bannerArt[b.id] && <img className="show__bg" src={store.bannerArt[b.id]} alt="" loading="lazy" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
                 <div className="show__top">
+                  {store.bannerArt[b.id] && <img className="show__bg" src={store.bannerArt[b.id]} alt="" loading="lazy" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
                   <span className="show__glyph" lang="ja" aria-hidden="true">{b.glyph}</span>
                   <div className="show__text">
                     <p className="show__kicker"><img className="show__emblem" src={extraArt(`emblem-${b.id}`)} alt="" />Bannière limitée</p>
