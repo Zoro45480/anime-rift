@@ -45,7 +45,7 @@ type State = {
 
 // bannière du profil : l'image d'un animé (identifiant de bannière), une couleur ou une image du joueur
 // frame / color / effect / theme : identifiants d'objets d'apparence ('' = automatique ou par défaut) ; badges : succès épinglés
-export type Profile = { name: string; avatar: string; bio: string; tag: string; title: string; banner: { kind: 'anime' | 'color' | 'image'; value: string }; frame: string; color: string; effect: string; theme: string; badges: string[] }
+export type Profile = { name: string; avatar: string; bio: string; tag: string; title: string; banner: { kind: 'anime' | 'color' | 'image'; value: string }; frame: string; ornament: string; aura: string; color: string; effect: string; theme: string; badges: string[] }
 
 // Notification affichée sous la cloche de la barre du haut. Elles naissent d'événements réels de la partie.
 export type Notif = { id: number; t: number; kind: 'pull' | 'level' | 'saga' | 'drop' | 'rebirth' | 'free'; text: string; read: boolean }
@@ -95,7 +95,7 @@ const LOG_MAX = 30
 // Dotation de départ du compte.
 export const START_GEMS = 600
 const START: State = {
-  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' }, frame: '', color: '', effect: '', theme: '', badges: [] }, pulls: 0, wins: 0, cosmetics: [], arcHeroes: {}, tutorialSeen: [],
+  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' }, frame: '', ornament: '', aura: '', color: '', effect: '', theme: '', badges: [] }, pulls: 0, wins: 0, cosmetics: [], arcHeroes: {}, tutorialSeen: [],
   tickets: 20, gems: START_GEMS, pity: Object.fromEntries(BANNERS.map((b) => [b.id, 0])), owned: {},
   xp: {}, scrolls: { small: 0, medium: 0, large: 0 }, wish: [], pinned: [], log: {},
 }
@@ -164,9 +164,10 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     const setProfile = (profile: Partial<Profile>) => setState({ ...state, profile: { ...state.profile, ...profile } })
     const buyCosmetic = (id: string) => {
       const c = cosmeticById(id)
-      if (!c || !canBuy(c, state.cosmetics, accountLevel(state.accountXp, state.rebirths).level, state.rebirths, state.gems)) return false
+      const own = { bought: state.cosmetics, level: accountLevel(state.accountXp, state.rebirths).level, rebirths: state.rebirths, arcs: BANNERS.filter((_, i) => (state.saga[`${i}-4`] ?? 0) > 0).map((b) => b.id) }
+      if (!c || !canBuy(c, own, state.gems)) return false
       // l'achat et l'équipement se font d'un seul geste (deux mises à jour séparées s'écraseraient)
-      setState({ ...state, gems: state.gems - c.price, gemsSpent: state.gemsSpent + c.price, cosmetics: [...state.cosmetics, id], profile: { ...state.profile, [c.kind]: id } })
+      setState({ ...state, gems: state.gems - c.price, gemsSpent: state.gemsSpent + c.price, cosmetics: [...state.cosmetics, id], profile: { ...state.profile, [c.kind]: c.kind === 'title' ? c.name : id } })
       return true
     }
     const resetGame = () => setState({ ...START, profile: state.profile, tutorialSeen: state.tutorialSeen, cosmetics: state.cosmetics })

@@ -1578,3 +1578,50 @@ h1.pf-name { font-size: clamp(34px, 8vw, 52px); line-height: 1; overflow-wrap: a
 @media (max-width: 370px) { .bell { width: 26px !important; height: 26px !important; margin-left: 0 !important; } .bell svg { width: 15px; height: 15px; } .wallet span, .wallet__energy { padding: 4px 6px 5px 5px !important; font-size: 11.5px; } .wallet .coin { width: 15px !important; height: 15px !important; } }
 @media (max-width: 370px) { .topbar .logo { display: none; } .topbar__in { justify-content: flex-end; } .wallet { flex-wrap: nowrap; } .wallet__lvl { flex: none; } }
 .bell--me .avatar { display: grid; }
+
+/* ───────── Apparence : cadre, aura, ornement, plaques de titre, médailles ───────── */
+.avatar-frame > img { inset: 0; }
+.avatar-frame__aura { z-index: 0; mix-blend-mode: screen; animation: aura-spin 14s linear infinite; filter: none !important; }
+.avatar-frame__aura--spark, .avatar-frame__aura--rainbow { animation-duration: 9s; }
+.avatar-frame__aura--shadow { animation-direction: reverse; animation-duration: 20s; }
+.avatar-frame__aura--fire { animation: aura-fire 1.6s ease-in-out infinite alternate; }
+.avatar-frame__aura--volt { animation: aura-volt 0.9s steps(3) infinite; }
+.avatar-frame .avatar { position: relative; z-index: 1; }
+.avatar-frame__ring { z-index: 2; }
+.avatar-frame__orn { z-index: 3; }
+@keyframes aura-spin { to { transform: rotate(360deg); } }
+@keyframes aura-fire { from { transform: scale(0.97) rotate(-3deg); opacity: 0.85; } to { transform: scale(1.06) rotate(3deg); opacity: 1; } }
+@keyframes aura-volt { 0% { transform: rotate(0deg); opacity: 1; } 33% { transform: rotate(18deg); opacity: 0.6; } 66% { transform: rotate(-12deg); opacity: 1; } }
+:root[data-fx='low'] .avatar-frame__aura { animation: none !important; }
+.plate { position: relative; display: inline-grid; place-items: center; width: 232px; max-width: 100%; aspect-ratio: 504 / 136; flex: none; }
+.plate img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.plate b { position: relative; max-width: 74%; font-family: var(--font-display); font-style: italic; font-size: 17px; line-height: 1; letter-spacing: 0.03em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; text-shadow: 0 1px 0 #000, 0 0 10px rgba(0, 0, 0, 0.8); }
+.plate--small { width: 176px; } .plate--small b { font-size: 13px; }
+.plate--legend b { color: #ffe9a8; } .plate--mythic b { color: #ffd0da; text-shadow: 0 0 10px #ff4d6d, 0 1px 0 #000; }
+.plate--mythic img { animation: frame-glow 3s ease-in-out infinite; }
+.pf-hero__chips { align-items: center; }
+.pf-hero__chips .plate { margin: -6px -8px; }
+.pf-name--grad { -webkit-background-clip: text; background-clip: text; color: transparent !important; text-shadow: none !important; }
+.pf-name--ice { text-shadow: 0 0 10px #9fe8ff, 0 0 26px #4fb8ff, 0 2px 0 #000 !important; }
+.pf-name--shadow { text-shadow: 3px 3px 0 #3a0f6b, 6px 6px 0 rgba(120, 40, 220, 0.5), 0 0 22px #7a2be0 !important; }
+.pf-name--gold { animation: name-gold 2.6s linear infinite; background-image: linear-gradient(110deg, var(--nc) 35%, #fff6c8 48%, #ffd24d 52%, var(--nc) 65%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent !important; text-shadow: none !important; }
+@keyframes name-gold { from { background-position: 120% 0; } to { background-position: -130% 0; } }
+.pe__items button { --rh: #9aa6c8; box-shadow: inset 0 3px 0 var(--rh), inset 0 0 0 1px rgba(255, 255, 255, 0.12); }
+.pe__items img { width: 104px; height: 104px; }
+.pe__stack { position: relative; display: block; width: 104px; height: 104px; }
+.pe__stack img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.pe__items .pe__medal { width: 84px; height: 84px; }
+.pe__items button:disabled img, .pe__titles button:disabled .plate { filter: grayscale(0.85) brightness(0.7); }
+.pe__titles { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); max-height: none; }
+.pe__titles button { --rh: #9aa6c8; display: grid; gap: 2px; justify-items: center; min-height: 0; padding: 6px 4px 8px; border-radius: 14px; background: #000; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12); }
+.pe__titles button small { font-size: 11.5px; color: var(--text-dim); }
+.pe__titles button.is-on { background: rgba(255, 201, 77, 0.12); box-shadow: inset 0 0 0 2px #ffc94d; color: inherit; }
+.pe__titles button.is-on small { color: #ffc94d; font-weight: 800; }
+.pe__sec .pe__items, .pe__sec .pe__titles { max-height: 46vh; overflow-y: auto; padding: 2px; }
+.pe__card div { justify-items: start; }
+.pf-badges li { grid-template-columns: 54px 1fr; }
+.pf-badges img { grid-row: span 2; width: 54px; height: 54px; }
+.ach__medal { grid-row: span 2; width: 54px; height: 54px; }
+.ach li:not(.is-done) .ach__medal { filter: grayscale(1) brightness(0.55); }
+.pf-hero__chips span.plate, .pe__card div > span.plate { padding: 0; border-radius: 0; background: none; box-shadow: none; }
+.pe__card div > span.plate { margin-left: -8px; }

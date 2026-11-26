@@ -4,7 +4,7 @@ import { STAGES, STAGES_PER_ARC } from './saga'
 
 // Succès : des objectifs calculés sur la partie réelle. Chaque succès obtenu débloque un titre à afficher sur le profil.
 export type AchState = { owned: Record<string, number>; xp: Record<string, number>; saga: Record<string, number>; awakened: string[]; rebirths: number; pulls: number; wins: number }
-export type Achievement = { id: string; group: 'Collection' | 'Invocation' | 'Combat' | 'Maîtrise'; kanji: string; name: string; goal: string; title: string; target: number; value: (s: AchState) => number }
+export type Achievement = { id: string; group: 'Collection' | 'Invocation' | 'Combat' | 'Maîtrise'; kanji: string; name: string; goal: string; title: string; target: number; metal: 'bronze' | 'silver' | 'gold'; value: (s: AchState) => number }
 
 const count = (s: AchState, test: (id: string) => boolean) => Object.keys(s.owned).filter((id) => s.owned[id] > 0 && test(id)).length
 const rarityOf = new Map(HEROES.map((h) => [h.id, h.rarity]))
@@ -13,7 +13,7 @@ const arcs = (s: AchState) => STAGES.filter((st) => st.boss && (s.saga[st.id] ??
 const best = (s: AchState) => Math.max(0, ...Object.keys(s.owned).filter((id) => s.owned[id] > 0).map((id) => levelFromXp(s.xp[id] ?? 0, s.awakened.includes(id) ? MAX_LEVEL : 50).level))
 
 const tiers = (group: Achievement['group'], kanji: string, base: string, steps: [number, string, string, string][], value: Achievement['value']): Achievement[] =>
-  steps.map(([target, name, goal, title]) => ({ id: `${base}-${target}`, group, kanji, name, goal, title, target, value }))
+  steps.map(([target, name, goal, title], i) => ({ id: `${base}-${target}`, group, kanji, name, goal, title, target, value, metal: steps.length === 1 || i >= 2 ? 'gold' : i === 1 ? 'silver' : 'bronze' }))
 
 export const ACHIEVEMENTS: Achievement[] = [
   ...tiers('Collection', '集', 'cards', [[10, 'Premiers pas de collectionneur', 'Possède 10 personnages différents.', 'Collectionneur'], [50, 'Classeur bien rempli', 'Possède 50 personnages différents.', 'Archiviste'], [150, 'Grande galerie', 'Possède 150 personnages différents.', 'Conservateur'], [400, 'Mémoire des mondes', 'Possède 400 personnages différents.', 'Gardien des mondes']], (s) => count(s, () => true)),
@@ -31,3 +31,7 @@ export const ACHIEVEMENTS: Achievement[] = [
 export const DEFAULT_TITLE = 'Nouvel invocateur'
 export const progressOf = (a: Achievement, s: AchState) => ({ value: Math.min(a.target, a.value(s)), done: a.value(s) >= a.target })
 export const unlockedTitles = (s: AchState) => [DEFAULT_TITLE, ...ACHIEVEMENTS.filter((a) => a.value(s) >= a.target).map((a) => a.title)]
+
+// Médaille 3D d'un succès : la forme suit son groupe, le métal son palier.
+const SHAPE = { Collection: 'gem', Invocation: 'portal', Combat: 'swords', 'Maîtrise': 'shield' } as const
+export const medalOf = (a: Achievement) => `medal-${SHAPE[a.group]}-${a.metal}`

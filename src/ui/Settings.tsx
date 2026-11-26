@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { createPortal } from 'react-dom'
-import { extraArt } from '../assets/manifest'
+import { cosmeticArt, extraArt } from '../assets/manifest'
 import { accountLevel } from '../game/progression'
 import { useStore } from '../state/store'
 import { getVolume, isSoundOn, setSoundOn, setVolume } from '../summon/audio'
@@ -32,16 +32,15 @@ export const Avatar = ({ size = 44 }: { size?: number }) => {
     : <span className="avatar avatar--letter" style={{ width: size, height: size, fontSize: size * 0.5 }} aria-hidden="true">{name[0].toUpperCase()}</span>
 }
 
-// Photo de profil dans son cadre 3D (Blender). Le cadre suit le style du niveau : acier, or, braise, plasma, légende, arc-en-ciel.
-export const FramedAvatar = ({ size, style }: { size: number; style: string }) => {
-  const big = style === 't4' || style === 'r' // ces cadres ont des ailes : la photo y occupe moins de place
-  return (
-    <span className={`avatar-frame avatar-frame--${style}`} style={{ width: size, height: size }}>
-      <Avatar size={Math.round(size * (big ? 0.45 : 0.54))} />
-      <img src={extraArt(`frame-${style}`)} alt="" />
-    </span>
-  )
-}
+// Photo de profil dans son cadre 3D (Blender), avec une aura derrière et un ornement par-dessus si le joueur en porte.
+export const FramedAvatar = ({ size, style, aura, ornament }: { size: number; style: string; aura?: string; ornament?: string }) => (
+  <span className={`avatar-frame avatar-frame--${style}`} style={{ width: size, height: size }}>
+    {aura && <img className={`avatar-frame__aura avatar-frame__aura--${aura}`} src={cosmeticArt(`aura-${aura}`)} alt="" />}
+    <Avatar size={Math.round(size * 0.44)} />
+    <img className="avatar-frame__ring" src={cosmeticArt(`frame-${style}`)} alt="" />
+    {ornament && <img className="avatar-frame__orn" src={cosmeticArt(`orn-${ornament}`)} alt="" />}
+  </span>
+)
 
 const GRAPHICS: [GraphicsMode, string, string][] = [['auto', 'Automatique', 'Selon ton appareil'], ['high', 'Maximale', 'Tous les effets'], ['low', 'Fluide', 'Appareil modeste']]
 
@@ -89,7 +88,7 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
         </header>
 
         <section className="set__profile">
-          <FramedAvatar size={124} style={levelStyle(acc.level, store.rebirths)} />
+          <FramedAvatar size={150} style={levelStyle(acc.level, store.rebirths)} />
           <div><b>{store.profile.name.trim() || 'Joueur'}</b><LevelBadge level={acc.level} rebirths={store.rebirths} size={26} /></div>
         </section>
         <p className="set__note">Ta partie est gardée sur cet appareil : il n'y a pas encore de compte en ligne ni de connexion.</p>

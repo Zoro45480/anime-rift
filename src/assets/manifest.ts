@@ -59,3 +59,8 @@ const extras = import.meta.glob('./extras/*.webp', { eager: true, query: '?url',
 
 // Bandeaux de titre (un par univers, inspiré de son animé), Kiri (planche de 16 images, 4×4) et micro du seiyū — rendus Blender (tools/blender/build_extras.py).
 export const extraArt = (name: `ribbon-${string}` | `emblem-${string}` | `set-${string}` | `frame-${string}` | `dist-${string}` | 'guide' | 'mic'): string => extras[`./extras/${name}.webp`] ?? ''
+
+const cosmetics = import.meta.glob('./cosmetics/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
+
+// Objets d'apparence du profil, rendus Blender (tools/blender/build_cosmetics.py) : frame-, orn-, aura-, medal-, plate-.
+export const cosmeticArt = (name: string): string => cosmetics[`./cosmetics/${name}.webp`] ?? ''
