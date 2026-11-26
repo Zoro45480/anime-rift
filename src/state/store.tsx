@@ -8,6 +8,7 @@ import { makeUnit, simulate, type BattleEvent, type Unit } from '../game/battle'
 import { foeUnits, isUnlocked, rollDrops, SOULS_PER_STAR, stageById, starsFor, TEAM_SIZE, type Stage } from '../game/saga'
 import { canBuy, cosmeticById } from '../game/cosmetics'
 import { addCounts, claimable, DAILY_REWARDS, dailyStatus, dayKey, emptyQuests, featuredWorld, markClaimed, roll, type Counts, type Quests, type Reward } from '../game/contracts'
+import { claimableTiers, PATH_XP, rollCard, rollPath, tierOf, tierReward, type PathState } from '../game/riftpath'
 import { loadAllArt, removeArt, saveArt } from './customArt'
 import { loadBannerArt, loadRemoteArt, type RemoteStatus } from './remoteArt'
 
@@ -39,6 +40,7 @@ type State = {
   pulls: number // invocations réalisées depuis le début
   wins: number // combats gagnés depuis le début
   cosmetics: string[] // objets d'apparence achetés
+  path: PathState // Chemin du Rift : saison, XP, paliers récupérés
   quests: Quests // contrats : compteurs du jour, de la semaine, à vie, série quotidienne
   arcHeroes: Record<string, boolean> // cartes qui étaient dans l'équipe quand le boss de leur arc est tombé (titre d'arc)
   tutorialSeen: string[] // écrans dont l'explication de Kiri a déjà été lue
@@ -67,6 +69,8 @@ type Store = State & {
   claimContract: (id: string) => boolean // récupère la récompense d'un contrat accompli
   claimDaily: () => boolean // récompense quotidienne
   markVisit: () => void // « passe voir ta collection »
+  claimTier: (tier: number) => Hero | true | null // récupère un palier du Chemin du Rift (la carte obtenue, s'il y en a une)
+  claimAllTiers: () => Hero[] // récupère tous les paliers prêts
   questsReady: number // contrats et récompense quotidienne à récupérer
   buyCosmetic: (id: string) => boolean // achat en âmes ; l'objet est équipé aussitôt
   resetGame: () => void // efface toute la progression
@@ -101,7 +105,7 @@ const LOG_MAX = 30
 // Dotation de départ du compte.
 export const START_GEMS = 600
 const START: State = {
-  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' }, frame: '', ornament: '', aura: '', color: '', effect: '', theme: '', badges: [] }, pulls: 0, wins: 0, cosmetics: [], quests: emptyQuests(), arcHeroes: {}, tutorialSeen: [],
+  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' }, frame: '', ornament: '', aura: '', color: '', effect: '', theme: '', badges: [] }, pulls: 0, wins: 0, cosmetics: [], quests: emptyQuests(), path: { season: 0, xp: 0, claimed: [] }, arcHeroes: {}, tutorialSeen: [],
   tickets: 20, gems: START_GEMS, pity: Object.fromEntries(BANNERS.map((b) => [b.id, 0])), owned: {},
   xp: {}, scrolls: { small: 0, medium: 0, large: 0 }, wish: [], pinned: [], log: {},
 }
@@ -179,7 +183,16 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     const resetGame = () => setState({ ...START, profile: state.profile, tutorialSeen: state.tutorialSeen, cosmetics: state.cosmetics })
 
     // Ajoute des compteurs de contrats à un nouvel état, et prévient quand un contrat vient d'être accompli.
-    const tracked = (next: State, adds: Counts): State => {
+    // Ajoute de l'XP au Chemin du Rift et prévient quand un palier est atteint.
+    const withPath = (next: State, gain: number): State => {
+      if (!gain) return next
+      const p = rollPath(next.path, new Date())
+      const path = { ...p, xp: p.xp + gain }
+      const up = tierOf(path.xp) > tierOf(p.xp)
+      return { ...next, path, notifs: up ? notify(next.notifs, [['quest', `Chemin du Rift : palier ${tierOf(path.xp)} atteint, ta récompense t’attend.`]]) : next.notifs }
+    }
+    const tracked = (base: State, adds: Counts): State => {
+      const next = withPath(base, (adds.wins ?? 0) * PATH_XP.win + (adds.pulls ?? 0) * PATH_XP.pull)
       const t = new Date()
       const quests = addCounts(next.quests, adds, t)
       const before = new Set(claimable(state.quests, state.saga, t).map((c) => c.id))
@@ -322,18 +335,48 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       const t = new Date()
       const c = claimable(state.quests, state.saga, t).find((x) => x.id === id)
       if (!c) return false
-      setState({ ...grant(state, c.reward), quests: markClaimed(c, state.quests, t) })
+      const xp = c.id === 'd-all' ? PATH_XP.dayBonus : c.period === 'day' ? PATH_XP.dayContract : c.period === 'week' ? PATH_XP.weekContract : PATH_XP.storyContract
+      setState(withPath({ ...grant(state, c.reward), quests: markClaimed(c, state.quests, t) }, xp))
       return true
     }
     const claimDaily = () => {
       const t = new Date()
       const st = dailyStatus(state.quests.daily, t)
       if (st.claimed) return false
-      setState({ ...grant(state, DAILY_REWARDS[st.day - 1]), quests: { ...roll(state.quests, t), daily: { last: dayKey(t), streak: st.day } } })
+      setState(withPath({ ...grant(state, DAILY_REWARDS[st.day - 1]), quests: { ...roll(state.quests, t), daily: { last: dayKey(t), streak: st.day } } }, PATH_XP.daily))
       return true
     }
     const markVisit = () => { if (!roll(state.quests, new Date()).day.c.visit) setState(tracked(state, { visit: 1 })) }
-    const questsReady = claimable(state.quests, state.saga, new Date(now)).length + (dailyStatus(state.quests.daily, new Date(now)).claimed ? 0 : 1)
+    // Paliers du Chemin du Rift : la récompense, et une carte SR ou mieux tous les 10 paliers.
+    const openTiers = (s: State, tiers: number[]): { s: State; cards: Hero[] } => {
+      const path = rollPath(s.path, new Date())
+      const ready = claimableTiers(path).filter((t) => tiers.includes(t))
+      let next: State = { ...s, path }
+      const cards: Hero[] = []
+      for (const t of ready) {
+        const r = tierReward(t)
+        next = grant(next, r)
+        if (r.card) {
+          const h = rollCard(Math.random)
+          cards.push(h)
+          next = { ...next, owned: { ...next.owned, [h.id]: (next.owned[h.id] ?? 0) + 1 }, accountXp: next.accountXp + ACCOUNT_XP[h.rarity], log: withLog(next.log, h.id, { k: 'pull', note: `Obtenue · Chemin du Rift, palier ${t}` }),
+            notifs: notify(next.notifs, [['pull', `Chemin du Rift : ${h.name} (${RARITIES[h.rarity].short}) rejoint ta collection.`]]) }
+        }
+      }
+      return { s: { ...next, path: { ...path, claimed: [...path.claimed, ...ready] } }, cards }
+    }
+    const claimTier = (tier: number) => {
+      if (!claimableTiers(rollPath(state.path, new Date())).includes(tier)) return null
+      const { s, cards } = openTiers(state, [tier])
+      setState(s)
+      return cards[0] ?? true
+    }
+    const claimAllTiers = () => {
+      const { s, cards } = openTiers(state, claimableTiers(rollPath(state.path, new Date())))
+      setState(s)
+      return cards
+    }
+    const questsReady = claimable(state.quests, state.saga, new Date(now)).length + (dailyStatus(state.quests.daily, new Date(now)).claimed ? 0 : 1) + claimableTiers(rollPath(state.path, new Date(now))).length
     const seeTutorial = (id: string) => { if (!state.tutorialSeen.includes(id)) setState({ ...state, tutorialSeen: [...state.tutorialSeen, id] }) }
     const resetTutorial = () => setState({ ...state, tutorialSeen: [] })
     const awaken = (heroId: string) => {
@@ -366,7 +409,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setArt((a) => Object.fromEntries(Object.entries(a).filter(([k]) => k !== heroId)))
       void removeArt(heroId)
     }
-    return { ...state, canAfford, summon, merge, useScroll, toggleWish, togglePin, claimContract, claimDaily, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
+    return { ...state, canAfford, summon, merge, useScroll, toggleWish, togglePin, claimContract, claimDaily, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
   }, [state, customArt, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, now])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>

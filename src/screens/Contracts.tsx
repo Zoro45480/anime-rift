@@ -9,6 +9,8 @@ import { useStore } from '../state/store'
 import { Card } from '../ui/Card'
 import { Coin } from '../ui/Coin'
 import { Guide } from '../ui/Guide'
+import { RiftPath } from './RiftPath'
+import { claimableTiers, rollPath } from '../game/riftpath'
 
 const n = (x: number) => x.toLocaleString('fr-FR')
 const clock = (ms: number) => {
@@ -53,7 +55,7 @@ const Row = ({ c, now }: { c: Contract; now: Date }) => {
   )
 }
 
-type Tab = 'daily' | 'contracts' | 'path'
+type Tab = 'daily' | 'contracts' | 'rift' | 'path'
 type Sub = 'day' | 'week' | 'story'
 
 export const Contracts = () => {
@@ -77,7 +79,7 @@ export const Contracts = () => {
         <div><p className="eyebrow">Tes objectifs</p><h1>Contrats</h1><p>Accomplis-les en jouant, puis récupère tes récompenses.</p></div>
       </header>
       <div className="coltabs__bar" role="tablist" aria-label="Sections des contrats">
-        {([['daily', 'Chaque jour', st.claimed ? 0 : 1], ['contracts', 'Contrats', readyIn([...daily, DAILY_BONUS, ...WEEKLY, ...STORY])], ['path', 'Parcours', 0]] as [Tab, string, number][]).map(([id, label, dot]) => (
+        {([['daily', 'Chaque jour', st.claimed ? 0 : 1], ['contracts', 'Contrats', readyIn([...daily, DAILY_BONUS, ...WEEKLY, ...STORY])], ['rift', 'Chemin du Rift', claimableTiers(rollPath(store.path, now)).length], ['path', 'Parcours', 0]] as [Tab, string, number][]).map(([id, label, dot]) => (
           <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>{label}{dot > 0 && <i className="dot" aria-label={`${dot} à récupérer`} />}</button>
         ))}
       </div>
@@ -140,6 +142,8 @@ export const Contracts = () => {
           </>}
         </section>
       )}
+
+      {tab === 'rift' && <RiftPath now={now} />}
 
       {tab === 'path' && (
         <section className="cn__path">

@@ -1701,3 +1701,70 @@ h1.pf-name { font-size: clamp(34px, 8vw, 52px); line-height: 1; overflow-wrap: a
 .pv__col b i { font-style: normal; font-size: 20px; color: var(--text-dim); }
 @media (max-width: 480px) { .pv { grid-template-columns: 120px 1fr; gap: 16px; padding: 24px 14px 14px; } }
 @media (min-width: 760px) { .dr__days { grid-template-columns: repeat(6, minmax(0, 1fr)) 1.6fr; } .dr__day--chest { grid-column: auto; grid-template-columns: 1fr; justify-items: center; } }
+
+/* ───────── Chemin du Rift ───────── */
+.coltabs__bar { overflow-x: auto; scrollbar-width: none; }
+.pt { --season: #7fd8ff; display: grid; gap: 14px; }
+.pt__season { position: relative; overflow: hidden; display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: center; padding: 14px 18px; border-radius: 22px;
+  background: radial-gradient(80% 160% at 0% 50%, color-mix(in srgb, var(--season) 30%, transparent), transparent 60%), radial-gradient(60% 120% at 100% 0%, rgba(154, 125, 255, 0.25), transparent 60%), linear-gradient(180deg, #0c0d18, #05060b);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--season) 55%, transparent), 0 0 30px color-mix(in srgb, var(--season) 18%, transparent); }
+.pt__season img { width: 120px; height: 120px; filter: drop-shadow(0 0 18px color-mix(in srgb, var(--season) 60%, transparent)); }
+.pt__season .eyebrow { color: var(--season); }
+.pt__season h2 { font-family: var(--font-display); font-style: italic; font-size: clamp(24px, 6vw, 40px); line-height: 1.02; text-transform: uppercase; color: #fff; }
+.pt__end { margin-top: 6px; font-size: 13.5px; color: var(--text-dim); }
+.pt__end b { color: #fff; }
+.pt__prog { display: grid; grid-template-columns: auto 1fr; gap: 10px 16px; align-items: center; padding: 14px 16px; border-radius: 18px; background: #07080d; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1); }
+.pt__lvl { display: grid; justify-items: center; line-height: 1; }
+.pt__lvl small { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); }
+.pt__lvl b { font-family: var(--font-display); font-size: 44px; color: var(--season); text-shadow: 0 0 18px color-mix(in srgb, var(--season) 60%, transparent); }
+.pt__xp { display: grid; gap: 8px; min-width: 0; }
+.pt__xp p { font-size: 13px; color: var(--text-dim); }
+.pt__xp p b { color: var(--cream); }
+.pt__bar { height: 12px; border-radius: 99px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+.pt__bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #9a7dff, var(--season)); box-shadow: 0 0 12px var(--season); transition: width 500ms var(--ease-out); }
+.pt__all { grid-column: 1 / -1; min-height: 48px; border-radius: 14px; font-weight: 800; font-size: 15px; color: #062a1a; background: linear-gradient(100deg, #b6f36a, #4be3a4); box-shadow: 0 0 20px rgba(75, 227, 164, 0.5); animation: claim-glow 1.6s ease-in-out infinite; }
+.pt__rail { display: grid; grid-template-columns: 36px minmax(0, 1fr) 36px; gap: 6px; align-items: center; }
+.pt__arrow { height: 72px; border-radius: 12px; font-size: 28px; color: #fff; background: rgba(255, 255, 255, 0.06); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14); }
+.pt__track { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; list-style: none; padding: 30px 4px 8px; margin: 0; scrollbar-width: thin; position: relative; }
+.pt-tier { position: relative; flex: 0 0 112px; scroll-snap-align: center; display: grid; justify-items: center; gap: 8px; }
+.pt-tier::before { content: ''; position: absolute; top: -16px; left: -4px; right: -4px; height: 4px; background: rgba(255, 255, 255, 0.1); }
+.pt-tier--done::before, .pt-tier--ready::before { background: linear-gradient(90deg, #9a7dff, var(--season)); }
+.pt-tier__no { position: absolute; top: -28px; z-index: 1; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; font-size: 13px; font-weight: 800; color: #fff; background: #11131d; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.2); }
+.pt-tier--done .pt-tier__no, .pt-tier--ready .pt-tier__no { background: var(--season); color: #04101a; box-shadow: 0 0 12px var(--season); }
+.pt-tier__box { display: grid; gap: 8px; justify-items: center; align-content: space-between; width: 100%; min-height: 128px; padding: 14px 6px 8px; border-radius: 16px; text-align: center; background: #07080d; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12); }
+.pt-tier--mid .pt-tier__box { background: linear-gradient(180deg, rgba(255, 201, 77, 0.12), #07080d 70%); box-shadow: inset 0 0 0 1px rgba(255, 201, 77, 0.4); }
+.pt-tier--big { flex-basis: 150px; }
+.pt-tier--big .pt-tier__box { background: radial-gradient(90% 70% at 50% 20%, color-mix(in srgb, var(--season) 26%, transparent), #07080d 75%); box-shadow: inset 0 0 0 1.5px var(--season), 0 0 22px color-mix(in srgb, var(--season) 30%, transparent); }
+.pt-tier--ready .pt-tier__box { box-shadow: inset 0 0 0 2px #4be3a4, 0 0 18px rgba(75, 227, 164, 0.35); }
+.pt-tier--done .pt-tier__box { opacity: 0.5; }
+.pt-tier__box small { font-size: 11.5px; font-weight: 800; color: var(--text-dim); }
+.pt-tier--done .pt-tier__box small { color: #4be3a4; }
+.pt-tier__box button { min-height: 40px; width: 100%; border-radius: 10px; font-size: 13px; font-weight: 800; color: #062a1a; background: linear-gradient(100deg, #b6f36a, #4be3a4); }
+.pt-loot { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+.pt-loot > span { display: inline-flex; align-items: center; gap: 3px; padding: 3px 7px 3px 4px; border-radius: 99px; font-size: 12.5px; font-weight: 800; color: #fff; background: rgba(255, 255, 255, 0.07); }
+.pt-loot img { width: 20px; height: 20px; object-fit: contain; }
+.pt-loot .pt-loot__card { flex-basis: 100%; flex-direction: column; justify-content: center; background: none; padding: 0; }
+.pt-loot__card img { width: 72px; height: 72px; filter: drop-shadow(0 0 12px rgba(255, 200, 90, 0.5)); }
+.pt-loot__card b { font-size: 12px; color: #ffc94d; }
+.pt__legend { display: flex; gap: 14px; justify-content: center; font-size: 12px; color: var(--text-dim); }
+.pt__legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 3px; vertical-align: -1px; }
+.pt__legend .is-done::before { background: var(--season); opacity: 0.5; }
+.pt__legend .is-ready::before { background: #4be3a4; }
+.pt__legend .is-next::before { background: rgba(255, 255, 255, 0.2); }
+.pt__how { display: grid; gap: 10px; padding: 14px 16px; border-radius: 18px; background: #07080d; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1); }
+.pt__how h3 { font-size: 13px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-dim); }
+.pt__how ul { display: grid; gap: 6px; list-style: none; padding: 0; }
+.pt__how li { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; color: var(--cream); }
+.pt__how li b { color: var(--season); white-space: nowrap; }
+.pt-reveal { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 16px; background: rgba(2, 3, 8, 0.82); backdrop-filter: blur(6px); animation: fade-in 200ms ease; }
+.pt-reveal__box { display: grid; gap: 14px; justify-items: center; max-width: 520px; width: 100%; max-height: 90vh; overflow: auto; padding: 22px 18px; border-radius: 22px; text-align: center; background: radial-gradient(80% 60% at 50% 0%, rgba(154, 125, 255, 0.3), #07080d 70%); box-shadow: inset 0 0 0 1.5px #9a7dff, 0 0 40px rgba(154, 125, 255, 0.35); }
+.pt-reveal__box h3 { font-family: var(--font-display); font-style: italic; font-size: 34px; text-transform: uppercase; color: #fff; }
+.pt-reveal__cards { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; padding-top: 20px; }
+.pt-reveal__cards > * { width: 150px; animation: reveal-pop 600ms var(--ease-out) both; }
+@keyframes reveal-pop { from { opacity: 0; transform: scale(0.6) rotateY(90deg); } }
+@keyframes fade-in { from { opacity: 0; } }
+@media (max-width: 420px) { .pt__season { grid-template-columns: 84px 1fr; padding: 12px 14px; } .pt__season img { width: 84px; height: 84px; } .pt__rail { grid-template-columns: minmax(0, 1fr); } .pt__arrow { display: none; } }
+
+.pt-loot:not(.pt-loot--big) > span { flex-direction: column; gap: 2px; padding: 0; background: none; font-size: 16px; }
+.pt-loot:not(.pt-loot--big) img { width: 46px; height: 46px; filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.18)); }
+.pt-loot--big > span:not(.pt-loot__card) img { width: 22px; height: 22px; }

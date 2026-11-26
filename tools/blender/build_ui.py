@@ -279,6 +279,70 @@ def chest():
     return 3.4, 3.0
 
 
+def rift_path():
+    """Emblème du Chemin du Rift : une arche de cristal au bout d'une route d'or, une faille de lumière au cœur."""
+    gold = pbr((1.0, 0.78, 0.3), 1, 0.14)
+    crystal = pbr((0.55, 0.85, 1.0), 0.2, 0.05, (0.35, 0.75, 1.0), 1.2, coat=1)
+    violet = pbr((0.6, 0.35, 1.0), 0.3, 0.08, (0.55, 0.3, 1.0), 1.0, coat=1)
+    stone = pbr((0.1, 0.09, 0.2), 0.5, 0.3)
+    # la route : des dalles de cristal violet serties d'or, qui rétrécissent en montant vers l'arche
+    slab = pbr((0.32, 0.16, 0.62), 0.3, 0.12, (0.3, 0.12, 0.6), 0.35, coat=1)
+    for k in range(5):
+        t0, t1 = k / 5 + 0.02, (k + 1) / 5 - 0.03
+        wl = lambda t: 1.25 - 0.92 * t
+        z = lambda t: -1.65 + 1.35 * t
+        quad = [(-wl(t0), z(t0)), (wl(t0), z(t0)), (wl(t1), z(t1)), (-wl(t1), z(t1))]
+        solid(quad, 0.12, gold, bevel=0.03)
+        inner = [(-wl(t0) + 0.07, z(t0) + 0.04), (wl(t0) - 0.07, z(t0) + 0.04), (wl(t1) - 0.07, z(t1) - 0.03), (-wl(t1) + 0.07, z(t1) - 0.03)]
+        solid(inner, 0.06, slab, bevel=0.02, back=-0.08)
+        solid(circle(0, (z(t0) + z(t1)) / 2, 0.06 * (1 - t0 * 0.6)), 0.03, glow((1.0, 0.86, 0.45), 6.0), bevel=0.0, back=-0.15)
+    # l'arche : deux piliers de cristal et une voûte d'or
+    arch_out = [(math.cos(a) * 1.15, 0.2 + math.sin(a) * 1.25) for a in [math.pi * i / 32 for i in range(33)]]
+    arch_in = [(math.cos(a) * 0.86, 0.2 + math.sin(a) * 0.96) for a in [math.pi * i / 32 for i in range(32, -1, -1)]]
+    solid(arch_out + arch_in, 0.3, gold, bevel=0.06)
+    for x in (-1.0, 1.0):
+        solid([(x - 0.15, -0.5), (x + 0.15, -0.5), (x + 0.18, 0.2), (x, 0.42), (x - 0.18, 0.2)], 0.3, crystal, bevel=0.06)
+    # la faille dans l'arche
+    crack = [(0.0, 1.12), (0.12, 0.8), (-0.08, 0.55), (0.1, 0.25), (-0.06, -0.05), (0.04, -0.3)]
+    for wdt, c, st in ((0.16, (0.35, 0.25, 1.0), 3.0), (0.07, (0.5, 0.85, 1.0), 6.0), (0.025, (1.0, 1.0, 1.0), 12.0)):
+        left = [(x - wdt * math.sin(math.pi * i / 5 + 0.3), z) for i, (x, z) in enumerate(crack)]
+        right = [(x + wdt * math.sin(math.pi * i / 5 + 0.3), z) for i, (x, z) in reversed(list(enumerate(crack)))]
+        flat_shape(left + right, glow(c, st), 0.1 + wdt * 0.4)
+    flat_shape(arch_in[::-1] + [(0.86, -0.32), (-0.86, -0.32)], gradient([(0.0, (0.1, 0.05, 0.3)), (1.0, (0.03, 0.02, 0.1))], -0.3, 1.2), 0.25)
+    # gemme au sommet et éclats qui flottent
+    solid([(0, 1.62), (0.2, 1.42), (0, 1.2), (-0.2, 1.42)], 0.2, violet, bevel=0.05, back=-0.12)
+    random.seed(7)
+    for _ in range(9):
+        x, z = random.uniform(-1.5, 1.5), random.uniform(-0.4, 1.7)
+        if abs(x) < 1.25 and z < 1.5:
+            continue
+        r = random.uniform(0.05, 0.11)
+        solid([(x, z + r * 1.6), (x + r, z), (x, z - r * 1.6), (x - r, z)], 0.06, crystal, bevel=0.02, back=-0.2)
+    return 3.6, 3.6
+
+
+def card_pack():
+    """Récompense « carte » : trois cartes au dos violet et or, en éventail, une rune de lumière au centre."""
+    gold = pbr((1.0, 0.78, 0.3), 1, 0.14)
+    back = pbr((0.26, 0.1, 0.5), 0.4, 0.2, coat=1)
+    for i, ang in enumerate((0.42, 0.0, -0.42)):
+        cx = (i - 1) * 0.5
+        rim = rotated(rounded(1.3, 1.85, 0.12, 0, 0, 0), ang, 0, -0.9)
+        rim = [(x + cx, z + (0.1 if i == 1 else 0)) for x, z in rim]
+        solid(rim, 0.1, gold, bevel=0.03, back=0.3 - i * 0.15 if i != 1 else -0.2)
+        face = rotated(rounded(1.12, 1.66, 0.08, 0, 0, 0), ang, 0, -0.9)
+        face = [(x + cx, z + (0.1 if i == 1 else 0)) for x, z in face]
+        solid(face, 0.1, back, bevel=0.02, back=(0.3 - i * 0.15 if i != 1 else -0.2) - 0.04)
+    star = []
+    for i in range(16):
+        a = math.pi / 2 + i * math.pi / 8
+        r = 0.42 if i % 2 == 0 else 0.13
+        star.append((math.cos(a) * r, 0.1 + math.sin(a) * r))
+    solid(star, 0.04, glow((1.0, 0.88, 0.5), 5.0), bevel=0.0, back=-0.32)
+    solid(circle(0, 0.1, 0.12), 0.04, glow((1.0, 1.0, 1.0), 8.0), bevel=0.0, back=-0.36)
+    return 3.2, 3.2
+
+
 # --- fond des menus -----------------------------------------------------------------------------------------------------
 def background():
     """Ciel nocturne en dégradés doux. L'image est ensuite légèrement floutée : elle doit rester en retrait."""
@@ -382,8 +446,10 @@ ELEMENTS = {
     'nav-contracts': nav_contracts,
     'nav-profile': nav_profile,
     'chest': chest,
+    'rift-path': rift_path,
+    'card-pack': card_pack,
 }
-SCALE = {'nav-nexus': 60, 'nav-summon': 60, 'nav-cards': 60, 'nav-contracts': 60, 'nav-profile': 60, 'chest': 60}  # pixels par unité, quand ce n'est pas PX
+SCALE = {'nav-nexus': 60, 'nav-summon': 60, 'nav-cards': 60, 'nav-contracts': 60, 'nav-profile': 60, 'chest': 60, 'rift-path': 90, 'card-pack': 80}  # pixels par unité, quand ce n'est pas PX
 
 os.makedirs(OUT, exist_ok=True)
 for name in [a for a in sys.argv[1:] if a in ELEMENTS] or list(ELEMENTS):

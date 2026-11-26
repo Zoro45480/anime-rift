@@ -24,7 +24,8 @@ const TALKS: Record<string, { title: string; lines: string[] }> = {
   contracts: { title: 'Les Contrats', lines: [
     'Ici, tes objectifs. Chaque jour, une récompense t’attend : reviens sept jours de suite pour ouvrir le coffre.',
     'Les contrats du jour et de la semaine se remplissent tout seuls en jouant : invoquer, combattre, améliorer tes cartes.',
-    'Quand une barre est pleine, touche « Récupérer ». Le Parcours garde tes records pour toujours.',
+    'Quand une barre est pleine, touche « Récupérer ». Chaque contrat fait aussi avancer le Chemin du Rift : une récompense par palier, et une carte tous les 10 paliers !',
+    'Le Parcours, lui, garde tes records pour toujours.',
   ] },
   collection: { title: 'La Collection', lines: [
     'Toutes tes cartes sont ici. Touche une carte, retourne-la, puis « En savoir plus » pour sa fiche.',
