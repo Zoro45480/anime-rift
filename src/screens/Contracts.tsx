@@ -70,6 +70,7 @@ export const Contracts = ({ start = 'daily' }: { start?: 'daily' | 'contracts' |
   const mine = HEROES.filter((h) => store.owned[h.id])
   const best = [...mine].sort((a, b) => RARITY_ORDER.indexOf(a.rarity) - RARITY_ORDER.indexOf(b.rarity) || a.no - b.no)[0]
   const life = store.quests.life
+  const bestArt = best ? store.customArt[best.id] ?? store.remoteArt[best.id] : undefined
   const worldsDone = BANNERS.filter((b) => HEROES.filter((h) => h.world === b.world).every((h) => store.owned[h.id])).length
 
   return (
@@ -146,22 +147,25 @@ export const Contracts = ({ start = 'daily' }: { start?: 'daily' | 'contracts' |
       {tab === 'rift' && <RiftPath now={now} />}
 
       {tab === 'path' && (
-        <section className="cn__path">
-          <div className="pv">
-            <div className="pv__best">{best ? <Card hero={best} /> : <p className="pf-empty">Pas encore de carte.</p>}<small>Ton plus beau tirage</small></div>
-            <div className="pv__col">
+        <section className="cn__path pc">
+          <div className="pc__main">
+            {bestArt && <img className="pc__art" src={bestArt} alt="" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
+            {!bestArt && best && <div className="pc__card"><Card hero={best} inert /></div>}
+            <div className="pc__text">
               <h3>Collection</h3>
-              <b>{n(mine.length)} <i>/ {n(HEROES.length)}</i></b>
-              <div className="ct__bar"><i style={{ width: `${(mine.length / HEROES.length) * 100}%` }} /></div>
+              <p className="pc__count"><b>{n(mine.length)}</b> / {n(HEROES.length)}</p>
+              <div className="pc__bar"><i style={{ width: `${Math.max(1, (mine.length / HEROES.length) * 100)}%` }} /></div>
+              <p className="pc__best">Meilleur tirage : <b>{best ? best.name : '—'}</b></p>
             </div>
           </div>
-          <ul className="pf-stats">
-            {([['召', 'Invocations', n(store.pulls)], ['神', 'Cartes MR', n(mine.filter((h) => h.rarity === 'rift').length)], ['光', 'Cartes LR', n(mine.filter((h) => h.rarity === 'legend').length)],
-              ['界', 'Univers complétés', `${worldsDone} / ${BANNERS.length}`], ['合', 'Doublons fusionnés', n(life.merges ?? 0)], ['魂', 'Âmes dépensées', n(life.gemsSpent ?? 0)],
-              ['闘', 'Combats gagnés', n(store.wins)], ['鬼', 'Boss battus', n(life.bosses ?? 0)], ['塔', 'Meilleur étage de La Spire', n(store.spire.best)], ['撃', 'Dégâts infligés', n(life.damage ?? 0)], ['昇', 'Niveaux gagnés par tes cartes', n(life.levels ?? 0)]] as [string, string, string][])
-              .map(([k, label, value]) => <li key={label}><i lang="ja">{k}</i><span>{label}</span><b>{value}</b></li>)}
+          <ul className="pc__grid">
+            {([[uiArt('nav-summon'), 'Invocations', n(store.pulls)], [uiArt('card-pack'), 'Cartes MR', n(mine.filter((h) => h.rarity === 'rift').length)], [uiArt('card-pack'), 'Cartes LR', n(mine.filter((h) => h.rarity === 'legend').length)],
+              [uiArt('nav-cards'), 'Univers complétés', `${worldsDone} / ${BANNERS.length}`], [iconArt('scroll-medium'), 'Doublons fusionnés', n(life.merges ?? 0)], [iconArt('soul'), 'Âmes dépensées', n(Math.max(store.gemsSpent, life.gemsSpent ?? 0))],
+              [uiArt('role-dps'), 'Combats gagnés', n(store.wins)], [uiArt('floor-boss'), 'Boss battus', n(life.bosses ?? 0)], [uiArt('floor-plate'), 'Meilleur étage de La Spire', n(store.spire.best)],
+              [uiArt('role-hybrid'), 'Dégâts infligés', n(life.damage ?? 0)], [iconArt('scroll-large'), 'Niveaux gagnés', n(life.levels ?? 0)], [uiArt('chest'), 'Récompenses du jour', n(life.dailies ?? 0)]] as [string, string, string][])
+              .map(([icon, label, value]) => <li key={label}><img src={icon} alt="" /><b>{value}</b><span>{label}</span></li>)}
           </ul>
-          <p className="set__note">Les doublons fusionnés, les âmes dépensées, les boss, les dégâts et les niveaux sont comptés depuis l'arrivée des Contrats.</p>
+          <p className="set__note">Les doublons fusionnés, les boss, les dégâts et les niveaux sont comptés depuis l'arrivée des Contrats.</p>
         </section>
       )}
       <Guide id="contracts" />
