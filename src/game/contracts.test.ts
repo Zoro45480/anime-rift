@@ -43,7 +43,7 @@ describe('contrats', () => {
     expect(q.week.c.dailyAll).toBe(1)
     expect(claimable(q, {}, now)).toEqual([])
     expect(isClaimed(dailyContracts(now)[0], q, at('2026-11-27'))).toBe(false) // un nouveau jour
-    expect(WEEKLY).toHaveLength(6)
+    expect(WEEKLY).toHaveLength(7)
   })
 
   it('contrats d’histoire : arc terminé, puis 3 étoiles partout', () => {

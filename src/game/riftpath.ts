@@ -32,7 +32,7 @@ export const rollPath = (p: PathState | undefined, now: Date): PathState => {
 }
 
 // XP gagnée selon l'action.
-export const PATH_XP = { dayContract: 20, dayBonus: 50, weekContract: 80, storyContract: 60, daily: 30, win: 5, pull: 2 }
+export const PATH_XP = { dayContract: 20, dayBonus: 50, weekContract: 80, storyContract: 60, daily: 30, win: 5, pull: 2, floor: 10 }
 
 export const tierOf = (xp: number) => Math.min(TIERS, Math.floor(xp / TIER_XP))
 

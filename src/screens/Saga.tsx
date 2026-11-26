@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { gateArt, iconArt } from '../assets/manifest'
 import { HEROES, roleKind } from '../data/heroes'
@@ -15,7 +15,8 @@ const pct = (x: number) => `${Math.round(x * 100)} %`
 const Stars = ({ value }: { value: number }) => <span className="sg-stars" aria-label={`${value} étoile${value > 1 ? 's' : ''} sur 3`}>{[1, 2, 3].map((i) => <i key={i} className={i <= value ? 'is-on' : ''}>★</i>)}</span>
 
 // Rejoue le combat action par action : barres de vie, boucliers, texte de l'action.
-const Battle = ({ result, onClose }: { result: FightResult; onClose: () => void }) => {
+type Fight = Pick<FightResult, 'allies' | 'foes' | 'events' | 'win'>
+export const Battle = ({ result, onClose, kicker, title, winBody, loseBody }: { result: Fight; onClose: () => void; kicker: string; title: string; winBody: ReactNode; loseBody: ReactNode }) => {
   const [step, setStep] = useState(0) // nombre d'actions déjà montrées
   const [fast, setFast] = useState(false)
   const total = result.events.length
@@ -64,9 +65,9 @@ const Battle = ({ result, onClose }: { result: FightResult; onClose: () => void 
   )
 
   return createPortal(
-    <div className="bt" role="dialog" aria-modal="true" aria-label={`Combat : ${result.stage.world}, ${result.stage.name}`}>
+    <div className="bt" role="dialog" aria-modal="true" aria-label={`Combat : ${title}`}>
       <div className="bt__in">
-        <header className="bt__head"><p>{result.stage.world} · {result.stage.index + 1}/{STAGES_PER_ARC}</p><h2>{result.stage.name}</h2></header>
+        <header className="bt__head"><p>{kicker}</p><h2>{title}</h2></header>
         <Row units={result.foes} />
         <div className={`bt-line ${line ? `bt-line--${line.kind === 'Ultime' ? 'u' : line.kind === 'Technique' ? 't' : 'a'}` : ''}`} aria-live="polite">
           {line ? <><small>{line.kind} · {line.who}</small><b>{line.move}</b><span>{line.text}</span></> : <b>Le combat commence…</b>}
@@ -81,16 +82,7 @@ const Battle = ({ result, onClose }: { result: FightResult; onClose: () => void 
         ) : (
           <section className={`bt-end ${result.win ? 'is-win' : 'is-lose'}`} role="status">
             <h3>{result.win ? 'Victoire' : 'Défaite'}</h3>
-            {result.win ? <>
-              <Stars value={result.stars} />
-              <ul>
-                <li><b>+{n(result.accountXp)}</b> XP de compte</li>
-                <li><b>+{n(result.cardXp)}</b> XP pour chaque carte de l'équipe</li>
-                {result.souls > 0 && <li><b>+{result.souls}</b> âmes ({result.newStars} nouvelle{result.newStars > 1 ? 's' : ''} étoile{result.newStars > 1 ? 's' : ''})</li>}
-                {result.scrolls.map((id) => <li key={id} className="bt-end__drop"><img src={iconArt(`scroll-${id}`)} alt="" /><b>{SCROLLS[id].label}</b> obtenu</li>)}
-                {result.scrolls.length === 0 && <li>Aucun parchemin cette fois.</li>}
-              </ul>
-            </> : <p>Ton équipe est tombée. L'éclair est dépensé, mais rien n'est perdu : monte tes cartes de niveau et réessaie.</p>}
+            {result.win ? winBody : loseBody}
             <button className="btn btn--gold" onClick={onClose}>Continuer</button>
           </section>
         )}
@@ -100,10 +92,46 @@ const Battle = ({ result, onClose }: { result: FightResult; onClose: () => void 
   )
 }
 
+// Mon équipe : les trois cartes qui combattent (La Saga et La Spire).
+export const TeamPanel = () => {
+  const store = useStore()
+  const [picking, setPicking] = useState(false)
+  const owned = HEROES.filter((h) => store.owned[h.id]).map((h) => ({ hero: h, state: cardState(h, store.xp, store.owned, store.rebirths, store.awakened, store.teamNow) }))
+    .sort((a, b) => b.state.power - a.state.power)
+  const team = store.teamNow
+  const teamPower = team.reduce((s, id) => s + (owned.find((o) => o.hero.id === id)?.state.power ?? 0), 0)
+  const activeGroups = [...new Map(owned.filter((o) => team.includes(o.hero.id)).flatMap((o) => o.state.groups.filter((g) => g.counted && g.stat !== 'all')).map((g) => [g.name, g])).values()]
+  const toggle = (id: string) => store.setTeam(team.includes(id) ? team.filter((x) => x !== id) : team.length < TEAM_SIZE ? [...team, id] : team)
+  return (
+    <section className="sg-team">
+      <header><h2>Mon équipe</h2><em>Puissance {n(teamPower)}</em><button className="linkbtn" aria-expanded={picking} onClick={() => setPicking(!picking)}>{picking ? 'Terminer' : 'Changer'}</button></header>
+      {owned.length === 0 ? <p className="cd-note">Tu n'as encore aucune carte : fais une invocation d'abord.</p> : (
+        <ul className="sg-team__slots">
+          {Array.from({ length: TEAM_SIZE }, (_, i) => {
+            const o = owned.find((x) => x.hero.id === team[i])
+            return o ? (
+              <li key={i} style={{ ['--rc' as string]: RARITIES[o.hero.rarity].color }}><b>{RARITIES[o.hero.rarity].short}</b><span>{o.hero.name}</span><small><span className={`role role--${roleKind(o.hero.role)}`}>{o.hero.role}</span> · Nv {o.state.level}</small></li>
+            ) : <li key={i} className="is-empty">Place libre</li>
+          })}
+        </ul>
+      )}
+      {owned.length > 0 && <p className="sg-team__groups">{activeGroups.length === 0 ? 'Aucun collectif actif : mets ensemble deux membres d’un même collectif pour gagner un bonus.' : <>Collectifs actifs : {activeGroups.map((g) => <b key={g.name}>{g.name} +{g.pct} % {STAT_LABEL[g.stat]}</b>)}</>}</p>}
+      {picking && (
+        <ul className="sg-pick">
+          {owned.map((o) => (
+            <li key={o.hero.id}><button className={team.includes(o.hero.id) ? 'is-on' : ''} aria-pressed={team.includes(o.hero.id)} style={{ ['--rc' as string]: RARITIES[o.hero.rarity].color }} onClick={() => toggle(o.hero.id)}>
+              <b>{RARITIES[o.hero.rarity].short}</b><span>{o.hero.name}</span><small>{o.hero.role} · Nv {o.state.level} · {n(o.state.power)}</small>
+            </button></li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
+
 export const Saga = ({ onBack }: { onBack: () => void }) => {
   const store = useStore()
   const [openId, setOpenId] = useState(() => STAGES.filter((s) => isUnlocked(s, store.saga)).at(-1)!.id)
-  const [picking, setPicking] = useState(false)
   const [result, setResult] = useState<FightResult | null>(null)
   const stage = STAGES.find((s) => s.id === openId)!
   const foes = foeUnits(stage)
@@ -112,9 +140,7 @@ export const Saga = ({ onBack }: { onBack: () => void }) => {
   const team = store.teamNow
   const teamPower = team.reduce((s, id) => s + (owned.find((o) => o.hero.id === id)?.state.power ?? 0), 0)
   const foePower = foes.reduce((s, u) => s + power(u), 0)
-  const activeGroups = [...new Map(owned.filter((o) => team.includes(o.hero.id)).flatMap((o) => o.state.groups.filter((g) => g.counted && g.stat !== 'all')).map((g) => [g.name, g])).values()]
   const totalStars = Object.values(store.saga).reduce((a, b) => a + b, 0)
-  const toggle = (id: string) => store.setTeam(team.includes(id) ? team.filter((x) => x !== id) : team.length < TEAM_SIZE ? [...team, id] : team)
   const start = () => { const r = store.fight(stage.id); if (r) setResult(r) }
 
   return (
@@ -129,29 +155,7 @@ export const Saga = ({ onBack }: { onBack: () => void }) => {
         </div>
       </header>
 
-      <section className="sg-team">
-        <header><h2>Mon équipe</h2><em>Puissance {n(teamPower)}</em><button className="linkbtn" aria-expanded={picking} onClick={() => setPicking(!picking)}>{picking ? 'Terminer' : 'Changer'}</button></header>
-        {owned.length === 0 ? <p className="cd-note">Tu n'as encore aucune carte : fais une invocation d'abord.</p> : (
-          <ul className="sg-team__slots">
-            {Array.from({ length: TEAM_SIZE }, (_, i) => {
-              const o = owned.find((x) => x.hero.id === team[i])
-              return o ? (
-                <li key={i} style={{ ['--rc' as string]: RARITIES[o.hero.rarity].color }}><b>{RARITIES[o.hero.rarity].short}</b><span>{o.hero.name}</span><small><span className={`role role--${roleKind(o.hero.role)}`}>{o.hero.role}</span> · Nv {o.state.level}</small></li>
-              ) : <li key={i} className="is-empty">Place libre</li>
-            })}
-          </ul>
-        )}
-        {owned.length > 0 && <p className="sg-team__groups">{activeGroups.length === 0 ? 'Aucun collectif actif : mets ensemble deux membres d’un même collectif pour gagner un bonus.' : <>Collectifs actifs : {activeGroups.map((g) => <b key={g.name}>{g.name} +{g.pct} % {STAT_LABEL[g.stat]}</b>)}</>}</p>}
-        {picking && (
-          <ul className="sg-pick">
-            {owned.map((o) => (
-              <li key={o.hero.id}><button className={team.includes(o.hero.id) ? 'is-on' : ''} aria-pressed={team.includes(o.hero.id)} style={{ ['--rc' as string]: RARITIES[o.hero.rarity].color }} onClick={() => toggle(o.hero.id)}>
-                <b>{RARITIES[o.hero.rarity].short}</b><span>{o.hero.name}</span><small>{o.hero.role} · Nv {o.state.level} · {n(o.state.power)}</small>
-              </button></li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <TeamPanel />
 
       <div className="sg-arcs">
         {Array.from({ length: STAGES.length / STAGES_PER_ARC }, (_, arc) => {
@@ -197,7 +201,19 @@ export const Saga = ({ onBack }: { onBack: () => void }) => {
         })}
       </div>
       <Guide id="saga" />
-      {result && <Battle result={result} onClose={() => { setResult(null); const next = STAGES[STAGES.indexOf(result.stage) + 1]; if (result.win && next && result.newStars === result.stars) setOpenId(next.id) }} />}
+      {result && <Battle result={result} kicker={`${result.stage.world} · ${result.stage.index + 1}/${STAGES_PER_ARC}`} title={result.stage.name}
+        winBody={<>
+          <Stars value={result.stars} />
+          <ul>
+            <li><b>+{n(result.accountXp)}</b> XP de compte</li>
+            <li><b>+{n(result.cardXp)}</b> XP pour chaque carte de l'équipe</li>
+            {result.souls > 0 && <li><b>+{result.souls}</b> âmes ({result.newStars} nouvelle{result.newStars > 1 ? 's' : ''} étoile{result.newStars > 1 ? 's' : ''})</li>}
+            {result.scrolls.map((id) => <li key={id} className="bt-end__drop"><img src={iconArt(`scroll-${id}`)} alt="" /><b>{SCROLLS[id].label}</b> obtenu</li>)}
+            {result.scrolls.length === 0 && <li>Aucun parchemin cette fois.</li>}
+          </ul>
+        </>}
+        loseBody={<p>Ton équipe est tombée. L'éclair est dépensé, mais rien n'est perdu : monte tes cartes de niveau et réessaie.</p>}
+        onClose={() => { setResult(null); const next = STAGES[STAGES.indexOf(result.stage) + 1]; if (result.win && next && result.newStars === result.stars) setOpenId(next.id) }} />}
     </div>
   )
 }

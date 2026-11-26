@@ -6,6 +6,7 @@ import { useStore } from '../state/store'
 import { Guide } from '../ui/Guide'
 import { Avatar } from '../ui/Settings'
 import { Saga } from './Saga'
+import { Spire } from './Spire'
 import { Coin } from '../ui/Coin'
 import { IconLock } from '../ui/icons'
 import { LEVEL_STYLE_NAME, LevelBadge, levelStyle } from '../ui/LevelBadge'
@@ -17,7 +18,7 @@ const GATES = [
   { id: 'raids', anime: 'onepiece', model: 'Darkness_Shibu', numeral: 'II', kanji: '巨人', title: 'Les Colosses', tag: 'Boss', text: 'Des boss à plusieurs phases qui demandent une vraie préparation.', hue: '#ff3d8b',
     points: ['Des boss géants qui changent de comportement à chaque phase', 'Tanks, DPS et soigneurs deviennent tous utiles', 'Des coffres de raid à ouvrir dans ton inventaire'] },
   { id: 'spire', anime: 'hunter', model: 'Victoria_Rubin', numeral: 'III', kanji: '塔', title: 'La Spire', tag: 'Tour', text: 'Une tour sans fin, dont les règles changent à chaque étage.', hue: '#ffb829',
-    points: ['Un étage après l’autre, de plus en plus dur', 'Une règle spéciale par étage', 'Jusqu’où ira ta meilleure équipe ?'] },
+    points: ['Un étage après l’autre, de plus en plus dur', 'Une règle spéciale par étage', 'Des fragments d’âme pour libérer tes cartes'] },
   { id: 'arena', anime: 'dragonball', model: 'Sendagaya_Shibu', numeral: 'IV', kanji: '闘', title: 'L’Arène', tag: 'Duel', text: 'Affronte les équipes des autres joueurs.', hue: '#ff6a2b',
     points: ['Ton équipe contre celle d’un autre joueur', 'Un classement à grimper', 'Les bonus de Renaissance n’y comptent pas : seul le talent parle'] },
 ] as const
@@ -53,7 +54,9 @@ export const Play = ({ onRebirth, onProfile }: { onRebirth: () => void; onProfil
   const { accountXp, rebirths, energyLeft, profile, gems, buyEnergy } = useStore()
   const [open, setOpen] = useState<Gate | null>(null)
   const [saga, setSaga] = useState(false)
+  const [spire, setSpire] = useState(false)
   const acc = accountLevel(accountXp, rebirths)
+  if (spire) return <Spire onBack={() => { setSpire(false); window.scrollTo(0, 0) }} />
   if (saga) return <Saga onBack={() => { setSaga(false); window.scrollTo(0, 0) }} />
   return (
     <div className="nx">
@@ -69,13 +72,15 @@ export const Play = ({ onRebirth, onProfile }: { onRebirth: () => void; onProfil
       </section>
       <header className="nx__head">
         <p className="eyebrow">Le Nexus</p>
-        <h1>Quatre portes.<br />Une seule s'ouvre à la fois.</h1>
+        <h1>Quatre portes.<br />Deux sont ouvertes.</h1>
         <button className="nx__who" onClick={onProfile} aria-label="Voir mon profil"><Avatar size={40} /><b>{profile.name.trim() || 'Joueur'}</b><span>Voir mon profil →</span></button>
         <p className="nx__level"><LevelBadge level={acc.level} rebirths={rebirths} size={40} /><span>Style {LEVEL_STYLE_NAME[levelStyle(acc.level, rebirths)]} · {acc.need ? `${acc.into.toLocaleString('fr-FR')} / ${acc.need.toLocaleString('fr-FR')} XP de compte` : 'Niveau maximum'}</span></p>
       </header>
       <GateTile gate={GATES[0]} featured playable onOpen={() => { setSaga(true); window.scrollTo(0, 0) }} />
       <div className="nx__row">
-        {GATES.slice(1).map((g) => <GateTile key={g.id} gate={g} onOpen={() => setOpen(g)} />)}
+        {GATES.slice(1).map((g) => g.id === 'spire'
+          ? <GateTile key={g.id} gate={g} playable onOpen={() => { setSpire(true); window.scrollTo(0, 0) }} />
+          : <GateTile key={g.id} gate={g} onOpen={() => setOpen(g)} />)}
       </div>
 
       {/* Renaissance : tout en bas du Nexus */}

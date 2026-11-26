@@ -6,7 +6,7 @@ import { STAGES, STAGES_PER_ARC } from './saga'
 // et compteurs à vie pour le Parcours. Fonctions pures : la date est toujours passée en argument.
 
 export type Reward = { gems?: number; energy?: number; tickets?: number; shards?: number; scrolls?: Partial<Record<ScrollId, number>> }
-export type Counter = 'pulls' | 'newCards' | 'featuredPull' | 'wins' | 'win3' | 'levels' | 'visit' | 'merges' | 'dailyAll' | 'gemsSpent' | 'damage' | 'bosses'
+export type Counter = 'pulls' | 'newCards' | 'featuredPull' | 'wins' | 'win3' | 'levels' | 'visit' | 'merges' | 'dailyAll' | 'gemsSpent' | 'damage' | 'bosses' | 'floors'
 export type Counts = Partial<Record<Counter, number>>
 export type Period = { key: string; c: Counts; claimed: string[] }
 export type Quests = { day: Period; week: Period; story: string[]; life: Counts; daily: { last: string | null; streak: number } }
@@ -79,6 +79,7 @@ export const WEEKLY: Contract[] = [
   w('damage', 'Inflige 200 000 dégâts', 'damage', 200000, { gems: 150, energy: 10 }),
   w('pulls', 'Fais 20 invocations', 'pulls', 20, { gems: 150, tickets: 1 }),
   w('bosses', 'Bats 3 boss', 'bosses', 3, { gems: 200, scrolls: { large: 1 } }),
+  w('floors', 'Monte 5 étages de La Spire', 'floors', 5, { gems: 150, shards: 4 }),
 ]
 export const STORY: Contract[] = BANNERS.flatMap((b, arc) => [
   { id: `s-${arc}-clear`, period: 'story', title: `Termine l'arc ${b.world}`, target: 1, arc, reward: { gems: 100, tickets: 1 } },

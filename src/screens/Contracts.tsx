@@ -158,7 +158,7 @@ export const Contracts = () => {
           <ul className="pf-stats">
             {([['召', 'Invocations', n(store.pulls)], ['神', 'Cartes MR', n(mine.filter((h) => h.rarity === 'rift').length)], ['光', 'Cartes LR', n(mine.filter((h) => h.rarity === 'legend').length)],
               ['界', 'Univers complétés', `${worldsDone} / ${BANNERS.length}`], ['合', 'Doublons fusionnés', n(life.merges ?? 0)], ['魂', 'Âmes dépensées', n(life.gemsSpent ?? 0)],
-              ['闘', 'Combats gagnés', n(store.wins)], ['鬼', 'Boss battus', n(life.bosses ?? 0)], ['撃', 'Dégâts infligés', n(life.damage ?? 0)], ['昇', 'Niveaux gagnés par tes cartes', n(life.levels ?? 0)]] as [string, string, string][])
+              ['闘', 'Combats gagnés', n(store.wins)], ['鬼', 'Boss battus', n(life.bosses ?? 0)], ['塔', 'Meilleur étage de La Spire', n(store.spire.best)], ['撃', 'Dégâts infligés', n(life.damage ?? 0)], ['昇', 'Niveaux gagnés par tes cartes', n(life.levels ?? 0)]] as [string, string, string][])
               .map(([k, label, value]) => <li key={label}><i lang="ja">{k}</i><span>{label}</span><b>{value}</b></li>)}
           </ul>
           <p className="set__note">Les doublons fusionnés, les âmes dépensées, les boss, les dégâts et les niveaux sont comptés depuis l'arrivée des Contrats.</p>

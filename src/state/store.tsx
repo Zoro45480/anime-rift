@@ -9,6 +9,7 @@ import { foeUnits, isUnlocked, rollDrops, SOULS_PER_STAR, stageById, starsFor, T
 import { canBuy, cosmeticById } from '../game/cosmetics'
 import { addCounts, claimable, DAILY_REWARDS, dailyStatus, dayKey, emptyQuests, featuredWorld, markClaimed, roll, type Counts, type Quests, type Reward } from '../game/contracts'
 import { claimableTiers, PATH_XP, rollCard, rollPath, tierOf, tierReward, type PathState } from '../game/riftpath'
+import { applyRule, floor as spireFloor, spireFoes, type Floor } from '../game/spire'
 import { loadAllArt, removeArt, saveArt } from './customArt'
 import { loadBannerArt, loadRemoteArt, type RemoteStatus } from './remoteArt'
 
@@ -40,6 +41,7 @@ type State = {
   pulls: number // invocations réalisées depuis le début
   wins: number // combats gagnés depuis le début
   cosmetics: string[] // objets d'apparence achetés
+  spire: { best: number } // La Spire : plus haut étage gagné
   path: PathState // Chemin du Rift : saison, XP, paliers récupérés
   quests: Quests // contrats : compteurs du jour, de la semaine, à vie, série quotidienne
   arcHeroes: Record<string, boolean> // cartes qui étaient dans l'équipe quand le boss de leur arc est tombé (titre d'arc)
@@ -56,6 +58,7 @@ export type Notif = { id: number; t: number; kind: 'pull' | 'level' | 'saga' | '
 const NOTIF_MAX = 30
 
 // Ce qu'un combat a donné : de quoi le rejouer à l'écran et afficher les récompenses.
+export type SpireResult = { floor: Floor; allies: Unit[]; foes: Unit[]; events: BattleEvent[]; win: boolean; first: boolean }
 export type FightResult = {
   stage: Stage; allies: Unit[]; foes: Unit[]; events: BattleEvent[]; win: boolean
   stars: number; newStars: number; souls: number; accountXp: number; cardXp: number; scrolls: ScrollId[]
@@ -78,6 +81,7 @@ type Store = State & {
   clearNotifs: () => void
   teamNow: string[] // l'équipe réellement utilisée : celle choisie, sinon les 3 cartes les plus puissantes
   setTeam: (ids: string[]) => void
+  fightSpire: () => SpireResult | null // combat l'étage suivant de La Spire (sans éclair)
   fight: (stageId: string) => FightResult | null // null = combat impossible (verrouillé, pas d'énergie ou pas d'équipe)
   canAfford: (currency: Currency, count: number) => boolean
   summon: (banner: Banner, currency: Currency, count: number) => Hero[] | null
@@ -105,7 +109,7 @@ const LOG_MAX = 30
 // Dotation de départ du compte.
 export const START_GEMS = 600
 const START: State = {
-  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' }, frame: '', ornament: '', aura: '', color: '', effect: '', theme: '', badges: [] }, pulls: 0, wins: 0, cosmetics: [], quests: emptyQuests(), path: { season: 0, xp: 0, claimed: [] }, arcHeroes: {}, tutorialSeen: [],
+  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' }, frame: '', ornament: '', aura: '', color: '', effect: '', theme: '', badges: [] }, pulls: 0, wins: 0, cosmetics: [], quests: emptyQuests(), path: { season: 0, xp: 0, claimed: [] }, spire: { best: 0 }, arcHeroes: {}, tutorialSeen: [],
   tickets: 20, gems: START_GEMS, pity: Object.fromEntries(BANNERS.map((b) => [b.id, 0])), owned: {},
   xp: {}, scrolls: { small: 0, medium: 0, large: 0 }, wish: [], pinned: [], log: {},
 }
@@ -192,7 +196,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       return { ...next, path, notifs: up ? notify(next.notifs, [['quest', `Chemin du Rift : palier ${tierOf(path.xp)} atteint, ta récompense t’attend.`]]) : next.notifs }
     }
     const tracked = (base: State, adds: Counts): State => {
-      const next = withPath(base, (adds.wins ?? 0) * PATH_XP.win + (adds.pulls ?? 0) * PATH_XP.pull)
+      const next = withPath(base, (adds.wins ?? 0) * PATH_XP.win + (adds.pulls ?? 0) * PATH_XP.pull + (adds.floors ?? 0) * PATH_XP.floor)
       const t = new Date()
       const quests = addCounts(next.quests, adds, t)
       const before = new Set(claimable(state.quests, state.saga, t).map((c) => c.id))
@@ -325,6 +329,22 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       return { stage, allies, foes, events, win, stars, newStars, souls: newStars * SOULS_PER_STAR, accountXp: stage.accountXp, cardXp, scrolls: drops }
     }
 
+    // La Spire : l'étage suivant, gratuit ; la récompense n'est donnée qu'à la première victoire.
+    const fightSpire = (): SpireResult | null => {
+      if (teamNow.length === 0) return null
+      const f = spireFloor(state.spire.best + 1)
+      const allies = applyRule(teamNow.map((id, i) => makeUnit(heroById(id), cardState(heroById(id), state.xp, state.owned, state.rebirths, state.awakened, teamNow).stats, 0, i)), f.rule)
+      const foes = spireFoes(f)
+      const { events, win } = simulate(allies, foes, Math.random)
+      const damage = events.filter((e) => e.actor.startsWith('0-')).reduce((n, e) => n + e.hits.reduce((m, h) => m + h.amount, 0), 0)
+      if (!win) { setState(tracked(state, { damage })); return { floor: f, allies, foes, events, win, first: false } }
+      setState(tracked({
+        ...grant(state, f.reward), spire: { best: f.n }, wins: state.wins + 1, accountXp: state.accountXp + f.accountXp,
+        notifs: notify(state.notifs, [...(f.boss ? [['saga', `La Spire : gardien de l'étage ${f.n} vaincu !`] as [Notif['kind'], string]] : []), ...levelNote(state.accountXp + f.accountXp)]),
+      }, { wins: 1, floors: 1, bosses: f.boss ? 1 : 0, damage }))
+      return { floor: f, allies, foes, events, win, first: true }
+    }
+
     const buyEnergy = () => {
       const left = energyNow(state.energy, state.energyAt, Date.now())
       if (state.gems < ENERGY_REFILL_COST || left + ENERGY_REFILL > ENERGY_OVER) return false
@@ -409,7 +429,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setArt((a) => Object.fromEntries(Object.entries(a).filter(([k]) => k !== heroId)))
       void removeArt(heroId)
     }
-    return { ...state, canAfford, summon, merge, useScroll, toggleWish, togglePin, claimContract, claimDaily, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
+    return { ...state, canAfford, summon, merge, useScroll, toggleWish, togglePin, fightSpire, claimContract, claimDaily, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
   }, [state, customArt, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, now])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>

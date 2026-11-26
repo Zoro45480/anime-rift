@@ -343,6 +343,27 @@ def card_pack():
     return 3.2, 3.2
 
 
+def floor_plate(boss=False):
+    """Plaque d'étage de La Spire : hexagone d'or, verre sombre au centre, cristaux aux pointes (rouges pour un gardien)."""
+    gold = pbr((1.0, 0.78, 0.3), 1, 0.14)
+    glass = pbr((0.04, 0.04, 0.1), 0.5, 0.18, coat=1)
+    gem = pbr((1.0, 0.25, 0.3), 0.2, 0.05, (1.0, 0.15, 0.2), 1.6, coat=1) if boss else pbr((1.0, 0.8, 0.35), 0.2, 0.05, (1.0, 0.7, 0.25), 1.2, coat=1)
+    hexa = lambda r: [(math.cos(math.pi / 6 + k * math.pi / 3) * r, math.sin(math.pi / 6 + k * math.pi / 3) * r) for k in range(6)]
+    solid(hexa(1.3), 0.22, gold, bevel=0.07)
+    solid(hexa(1.08), 0.26, glass, bevel=0.04)
+    flat_shape([(x * 1.0, z * 1.0) for x, z in hexa(1.0)], gradient([(0.0, (0.02, 0.02, 0.06)), (1.0, (0.12, 0.08, 0.25) if not boss else (0.3, 0.05, 0.08))], -1.0, 1.0), -0.3)
+    for k in range(6):
+        a = math.pi / 6 + k * math.pi / 3
+        cx, cz = math.cos(a) * 1.3, math.sin(a) * 1.3
+        r = 0.13
+        solid([(cx + math.cos(a) * r * 1.8, cz + math.sin(a) * r * 1.8), (cx + math.cos(a + 1.57) * r, cz + math.sin(a + 1.57) * r), (cx - math.cos(a) * r, cz - math.sin(a) * r), (cx + math.cos(a - 1.57) * r, cz + math.sin(a - 1.57) * r)], 0.14, gem, bevel=0.04, back=-0.18)
+    if boss:  # deux cornes d'or au-dessus
+        for side in (-1, 1):
+            horn = [(side * 0.45, 1.02), (side * 0.75, 1.0), (side * 1.05, 1.55), (side * 0.95, 1.75), (side * 0.85, 1.5)]
+            solid(horn, 0.16, gold, bevel=0.05, back=-0.05)
+    return 3.2, 3.8 if boss else 3.2
+
+
 # --- fond des menus -----------------------------------------------------------------------------------------------------
 def background():
     """Ciel nocturne en dégradés doux. L'image est ensuite légèrement floutée : elle doit rester en retrait."""
@@ -448,8 +469,10 @@ ELEMENTS = {
     'chest': chest,
     'rift-path': rift_path,
     'card-pack': card_pack,
+    'floor-plate': floor_plate,
+    'floor-boss': lambda: floor_plate(True),
 }
-SCALE = {'nav-nexus': 60, 'nav-summon': 60, 'nav-cards': 60, 'nav-contracts': 60, 'nav-profile': 60, 'chest': 60, 'rift-path': 90, 'card-pack': 80}  # pixels par unité, quand ce n'est pas PX
+SCALE = {'nav-nexus': 60, 'nav-summon': 60, 'nav-cards': 60, 'nav-contracts': 60, 'nav-profile': 60, 'chest': 60, 'rift-path': 90, 'card-pack': 80, 'floor-plate': 70, 'floor-boss': 70}  # pixels par unité, quand ce n'est pas PX
 
 os.makedirs(OUT, exist_ok=True)
 for name in [a for a in sys.argv[1:] if a in ELEMENTS] or list(ELEMENTS):

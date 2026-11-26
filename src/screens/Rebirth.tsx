@@ -30,7 +30,7 @@ export const Inventory = () => {
             <strong>{n(scrolls[id])}</strong>
           </li>
         ))}
-        <li style={{ ['--ic' as string]: '#8f6bff' }}><img src={iconArt('shard')} alt="" width={64} height={64} /><div><b>Fragments d'âme</b><small>Servent à libérer une carte (niveau maximum {MAX_LEVEL}). Se gagneront dans La Spire ; chaque Renaissance en offre {REBIRTH_SHARDS}.</small></div><strong>{n(shards)}</strong></li>
+        <li style={{ ['--ic' as string]: '#8f6bff' }}><img src={iconArt('shard')} alt="" width={64} height={64} /><div><b>Fragments d'âme</b><small>Servent à libérer une carte (niveau maximum {MAX_LEVEL}). Se gagnent dans La Spire ; chaque Renaissance en offre {REBIRTH_SHARDS}.</small></div><strong>{n(shards)}</strong></li>
       </ul>
       <h2>Objets de raid</h2>
       <p className="inv__empty">Aucun coffre à ouvrir. Les raids (Les Colosses) ne sont pas encore jouables : leurs récompenses arriveront ici.</p>

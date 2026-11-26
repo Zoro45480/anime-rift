@@ -21,6 +21,11 @@ const TALKS: Record<string, { title: string; lines: string[] }> = {
     'Mets ensemble des cartes du même collectif (Équipe 7, Chapeaux de paille…) : elles gagnent un bonus.',
     'Chaque victoire donne de l’XP, des âmes pour tes nouvelles étoiles, et parfois un parchemin.',
   ] },
+  spire: { title: 'La Spire', lines: [
+    'Bienvenue dans La Spire ! Une tour sans fin : chaque étage est plus dur que le précédent.',
+    'Lis bien la règle de l’étage : parfois elle aide tes Tanks, tes DPS ou tes Soigneurs. Change ton équipe pour en profiter !',
+    'Les combats sont gratuits. Tous les 10 étages, un gardien t’attend avec des fragments d’âme pour libérer tes cartes.',
+  ] },
   contracts: { title: 'Les Contrats', lines: [
     'Ici, tes objectifs. Chaque jour, une récompense t’attend : reviens sept jours de suite pour ouvrir le coffre.',
     'Les contrats du jour et de la semaine se remplissent tout seuls en jouant : invoquer, combattre, améliorer tes cartes.',
