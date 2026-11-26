@@ -6,8 +6,11 @@ import { frameOf } from '../data/banners'
 import { HEROES, roleKind, type Hero } from '../data/heroes'
 import { RARITIES, RARITY_ORDER } from '../data/rarities'
 import { cardRate } from '../game/gacha'
-import { titleRank, TITLE_RULES, TITLES, MARKET_BASE, marketFloor, STAT_SCALE, AWAKEN_COST, AWAKEN_STAT, LEVEL_CAP, baseRank, baseStats, cardState, kitOf, MAX_GROUPS, STAT_LABEL, MAX_LEVEL, MERGE_XP, SCROLL_IDS, SCROLLS, REBIRTH_XP, type Collectif, type ScrollId } from '../game/progression'
+import { titleRank, TITLE_RULES, TITLES, STAT_SCALE, AWAKEN_COST, AWAKEN_STAT, LEVEL_CAP, baseRank, baseStats, cardState, kitOf, MAX_GROUPS, STAT_LABEL, MAX_LEVEL, MERGE_XP, SCROLL_IDS, SCROLLS, REBIRTH_XP, type Collectif, type ScrollId } from '../game/progression'
 import { SHOWCASE_MAX, useStore } from '../state/store'
+import { coteOf, quickPrice, valueOf } from '../game/bazaar'
+import { dayKey } from '../game/contracts'
+import { Spark } from '../screens/Bazaar'
 import { AffinityIcon } from './AffinityIcon'
 import { Card, LazyCard } from './Card'
 import { bannerOf, pct } from './CardViewer'
@@ -43,7 +46,7 @@ const Group = ({ group, owned, team, current, onOpen }: { group: Collectif; owne
 )
 
 export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () => void; onOpen: (hero: Hero) => void }) => {
-  const { remoteSeiyu, teamNow, arcHeroes, remoteFans, awakened, shards, awaken, rebirths, owned, xp, scrolls, wish, pinned, favs, log, merge, useScroll, scrollsUseful, toggleFav, toggleWish, togglePin } = useStore()
+  const { remoteSeiyu, teamNow, arcHeroes, remoteFans, awakened, shards, awaken, rebirths, owned, xp, scrolls, wish, pinned, favs, bazaar, log, merge, useScroll, scrollsUseful, toggleFav, toggleWish, togglePin } = useStore()
   const [qty, setQty] = useState<Record<ScrollId, 1 | 10 | 0>>({ small: 1, medium: 1, large: 1 }) // 0 = le maximum utile
   const [notice, setNotice] = useState('')
   const top = useRef<HTMLDivElement>(null)
@@ -60,6 +63,8 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
   const wished = wish.includes(hero.id)
   const isPinned = pinned.includes(hero.id)
   const isFav = favs.includes(hero.id)
+  const today = dayKey(new Date())
+  const cote = coteOf(bazaar.trades, hero.id, Date.now())
   const kit = kitOf(hero, state.stats)
   const history = log[hero.id] ?? []
   const first = history.filter((e) => e.k === 'pull').at(-1)
@@ -206,16 +211,17 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
           <p className="cd-note">Les titres de l'univers {hero.world}. La carte porte le plus haut qu'elle a mérité.</p>
         </Section>
 
-        <Section hue="#b78bff" title="Cote de la carte" aside="Marché">
+        <Section hue="#b78bff" title="Cote de la carte" aside="Bazar">
           <div className="cd-market">
-            <div><small>Médiane 7 j</small><b>—</b></div>
-            <div><small>Médiane 30 j</small><b>—</b></div>
-            <div><small>Ventes conclues</small><b>0</b></div>
-            <div><small>Barème de départ</small><b>{n(MARKET_BASE[hero.rarity])} âmes</b></div>
-            <div><small>Fourchette autorisée</small><b>{n(marketFloor(hero.rarity))} – ∞ âmes</b></div>
+            <div><small>Valeur du jour</small><b>{n(valueOf(hero, has ? state.level : 1, today))} âmes</b></div>
+            <div><small>Vente immédiate</small><b>{n(quickPrice(hero, has ? state.level : 1, today))} âmes</b></div>
+            <div><small>Médiane 7 j</small><b>{cote.d7 ? `${n(cote.d7)} âmes` : '—'}</b></div>
+            <div><small>Médiane 30 j</small><b>{cote.d30 ? `${n(cote.d30)} âmes` : '—'}</b></div>
+            <div><small>Transactions (30 j)</small><b>{cote.count30}</b></div>
             <div><small>Exemplaires chez toi</small><b>{copies}</b></div>
           </div>
-          <p className="cd-note">Aucune vente conclue pour le moment : le marché entre joueurs n'est pas encore ouvert (il demande un jeu en ligne). Le barème et la fourchette sont les règles prévues pour cette rareté ; aucune cote n'est inventée.</p>
+          <Spark trades={cote.all} />
+          <p className="cd-note">La valeur suit la rareté, le niveau de la carte et la demande du jour au Bazar. Les médianes viennent uniquement de tes vrais achats et ventes : aucun prix n'est inventé. Le Bazar est dans la barre du bas.</p>
         </Section>
 
         <Section hue="#4be3a4" title="Où l'obtenir">
@@ -249,7 +255,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
         </Section>
 
         <Section hue="#8089a8" title="Pas encore disponible" closed>
-          <p className="cd-note">Les ventes entre joueurs et les statistiques de combat détaillées (victoires, titres) n’existent pas encore : elles demandent un jeu en ligne. Aucun chiffre n’est inventé d’ici là.</p>
+          <p className="cd-note">Les ventes entre vrais joueurs et les statistiques de combat détaillées par carte demandent un jeu en ligne. Aucun chiffre n’est inventé d’ici là.</p>
         </Section>
       </div>
     </div>,

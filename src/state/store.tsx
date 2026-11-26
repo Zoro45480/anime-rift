@@ -14,6 +14,7 @@ import { ACHIEVEMENTS, doneIds, METAL_LABEL } from '../game/achievements'
 import { colossusFoes, colossusOf, DIFFICULTIES, eventDone, isOpen as colOpen, rollCol, TRIES_PER_DAY, WIN_SOULS, type ColState, type Difficulty } from '../game/colossus'
 import { emptyTourney, ROUNDS, tourneyRival, type Tourney, DUELS_PER_DAY, eloChange, emptyArena, PVP_GOALS, rivalsFor, rivalUnits, rollWeek, WIN_SOULS as DUEL_SOULS, type ArenaState, type Rival } from '../game/arena'
 import { emptyShop, giftOf, rollAtLeast, weeklyOffers, type ShopState } from '../game/shop'
+import { AUCTION_HOURS, auctionResult, emptyBazaar, quickPrice, stallOf, type BazaarState } from '../game/bazaar'
 import { loadAllArt, removeArt, saveArt } from './customArt'
 import { loadBannerArt, loadRemoteArt, type RemoteStatus } from './remoteArt'
 
@@ -48,6 +49,7 @@ type State = {
   cosmetics: string[] // objets d'apparence achetés
   seen: { last: string; days: number } // jours de jeu différents (succès d'ancienneté)
   achDone: string[] | null // succès déjà annoncés (null : ancienne sauvegarde, on les marque sans notification)
+  bazaar: BazaarState // Bazar : achats du jour, enchères en cours, journal des transactions, alertes de prix
   shop: ShopState // boutique : offres achetées cette semaine, cadeau du jour, historique
   tourney: Tourney // Le Grand Rift : tournoi du jour, titres gagnés
   arena: ArenaState // L'Arène : cote, ligue, duels du jour, défis de la semaine
@@ -66,7 +68,7 @@ type State = {
 export type Profile = { name: string; avatar: string; bio: string; tag: string; title: string; banner: { kind: 'anime' | 'color' | 'image'; value: string }; frame: string; ornament: string; aura: string; color: string; effect: string; theme: string; badges: string[] }
 
 // Notification affichée sous la cloche de la barre du haut. Elles naissent d'événements réels de la partie.
-export type Notif = { id: number; t: number; kind: 'pull' | 'level' | 'saga' | 'drop' | 'rebirth' | 'free' | 'quest' | 'ach'; text: string; read: boolean }
+export type Notif = { id: number; t: number; kind: 'pull' | 'level' | 'saga' | 'drop' | 'rebirth' | 'free' | 'quest' | 'ach' | 'bazaar'; text: string; read: boolean }
 const NOTIF_MAX = 30
 
 // Ce qu'un combat a donné : de quoi le rejouer à l'écran et afficher les récompenses.
@@ -99,6 +101,11 @@ type Store = State & {
   fightColossus: (diff: Difficulty['id']) => ColResult | null // combat contre le Colosse de la semaine
   claimEvent: () => Hero | null // récompense finale de l'événement : une carte SR ou mieux
   colTries: number // essais restants aujourd'hui
+  buyStall: (id: string) => boolean // achète une carte à l'étal du jour
+  quickSell: (heroId: string) => number // vend un doublon tout de suite (prix obtenu, 0 si impossible)
+  listAuction: (heroId: string, start: number) => boolean // met un doublon aux enchères
+  setAlert: (heroId: string, below: number | null) => void // alerte de prix (null pour la retirer)
+  levelOf: (heroId: string) => number
   buyOffer: (id: string) => Hero | true | null // achète une offre de la semaine (la carte garantie s'il y en a une)
   claimGift: () => boolean // cadeau gratuit du jour
   giftReady: boolean
@@ -138,7 +145,7 @@ const LOG_MAX = 30
 // Dotation de départ du compte.
 export const START_GEMS = 600
 const START: State = {
-  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' }, frame: '', ornament: '', aura: '', color: '', effect: '', theme: '', badges: [] }, pulls: 0, wins: 0, cosmetics: [], quests: emptyQuests(), path: { season: 0, xp: 0, claimed: [] }, spire: { best: 0 }, shop: emptyShop(), tourney: emptyTourney(), arena: emptyArena(), col: { week: '', cleared: [], tries: { day: '', n: 0 }, wins: 0, pulls: 0, final: false }, multis: {}, seen: { last: '', days: 0 }, achDone: [], arcHeroes: {}, tutorialSeen: [],
+  accountXp: 0, rebirths: 0, gemsSpent: 0, shards: 0, awakened: [], energy: ENERGY_MAX, energyAt: 0, saga: {}, team: [], notifs: [], profile: { name: '', avatar: '', bio: '', tag: '', title: '', banner: { kind: 'anime', value: 'naruto' }, frame: '', ornament: '', aura: '', color: '', effect: '', theme: '', badges: [] }, pulls: 0, wins: 0, cosmetics: [], quests: emptyQuests(), path: { season: 0, xp: 0, claimed: [] }, spire: { best: 0 }, shop: emptyShop(), bazaar: emptyBazaar(), tourney: emptyTourney(), arena: emptyArena(), col: { week: '', cleared: [], tries: { day: '', n: 0 }, wins: 0, pulls: 0, final: false }, multis: {}, seen: { last: '', days: 0 }, achDone: [], arcHeroes: {}, tutorialSeen: [],
   tickets: 20, gems: START_GEMS, pity: Object.fromEntries(BANNERS.map((b) => [b.id, 0])), owned: {},
   xp: {}, scrolls: { small: 0, medium: 0, large: 0 }, wish: [], pinned: [], favs: [], log: {},
 }
@@ -152,7 +159,7 @@ const load = (): State => {
     const raw = localStorage.getItem(SAVE_KEY)
     if (!raw) return { ...START, profile: { ...START.profile, tag: newTag() } }
     const s = JSON.parse(raw) as Partial<State>
-    const merged = { ...START, achDone: null, ...s, arena: { ...emptyArena(), ...s.arena }, tourney: { ...emptyTourney(), ...s.tourney }, shop: { ...emptyShop(), ...s.shop }, pity: { ...START.pity, ...s.pity }, scrolls: { ...START.scrolls, ...s.scrolls }, profile: { ...START.profile, ...s.profile }, quests: { ...emptyQuests(), ...s.quests } }
+    const merged = { ...START, achDone: null, ...s, arena: { ...emptyArena(), ...s.arena }, tourney: { ...emptyTourney(), ...s.tourney }, shop: { ...emptyShop(), ...s.shop }, bazaar: { ...emptyBazaar(), ...s.bazaar }, pity: { ...START.pity, ...s.pity }, scrolls: { ...START.scrolls, ...s.scrolls }, profile: { ...START.profile, ...s.profile }, quests: { ...emptyQuests(), ...s.quests } }
     return merged.profile.tag ? merged : { ...merged, profile: { ...merged.profile, tag: newTag() } }
   } catch {
     return START
@@ -199,6 +206,28 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     const t = setInterval(() => setNow(Date.now()), 15000)
     return () => clearInterval(t)
   }, [])
+  // Bazar : les enchères terminées sont réglées, et les alertes de prix préviennent une fois par jour.
+  useEffect(() => {
+    const t = Date.now(), day = dayKey(new Date(t))
+    const ended = state.bazaar.auctions.filter((a) => a.ends <= t)
+    const stall = stallOf(day, state.wish)
+    const hits = state.bazaar.alerted === day ? [] : state.bazaar.alerts.filter((a) => stall.some((x) => x.hero.id === a.heroId && x.price <= a.below))
+    if (!ended.length && (state.bazaar.alerted === day || !state.bazaar.alerts.length)) return
+    setState((s) => {
+      let gems = s.gems
+      const owned = { ...s.owned }
+      const trades = [...s.bazaar.trades]
+      const news: Notif[] = []
+      for (const a of s.bazaar.auctions.filter((x) => x.ends <= t)) {
+        const h = heroById(a.heroId)
+        const r = auctionResult(a, h)
+        if (r.sold) { gems += r.price; trades.unshift({ t: a.ends, heroId: a.heroId, kind: 'auction', price: r.price }) } else owned[a.heroId] = (owned[a.heroId] ?? 0) + 1
+        news.push({ id: t * 100 + news.length, t, kind: 'bazaar', read: false, text: r.sold ? `Bazar : ${h.name} vendu aux enchères pour ${r.price} âmes (${r.bids} offres).` : `Bazar : personne n'a enchéri sur ${h.name}, la carte revient dans ta collection.` })
+      }
+      for (const a of hits) { const x = stall.find((y) => y.hero.id === a.heroId)!; news.push({ id: t * 100 + 50 + news.length, t, kind: 'bazaar', read: false, text: `Alerte de prix : ${x.hero.name} est au Bazar à ${x.price} âmes (ton seuil : ${a.below}).` }) }
+      return { ...s, gems, owned, notifs: [...news, ...s.notifs].slice(0, NOTIF_MAX), bazaar: { ...s.bazaar, auctions: s.bazaar.auctions.filter((x) => x.ends > t), trades: trades.slice(0, 300), alerted: s.bazaar.alerts.length ? day : s.bazaar.alerted } }
+    })
+  }, [state, now])
 
   const store = useMemo<Store>(() => {
     const price = (currency: Currency, count: number) => count * (currency === 'ticket' ? COST.ticket : COST.gems)
@@ -490,6 +519,37 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       return true
     }
 
+    // Bazar : marchands et acheteurs joués par le jeu ; seule la dernière copie d'une carte ne se vend pas.
+    const levelOf = (heroId: string) => levelFromXp(state.xp[heroId] ?? 0, capOf(heroId)).level
+    const bzToday = (b: BazaarState, day: string) => (b.day === day ? b : { ...b, day, bought: [] })
+    const buyStall = (id: string) => {
+      const day = dayKey(new Date())
+      const b = bzToday(state.bazaar, day)
+      const item = stallOf(day, state.wish).find((x) => x.id === id)
+      if (!item || b.bought.includes(id) || state.gems < item.price) return false
+      const h = item.hero
+      setState(tracked({ ...state, gems: state.gems - item.price, gemsSpent: state.gemsSpent + item.price, owned: { ...state.owned, [h.id]: (state.owned[h.id] ?? 0) + 1 },
+        log: withLog(state.log, h.id, { k: 'pull', note: `Achetée au Bazar · ${item.merchant}, ${item.price} âmes` }),
+        bazaar: { ...b, bought: [...b.bought, id], trades: [{ t: Date.now(), heroId: h.id, kind: 'buy' as const, price: item.price }, ...b.trades].slice(0, 300) } }, { gemsSpent: item.price, newCards: state.owned[h.id] ? 0 : 1 }))
+      return true
+    }
+    const quickSell = (heroId: string) => {
+      const h = heroById(heroId)
+      if (!h || (state.owned[heroId] ?? 0) < 2) return 0
+      const price = quickPrice(h, levelOf(heroId), dayKey(new Date()))
+      setState({ ...state, gems: state.gems + price, owned: { ...state.owned, [heroId]: state.owned[heroId] - 1 },
+        bazaar: { ...state.bazaar, trades: [{ t: Date.now(), heroId, kind: 'sell' as const, price }, ...state.bazaar.trades].slice(0, 300) } })
+      return price
+    }
+    const listAuction = (heroId: string, start: number) => {
+      if ((state.owned[heroId] ?? 0) < 2 || start < 1 || state.bazaar.auctions.length >= 5) return false
+      const at = Date.now()
+      setState({ ...state, owned: { ...state.owned, [heroId]: state.owned[heroId] - 1 },
+        bazaar: { ...state.bazaar, auctions: [...state.bazaar.auctions, { id: `${heroId}-${at}`, heroId, level: levelOf(heroId), start: Math.round(start), at, ends: at + AUCTION_HOURS * 3600000 }] } })
+      return true
+    }
+    const setAlert = (heroId: string, below: number | null) => setState({ ...state, bazaar: { ...state.bazaar, alerts: [...state.bazaar.alerts.filter((a) => a.heroId !== heroId), ...(below ? [{ heroId, below }] : [])] } })
+
     // Boutique : tout en âmes, chaque offre une fois par semaine.
     const giftReady = state.shop.gift !== today
     const claimGift = () => {
@@ -607,7 +667,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setArt((a) => Object.fromEntries(Object.entries(a).filter(([k]) => k !== heroId)))
       void removeArt(heroId)
     }
-    return { ...state, canAfford, summon, merge, useScroll, scrollsUseful, toggleFav, toggleWish, togglePin, fightSpire, tourneyFight, buyOffer, claimGift, giftReady, duel, newRivals, claimPvp, duelsLeft, arenaPower, fightColossus, claimEvent, colTries, claimContract, claimDaily, claimChallenge, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
+    return { ...state, canAfford, summon, merge, useScroll, scrollsUseful, toggleFav, toggleWish, togglePin, fightSpire, tourneyFight, buyStall, quickSell, listAuction, setAlert, levelOf, buyOffer, claimGift, giftReady, duel, newRivals, claimPvp, duelsLeft, arenaPower, fightColossus, claimEvent, colTries, claimContract, claimDaily, claimChallenge, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
   }, [state, customArt, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, now])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>

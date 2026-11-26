@@ -418,6 +418,28 @@ def shop():
     return 3.2, 3.6
 
 
+def nav_bazaar():
+    """Le Bazar : une balance d'or, une gemme bleue sur un plateau, une pile d'âmes sur l'autre."""
+    gold = pbr((1.0, 0.78, 0.3), 1, 0.14)
+    dark = pbr((0.08, 0.06, 0.14), 0.6, 0.3)
+    gem = pbr((0.45, 0.8, 1.0), 0.2, 0.05, (0.4, 0.75, 1.0), 1.8, coat=1)
+    ruby = pbr((1.0, 0.3, 0.55), 0.2, 0.05, (1.0, 0.25, 0.5), 1.4, coat=1)
+    solid(rounded(1.3, 0.22, 0.08, 0, 0, -1.25), 0.5, gold, bevel=0.06)
+    solid(rounded(0.16, 2.0, 0.06, 0, 0, -0.2), 0.16, gold, bevel=0.05)
+    solid(circle(0, 0.85, 0.16), 0.2, ruby, bevel=0.06, back=-0.05)
+    solid(rotated(rounded(2.6, 0.12, 0.05, 0, 0, 0.62), 0.12, 0, 0.62), 0.14, gold, bevel=0.04)
+    for side, z in ((-1, 0.48), (1, 0.78)):
+        x = side * 1.2
+        for dx in (-0.35, 0.35):
+            solid([(x - 0.03, z), (x + 0.03, z), (x + dx + 0.03, z - 0.7), (x + dx - 0.03, z - 0.7)], 0.05, gold, bevel=0.0, back=0.1)
+        solid([(x - 0.5, z - 0.7), (x + 0.5, z - 0.7), (x + 0.36, z - 0.88), (x - 0.36, z - 0.88)], 0.4, gold, bevel=0.06)
+        solid([(x - 0.42, z - 0.72), (x + 0.42, z - 0.72), (x + 0.3, z - 0.84), (x - 0.3, z - 0.84)], 0.42, dark, bevel=0.02, back=-0.02)
+    solid([(-1.2, 0.3), (-0.92, 0.0), (-1.2, -0.2), (-1.48, 0.0)], 0.2, gem, bevel=0.05, back=-0.15)
+    for k in range(3):
+        solid(circle(1.2 + (k - 1) * 0.2, 0.22 + (0.16 if k == 1 else 0), 0.14), 0.12, ruby, bevel=0.05, back=-0.15)
+    return 3.6, 3.2
+
+
 # --- fond des menus -----------------------------------------------------------------------------------------------------
 def background():
     """Ciel nocturne en dégradés doux. L'image est ensuite légèrement floutée : elle doit rester en retrait."""
@@ -525,6 +547,7 @@ ELEMENTS = {
     'card-pack': card_pack,
     'floor-plate': floor_plate,
     'shop': shop,
+    'nav-bazaar': nav_bazaar,
     'league-bronze': lambda k='bronze': league(k),
     'league-silver': lambda k='silver': league(k),
     'league-gold': lambda k='gold': league(k),
@@ -533,7 +556,7 @@ ELEMENTS = {
     'league-legend': lambda k='legend': league(k),
     'floor-boss': lambda: floor_plate(True),
 }
-SCALE = {'nav-nexus': 60, 'nav-summon': 60, 'nav-cards': 60, 'nav-contracts': 60, 'nav-profile': 60, 'chest': 60, 'rift-path': 90, 'card-pack': 80, 'floor-plate': 70, 'floor-boss': 70, 'shop': 70, 'league-bronze': 70, 'league-silver': 70, 'league-gold': 70, 'league-platinum': 70, 'league-diamond': 70, 'league-legend': 70}  # pixels par unité, quand ce n'est pas PX
+SCALE = {'nav-nexus': 60, 'nav-summon': 60, 'nav-cards': 60, 'nav-contracts': 60, 'nav-profile': 60, 'chest': 60, 'rift-path': 90, 'card-pack': 80, 'floor-plate': 70, 'floor-boss': 70, 'shop': 70, 'nav-bazaar': 60, 'league-bronze': 70, 'league-silver': 70, 'league-gold': 70, 'league-platinum': 70, 'league-diamond': 70, 'league-legend': 70}  # pixels par unité, quand ce n'est pas PX
 
 os.makedirs(OUT, exist_ok=True)
 for name in [a for a in sys.argv[1:] if a in ELEMENTS] or list(ELEMENTS):

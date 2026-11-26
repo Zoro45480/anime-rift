@@ -8,7 +8,7 @@ import { useStore } from '../state/store'
 import { Coin } from './Coin'
 import { logoArt, uiArt } from '../assets/manifest'
 
-export type TabId = 'banners' | 'play' | 'collection' | 'contracts'
+export type TabId = 'banners' | 'play' | 'collection' | 'contracts' | 'bazaar'
 
 // Logo 3D : complet sur grand écran, emblème seul sur téléphone.
 export const Logo = () => (
@@ -57,9 +57,9 @@ export const TopBar = ({ onPlay, onSummon, onProfile, onGo }: { onPlay: () => vo
 
 // Dock flottant : l'invocation au centre dans un losange, les deux autres écrans de part et d'autre.
 // Dock : l'invocation au centre ; Nexus et Contrats à gauche, Collection et Profil à droite.
-export const Dock = ({ tab, onTab, onProfile, profileOn }: { tab: TabId; onTab: (t: TabId) => void; onProfile: () => void; profileOn: boolean }) => {
+export const Dock = ({ tab, onTab, profileOn }: { tab: TabId; onTab: (t: TabId) => void; profileOn: boolean }) => {
   const { questsReady } = useStore()
-  const side = (id: TabId, label: string, icon: 'nav-nexus' | 'nav-contracts' | 'nav-cards', dot = 0) => (
+  const side = (id: TabId, label: string, icon: 'nav-nexus' | 'nav-contracts' | 'nav-cards' | 'nav-bazaar', dot = 0) => (
     <button className={`dock__side ${tab === id && !profileOn ? 'is-active' : ''}`} onClick={() => onTab(id)} aria-current={tab === id && !profileOn ? 'page' : undefined} aria-label={dot ? `${label} (${dot} à récupérer)` : label}>
       <img src={uiArt(icon)} alt="" /><span>{label}</span>{dot > 0 && <i className="dot dock__dot" />}
     </button>
@@ -73,9 +73,7 @@ export const Dock = ({ tab, onTab, onProfile, profileOn }: { tab: TabId; onTab: 
         <i><img src={uiArt('nav-summon')} alt="" /></i><span>Invoquer</span>
       </button>
       {side('collection', 'Collection', 'nav-cards')}
-      <button className={`dock__side ${profileOn ? 'is-active' : ''}`} onClick={onProfile} aria-current={profileOn ? 'page' : undefined}>
-        <img src={uiArt('nav-profile')} alt="" /><span>Profil</span>
-      </button>
+      {side('bazaar', 'Bazar', 'nav-bazaar')}
     </nav>
   )
 }

@@ -21,6 +21,11 @@ const TALKS: Record<string, { title: string; lines: string[] }> = {
     'Mets ensemble des cartes du même collectif (Équipe 7, Chapeaux de paille…) : elles gagnent un bonus.',
     'Chaque victoire donne de l’XP, des âmes pour tes nouvelles étoiles, et parfois un parchemin.',
   ] },
+  bazaar: { title: 'Le Bazar', lines: [
+    'Bienvenue au Bazar des Failles ! Chaque jour, des marchands proposent 8 cartes. Celles de ta liste d’envies passent en premier.',
+    'Tes doublons se vendent ici : tout de suite pour 60 % de leur valeur, ou aux enchères pendant 4 heures pour espérer plus.',
+    'Dans « Mon Bazar », crée des alertes de prix et suis la cote de tes cartes, calculée sur tes vraies ventes.',
+  ] },
   arena: { title: 'L’Arène', lines: [
     'Bienvenue dans l’Arène ! Ici tu affrontes les Rivaux du Rift, des équipes jouées par le jeu et réglées sur ta force.',
     'Gagner te fait monter ta cote, perdre la fait baisser. Bats un rival mieux classé pour gagner plus de points !',

@@ -13,6 +13,7 @@ const KINDS: Record<Notif['kind'] | 'energy', { title: string; hue: string; icon
   drop: { title: 'Parchemin obtenu', hue: '#a56bff', icon: iconArt('scroll-medium') },
   rebirth: { title: 'Renaissance', hue: '#ff9a4a', icon: gateArt('rebirth') },
   ach: { title: 'Succès débloqué', hue: '#b78bff', icon: extraArt('dist-trophy') },
+  bazaar: { title: 'Bazar', hue: '#ffc94d', icon: uiArt('nav-bazaar') },
   quest: { title: 'Contrat accompli', hue: '#4be3a4', icon: uiArt('nav-contracts') },
   free: { title: 'Carte libérée', hue: '#7ff0ff', icon: iconArt('shard') },
   energy: { title: 'Énergie pleine', hue: '#ffd24d', icon: iconArt('bolt') },
