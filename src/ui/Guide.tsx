@@ -21,6 +21,11 @@ const TALKS: Record<string, { title: string; lines: string[] }> = {
     'Mets ensemble des cartes du même collectif (Équipe 7, Chapeaux de paille…) : elles gagnent un bonus.',
     'Chaque victoire donne de l’XP, des âmes pour tes nouvelles étoiles, et parfois un parchemin.',
   ] },
+  arena: { title: 'L’Arène', lines: [
+    'Bienvenue dans l’Arène ! Ici tu affrontes les Rivaux du Rift, des équipes jouées par le jeu et réglées sur ta force.',
+    'Gagner te fait monter ta cote, perdre la fait baisser. Bats un rival mieux classé pour gagner plus de points !',
+    'Tu as 5 duels par jour. Grimpe de Bronze jusqu’à Légende, et fais les défis de la semaine pour des âmes et des sceaux.',
+  ] },
   colossus: { title: 'Les Colosses', lines: [
     'Voici le Colosse de la semaine ! Un grand méchant, beaucoup plus solide que d’habitude, avec deux sbires.',
     'Bats-le en Normal pour ouvrir Difficile, puis Extrême et Ultime. Chaque difficulté donne sa récompense une fois par semaine.',

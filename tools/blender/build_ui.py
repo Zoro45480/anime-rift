@@ -364,6 +364,41 @@ def floor_plate(boss=False):
     return 3.2, 3.8 if boss else 3.2
 
 
+LEAGUES = {  # métal, couleur de la gemme, nombre de pointes, ailes
+    'bronze': ((0.8, 0.45, 0.25), (1.0, 0.55, 0.3), 0, False), 'silver': ((0.82, 0.86, 0.95), (0.6, 0.85, 1.0), 0, False),
+    'gold': ((1.0, 0.78, 0.3), (1.0, 0.85, 0.35), 3, False), 'platinum': ((0.75, 0.95, 0.92), (0.3, 1.0, 0.85), 3, True),
+    'diamond': ((0.7, 0.85, 1.0), (0.4, 0.7, 1.0), 5, True), 'legend': ((1.0, 0.7, 0.35), (1.0, 0.3, 0.6), 5, True),
+}
+
+
+def league(kind):
+    """Emblème de ligue d'arène : un écu de métal, une gemme au centre, une couronne de pointes et des ailes aux rangs élevés."""
+    metal_c, gem_c, spikes, wings = LEAGUES[kind]
+    metal = pbr(metal_c, 1, 0.14)
+    dark = pbr((0.05, 0.05, 0.1), 0.6, 0.3)
+    gem = pbr(gem_c, 0.2, 0.04, gem_c, 1.4 if kind != 'bronze' else 0.6, coat=1)
+    shield = [(0, -1.25), (0.9, -0.55), (0.95, 0.75), (0, 1.0), (-0.95, 0.75), (-0.9, -0.55)]
+    inner = [(0, -1.02), (0.74, -0.46), (0.78, 0.62), (0, 0.82), (-0.78, 0.62), (-0.74, -0.46)]
+    if wings:
+        for side in (-1, 1):
+            for k in range(3):
+                feather = [(side * 0.8, 0.5 - k * 0.32), (side * (1.55 - k * 0.12), 0.9 - k * 0.42), (side * (1.45 - k * 0.15), 0.62 - k * 0.42), (side * 0.85, 0.25 - k * 0.32)]
+                solid(feather, 0.1, metal, bevel=0.03, back=0.12)
+    solid(shield, 0.24, metal, bevel=0.07)
+    solid(inner, 0.28, dark, bevel=0.03)
+    solid([(0, 0.55), (0.42, 0.0), (0, -0.62), (-0.42, 0.0)], 0.3, gem, bevel=0.08, back=-0.18)
+    for k in range(spikes):
+        x = (k - (spikes - 1) / 2) * 0.32
+        hgt = 0.42 - abs(k - (spikes - 1) / 2) * 0.08
+        solid([(x - 0.12, 0.95), (x + 0.12, 0.95), (x, 0.95 + hgt)], 0.14, metal, bevel=0.03, back=-0.02)
+        solid(circle(x, 0.97 + hgt, 0.06), 0.06, gem, bevel=0.02, back=-0.08)
+    if kind == 'legend':  # rayons de lumière derrière l'écu
+        for k in range(12):
+            a = k * math.pi / 6 + math.pi / 12
+            solid([(math.cos(a - 0.05) * 0.5, math.sin(a - 0.05) * 0.5), (math.cos(a) * 1.75, math.sin(a) * 1.5), (math.cos(a + 0.05) * 0.5, math.sin(a + 0.05) * 0.5)], 0.01, glow((1.0, 0.55, 0.75), 2.5), bevel=0.0, back=0.4)
+    return (3.6 if wings else 2.6), 3.0
+
+
 # --- fond des menus -----------------------------------------------------------------------------------------------------
 def background():
     """Ciel nocturne en dégradés doux. L'image est ensuite légèrement floutée : elle doit rester en retrait."""
@@ -470,9 +505,15 @@ ELEMENTS = {
     'rift-path': rift_path,
     'card-pack': card_pack,
     'floor-plate': floor_plate,
+    'league-bronze': lambda k='bronze': league(k),
+    'league-silver': lambda k='silver': league(k),
+    'league-gold': lambda k='gold': league(k),
+    'league-platinum': lambda k='platinum': league(k),
+    'league-diamond': lambda k='diamond': league(k),
+    'league-legend': lambda k='legend': league(k),
     'floor-boss': lambda: floor_plate(True),
 }
-SCALE = {'nav-nexus': 60, 'nav-summon': 60, 'nav-cards': 60, 'nav-contracts': 60, 'nav-profile': 60, 'chest': 60, 'rift-path': 90, 'card-pack': 80, 'floor-plate': 70, 'floor-boss': 70}  # pixels par unité, quand ce n'est pas PX
+SCALE = {'nav-nexus': 60, 'nav-summon': 60, 'nav-cards': 60, 'nav-contracts': 60, 'nav-profile': 60, 'chest': 60, 'rift-path': 90, 'card-pack': 80, 'floor-plate': 70, 'floor-boss': 70, 'league-bronze': 70, 'league-silver': 70, 'league-gold': 70, 'league-platinum': 70, 'league-diamond': 70, 'league-legend': 70}  # pixels par unité, quand ce n'est pas PX
 
 os.makedirs(OUT, exist_ok=True)
 for name in [a for a in sys.argv[1:] if a in ELEMENTS] or list(ELEMENTS):
