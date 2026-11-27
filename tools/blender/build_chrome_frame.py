@@ -10,6 +10,7 @@ un liseré rouge lumineux à l'intérieur, des éclats chromés qui jaillissent 
 import math
 import os
 import random
+import sys
 
 import bpy
 
@@ -84,55 +85,67 @@ def rim(t, w=W, h=H, r=R_CORNER):
     return (-sw, h), (0, 1)
 
 
-def build():
-    chrome = principled('Chrome', (0.98, 0.98, 1.0), 1, 0.03)
-    chrome_soft = principled('ChromeDoux', (0.95, 0.95, 1.0), 1, 0.03)
-    dark = principled('ChromeNoir', (0.04, 0.04, 0.06), 1, 0.1)
-    red = principled('Ecarlate', (0.85, 0.0, 0.05), 0.5, 0.2, (1.0, 0.02, 0.06), 6.0)
-    redchrome = principled('ChromeRouge', (0.95, 0.1, 0.12), 1, 0.08, (1.0, 0.0, 0.04), 1.2)
+VARIANTS = {
+    # nom : (métal principal, métal d'accent, couleur lumineuse, couleur du halo)
+    'chrome_ecarlate': ((0.98, 0.98, 1.0), (0.95, 0.12, 0.14), (1.0, 0.02, 0.06), (255, 20, 50)),
+    'chrome_pur': ((0.98, 0.98, 1.0), (0.75, 0.78, 0.85), (0.9, 0.95, 1.0), (230, 235, 255)),
+    'flamme_rouge': ((0.95, 0.12, 0.14), (0.98, 0.98, 1.0), (1.0, 0.1, 0.02), (255, 60, 20)),
+    'givre_rift': ((0.92, 0.95, 1.0), (0.45, 0.35, 1.0), (0.1, 0.85, 1.0), (60, 200, 255)),
+}
+
+
+def build(variant):
+    main_c, acc_c, glow_c, _ = VARIANTS[variant]
+    chrome = principled('Chrome', main_c, 1, 0.03)
+    accent = principled('Accent', acc_c, 1, 0.06, glow_c, 0.8)
+    dark = principled('ChromeNoir', (0.04, 0.04, 0.06), 1, 0.08)
+    lum = principled('Lumiere', glow_c, 0.4, 0.2, glow_c, 7.0)
 
     N = 480
     base = [rim(i / N) for i in range(N)]
-    # 1. bandeau chrome épais tout autour (le corps du cadre), bord intérieur sombre et liseré rouge lumineux
-    curve('Corps', [(p[0] + n[0] * 0.08, p[1] + n[1] * 0.08, 0) for p, n in base], [1] * N, chrome_soft, 0.22, cyclic=True)
-    curve('BordInt', [(p[0] - n[0] * 0.13, p[1] - n[1] * 0.13, 0.02) for p, n in base], [1] * N, dark, 0.05, cyclic=True)
-    curve('Lisere', [(p[0] - n[0] * 0.19, p[1] - n[1] * 0.19, 0.05) for p, n in base], [1] * N, red, 0.02, cyclic=True)
+    # corps du cadre : un jonc chrome poli, bord intérieur sombre, liseré lumineux
+    curve('Corps', [(p[0] + n[0] * 0.08, p[1] + n[1] * 0.08, 0) for p, n in base], [1] * N, chrome, 0.2, cyclic=True)
+    curve('BordInt', [(p[0] - n[0] * 0.12, p[1] - n[1] * 0.12, 0.05) for p, n in base], [1] * N, dark, 0.05, cyclic=True)
+    curve('Lisere', [(p[0] - n[0] * 0.18, p[1] - n[1] * 0.18, 0.08) for p, n in base], [1] * N, lum, 0.02, cyclic=True)
 
-    # 2. flammes de chrome liquide : chaque mèche part du bord, file le long du cadre puis s'enroule vers l'extérieur
-    def wisp(t, span, rise, curl, thick, mat, direction):
+    def flame(t, length, lean, sway, curl, r0, mat):
+        """Langue de feu en métal : base épaisse posée sur le cadre, corps en S, pointe qui s'enroule."""
+        (x, y), (nx, ny) = rim(t)
+        tx, ty = -ny, nx
+        # direction de départ : la normale, penchée vers la tangente (lean, en radians)
+        dx, dy = nx * math.cos(lean) + tx * math.sin(lean), ny * math.cos(lean) + ty * math.sin(lean)
+        px, py = -dy, dx  # côté de la flamme
         pts, radii = [], []
-        steps = 18
+        steps = 16
         for k in range(steps):
             f = k / (steps - 1)
-            (x, y), (nx, ny) = rim(t + direction * span * f)
-            h = 0.02 + rise * (f ** 1.6) + 0.05 * math.sin(f * math.pi * 2.2) * f
-            # enroulement en bout de flamme : la pointe repart vers l'arrière
-            ang = curl * max(0.0, f - 0.45) ** 2 * 10
-            tx, ty = -ny * direction, nx * direction
-            bx = x + nx * h - tx * ang
-            by = y + ny * h - ty * ang
-            pts.append((bx, by, 0.12 + 0.25 * f + 0.1 * math.sin(f * 5)))
-            radii.append(max(0.12, (1 - f) ** 0.55 * (0.8 + 0.2 * math.sin(f * 4 + t * 40))))  # bouts arrondis : du métal liquide, pas des épines
-        curve('Flamme', pts, radii, mat, thick)
+            fwd = length * f
+            side = sway * math.sin(math.pi * f * 1.15) + curl * f ** 3
+            pts.append((x + dx * fwd + px * side, y + dy * fwd + py * side, 0.16 + 0.18 * math.sin(math.pi * f)))
+            radii.append(max(0.1, (1 - f) ** 0.7))
+        curve('Flamme', pts, radii, mat, r0)
 
-    # couche serrée de petites flammes tout le long
-    for i in range(110):
-        t = i / 110 + rng.random() * 0.004
+    # couronne serrée de flammes moyennes : elles couvrent le jonc et lui donnent sa silhouette ondulée
+    for i in range(96):
+        t = i / 96 + rng.uniform(-0.003, 0.003)
         (x, y), (nx, ny) = rim(t)
         top = ny > 0.5
-        rise = 0.12 + rng.random() * 0.16 + (0.22 * rng.random() if top else 0)
-        wisp(t, 0.022 + rng.random() * 0.025, rise, 0.04 + rng.random() * 0.06, 0.1 + rng.random() * 0.06,
-             redchrome if rng.random() < 0.12 else chrome, 1 if rng.random() < 0.6 else -1)
-    # grandes flammes : en haut, aux coins, et quelques-unes qui jaillissent sur les côtés
-    for t0, n, big in ((0.0, 9, 1.0), (0.12, 7, 0.8), (0.25, 6, 0.75), (0.5, 9, 1.0), (0.75, 6, 0.75), (0.62, 5, 0.6), (0.37, 5, 0.6), (0.88, 5, 0.6)):
+        sgn = 1 if (i % 2) else -1
+        flame(t, rng.uniform(0.22, 0.38) + (0.18 if top else 0), sgn * rng.uniform(0.5, 1.0), sgn * rng.uniform(0.05, 0.12),
+              -sgn * rng.uniform(0.06, 0.16), rng.uniform(0.09, 0.13), accent if rng.random() < 0.14 else chrome)
+    # grandes flammes : bouquets aux coins (surtout haut-gauche et bas-droit) et au milieu du haut
+    bouquets = [(0.0, 7, 1.0), (0.5, 7, 1.0), (0.25, 4, 0.55), (0.75, 4, 0.55), (0.115, 5, 0.7), (0.62, 3, 0.45), (0.38, 3, 0.45), (0.88, 3, 0.45)]
+    for t0, n, big in bouquets:
         for k in range(n):
-            t = t0 + (k - n / 2) * 0.006 + rng.random() * 0.003
-            wisp(t, 0.035 + rng.random() * 0.04, (0.3 + rng.random() * 0.4) * big, 0.08 + rng.random() * 0.08, 0.14 + rng.random() * 0.06,
-                 redchrome if k == n // 2 else chrome, 1 if k % 2 else -1)
-    # fines mèches rouges lumineuses glissées entre les flammes
-    for i in range(40):
+            sgn = 1 if k % 2 else -1
+            flame(t0 + (k - n / 2) * 0.009, (0.5 + rng.uniform(0, 0.45)) * big + 0.15, sgn * rng.uniform(0.2, 0.7),
+                  sgn * rng.uniform(0.08, 0.2), -sgn * rng.uniform(0.15, 0.3), rng.uniform(0.12, 0.17) * (0.7 + 0.3 * big),
+                  accent if k == n // 2 else chrome)
+    # fines mèches lumineuses glissées dans le métal
+    for i in range(36):
         t = rng.random()
-        wisp(t, 0.02 + rng.random() * 0.02, 0.08 + rng.random() * 0.2, 0.05, 0.03, red, 1 if rng.random() < 0.5 else -1)
+        sgn = 1 if rng.random() < 0.5 else -1
+        flame(t, rng.uniform(0.15, 0.4), sgn * 0.8, sgn * 0.06, -sgn * 0.1, 0.03, lum)
 
 
 def studio():
@@ -192,22 +205,26 @@ def studio():
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    reset()
-    build()
-    studio()
-    path = os.path.join(OUT, 'cadre_chrome.png')
-    bpy.context.scene.render.filepath = path
-    bpy.ops.render.render(write_still=True)
-    glow(path)
-    print('rendu :', path)
+    wanted = [a for a in sys.argv[1:] if a in VARIANTS] or list(VARIANTS)
+    for v in wanted:
+        global rng
+        rng = random.Random(7)
+        reset()
+        build(v)
+        studio()
+        path = os.path.join(OUT, f'cadre_{v}.png')
+        bpy.context.scene.render.filepath = path
+        bpy.ops.render.render(write_still=True)
+        glow(path, VARIANTS[v][3])
+        print('rendu :', path)
 
 
-def glow(path):
+def glow(path, color=(255, 20, 50)):
     """Halo rouge derrière le cadre (comme une aura) : flou de la silhouette, teinté, glissé dessous."""
     from PIL import Image, ImageFilter
     fr = Image.open(path).convert('RGBA')
     a = fr.split()[3]
-    halo = Image.new('RGBA', fr.size, (255, 20, 50, 0))
+    halo = Image.new('RGBA', fr.size, (*color, 0))
     soft = a.filter(ImageFilter.GaussianBlur(16)).point(lambda v: min(200, int(v * 1.1)))
     halo.putalpha(soft)
     out = Image.new('RGBA', fr.size, (0, 0, 0, 0))
