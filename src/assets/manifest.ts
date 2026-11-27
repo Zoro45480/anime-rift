@@ -44,7 +44,13 @@ export const mrFrameArt = (theme: string, hd = false): string => (hd ? mrFrames[
 // Cadres N et R dessinés par univers (fournis par le joueur).
 const nrFrames = import.meta.glob('./nr-frames/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 const nrFramesSm = import.meta.glob('./nr-frames-sm/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
-export const nrFrameArt = (rarity: string, theme: string, hd = false): string => (hd ? nrFrames[`./nr-frames/${rarity}-${theme}.webp`] : nrFramesSm[`./nr-frames-sm/${rarity}-${theme}.webp`]) ?? ''
+const nrPick = (rarity: string, theme: string, hd: boolean): string | undefined => (hd ? nrFrames[`./nr-frames/${rarity}-${theme}.webp`] : nrFramesSm[`./nr-frames-sm/${rarity}-${theme}.webp`])
+// Cadre de l'univers s'il existe, sinon le cadre « générique » de la même rareté. Avec `name`, renvoie le nom du cadre choisi (pour son placement CSS).
+export const nrFrameArt = (rarity: string, theme: string, hd = false, name = false): string => {
+  const own = nrPick(rarity, theme, hd)
+  if (name) return own ? theme : 'generique'
+  return own ?? nrPick(rarity, 'generique', hd) ?? ''
+}
 
 export const frameFx = (rarity: string, theme = 'naruto', hd = false): string => pick(`${rarity}-fx`, theme, hd)
 

@@ -34,7 +34,7 @@ export const Card = ({ hero, count, locked, inert, hd, className = '', style }: 
   // MR : cadre dessiné propre à son univers, lueur à sa couleur, et particules animées sur la carte en grand
   const theme = frameOf(hero.world)
   const mrSrc = hero.rarity === 'rift' ? mrFrameArt(theme, hd) : ''
-  const nrSrc = hero.rarity === 'common' || hero.rarity === 'rare' || hero.rarity === 'legend' ? nrFrameArt(hero.rarity, theme, hd) : ''
+  const nrSrc = hero.rarity !== 'rift' ? nrFrameArt(hero.rarity, theme, hd) : ''
   const fxRef = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
     if (!mrSrc || !fxRef.current || document.documentElement.dataset.fxchoice === 'low') return // coupé seulement si le joueur a choisi « Fluide »
@@ -100,7 +100,7 @@ export const Card = ({ hero, count, locked, inert, hd, className = '', style }: 
           <img className={`card__frame card__frame--mr card__frame--mr-${theme}`} src={mrSrc} alt="" decoding="async" />
           <span className={`card__mrshine card__frame--mr-${theme}`} style={{ WebkitMaskImage: `url("${mrSrc}")`, maskImage: `url("${mrSrc}")` }} aria-hidden="true" />
           <canvas ref={fxRef} className="card__mrfx" aria-hidden="true" />
-        </> : nrSrc ? <img className={`card__frame card__frame--nr card__frame--nr-${hero.rarity}-${theme}`} src={nrSrc} alt="" decoding="async" /> : <>
+        </> : nrSrc ? <img className={`card__frame card__frame--nr card__frame--nr-${hero.rarity}-${nrFrameArt(hero.rarity, theme, hd, true)}`} src={nrSrc} alt="" decoding="async" /> : <>
           <img className="card__frame" src={frameArt(hero.rarity, frameOf(hero.world), hd)} alt="" decoding="async" />
           <img className={`card__fx ${frameOf(hero.world) === 'naruto' ? '' : 'card__fx--own'}`} src={frameFx(hero.rarity, frameOf(hero.world), hd)} alt="" decoding="async" />
         </>}
