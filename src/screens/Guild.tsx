@@ -12,7 +12,7 @@ import type { ColResult } from '../state/store'
 const n = (x: number) => x.toLocaleString('fr-FR')
 const EMBLEMS = ['狐', '龍', '鬼', '侍', '忍', '炎', '雷', '月', '桜', '虎', '神', '影']
 const COLORS = ['#ff3d6e', '#ffc94d', '#22d3ee', '#a855f7', '#4ade80', '#f97316', '#3b82f6', '#e5e7eb']
-const KIND: Record<Guild['kind'], string> = { open: 'Ouverte', invite: 'Sur invitation', closed: 'Fermée' }
+const KIND: Record<Guild['kind'], string> = { open: 'Ouvert', invite: 'Sur invitation', closed: 'Fermé' }
 export const GUILD_BOSS_HP = 50_000_000 // PV du boss d’Ordre de la semaine
 type Tab = 'find' | 'create' | 'rank'
 
@@ -25,7 +25,7 @@ export const GuildPage = ({ onConnect }: { onConnect: () => void }) => {
   const [mine, setMine] = useState<Awaited<ReturnType<typeof fetchMyGuild>> | undefined>(undefined)
   const reload = useCallback(async () => setMine(await fetchMyGuild()), [])
   useEffect(() => { if (session) void reload() }, [session, reload])
-  if (!session) return <section className="so-login"><h2>Ordre</h2><p>Connecte-toi avec Discord ou Google pour rejoindre un Ordre ou fonder la tienne.</p><button className="oauth oauth--discord" onClick={onConnect}>Se connecter</button></section>
+  if (!session) return <section className="so-login"><h2>Ordre</h2><p>Connecte-toi avec Discord ou Google pour rejoindre un Ordre ou fonder le tien.</p><button className="oauth oauth--discord" onClick={onConnect}>Se connecter</button></section>
   if (mine === undefined) return <p className="pf-empty">Chargement de ton Ordre…</p>
   return mine ? <MyGuild data={mine} reload={reload} /> : <NoGuild reload={reload} />
 }
@@ -35,7 +35,7 @@ const Hero = () => (
     <span className="gd-hero__kanji" lang="ja" aria-hidden="true">組</span>
     <p className="eyebrow">Anime Rift — Ordre</p>
     <h1>Ordre</h1>
-    <p>Rejoins un Ordre ou fonde la tienne : on est plus forts à plusieurs.</p>
+    <p>Rejoins un Ordre ou fonde le tien : on est plus forts à plusieurs.</p>
     <ul className="gd-perks">
       <li><b>Boss de la semaine</b><span>Cumulez vos dégâts contre un boss commun.</span></li>
       <li><b>Classement</b><span>L’Ordre qui inflige le plus de dégâts mène la semaine.</span></li>
@@ -108,7 +108,7 @@ const NoGuild = ({ reload }: { reload: () => Promise<void> }) => {
         </section>
       </div>}
       {tab === 'rank' && <section className="so-box"><header className="so-box__head"><h2>Classement de la semaine</h2><span>fin lundi</span></header>
-        {!list ? <p className="pf-empty">Chargement…</p> : list.length === 0 ? <p className="pf-empty">Aucun Ordre classée.</p> : <ul className="gd-list">{list.map((g, i) => <GuildRow key={g.id} g={g} i={i} />)}</ul>}</section>}
+        {!list ? <p className="pf-empty">Chargement…</p> : list.length === 0 ? <p className="pf-empty">Aucun Ordre classé.</p> : <ul className="gd-list">{list.map((g, i) => <GuildRow key={g.id} g={g} i={i} />)}</ul>}</section>}
     </div>
   )
 }
@@ -116,7 +116,7 @@ const NoGuild = ({ reload }: { reload: () => Promise<void> }) => {
 const MyGuild = ({ data, reload }: { data: NonNullable<Awaited<ReturnType<typeof fetchMyGuild>>>; reload: () => Promise<void> }) => {
   const store = useStore()
   const { guild, me, members, requests } = data
-  const [tab, setTab] = useState<'boss' | 'members' | 'requests' | 'rank' | 'settings'>('boss')
+  const [tab, setTab] = useState<'boss' | 'members' | 'requests' | 'rank' | 'badges' | 'settings'>('boss')
   const [people, setPeople] = useState<Record<string, PublicPlayer>>({})
   const [dmg, setDmg] = useState<{ user_id: string; damage: number; tries: number }[]>([])
   const [rank, setRank] = useState<Guild[]>([])
@@ -139,7 +139,7 @@ const MyGuild = ({ data, reload }: { data: NonNullable<Awaited<ReturnType<typeof
     <div className="gd">
       <header className="gd-mine" style={{ ['--gc' as string]: guild.color }}>
         <Emblem g={guild} size={110} />
-        <div className="gd-mine__id"><p className="eyebrow">Ton Ordre · {role(me)}</p><h1>{guild.name} <i>{guild.tag}</i></h1>
+        <div className="gd-mine__id"><p className="eyebrow">Ton Ordre · {role(me)}{weekTitle(place) && <b className="gd-title"> · {weekTitle(place)}</b>}</p><h1>{guild.name} <i>{guild.tag}</i></h1>
           <p className="gd-mine__chips"><span>{KIND[guild.kind]}</span><span>{guild.min_level ? `Niveau ${guild.min_level}+` : 'Aucune condition'}</span></p>
           <p>{guild.description || 'Pas encore de description.'}</p></div>
         <ul className="gd-mine__stats">
@@ -148,7 +148,7 @@ const MyGuild = ({ data, reload }: { data: NonNullable<Awaited<ReturnType<typeof
         </ul>
       </header>
       <div className="coltabs__bar so__tabs" role="tablist">
-        {([['boss', 'Boss de la semaine'], ['members', `Membres (${members.length})`], ...(lead ? [['requests', `Candidatures (${requests.length})`]] : []), ['rank', 'Classement'], ['settings', 'Paramètres']] as [typeof tab, string][]).map(([id, l]) => <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>{l}</button>)}
+        {([['boss', 'Boss de la semaine'], ['members', `Membres (${members.length})`], ...(lead ? [['requests', `Candidatures (${requests.length})`]] : []), ['rank', 'Classement'], ['badges', 'Insignes'], ['settings', 'Paramètres']] as [typeof tab, string][]).map(([id, l]) => <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>{l}</button>)}
       </div>
       {msg && <p className="cd__notice" role="status">{msg}</p>}
       {tab === 'boss' && <div className="so__grid">
@@ -179,12 +179,46 @@ const MyGuild = ({ data, reload }: { data: NonNullable<Awaited<ReturnType<typeof
         <li key={r.user_id} className="gd-row"><div className="gd-row__id"><b>{people[r.user_id]?.name ?? '…'} <i>#{people[r.user_id]?.player_no}</i></b><small>Niveau {people[r.user_id]?.level ?? 1} · {n(people[r.user_id]?.collection ?? 0)} persos</small></div>
           <button className="btn btn--gold gd-join" onClick={() => void answerRequest(guild.id, r.user_id, true).then(reload)}>Accepter</button><button className="cd-btn cd-btn--small" onClick={() => void answerRequest(guild.id, r.user_id, false).then(reload)}>Refuser</button></li>
       ))}</ul>}</section>}
+      {tab === 'badges' && <Insignias guild={guild} members={members.length} total={total} place={place} />}
       {tab === 'rank' && <section className="so-box"><header className="so-box__head"><h2>Classement de la semaine</h2></header><ul className="gd-list">{rank.map((g, i) => <GuildRow key={g.id} g={g} i={i} />)}</ul></section>}
-      {tab === 'settings' && <section className="so-box"><p className="set__note">{me.role === 'chef' ? 'Si tu quittes l’Ordre, un adjoint (ou le plus ancien membre) devient chef. Si tu étais seul, l’Ordre est dissoute.' : 'Tu peux quitter l’Ordre quand tu veux.'}</p>
+      {tab === 'settings' && <section className="so-box"><p className="set__note">{me.role === 'chef' ? 'Si tu quittes l’Ordre, un adjoint (ou le plus ancien membre) devient chef. Si tu étais seul, l’Ordre est dissous.' : 'Tu peux quitter l’Ordre quand tu veux.'}</p>
         <button className="cd-btn cd-btn--small" onClick={async () => { const r = await leaveGuild(); setMsg(r === 'ok' ? 'Tu as quitté l’Ordre.' : r); await reload() }}>Quitter l’Ordre</button></section>}
       {fight && <Battle result={fight.result} kicker={`Boss d’Ordre · ${guild.name}`} title={boss.name}
         winBody={null} loseBody={<p className="sp-win">{n(fight.damage)} dégâts infligés pour ton Ordre !</p>}
         onClose={async () => { const d = fight.damage; setFight(null); const r = await hitGuildBoss(week, d); setMsg(r === 'ok' ? `${n(d)} dégâts ajoutés au boss de l’Ordre.` : r); await load() }} />}
     </div>
+  )
+}
+
+// Titre de la semaine selon la place : 1er Légende, 2e-3e Maîtres, 4e-10e Élite.
+export const weekTitle = (place: number) => (place === 1 ? 'Légende' : place >= 2 && place <= 3 ? 'Maîtres' : place >= 4 && place <= 10 ? 'Élite' : '')
+
+// Les 13 insignes d'un Ordre. Ceux des rivalités arrivent avec les rivalités.
+export const insigniasOf = (g: { created_at?: string }, members: number, total: number, place: number, now = Date.now()) => {
+  const age = g.created_at ? Math.floor((now - new Date(g.created_at).getTime()) / 86400000) : 0
+  const kills = Math.floor(total / GUILD_BOSS_HP)
+  return [
+    { id: 'found', name: 'Première pierre', need: '30 jours d’existence', done: age >= 30, soon: false },
+    { id: 'old', name: 'Gardiens anciens', need: '180 jours d’existence', done: age >= 180, soon: false },
+    { id: 'circle', name: 'Cercle', need: '10 membres', done: members >= 10, soon: false },
+    { id: 'legion', name: 'Légion', need: '30 membres', done: members >= 30, soon: false },
+    { id: 'hunt', name: 'Traqueurs de Faille', need: 'Abattre le boss de la semaine', done: kills >= 1, soon: false },
+    { id: 'break', name: 'Brise-Colosses', need: 'Abattre le boss 3 fois en une semaine', done: kills >= 3, soon: false },
+    { id: 'stars', name: 'Mangeurs d’étoiles', need: 'Abattre le boss 10 fois en une semaine', done: kills >= 10, soon: false },
+    { id: 'rival1', name: 'Premier duel', need: 'Gagner une rivalité', done: false, soon: true },
+    { id: 'rival5', name: 'Rivaux redoutés', need: 'Gagner 5 rivalités', done: false, soon: true },
+    { id: 'unbeaten', name: 'Invaincus', need: '5 rivalités sans défaite', done: false, soon: true },
+    { id: 'elite', name: 'Élite', need: 'Finir la semaine dans le top 10', done: place >= 1 && place <= 10, soon: false },
+    { id: 'podium', name: 'Podium', need: 'Finir la semaine dans le top 3', done: place >= 1 && place <= 3, soon: false },
+    { id: 'legend', name: 'Légende du Rift', need: 'Finir la semaine 1er', done: place === 1, soon: false },
+  ]
+}
+const Insignias = ({ guild, members, total, place }: { guild: { created_at?: string }; members: number; total: number; place: number }) => {
+  const list = insigniasOf(guild, members, total, place)
+  return (
+    <section className="so-box"><header className="so-box__head"><h2>Insignes de l’Ordre</h2><span><b>{list.filter((x) => x.done).length}</b> / {list.length}</span></header>
+      <ul className="gd-ins">{list.map((x) => <li key={x.id} className={x.done ? 'is-done' : ''}><i aria-hidden="true">{x.done ? '✦' : '◇'}</i><b>{x.name}</b><small>{x.need}{x.soon ? ' · bientôt' : ''}</small></li>)}</ul>
+      <p className="set__note">Les insignes de classement comptent la semaine en cours. Ceux des rivalités s’ouvriront avec les rivalités entre Ordres.</p>
+    </section>
   )
 }

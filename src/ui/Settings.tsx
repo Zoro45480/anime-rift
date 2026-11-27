@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { signInWith, signOut, useOnline } from '../state/online'
+import { deleteAccount, signInWith, signOut, useOnline } from '../state/online'
 import { createPortal } from 'react-dom'
 import { cosmeticArt, extraArt } from '../assets/manifest'
 import { accountLevel } from '../game/progression'
@@ -187,6 +187,10 @@ const AccountCard = () => {
           <p className="set-account__me"><b>{me?.name ?? 'Joueur'}</b> <span>#{me?.player_no ?? '…'}</span></p>
           <p className="set__note">Connecté avec {session.user.app_metadata.provider === 'discord' ? 'Discord' : session.user.app_metadata.provider === 'google' ? 'Google' : 'ton compte'}. Ta partie est sauvegardée en ligne toute seule : tu la retrouves en te connectant sur un autre appareil. Ton numéro de joueur dit dans quel ordre tu as rejoint le jeu.</p>
           <button className="cd-btn cd-btn--small" onClick={() => void signOut()}>Se déconnecter</button>
+          <details className="set-danger"><summary>Mes données (RGPD)</summary>
+            <p className="set__note">Tu peux supprimer ton compte en ligne : profil, sauvegarde, amis, messages, annonces et place dans ton Ordre. C’est définitif.</p>
+            <button className="cd-btn cd-btn--small set-danger__btn" onClick={() => { if (window.confirm('Supprimer définitivement ton compte en ligne ?')) void deleteAccount().then((r) => setMsg(r === 'ok' ? 'Compte supprimé.' : r)) }}>Supprimer mon compte</button>
+          </details>
         </>
       ) : (
         <>

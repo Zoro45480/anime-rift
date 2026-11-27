@@ -80,6 +80,13 @@ export const signIn = async (email: string, password: string) => {
   return error ? { ok: false, message: frError(error.message) } : { ok: true, message: 'Connecté !' }
 }
 export const signOut = () => supa.auth.signOut()
+// RGPD : supprime le compte en ligne et tout ce qui va avec (fichier SQL 03).
+export const deleteAccount = async () => {
+  const { error } = await supa.rpc('delete_me')
+  if (error) return /delete_me/.test(error.message) ? 'La suppression n’est pas encore activée sur le serveur (fichier SQL 03).' : error.message
+  await supa.auth.signOut()
+  return 'ok'
+}
 // Connexion avec Google ou Discord : on part sur leur page, puis on revient dans le jeu déjà connecté.
 export const signInWith = async (provider: 'google' | 'discord') => {
   const { error } = await supa.auth.signInWithOAuth({ provider, options: { redirectTo: window.location.origin + window.location.pathname } })
@@ -259,7 +266,7 @@ export const bidListing = (id: number, amount: number) => rpc('bid_listing', { l
 export const closeListing = (id: number) => rpc('close_listing', { listing: id })
 
 // Ordres
-export type Guild = { id: string; name: string; tag: string; description: string; kind: 'open' | 'invite' | 'closed'; min_level: number; max_members: number; emblem: string; color: string; members: number; week_damage: number }
+export type Guild = { id: string; name: string; tag: string; description: string; kind: 'open' | 'invite' | 'closed'; min_level: number; max_members: number; emblem: string; color: string; members: number; week_damage: number; created_at?: string }
 export type GuildMember = { guild_id: string; user_id: string; role: 'chef' | 'adjoint' | 'membre'; joined_at: string }
 export const fetchGuilds = async (q = '') => {
   let req = supa.from('guild_board').select('*').order('week_damage', { ascending: false }).limit(50)
