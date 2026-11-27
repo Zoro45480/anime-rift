@@ -15,6 +15,7 @@ import { IconChevron, IconInfo } from '../ui/icons'
 import { Coin } from '../ui/Coin'
 import { SummonCinematic } from '../summon/SummonCinematic'
 import { primeAudio } from '../summon/audio'
+import { LrBanner } from './LrBanner'
 
 const pct = (x: number) => `${(x * 100).toLocaleString('fr-FR', { maximumFractionDigits: 3 })} %`
 const two = (n: number) => String(n).padStart(2, '0')
@@ -274,6 +275,8 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
           </div>
         </section>
       )}
+
+      {!focus && <LrBanner />}
 
       {/* Toutes les bannières : informations, progression et carte vedette */}
       {!focus && <section className="showcase">
