@@ -17,6 +17,7 @@ import './ui/ui.css'
 import './styles/rift.css'
 import { startI18n } from './ui/i18n'
 import { App } from './App'
+import { MrTest } from './screens/MrTest'
 import { installGlitter } from './ui/glitter'
 import { installTheme } from './ui/theme'
 
@@ -25,7 +26,7 @@ installTheme()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    {new URLSearchParams(location.search).has('mrtest') ? <MrTest /> : <App />}
   </StrictMode>,
 )
 

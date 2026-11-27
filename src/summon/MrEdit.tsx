@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Hero } from '../data/heroes'
-import { MR_VIDEOS } from '../data/mrVideos'
+import { MR_VIDEOS, MR_YOUTUBE, type YtClip } from '../data/mrVideos'
 
 // « Edit » plein écran quand une carte MR tombe.
 // Si une vidéo d'edit est fournie pour ce perso (dossier public/mr-videos, liste dans data/mrVideos.ts), c'est elle qui passe.
@@ -12,7 +12,38 @@ const CUTS = [ // [début (ms), cadrage x %, cadrage y %, zoom, rotation] : zoom
   [0, 50, 18, 1.7, -3], [650, 35, 25, 1.45, 2], [1250, 65, 15, 1.6, -2], [1850, 50, 35, 1.3, 0], [2500, 50, 20, 1.9, 4], [3100, 50, 25, 1.05, 0],
 ] as const
 
+// Lecteur YouTube officiel, sans commandes, du début à la fin choisis. Bouton « Passer » au bout de 2 secondes.
+export const YtEdit = ({ hero, clip, onDone }: { hero: Hero; clip: YtClip; onDone: () => void }) => {
+  const [skip, setSkip] = useState(false)
+  const done = useRef(onDone)
+  done.current = onDone
+  useEffect(() => {
+    const a = window.setTimeout(() => setSkip(true), 2000)
+    const b = window.setTimeout(() => done.current(), (clip.end - clip.start) * 1000 + 1200) // fin du passage choisi
+    const onMsg = (e: MessageEvent) => { // le lecteur signale la fin de la vidéo
+      if (!/youtube/.test(e.origin) || typeof e.data !== 'string') return
+      try { const d = JSON.parse(e.data); if (d.event === 'onStateChange' && d.info === 0) done.current() } catch { /* message d'un autre type */ }
+    }
+    window.addEventListener('message', onMsg)
+    return () => { window.clearTimeout(a); window.clearTimeout(b); window.removeEventListener('message', onMsg) }
+  }, [clip])
+  const q = new URLSearchParams({ autoplay: '1', start: String(clip.start), end: String(clip.end), controls: '0', rel: '0', playsinline: '1', modestbranding: '1', iv_load_policy: '3', disablekb: '1', enablejsapi: '1', origin: location.origin })
+  return (
+    <div className="mredit mredit--video">
+      <iframe src={`https://www.youtube-nocookie.com/embed/${clip.id}?${q}`} title={`Edit de ${hero.name}`} allow="autoplay; encrypted-media; fullscreen" />
+      <p className="mredit__tag"><b>MR</b>{hero.name}</p>
+      {skip && <button className="mredit__skip" onClick={() => done.current()}>Passer ›</button>}
+    </div>
+  )
+}
+
 export const MrEdit = ({ hero, art, onDone }: { hero: Hero; art: string; onDone: () => void }) => {
+  const yt = MR_YOUTUBE[hero.id]
+  if (yt) return <YtEdit hero={hero} clip={yt} onDone={onDone} />
+  return <MrEditOwn hero={hero} art={art} onDone={onDone} />
+}
+
+const MrEditOwn = ({ hero, art, onDone }: { hero: Hero; art: string; onDone: () => void }) => {
   const video = videoOf(hero.id)
   const [cut, setCut] = useState(0)
   const vidRef = useRef<HTMLVideoElement>(null)
