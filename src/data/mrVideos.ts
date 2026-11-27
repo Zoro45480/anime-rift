@@ -4,4 +4,6 @@ export const MR_VIDEOS: string[] = []
 
 // Edits lus directement depuis YouTube (lecteur officiel intégré) : identifiant de la vidéo, début et fin en secondes.
 export type YtClip = { id: string; start: number; end: number }
-export const MR_YOUTUBE: Record<string, YtClip> = {}
+export const MR_YOUTUBE: Record<string, YtClip> = {
+  naruto: { id: 'XvioQrCOP24', start: 21, end: 29 },
+}
