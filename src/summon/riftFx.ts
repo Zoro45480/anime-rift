@@ -102,33 +102,7 @@ export const sizeCanvas = (cv: HTMLCanvasElement): Ctx => {
   return ctx
 }
 
-// Prisme hexagonal allongé avec halo, facettes et reflets.
-export const crystalRaw = (ctx: Ctx, x: number, y: number, L: number, rot: number, c: string, al: number) => {
-  const w = L * 0.42, h = L
-  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.globalAlpha = al * 0.5
-  const hl = ctx.createRadialGradient(0, 0, 0, 0, 0, h * 1.7); hl.addColorStop(0, c); hl.addColorStop(1, 'rgba(0,0,0,0)')
-  ctx.fillStyle = hl; ctx.beginPath(); ctx.arc(0, 0, h * 1.7, 0, 7); ctx.fill(); ctx.globalAlpha = al
-  const P = [[0, -h], [w, -h * 0.45], [w, h * 0.45], [0, h], [-w, h * 0.45], [-w, -h * 0.45]]
-  ctx.beginPath(); P.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]))); ctx.closePath()
-  const g = ctx.createLinearGradient(-w, -h, w, h); g.addColorStop(0, 'rgba(255,255,255,.95)'); g.addColorStop(0.45, c); g.addColorStop(1, 'rgba(40,5,0,.6)')
-  ctx.fillStyle = g; ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 1; ctx.stroke()
-  ctx.beginPath(); ctx.moveTo(0, -h); ctx.lineTo(0, h); ctx.moveTo(-w, -h * 0.45); ctx.lineTo(0, -h * 0.1); ctx.lineTo(w, -h * 0.45)
-  ctx.strokeStyle = 'rgba(255,255,255,.4)'; ctx.stroke(); ctx.restore()
-}
 
-// Cristal d'une carte, à la couleur de sa rareté (LR : arc-en-ciel animé).
-export const crystal = (ctx: Ctx, x: number, y: number, L: number, rot: number, k: number, pulse: number, t: number) => {
-  const c = k === 4 ? `hsl(${(t / 5) % 360},100%,68%)` : `rgb(${rgb(RARITY_RGB[k])})`, w = L * 0.42 * pulse, h = L * pulse
-  const halo = ctx.createRadialGradient(x, y, 0, x, y, h * 1.6); halo.addColorStop(0, c); halo.addColorStop(1, 'rgba(0,0,0,0)')
-  ctx.globalAlpha = 0.55; ctx.fillStyle = halo; ctx.beginPath(); ctx.arc(x, y, h * 1.6, 0, 7); ctx.fill()
-  ctx.save(); ctx.translate(x, y); ctx.rotate(Math.sin(rot) * 0.35); ctx.globalAlpha = 1; const sx = Math.cos(rot)
-  const P = [[0, -h], [w * sx, -h * 0.45], [w * sx, h * 0.45], [0, h], [-w * sx, h * 0.45], [-w * sx, -h * 0.45]]
-  ctx.beginPath(); P.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]))); ctx.closePath()
-  const g = ctx.createLinearGradient(-w, -h, w, h); g.addColorStop(0, 'rgba(255,255,255,.95)'); g.addColorStop(0.45, c); g.addColorStop(1, 'rgba(20,10,30,.6)')
-  ctx.fillStyle = g; ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 1; ctx.stroke()
-  ctx.beginPath(); ctx.moveTo(0, -h); ctx.lineTo(0, h); ctx.moveTo(-w * sx, -h * 0.45); ctx.lineTo(0, -h * 0.1); ctx.lineTo(w * sx, -h * 0.45)
-  ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.stroke(); ctx.restore()
-}
 
 /* ===== explosion MR ===== */
 export type Boom = {
@@ -189,12 +163,12 @@ export const boomDraw = (ctx: Ctx, B: Boom, s0: number, cx: number, cy: number, 
     ctx.globalAlpha = 1 - k; ctx.strokeStyle = p.hue > 0.6 ? '#fff' : p.hue > 0.3 ? `rgb(${C2})` : `rgb(${C})`; ctx.lineWidth = p.w
     ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - Math.cos(p.a) * p.l * (1 - k), y - Math.sin(p.a) * p.l * (1 - k)); ctx.stroke()
   }
-  // éclats de cristal
+  // petites âmes projetées
   for (const p of B.shards) {
     const k = (s - p.d) / 1.5
     if (k < 0 || k > 1) continue
     const d = p.sp * (1 - Math.pow(1 - k, 3)) * 0.55, x = cx + Math.cos(p.a) * d, y = cy + Math.sin(p.a) * d * 0.85 + 120 * k * k
-    ctx.globalAlpha = 1; crystalRaw(ctx, x, y, p.len * (1 - k * 0.4), p.rot + p.vr * k, `rgb(${C})`, 1 - k)
+    ctx.globalAlpha = 1; soulRaw(ctx, x, y, p.len * (1 - k * 0.4), s * 1000, `rgb(${C})`, 1 - k, p.rot, Math.sin(p.rot + p.vr * k) * 0.5)
   }
   // braises
   for (const p of B.embers) {
@@ -205,8 +179,8 @@ export const boomDraw = (ctx: Ctx, B: Boom, s0: number, cx: number, cy: number, 
     const eg = ctx.createRadialGradient(x, y, 0, x, y, p.s * 4); eg.addColorStop(0, '#fff'); eg.addColorStop(0.3, `rgb(${C2})`); eg.addColorStop(1, 'rgba(0,0,0,0)')
     ctx.fillStyle = eg; ctx.beginPath(); ctx.arc(x, y, p.s * 4, 0, 7); ctx.fill()
   }
-  // grand cristal MR qui se reforme
-  if (s > 0.9 && !B.noCore) { const k = Math.min(1, (s - 0.9) / 0.6); ctx.globalAlpha = 1; crystalRaw(ctx, cx, cy, 30 + 60 * (1 - Math.pow(1 - k, 3)), s * 2.5, `rgb(${C})`, 1) }
+  // grande âme MR qui se reforme au centre
+  if (s > 0.9 && !B.noCore) { const k = Math.min(1, (s - 0.9) / 0.6); ctx.globalAlpha = 1; soulRaw(ctx, cx, cy, 30 + 60 * (1 - Math.pow(1 - k, 3)), s * 1000, `rgb(${C})`, 1, 3) }
 }
 
 // Éclats de verre : secteurs et anneaux irréguliers autour du point de rupture.
@@ -235,4 +209,54 @@ export const drawShards = (ctx: Ctx, shards: Shard[], st: number, acc: RGB) => {
     gg.addColorStop(0, `rgba(255,255,255,${0.07 * al})`); gg.addColorStop(0.5, `rgba(${rgb(acc)},${0.06 * al})`); gg.addColorStop(1, `rgba(10,8,16,${0.25 * al})`)
     ctx.fillStyle = gg; ctx.fill(); ctx.strokeStyle = `rgba(255,255,255,${0.7 * al})`; ctx.lineWidth = 1.2; ctx.stroke(); ctx.restore()
   }
+}
+
+/* ===== âmes (flammes d'âme, comme l'icône des Éclats) ===== */
+// Une âme : flamme à trois pointes qui ondulent, cœur blanc, halo à la couleur donnée. `t` en ms, `seed` décale l'ondulation.
+export const soulRaw = (ctx: Ctx, x: number, y: number, L: number, t: number, c: string, al: number, seed = 0, tilt = 0) => {
+  const h = L, w = L * 0.55, s = t / 160 + seed * 7
+  const sw = Math.sin(s) * w * 0.18, sw2 = Math.sin(s * 1.3 + 1) * w * 0.14, flick = 1 + Math.sin(s * 2.1) * 0.06
+  ctx.save(); ctx.translate(x, y); ctx.rotate(tilt)
+  // halo
+  ctx.globalAlpha = al * 0.55
+  const hl = ctx.createRadialGradient(0, 0, 0, 0, 0, h * 1.7); hl.addColorStop(0, c); hl.addColorStop(1, 'rgba(0,0,0,0)')
+  ctx.fillStyle = hl; ctx.beginPath(); ctx.arc(0, 0, h * 1.7, 0, 7); ctx.fill()
+  // corps de la flamme : base ronde, petite pointe à gauche, grande pointe au centre, pointe moyenne à droite
+  ctx.globalAlpha = al
+  const body = (k: number) => {
+    const hh = h * k * flick, ww = w * k
+    ctx.beginPath()
+    ctx.moveTo(0, hh * 0.45)
+    ctx.bezierCurveTo(-ww * 1.05, hh * 0.45, -ww * 1.15, -hh * 0.1, -ww * 0.55 + sw2, -hh * 0.62)
+    ctx.quadraticCurveTo(-ww * 0.45, -hh * 0.25, -ww * 0.18, -hh * 0.3)
+    ctx.quadraticCurveTo(-ww * 0.2, -hh * 0.75, sw, -hh)
+    ctx.quadraticCurveTo(ww * 0.35, -hh * 0.62, ww * 0.3, -hh * 0.28)
+    ctx.quadraticCurveTo(ww * 0.55, -hh * 0.4, ww * 0.62 - sw2, -hh * 0.68)
+    ctx.bezierCurveTo(ww * 1.2, -hh * 0.15, ww * 1.05, hh * 0.45, 0, hh * 0.45)
+    ctx.closePath()
+  }
+  body(1)
+  const g = ctx.createRadialGradient(0, h * 0.18, 0, 0, h * 0.05, h * 1.05)
+  g.addColorStop(0, '#fff'); g.addColorStop(0.28, 'rgba(255,255,255,.92)'); g.addColorStop(0.55, c); g.addColorStop(1, 'rgba(40,20,80,.85)')
+  ctx.fillStyle = g; ctx.fill()
+  ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = Math.max(0.8, L / 40); ctx.stroke()
+  // cœur blanc en goutte
+  ctx.beginPath(); ctx.moveTo(0, h * 0.34); ctx.bezierCurveTo(-w * 0.42, h * 0.34, -w * 0.38, -h * 0.02, sw * 0.4, -h * 0.28); ctx.bezierCurveTo(w * 0.38, -h * 0.02, w * 0.42, h * 0.34, 0, h * 0.34)
+  ctx.fillStyle = `rgba(255,255,255,${0.85 * al})`; ctx.fill()
+  ctx.restore()
+}
+
+// Âme d'une carte, à la couleur de sa rareté (LR : arc-en-ciel animé). Les SSR et plus pulsent.
+export const soul = (ctx: Ctx, x: number, y: number, L: number, k: number, pulse: number, t: number, seed: number) =>
+  soulRaw(ctx, x, y, L * pulse, t, k === 4 ? `hsl(${(t / 5) % 360},100%,68%)` : `rgb(${rgb(RARITY_RGB[k])})`, 1, seed)
+
+// Traînée lumineuse derrière une âme en mouvement (points de plus en plus petits et pâles).
+export const soulTrail = (ctx: Ctx, pts: number[][], k: number, t: number) => {
+  const c = k === 4 ? `hsl(${(t / 5) % 360},100%,68%)` : `rgb(${rgb(RARITY_RGB[k])})`
+  pts.forEach(([x, y], j) => {
+    const f = 1 - j / pts.length, r = 3 + f * 9
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, c); g.addColorStop(1, 'rgba(0,0,0,0)')
+    ctx.globalAlpha = f * 0.5; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill()
+  })
+  ctx.globalAlpha = 1
 }

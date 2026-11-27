@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { BANNERS, BIG_PITY, COST, PITY_MAX, type Banner } from '../data/banners'
+import { BANNERS, BIG_PITY, COST, PITY_MAX } from '../data/banners'
 import { heroById } from '../data/heroes'
 import { RARITIES, RARITY_ORDER } from '../data/rarities'
-import { extraArt, heroArt, iconArt } from '../assets/manifest'
+import { extraArt, iconArt } from '../assets/manifest'
 import { HEROES } from '../data/heroes'
 import { isPityRarity } from '../data/rarities'
 import { LEVEL_CAP, MAX_LEVEL } from '../game/progression'
@@ -11,13 +11,13 @@ import { cardRate, indexCards } from '../game/gacha'
 import { Guide } from '../ui/Guide'
 import { useStore, type Currency } from '../state/store'
 import { Card, LazyCard } from '../ui/Card'
-import { IconChevron, IconInfo } from '../ui/icons'
-import { Coin } from '../ui/Coin'
-import { RiftSummon } from '../summon/RiftSummon'
+import { readFav, RiftSummon, toggleFav } from '../summon/RiftSummon'
 import { primeAudio } from '../summon/audio'
 import { LrBanner } from './LrBanner'
 import { KeyTimer } from '../ui/Chrome'
 
+const lrArt = import.meta.glob('../assets/referral/ticket_LR.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
+const LR_TICKET = Object.values(lrArt)[0]
 const pct = (x: number) => `${(x * 100).toLocaleString('fr-FR', { maximumFractionDigits: 3 })} %`
 const two = (n: number) => String(n).padStart(2, '0')
 
@@ -34,44 +34,19 @@ const useCountdown = (iso: string) => {
   return ms === 0 ? 'Terminée' : `${d} j ${h} h ${m} min`
 }
 
-// Les deux garanties d'une bannière. Petite : une SSR ou mieux au plus tard à la 50e invocation.
-// Grande : une MR au 30e multi ×10 d'affilée sans MR sur ce Portail.
-const PityBar = ({ value, multis, banner }: { value: number; multis: number; banner: Banner }) => (
-  <div className="pity" role="group" aria-label="Garanties">
-    <div role="meter" aria-valuemin={0} aria-valuemax={PITY_MAX} aria-valuenow={value} aria-label="Garantie SSR ou mieux">
-      <div className="pity__row">
-        <span className="pity__label">Garantie SSR ou mieux</span>
-        <b className="pity__count">{value}<i> / {PITY_MAX}</i></b>
-      </div>
-      <div className="pity__track"><i style={{ width: `${(value / PITY_MAX) * 100}%` }} /></div>
-      <p className="pity__note">{value + 1 >= PITY_MAX ? 'La prochaine invocation est garantie SSR, LR ou MR.' : `Encore ${PITY_MAX - value} invocations au plus avant une carte SSR, LR ou MR garantie.`}</p>
-    </div>
-    <div className="pity__big" role="meter" aria-valuemin={0} aria-valuemax={BIG_PITY} aria-valuenow={multis} aria-label="Grande garantie MR">
-      <div className="pity__row">
-        <span className="pity__label">Grande garantie <b>MR</b></span>
-        <b className="pity__count">{multis}<i> / {BIG_PITY} multis</i></b>
-      </div>
-      <ol className="pity__steps" aria-hidden="true">{Array.from({ length: BIG_PITY }, (_, i) => <li key={i} className={i < multis ? 'is-on' : ''} />)}</ol>
-      <p className="pity__note">{multis + 1 >= BIG_PITY ? <>Ton prochain <b>×10</b> sur {banner.world} contient une carte MR garantie !</> : <>Encore {BIG_PITY - multis} invocations ×10 sur {banner.world} au plus avant une MR garantie. Le compteur repart à zéro quand une MR sort.</>}</p>
-    </div>
-  </div>
-)
 
 export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start?: number }) => {
   const store = useStore()
   const [index, setIndex] = useState(start)
-  const [currency, setCurrency] = useState<Currency>('ticket')
+  const currency: Currency = 'ticket' // le moyen de paiement se choisit dans la faille
   const [rift, setRift] = useState<number | null>(null) // écran d'invocation « faille » ouvert, avec la quantité choisie
   const [showIndex, setShowIndex] = useState(false)
+  const [hold, setHold] = useState(false) // la souris est sur l'affiche : on arrête le défilement
+  const [favs, setFavs] = useState(readFav)
   const [focus, setFocus] = useState(false) // « Voir le Portail » : n'affiche plus que la bannière choisie
   const banner = BANNERS[index]
-  const star = heroById(banner.star)
-  const starArt = store.customArt[star.id] ?? store.remoteArt[star.id] ?? heroArt(star.model, 'full')
   const left = useCountdown(banner.endsAt)
   const pity = store.pity[banner.id]
-  const coin = currency === 'ticket' ? 'seal' : 'soul'
-  const price = (n: number) => n * (currency === 'ticket' ? COST.ticket : COST.gems)
-  const turn = (step: number) => setIndex((i) => (i + step + BANNERS.length) % BANNERS.length)
   // Mes gros tirages : les cartes SSR, LR et MR réellement obtenues sur cet appareil, les plus récentes d'abord.
   const bigPulls = HEROES.filter((h) => isPityRarity(h.rarity))
     .flatMap((h) => (store.log[h.id] ?? []).filter((e) => e.k === 'pull').map((e) => ({ hero: h, t: e.t })))
@@ -80,6 +55,12 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
     const m = Math.floor((Date.now() - t) / 60000)
     return m < 1 ? 'à l’instant' : m < 60 ? `il y a ${m} min` : m < 1440 ? `il y a ${Math.floor(m / 60)} h` : `il y a ${Math.floor(m / 1440)} j`
   }
+  // l'affiche passe toute seule à la bannière suivante toutes les 8 secondes
+  useEffect(() => {
+    if (hold || focus || rift !== null) return
+    const t = setTimeout(() => setIndex((i) => (i + 1) % BANNERS.length), 8000)
+    return () => clearTimeout(t)
+  }, [index, hold, focus, rift])
   const summon = (n: number) => {
     primeAudio() // le son n'est autorisé par le navigateur que pendant ce clic
     setRift(n) // on ouvre la faille : le tirage se fait quand le joueur l'ouvre
@@ -88,128 +69,69 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
   return (
     <div className={`summon ${focus ? 'summon--focus' : ''}`} style={{ ['--hue' as string]: banner.hue }}>
       {focus && <button className="summon__back" onClick={() => { setFocus(false); window.scrollTo({ top: 0 }) }}>← Toutes les invocations</button>}
-      {/* ═══ Ordinateur : grande bannière avec les univers en pastilles, l'invocation à gauche, les vedettes en éventail à droite ═══ */}
-      <section className="bh" key={`bh-${banner.id}`}>
-        {store.bannerArt[banner.id] && <img className="bh__bg" src={store.bannerArt[banner.id]} alt="" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
-        <span className="bh__glyph" aria-hidden="true">{banner.glyph}</span>
-        {!focus && <div className="bh__chips" role="tablist" aria-label="Portails">
-          {BANNERS.map((b, i) => (
-            <button key={b.id} role="tab" aria-selected={i === index} className={i === index ? 'is-on' : ''} style={{ ['--hue' as string]: b.hue }} onClick={() => setIndex(i)}>
-              <img src={extraArt(`emblem-${b.id}`)} alt="" />{b.world}
-            </button>
-          ))}
-        </div>}
-        <div className="bh__main">
-          <div className="bh__left">
-            <p className="bh__kicker">✦ MR {pct(RARITIES.rift.rate)} · Portail ouvert pendant <b>{left}</b></p>
-            <h1>{banner.world}</h1>
-            <p className="bh__sub">{banner.subtitle}</p>
-            <div className="bh__links">
-              <button className="linkbtn" onClick={() => setShowIndex(true)}><IconInfo />Index du Portail</button>
-              {!focus && <button className="linkbtn" onClick={() => { setFocus(true); window.scrollTo({ top: 0 }) }}>Voir le Portail ↗</button>}
-            </div>
-            <p className="bh__label">Moyen d'invocation</p>
-            <div className="bh__pay" role="radiogroup" aria-label="Moyen d'invocation">
-              <button role="radio" aria-checked={currency === 'ticket'} className={currency === 'ticket' ? 'is-on' : ''} onClick={() => setCurrency('ticket')}><Coin name="seal" size={26} />Clés<b>{store.tickets}</b></button>
-              <button role="radio" aria-checked={currency === 'gems'} className={currency === 'gems' ? 'is-on' : ''} onClick={() => setCurrency('gems')}><Coin name="soul" size={26} />Éclats<b>{store.gems}</b></button>
-            </div>
-              <KeyTimer long />
-            <div className="bh__pulls">
-              {[1, 5, 10].map((n) => (
-                <button key={n} className={n === 10 ? 'is-gold' : ''} disabled={!store.canAfford(currency, n)} onClick={() => summon(n)}>
-                  <span>Invoquer ×{n}</span><i /><b>{price(n)}<Coin name={coin} size={20} /></b>
-                </button>
-              ))}
-            </div>
-            <div className="bh__pity">
-              <span>Garantie SSR</span><div className="pity__track"><i style={{ width: `${(pity / PITY_MAX) * 100}%` }} /></div><b>{pity}/{PITY_MAX}</b>
-              <span>Grande garantie MR</span><div className="pity__track pity__track--mr"><i style={{ width: `${((store.multis[banner.id] ?? 0) / BIG_PITY) * 100}%` }} /></div><b>{store.multis[banner.id] ?? 0}/{BIG_PITY}</b>
-            </div>
+      {/* ═══ Bannière en vedette : grande affiche qui défile toute seule ; « Invoquer » ouvre directement la faille ═══ */}
+      <section className="bx" key={`bx-${banner.id}`} style={{ ['--hue' as string]: banner.hue }} onPointerEnter={() => setHold(true)} onPointerLeave={() => setHold(false)}>
+        {store.bannerArt[banner.id] && <img className="bx__bg" src={store.bannerArt[banner.id]} alt="" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
+        <span className="bx__glyph" lang="ja" aria-hidden="true">{banner.glyph}</span>
+        <div className="bx__text">
+          <p className="bx__kicker">✦ MR {pct(RARITIES.rift.rate)} · Bannière limitée pendant <b>{left}</b></p>
+          <h1 className="bx__title">{banner.world}</h1>
+          <p className="bx__sub">{banner.subtitle}</p>
+          <div className="bx__btns">
+            <button className="bx__go" onClick={() => summon(10)}>Invoquer</button>
+            <button className="bx__ghost" onClick={() => setShowIndex(true)}>Index de la bannière</button>
           </div>
-          <div className="bh__fan">
-            {banner.featured.map((id, i) => (
-              <div key={id} className={`bh__card bh__card--${i}`}><Card hero={heroById(id)} /><span className={store.owned[id] ? 'is-owned' : ''}>{store.owned[id] ? `Possédée ×${store.owned[id]}` : 'Non obtenue'}</span></div>
-            ))}
-          </div>
+          <p className="bx__pity">Garantie SSR <b>{pity}/{PITY_MAX}</b><i>·</i>Grande garantie MR <b>{store.multis[banner.id] ?? 0}/{BIG_PITY}</b><i>·</i><span>🎟 {store.tickets} clés</span></p>
+          <KeyTimer long />
         </div>
-        {!focus && <button className="bh__nav bh__nav--prev" onClick={() => turn(-1)} aria-label="Portail précédent"><IconChevron left /></button>}
-        {!focus && <button className="bh__nav bh__nav--next" onClick={() => turn(1)} aria-label="Portail suivant"><IconChevron /></button>}
+        <div className="bx__fan">
+          {banner.featured.map((id, i) => <div key={id} className={`bx__card bx__card--${i}`}><Card hero={heroById(id)} /></div>)}
+        </div>
+        {!focus && <div className="bx__dots" role="tablist" aria-label="Bannières">{BANNERS.map((b, i) => <button key={b.id} role="tab" aria-selected={i === index} aria-label={b.world} className={i === index ? 'is-on' : ''} onClick={() => setIndex(i)} />)}</div>}
       </section>
 
-      {/* Affiche du Portail (téléphone) */}
-      <section className="poster" key={banner.id}>
-        {store.bannerArt[banner.id] && <img className="poster__bg" src={store.bannerArt[banner.id]} alt="" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
-        <div className="poster__slash" aria-hidden="true" />
-        <span className="poster__glyph" aria-hidden="true">{banner.glyph}</span>
-        {starArt && <img className={`poster__art ${store.customArt[star.id] || store.remoteArt[star.id] ? 'poster__art--custom' : ''}`} src={starArt} alt={star.name} referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
-        <div className="poster__text">
-          <p className="poster__count"><b>{two(index + 1)}</b> / {two(BANNERS.length)} · Faille ouverte</p>
-          <h1 className="poster__title">{banner.world}</h1>
-          <p className="poster__sub">{banner.subtitle}</p>
-          <div className="poster__chips">
-            <span className="chip chip--time">Ferme dans <b>{left}</b></span>
-            <span className="chip">MR {pct(RARITIES.rift.rate)} · LR {pct(RARITIES.legend.rate)}</span>
-          </div>
-        </div>
-        {!focus && <button className="poster__nav poster__nav--prev" onClick={() => turn(-1)} aria-label="Portail précédent"><IconChevron left /></button>}
-        {!focus && <button className="poster__nav poster__nav--next" onClick={() => turn(1)} aria-label="Portail suivant"><IconChevron /></button>}
-      </section>
-
-      {/* Choix du Portail */}
-      {!focus && <div className="rail" role="tablist" aria-label="Portails">
-        {BANNERS.map((b, i) => {
-          const have = b.featured.filter((id) => store.owned[id]).length
-          return (
-            <button key={b.id} role="tab" aria-selected={i === index} className={`rail__item ${i === index ? 'is-active' : ''}`} style={{ ['--hue' as string]: b.hue }} onClick={() => setIndex(i)}>
-              <img className="rail__emblem" src={extraArt(`emblem-${b.id}`)} alt="" />
-              <span><b>{b.world}</b><small>{have}/{b.featured.length} cartes · pity {store.pity[b.id]}/{PITY_MAX}</small></span>
-            </button>
-          )
-        })}
+      {!focus && <div className="bx-chips" role="tablist" aria-label="Bannières">
+        {BANNERS.map((b, i) => (
+          <button key={b.id} role="tab" aria-selected={i === index} className={`bx-chip ${i === index ? 'is-on' : ''}`} style={{ ['--hue' as string]: b.hue }} onClick={() => { setIndex(i); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
+            <img src={extraArt(`emblem-${b.id}`)} alt="" />{b.world}
+          </button>
+        ))}
+        <button className="bx-chip bx-chip--lr" onClick={() => document.querySelector('.lrb')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}><img src={LR_TICKET} alt="" />LR Garantie</button>
       </div>}
 
-      {/* Cartes à l'affiche */}
-      <section className="lineup">
-        <header className="lineup__head">
-          <h2>Cartes vedettes</h2>
-          <button className="linkbtn" onClick={() => setShowIndex(true)}><IconInfo />Index et taux</button>
-        </header>
-        <div className="lineup__cards">
-          {banner.featured.map((id) => (
-            <div key={id} className="lineup__slot">
-              <Card hero={heroById(id)} />
-              <span className={`lineup__own ${store.owned[id] ? 'is-owned' : ''}`}>{store.owned[id] ? `Possédée ×${store.owned[id]}` : 'Non obtenue'}</span>
-            </div>
-          ))}
+      {!focus && <section className="bx-aff">
+        <header className="section__head"><span>01</span><div><h2>À l'affiche</h2><p>Les bannières limitées du moment.</p></div></header>
+        <div className="bx-aff__grid">
+          {[...BANNERS].sort((x, y) => Number(favs.includes(y.id)) - Number(favs.includes(x.id))).map((b) => {
+            const i = BANNERS.indexOf(b)
+            const s = heroById(b.star)
+            const pool = indexCards(b)
+            const have = pool.filter((h) => store.owned[h.id]).length
+            const multis = store.multis[b.id] ?? 0
+            const isFav = favs.includes(b.id)
+            const open = () => { setIndex(i); window.scrollTo({ top: 0, behavior: 'smooth' }) }
+            return (
+              <article key={b.id} className={`bt ${i === index ? 'is-current' : ''}`} style={{ ['--hue' as string]: b.hue }}>
+                <div className="bt__top" onClick={open}>
+                  {store.bannerArt[b.id] && <img className="bt__bg" src={store.bannerArt[b.id]} alt="" loading="lazy" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
+                  <button className={`bt__fav ${isFav ? 'is-on' : ''}`} aria-pressed={isFav} aria-label={`${b.world} en favori`} onClick={(e) => { e.stopPropagation(); toggleFav(b.id, !isFav); setFavs(readFav()) }}>★</button>
+                  <div className="bt__text">
+                    <p className="bt__kick">Bannière limitée</p>
+                    <h3>{b.world}</h3>
+                    <p className="bt__star"><b>{RARITIES[s.rarity].short}</b>{s.name} ({s.title})</p>
+                    <button className="bt__link" onClick={(e) => { e.stopPropagation(); open() }}>Voir la bannière ↗</button>
+                  </div>
+                  <div className="bt__card"><Card hero={s} inert /></div>
+                </div>
+                <div className="bt__stats">
+                  <div><span>Cartes à l'affiche possédées</span><b>{have} / {pool.length}</b><div className="bt__bar"><i style={{ width: `${(have / Math.max(1, pool.length)) * 100}%` }} /></div></div>
+                  <div><span>Grande garantie MR · multis ×10</span><b>{multis} / {BIG_PITY}</b><div className="bt__bar bt__bar--gold"><i style={{ width: `${(multis / BIG_PITY) * 100}%` }} /></div></div>
+                </div>
+              </article>
+            )
+          })}
         </div>
-      </section>
-
-      {/* Console d'invocation */}
-      <section className="console">
-        <div className="console__top">
-          <div className="pay" role="radiogroup" aria-label="Moyen d'invocation">
-            <button role="radio" aria-checked={currency === 'ticket'} className={currency === 'ticket' ? 'is-active' : ''} onClick={() => setCurrency('ticket')}>
-              <Coin name="seal" size={40} /><span>Clés<b>{store.tickets}</b></span>
-            </button>
-            <button role="radio" aria-checked={currency === 'gems'} className={currency === 'gems' ? 'is-active' : ''} onClick={() => setCurrency('gems')}>
-              <Coin name="soul" size={40} /><span>Éclats<b>{store.gems}</b></span>
-            </button>
-          </div>
-        </div>
-        <ul className="owned-count">
-          <li><b>{banner.featured.filter((id) => store.owned[id]).length}<i> / {banner.featured.length}</i></b><span>têtes d'affiche possédées</span></li>
-          <li><b>{indexCards(banner).filter((h) => store.owned[h.id]).length}<i> / {indexCards(banner).length}</i></b><span>SSR, LR et MR de {banner.world} possédées</span></li>
-        </ul>
-        <PityBar value={pity} multis={store.multis[banner.id] ?? 0} banner={banner} />
-        <div className="console__pulls">
-          {[1, 5, 10].map((n) => (
-            <button key={n} className={`pull ${n === 10 ? 'pull--gold' : ''}`} disabled={!store.canAfford(currency, n)} onClick={() => summon(n)}>
-              <b>×{n}</b>
-              <span><Coin name={coin} size={20} />{price(n)}</span>
-            </button>
-          ))}
-        </div>
-      </section>
+      </section>}
 
       {/* Bannière seule : ses têtes d'affiche, une par une */}
       {focus && (
@@ -278,36 +200,6 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
       )}
 
       {!focus && <LrBanner />}
-
-      {/* Toutes les bannières : informations, progression et carte vedette */}
-      {!focus && <section className="showcase">
-        <header className="section__head"><span>{two(BANNERS.length)}</span><div><h2>À l'affiche</h2><p>Les Portails ouverts en ce moment.</p></div></header>
-        <div className="showcase__list">
-          {BANNERS.map((b, i) => {
-            const s = heroById(b.star)
-            const have = b.featured.filter((id) => store.owned[id]).length
-            return (
-              <article key={b.id} className={`show ${i === index ? 'is-current' : ''}`} style={{ ['--hue' as string]: b.hue }}>
-                <div className="show__top">
-                  {store.bannerArt[b.id] && <img className="show__bg" src={store.bannerArt[b.id]} alt="" loading="lazy" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
-                  <span className="show__glyph" lang="ja" aria-hidden="true">{b.glyph}</span>
-                  <div className="show__text">
-                    <p className="show__kicker"><img className="show__emblem" src={extraArt(`emblem-${b.id}`)} alt="" />Portail limité</p>
-                    <h3>{b.world}</h3>
-                    <p className="show__star"><b>{RARITIES[s.rarity].short}</b>{s.name} ({s.title})</p>
-                    <button className="show__link" onClick={() => { setIndex(i); setFocus(true); window.scrollTo({ top: 0 }) }}>Voir le Portail ↗</button>
-                  </div>
-                  <div className="show__card"><Card hero={s} /></div>
-                </div>
-                <div className="show__stats">
-                  <div><span>Cartes à l'affiche possédées</span><b>{have} / {b.featured.length}</b><div className="bar"><i style={{ width: `${(have / b.featured.length) * 100}%` }} /></div></div>
-                  <div><span>Pity SSR ou mieux</span><b>{store.pity[b.id]} / {PITY_MAX}</b><div className="bar"><i style={{ width: `${(store.pity[b.id] / PITY_MAX) * 100}%` }} /></div></div>
-                </div>
-              </article>
-            )
-          })}
-        </div>
-      </section>}
 
       {!focus && <>
         {/* Échos des failles : les anciens Portails, rouvertes par l’Ascension */}

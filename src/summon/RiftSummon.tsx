@@ -10,7 +10,7 @@ import { Card } from '../ui/Card'
 import './rift-summon.css'
 import { primeAudio, SummonAudio } from './audio'
 import { MrEdit } from './MrEdit'
-import { boomDraw, crystal, drawShards, makeBoom, makeRift, makeShards, makeSky, RARITY_RGB, rgb, sizeCanvas, type Boom, type Gl, type RGB } from './riftFx'
+import { boomDraw, drawShards, soul, soulTrail, makeBoom, makeRift, makeShards, makeSky, RARITY_RGB, rgb, sizeCanvas, type Boom, type Gl, type RGB } from './riftFx'
 
 const art = import.meta.glob('../assets/summon/rift-*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 const SKY = art['../assets/summon/rift-sky.webp']
@@ -35,11 +35,12 @@ const leftOf = (iso: string) => {
   return `${Math.floor(m / 1440)} j ${Math.floor((m % 1440) / 60)} h ${m % 60} min`
 }
 const favKey = 'anime-rift-fav-banners'
-const readFav = (): string[] => { try { return JSON.parse(localStorage.getItem(favKey) || '[]') } catch { return [] } }
+export const toggleFav = (id: string, on: boolean) => { const l = readFav().filter((x) => x !== id); if (on) l.push(id); try { localStorage.setItem(favKey, JSON.stringify(l)) } catch { /* stockage bloqué */ } }
+export const readFav = (): string[] => { try { return JSON.parse(localStorage.getItem(favKey) || '[]') } catch { return [] } }
 
 const CRACK = 'M50 2 L46 20 L54 34 L44 52 L57 70 L47 88 L55 104 L49 131|M46 20 L30 26 L22 40|M54 34 L72 30 L80 18|M44 52 L24 60 L14 78|M57 70 L78 76 L88 96|M47 88 L32 98 L26 118|M55 104 L70 112 L74 128'.split('|')
 
-// Écran d'invocation complet : la faille au repos → ouverture (déchirure, verre, cristaux, explosion MR) → révélation carte par carte → récapitulatif.
+// Écran d'invocation complet : la faille au repos → ouverture (déchirure, verre, âmes, explosion MR) → révélation carte par carte → récapitulatif.
 // Le tirage est fait par le jeu (store.summon, avec la pity) AVANT l'animation : l'animation ne fait que mettre en scène le résultat.
 export const RiftSummon = ({ banner, count = 10, currency = 'ticket', onClose }: { banner: Banner; count?: number; currency?: Currency; onClose: () => void }) => {
   const store = useStore()
@@ -178,7 +179,7 @@ export const RiftSummon = ({ banner, count = 10, currency = 'ticket', onClose }:
       }
       ctx.restore(); ctx.globalCompositeOperation = 'source-over'
       drawShards(ctx, shards, t / 1000, c1)
-      // cristaux : un par carte, le plus rare en dernier, puis fusion au centre
+      // âmes : une par carte, la plus rare en dernier, puis fusion au centre
       ctx.globalCompositeOperation = 'lighter'
       const merge = t > 2850 ? Math.min(1, (t - 2850) / 450) : 0
       if (t > 3280 && !fl) {
@@ -188,9 +189,18 @@ export const RiftSummon = ({ banner, count = 10, currency = 'ticket', onClose }:
       cr.forEach((c, j) => {
         const k = (t - c.t0) / 700
         if (k < 0 || (MR && t > 3330)) return
-        if (!c.rang) { c.rang = true; audio.current.pop(RARITY_OF[c.k], j) } // tintement de chaque cristal, plus aigu au fil des cartes
+        if (!c.rang) { c.rang = true; audio.current.pop(RARITY_OF[c.k], j) } // tintement de chaque âme, plus aigu au fil des cartes
         const e = 1 - Math.pow(1 - Math.min(k, 1), 3), R = c.R * e * (1 - merge * merge), a = c.a + (1 - e) * 2.2 + t / 2600
-        crystal(ctx, cx + Math.cos(a) * R, cy + Math.sin(a) * R * 0.62, c.len * (0.4 + 0.6 * e) * (1 - merge * 0.6), c.spin + t / 500, c.k, c.k >= 3 ? 1 + 0.15 * Math.sin(t / 80) : 1, t)
+        // traînée : la position de l'âme quelques instants plus tôt
+        const trail: number[][] = []
+        for (let q = 1; q <= 7; q++) {
+          const tq = t - q * 22, kq = Math.max(0, (tq - c.t0) / 700)
+          if (kq <= 0) break
+          const eq = 1 - Math.pow(1 - Math.min(kq, 1), 3), Rq = c.R * eq * (1 - merge * merge), aq = c.a + (1 - eq) * 2.2 + tq / 2600
+          trail.push([cx + Math.cos(aq) * Rq, cy + Math.sin(aq) * Rq * 0.62])
+        }
+        soulTrail(ctx, trail, c.k, t)
+        soul(ctx, cx + Math.cos(a) * R, cy + Math.sin(a) * R * 0.62, c.len * (0.4 + 0.6 * e) * (1 - merge * 0.6), c.k, c.k >= 3 ? 1 + 0.15 * Math.sin(t / 80) : 1, t, c.spin)
       })
       if (boom) boomDraw(ctx, boom, (t - 3300) / 1000, cx, cy, W, H)
       ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'
@@ -380,7 +390,7 @@ export const RiftSummon = ({ banner, count = 10, currency = 'ticket', onClose }:
         <div className="rs__top rs__ui-item">
           <button className="rs__back" onClick={onClose}>‹ Bannières</button>
           <h1 className="rs__cap"><span lang="ja">{banner.glyph}</span> {banner.world}</h1>
-          <button className={`rs__fav ${fav ? 'is-on' : ''}`} aria-pressed={fav} aria-label="Bannière favorite" onClick={() => { const l = readFav().filter((x) => x !== banner.id); if (!fav) l.push(banner.id); try { localStorage.setItem(favKey, JSON.stringify(l)) } catch { /* stockage bloqué */ } setFav(!fav) }}>★</button>
+          <button className={`rs__fav ${fav ? 'is-on' : ''}`} aria-pressed={fav} aria-label="Bannière favorite" onClick={() => { toggleFav(banner.id, !fav); setFav(!fav) }}>★</button>
         </div>
         <p className="rs__mono rs__tag rs__ui-item">✦ MR {(RARITIES.rift.rate * 100).toLocaleString('fr-FR', { maximumFractionDigits: 3 })} % · Bannière limitée pendant <b>{leftOf(banner.endsAt)}</b></p>
         <div className="rs__stage">
