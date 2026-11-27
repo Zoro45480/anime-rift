@@ -122,10 +122,14 @@ const draw = (ctx: CanvasRenderingContext2D, p: P, dt: number) => {
 }
 
 // Lance l'animation dans le canvas ; renvoie la fonction qui l'arrête.
-export const startMrFx = (cv: HTMLCanvasElement, theme: string) => {
+// Au plus MAX_LIVE cartes animées en même temps (les autres gardent lueur et reflet) : les grilles restent fluides.
+const MAX_LIVE = 10
+let live = 0
+export const startMrFx = (cv: HTMLCanvasElement, theme: string, density = 1) => {
   const T = MR_THEMES[theme]
   const ctx = cv.getContext('2d')
-  if (!T || !ctx) return () => {}
+  if (!T || !ctx || live >= MAX_LIVE) return () => {}
+  live++
   let parts: P[] = [], last = performance.now(), raf = 0, visible = true
   const acc = T.fx.map(() => 0)
   const resize = () => { const r = cv.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2); cv.width = Math.round(r.width * d); cv.height = Math.round(r.height * d) }
@@ -135,11 +139,11 @@ export const startMrFx = (cv: HTMLCanvasElement, theme: string) => {
     const dt = Math.min(0.05, (now - last) / 1000); last = now
     if (visible && cv.width) {
       ctx.clearRect(0, 0, cv.width, cv.height)
-      T.fx.forEach(([kind, rate, col], i) => { acc[i] += rate * dt; while (acc[i] >= 1) { acc[i]--; parts.push(spawn(kind, col, cv.width, cv.height)) } })
+      T.fx.forEach(([kind, rate, col], i) => { acc[i] += rate * density * dt; while (acc[i] >= 1) { acc[i]--; parts.push(spawn(kind, col, cv.width, cv.height)) } })
       parts = parts.filter((p) => draw(ctx, p, dt))
     }
     raf = requestAnimationFrame(loop)
   }
   raf = requestAnimationFrame(loop)
-  return () => { cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); parts = [] }
+  return () => { cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); parts = []; live-- }
 }

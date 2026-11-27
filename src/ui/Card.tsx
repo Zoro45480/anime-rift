@@ -36,8 +36,8 @@ export const Card = ({ hero, count, locked, inert, hd, className = '', style }: 
   const mrSrc = hero.rarity === 'rift' ? mrFrameArt(theme, hd) : ''
   const fxRef = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
-    if (!mrSrc || !hd || !fxRef.current || document.documentElement.dataset.fx === 'low') return
-    return startMrFx(fxRef.current, theme)
+    if (!mrSrc || !fxRef.current || document.documentElement.dataset.fx === 'low') return
+    return startMrFx(fxRef.current, theme, hd ? 1 : 0.55)
   }, [mrSrc, hd, theme])
 
   const onMove = (e: PointerEvent<HTMLDivElement>) => {
@@ -98,7 +98,7 @@ export const Card = ({ hero, count, locked, inert, hd, className = '', style }: 
         {mrSrc ? <>
           <img className={`card__frame card__frame--mr card__frame--mr-${theme}`} src={mrSrc} alt="" decoding="async" />
           <span className={`card__mrshine card__frame--mr-${theme}`} style={{ WebkitMaskImage: `url("${mrSrc}")`, maskImage: `url("${mrSrc}")` }} aria-hidden="true" />
-          {hd && <canvas ref={fxRef} className="card__mrfx" aria-hidden="true" />}
+          <canvas ref={fxRef} className="card__mrfx" aria-hidden="true" />
         </> : <>
           <img className="card__frame" src={frameArt(hero.rarity, frameOf(hero.world), hd)} alt="" decoding="async" />
           <img className={`card__fx ${frameOf(hero.world) === 'naruto' ? '' : 'card__fx--own'}`} src={frameFx(hero.rarity, frameOf(hero.world), hd)} alt="" decoding="async" />

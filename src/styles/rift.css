@@ -731,3 +731,11 @@ body:has(.sc) .chat__toggle, body:has(.sc) .chat__panel { display: none !importa
 .logo__full { height: 58px; margin-left: 0; }
 .logo__emblem { height: 40px; }
 @media (max-width: 480px) { .logo__emblem { height: 34px; } }
+
+/* ── Flamme de la série de jours ── */
+.dr__fire { width: 30px; height: 38px; flex: none; overflow: visible; filter: drop-shadow(0 0 8px rgba(255, 122, 43, 0.75)) drop-shadow(0 0 16px rgba(255, 61, 154, 0.45)); transform-origin: 50% 100%; animation: fire-flicker 1.4s ease-in-out infinite; }
+.dr__fire-in { transform-origin: 50% 100%; animation: fire-core 0.9s ease-in-out infinite alternate; }
+@keyframes fire-flicker { 0%, 100% { transform: scale(1, 1) skewX(0deg); } 30% { transform: scale(0.97, 1.05) skewX(-2deg); } 60% { transform: scale(1.03, 0.97) skewX(2deg); } }
+@keyframes fire-core { to { transform: scale(0.9, 1.08); } }
+:root[data-fx='low'] .dr__fire, :root[data-fx='low'] .dr__fire-in { animation: none; }
+@media (prefers-reduced-motion: reduce) { .dr__fire, .dr__fire-in { animation: none; } }

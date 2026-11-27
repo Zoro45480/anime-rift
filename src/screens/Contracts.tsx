@@ -105,7 +105,12 @@ export const Contracts = ({ start = 'daily' }: { start?: 'daily' | 'contracts' |
         <section className="dr">
           {st.missed && <p className="dr__alert" role="alert">Tu as manqué un jour : ta série repart au jour 1.</p>}
           <div className="dr__top">
-            <div className="dr__streak"><span className="dr__flame" aria-hidden="true" /><b>{streak}</b><span>jour{streak > 1 ? 's' : ''} d'affilée</span></div>
+            <div className="dr__streak"><svg className="dr__fire" viewBox="0 0 32 40" aria-hidden="true">
+              <defs><linearGradient id="dr-fire-a" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stopColor="#ff3d9a" /><stop offset=".55" stopColor="#ff7a2b" /><stop offset="1" stopColor="#ffd166" /></linearGradient>
+                <linearGradient id="dr-fire-b" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stopColor="#ffd166" /><stop offset="1" stopColor="#fff6d8" /></linearGradient></defs>
+              <path className="dr__fire-out" d="M16 1c1.5 6.5 9 9.6 9 19.5 0 2.2-.5 4-1.3 5.6 1.4-3.6.6-7.4-1.7-9.8.6 5.2-2.2 7.3-3.6 7.6 1.8-4.4-.4-9.8-4.6-12.5.8 5.6-4.9 9-4.9 14.9 0 1.6.4 3 1 4.2C7.7 28.4 6 25.4 6 21.7 6 13.4 15.4 9.6 16 1Z" fill="url(#dr-fire-a)" />
+              <path className="dr__fire-in" d="M16.5 19c3.3 3.2 5.7 6 5.7 10.2a6.2 6.2 0 0 1-12.4 0c0-3 1.7-4.9 3.5-6.6.1 2 1.1 3.3 2.2 3.6-.6-2.6.1-5 1-7.2Z" fill="url(#dr-fire-b)" />
+            </svg><b>{streak}</b><span>jour{streak > 1 ? 's' : ''} d'affilée</span></div>
             <div className="dr__clock"><small>Fin de la journée dans</small><b>{clock(msToDayEnd(now))}</b></div>
           </div>
           <ol className="dr__days">
