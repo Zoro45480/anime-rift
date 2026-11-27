@@ -104,7 +104,7 @@ export const Play = ({ onRebirth, onProfile, start }: { onRebirth: () => void; o
           <button className="energy__plus" onClick={buyEnergy} disabled={gems < ENERGY_REFILL_COST || energyLeft + ENERGY_REFILL > ENERGY_OVER} aria-label={`Recharger ${ENERGY_REFILL} éclairs pour ${ENERGY_REFILL_COST} Éclats`}>+</button>
         </div>
         {energyLeft > ENERGY_MAX && <p className="energy__bonus">Bonus : <b>+{energyLeft - ENERGY_MAX}</b> au-delà du maximum</p>}
-        <p>Un éclair par combat · +1 toutes les {ENERGY_REGEN_MS / 60000} minutes. {energyLeft >= ENERGY_MAX ? 'Énergie pleine.' : 'Elle remonte toute seule.'} Elle se dépense dans L’Aventure. Le bouton + rend {ENERGY_REFILL} éclairs pour {ENERGY_REFILL_COST} Éclats (jusqu'à {ENERGY_OVER} en réserve).</p>
+        <p>Un éclair par combat · +1 toutes les {ENERGY_REGEN_MS / 60000} minutes. {energyLeft >= ENERGY_MAX ? 'Énergie pleine.' : 'Elle remonte toute seule.'} Elle se dépense dans L’Aventure. Le bouton + rend {ENERGY_REFILL} éclairs pour {ENERGY_REFILL_COST} Éclats (même au-delà du maximum, sans limite).</p>
       </section>
       <header className="nx__head">
         <img className="nx__headimg" src={uiArt('nav-nexus')} alt="" />

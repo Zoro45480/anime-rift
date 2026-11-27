@@ -101,7 +101,7 @@ export const ENERGY_MAX = 10
 export const ENERGY_REGEN_MS = 6 * 60 * 1000
 export const ENERGY_REFILL = 5 // éclairs rendus par une recharge
 export const ENERGY_REFILL_COST = 20 // Éclats
-export const ENERGY_OVER = ENERGY_MAX * 2 // on peut dépasser le maximum en rechargeant, jusqu'à cette limite
+export const ENERGY_OVER = Number.POSITIVE_INFINITY // aucune limite : récompenses et recharges peuvent dépasser le maximum autant qu'on veut
 export const energyNow = (energy: number, at: number, now: number) =>
   energy >= ENERGY_MAX ? energy : Math.min(ENERGY_MAX, energy + Math.floor(Math.max(0, now - at) / ENERGY_REGEN_MS))
 
