@@ -27,6 +27,8 @@ const Loot = ({ r, big }: { r: PathReward; big?: boolean }) => (
   </span>
 )
 
+const ticketLr = Object.values(import.meta.glob('../assets/referral/ticket_LR.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>)[0]
+
 export const RiftPath = ({ now }: { now: Date }) => {
   const store = useStore()
   const path = rollPath(store.path, now)
@@ -37,6 +39,7 @@ export const RiftPath = ({ now }: { now: Date }) => {
   const need = tierCost(Math.min(TIERS, tier + 1))
   const inTier = tier >= TIERS ? need : path.xp - tierStart(tier)
   const [cards, setCards] = useState<Hero[]>([])
+  const [waive, setWaive] = useState(false)
   const track = useRef<HTMLOListElement>(null)
 
   // Ouvre la piste sur le prochain palier à récupérer, ou sur le palier en cours.
@@ -57,13 +60,13 @@ export const RiftPath = ({ now }: { now: Date }) => {
       <header className="pt__hero">
         {store.bannerArt[seasonWorld.id] && <img className="pt__hero-bg" src={store.bannerArt[seasonWorld.id]} alt="" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
         <div className="pt__hero-text">
-          <h2><img src={uiArt('crown')} alt="" />Chemin du Rift</h2>
-          <p className="pt__ribbon">Saison {season.number} · {season.name}</p>
+          <h2><img src={uiArt('crown')} alt="" />Pass de combat</h2>
+          <p className="pt__ribbon">Saison de {season.start.toLocaleDateString('fr-FR', { month: 'long' })} · {season.name.replace(/^Saison d(e |u |es |’|')/i, '')}</p>
         </div>
         <div className="pt__end"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg><div><small>Fin de saison dans</small><b>{left(season.msLeft)}</b></div></div>
       </header>
 
-      <div className="pt__free"><img src={uiArt('rift-path')} alt="" /><div><b>Piste gratuite ouverte à tous</b><p>Chaque palier atteint donne sa récompense. Avance en faisant tes contrats, tes défis de saison, en combattant et en invoquant.</p></div>{ready.length > 0 && <button className="pt__all" onClick={claimAll}>Tout récupérer ({ready.length})</button>}</div>
+      <div className="pt__free"><span className="pt__free-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M19.6 5.3A16 16 0 0 0 15.6 4l-.5 1a15 15 0 0 0-4.2 0l-.5-1a16 16 0 0 0-4 1.3C3.9 9.1 3.2 12.8 3.5 16.4a16 16 0 0 0 4.9 2.5l1-1.7a10 10 0 0 1-1.6-.8l.4-.3a11.5 11.5 0 0 0 9.6 0l.4.3a10 10 0 0 1-1.6.8l1 1.7a16 16 0 0 0 4.9-2.5c.4-4.2-.7-7.8-2.9-11.1ZM9.4 14.3c-.9 0-1.7-.9-1.7-1.9s.7-1.9 1.7-1.9 1.7.9 1.7 1.9-.8 1.9-1.7 1.9Zm5.2 0c-.9 0-1.7-.9-1.7-1.9s.7-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9Z" /></svg></span><div><b>Pass de combat gratuit ouvert à tous</b><p>Chaque palier atteint donne sa récompense. Avance en faisant tes contrats, tes défis de saison, en combattant et en invoquant.</p></div>{ready.length > 0 && <button className="pt__all" onClick={claimAll}>Tout récupérer ({ready.length})</button>}</div>
 
       <div className="pt__duo">
         <section className="pt__prog2">
@@ -75,10 +78,12 @@ export const RiftPath = ({ now }: { now: Date }) => {
         </section>
         <section className="pt__prem">
           <h3><img src={uiArt('crown')} alt="" />Pass premium</h3>
+          <img className="pt__prem-ticket" src={ticketLr} alt="" />
           <p className="pt__prem-sub">Une 2e récompense à chaque palier</p>
-          <p className="pt__prem-txt">Valable toute la saison {season.number}. Tu peux déjà voir ses récompenses sur la piste ci-dessous.</p>
-          <button className="pt__prem-btn" disabled>Bientôt disponible</button>
-          <small>Le premium demande un vrai paiement en ligne, donc un serveur : il n'est pas encore achetable.</small>
+          <p className="pt__prem-txt">Valable jusqu’au {new Date(season.end.getTime() - 1).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}.</p>
+          <label className="pt__prem-check"><input type="checkbox" checked={waive} onChange={(e) => setWaive(e.target.checked)} /> Je veux recevoir le pass premium tout de suite, et je renonce donc à mon droit de rétractation de 14 jours une fois la livraison faite.</label>
+          <button className="pt__prem-btn" disabled>Passer premium <b>14,99 €</b></button>
+          <small>Paiement sécurisé par Stripe · une fois par saison. Bientôt disponible : le paiement n’est pas encore ouvert.</small>
         </section>
       </div>
 
