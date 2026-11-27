@@ -32,6 +32,26 @@ const GATES = [
 
 type Gate = (typeof GATES)[number]
 
+// Niveau de compte requis pour ouvrir chaque mode. Après une Ascension, tout reste ouvert.
+export const UNLOCK_LEVEL: Record<string, number> = { saga: 1, raids: 15, world: 15, arena: 20, spire: 25, coop: 30 }
+export const modeOpen = (id: string, level: number, rebirths: number) => rebirths > 0 || level >= (UNLOCK_LEVEL[id] ?? 1)
+
+// Mode encore fermé : image en noir et blanc floutée, cadenas, niveau requis et progression.
+const LockedTile = ({ gate, level }: { gate: Gate; level: number }) => {
+  const need = UNLOCK_LEVEL[gate.id]
+  const anime = useStore().bannerArt[gate.anime]
+  return (
+    <div className="nx-lock" role="group" aria-label={`${gate.title} : débloqué au niveau ${need}`}>
+      <img className="nx-lock__bg" src={anime || gateArt('art' in gate ? gate.art : gate.id)} alt="" loading="lazy" referrerPolicy="no-referrer" />
+      <span className="nx-lock__ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /><circle cx="12" cy="16" r="1" /></svg></span>
+      <b className="nx-lock__title">{gate.title}</b>
+      <span className="nx-lock__need">Débloqué au niveau <em>{need}</em></span>
+      <span className="nx-lock__bar"><i style={{ width: `${Math.min(100, (level / need) * 100)}%` }} /></span>
+      <small>Encore {need - level} niveau{need - level > 1 ? 'x' : ''}</small>
+    </div>
+  )
+}
+
 // Une porte : panneau de verre noir, lueur à sa couleur, personnage en fondu devant le décor 3D de son mode.
 const GateTile = ({ gate, featured, playable, onOpen }: { gate: Gate; featured?: boolean; playable?: boolean; onOpen: () => void }) => {
   // image officielle de l'animé (AniList, chargée par le navigateur) ; sans elle, le décor 3D et le personnage du jeu
@@ -67,11 +87,12 @@ export const Play = ({ onRebirth, onProfile, start }: { onRebirth: () => void; o
   const [world, setWorld] = useState(false)
   const [coop, setCoop] = useState(false)
   const acc = accountLevel(accountXp, rebirths)
-  if (world) return <WorldBoss onBack={() => { setWorld(false); window.scrollTo(0, 0) }} />
-  if (coop) return <Raids onBack={() => { setCoop(false); window.scrollTo(0, 0) }} />
-  if (arena) return <Arena onBack={() => { setArena(false); window.scrollTo(0, 0) }} />
-  if (colossus) return <Colossus onBack={() => { setColossus(false); window.scrollTo(0, 0) }} />
-  if (spire) return <Spire onBack={() => { setSpire(false); window.scrollTo(0, 0) }} />
+  const ok = (id: string) => modeOpen(id, acc.level, rebirths)
+  if (world && ok('world')) return <WorldBoss onBack={() => { setWorld(false); window.scrollTo(0, 0) }} />
+  if (coop && ok('coop')) return <Raids onBack={() => { setCoop(false); window.scrollTo(0, 0) }} />
+  if (arena && ok('arena')) return <Arena onBack={() => { setArena(false); window.scrollTo(0, 0) }} />
+  if (colossus && ok('raids')) return <Colossus onBack={() => { setColossus(false); window.scrollTo(0, 0) }} />
+  if (spire && ok('spire')) return <Spire onBack={() => { setSpire(false); window.scrollTo(0, 0) }} />
   if (saga) return <Saga onBack={() => { setSaga(false); window.scrollTo(0, 0) }} />
   return (
     <div className="nx">
@@ -87,13 +108,13 @@ export const Play = ({ onRebirth, onProfile, start }: { onRebirth: () => void; o
       </section>
       <header className="nx__head">
         <p className="eyebrow">Le Nexus</p>
-        <h1>Six portes.<br />Toutes sont ouvertes.</h1>
+        <h1>Six portes.<br />{GATES.every((g) => modeOpen(g.id, acc.level, rebirths)) ? 'Toutes sont ouvertes.' : 'Monte de niveau pour les ouvrir.'}</h1>
         <button className="nx__who" onClick={onProfile} aria-label="Voir mon profil"><Avatar size={40} /><b>{profile.name.trim() || 'Joueur'}</b><span>Voir mon profil →</span></button>
         <p className="nx__level"><LevelBadge level={acc.level} rebirths={rebirths} size={40} /><span>Style {LEVEL_STYLE_NAME[levelStyle(acc.level, rebirths)]} · {acc.need ? `${acc.into.toLocaleString('fr-FR')} / ${acc.need.toLocaleString('fr-FR')} XP de compte` : 'Niveau maximum'}</span></p>
       </header>
       <GateTile gate={GATES[0]} featured playable onOpen={() => { setSaga(true); window.scrollTo(0, 0) }} />
       <div className="nx__row">
-        {GATES.slice(1).map((g) => <GateTile key={g.id} gate={g} playable onOpen={() => { if (g.id === 'spire') setSpire(true); else if (g.id === 'raids') setColossus(true); else if (g.id === 'world') setWorld(true); else if (g.id === 'coop') setCoop(true); else setArena(true); window.scrollTo(0, 0) }} />)}
+        {GATES.slice(1).map((g) => !modeOpen(g.id, acc.level, rebirths) ? <LockedTile key={g.id} gate={g} level={acc.level} /> : <GateTile key={g.id} gate={g} playable onOpen={() => { if (g.id === 'spire') setSpire(true); else if (g.id === 'raids') setColossus(true); else if (g.id === 'world') setWorld(true); else if (g.id === 'coop') setCoop(true); else setArena(true); window.scrollTo(0, 0) }} />)}
       </div>
 
       {/* Ascension : tout en bas du Nexus */}

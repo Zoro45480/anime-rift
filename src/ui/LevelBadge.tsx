@@ -7,7 +7,7 @@ const HEX = 'M50 3 93 27.5v49L50 101 7 76.5v-49Z'
 export const LevelBadge = ({ level, rebirths = 0, size = 22 }: { level: number; rebirths?: number; size?: number }) => {
   const style = levelStyle(level, rebirths)
   const h = Math.round(size * 1.55)
-  const big = size >= 40
+  const big = size >= 50
   return (
     <span className={`hexlvl hexlvl--${style}`} role="img" aria-label={`Niveau de compte ${level}`} style={{ width: Math.round(h * 0.89), height: h }}>
       <svg viewBox="0 0 100 104" aria-hidden="true"><defs><linearGradient id={`hx-${style}`} x1="0" y1="0" x2="1" y2="1"><stop offset="0" className="hexlvl__a" /><stop offset="1" className="hexlvl__b" /></linearGradient></defs>
