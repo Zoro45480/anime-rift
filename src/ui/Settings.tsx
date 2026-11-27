@@ -93,7 +93,7 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
           <FramedAvatar size={150} style={levelStyle(acc.level, store.rebirths)} />
           <div><b>{store.profile.name.trim() || 'Joueur'}</b><LevelBadge level={acc.level} rebirths={store.rebirths} size={26} /></div>
         </section>
-        <p className="set__note">Ta partie est gardée sur cet appareil : il n'y a pas encore de compte en ligne ni de connexion.</p>
+        <p className="set__note">Ta partie est enregistrée sur cet appareil, et aussi en ligne quand tu es connecté.</p>
 
         <AccountCard />
 
