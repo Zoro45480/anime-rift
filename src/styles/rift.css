@@ -725,3 +725,9 @@ body:has(.sc) .chat__toggle, body:has(.sc) .chat__panel { display: none !importa
 @keyframes mr-glow { 0%, 100% { filter: drop-shadow(0 0 0.6cqw var(--mr-glow)) drop-shadow(0 1.2cqw 2cqw rgba(0, 0, 0, 0.55)) brightness(1); } 50% { filter: drop-shadow(0 0 2.4cqw var(--mr-glow)) drop-shadow(0 0 4.6cqw var(--mr-glow)) brightness(1.12); } }
 :root[data-fx='low'] .card__frame--mr, :root[data-fx='low'] .card__mrshine { animation: none; }
 @media (prefers-reduced-motion: reduce) { .card__frame--mr, .card__mrshine { animation: none; } }
+
+/* ── Nouveau logo ANIME RIFT (chrome et faille) ── */
+.logo img { filter: drop-shadow(0 0 8px rgba(124, 92, 255, 0.45)); }
+.logo__full { height: 58px; margin-left: 0; }
+.logo__emblem { height: 40px; }
+@media (max-width: 480px) { .logo__emblem { height: 34px; } }
