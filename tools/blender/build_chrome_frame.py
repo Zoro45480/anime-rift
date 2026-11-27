@@ -85,61 +85,54 @@ def rim(t, w=W, h=H, r=R_CORNER):
 
 
 def build():
-    chrome = principled('Chrome', (0.97, 0.97, 1.0), 1, 0.04)
-    dark = principled('ChromeNoir', (0.05, 0.05, 0.07), 1, 0.12)
-    red = principled('Ecarlate', (0.85, 0.0, 0.05), 0.6, 0.18, (1.0, 0.02, 0.08), 4.0)
-    redchrome = principled('ChromeRouge', (0.9, 0.08, 0.12), 1, 0.1, (1.0, 0.0, 0.05), 0.6)
+    chrome = principled('Chrome', (0.98, 0.98, 1.0), 1, 0.03)
+    chrome_soft = principled('ChromeDoux', (0.95, 0.95, 1.0), 1, 0.03)
+    dark = principled('ChromeNoir', (0.04, 0.04, 0.06), 1, 0.1)
+    red = principled('Ecarlate', (0.85, 0.0, 0.05), 0.5, 0.2, (1.0, 0.02, 0.06), 6.0)
+    redchrome = principled('ChromeRouge', (0.95, 0.1, 0.12), 1, 0.08, (1.0, 0.0, 0.04), 1.2)
 
-    N = 420
-    # 1. moulure : un jonc chrome sombre et un jonc chrome clair, posés sur le bord
+    N = 480
     base = [rim(i / N) for i in range(N)]
-    curve('Moulure', [(p[0] + n[0] * 0.02, p[1] + n[1] * 0.02, 0) for p, n in base], [1] * N, dark, 0.11, cyclic=True)
-    curve('Jonc', [(p[0] - n[0] * 0.14, p[1] - n[1] * 0.14, 0.06) for p, n in base], [1] * N, chrome, 0.035, cyclic=True)
-    # 2. liseré rouge lumineux à l'intérieur
-    curve('Lisere', [(p[0] - n[0] * 0.22, p[1] - n[1] * 0.22, 0.04) for p, n in base], [1] * N, red, 0.018, cyclic=True)
+    # 1. bandeau chrome épais tout autour (le corps du cadre), bord intérieur sombre et liseré rouge lumineux
+    curve('Corps', [(p[0] + n[0] * 0.08, p[1] + n[1] * 0.08, 0) for p, n in base], [1] * N, chrome_soft, 0.22, cyclic=True)
+    curve('BordInt', [(p[0] - n[0] * 0.13, p[1] - n[1] * 0.13, 0.02) for p, n in base], [1] * N, dark, 0.05, cyclic=True)
+    curve('Lisere', [(p[0] - n[0] * 0.19, p[1] - n[1] * 0.19, 0.05) for p, n in base], [1] * N, red, 0.02, cyclic=True)
 
-    # 3. rubans torsadés : deux larges rubans chrome argent qui s'enroulent, et un fin ruban rouge entre eux
-    turns = 15
-    for phase, mat, amp, bev, base_r in ((0.0, chrome, 0.2, 0.085, 1.0), (math.pi, chrome, 0.2, 0.075, 0.95), (math.pi / 2, redchrome, 0.16, 0.03, 1.0)):
+    # 2. flammes de chrome liquide : chaque mèche part du bord, file le long du cadre puis s'enroule vers l'extérieur
+    def wisp(t, span, rise, curl, thick, mat, direction):
         pts, radii = [], []
-        for i in range(N):
-            t = i / N
-            (x, y), (nx, ny) = rim(t)
-            a = t * turns * 2 * math.pi + phase
-            off = amp * math.sin(a)
-            z = 0.2 + 0.16 * math.cos(a)
-            pts.append((x + nx * (0.02 + off), y + ny * (0.02 + off), z))
-            radii.append(base_r * (0.55 + 0.6 * (0.5 + 0.5 * math.cos(a))))
-        curve('Ruban', pts, radii, mat, bev, cyclic=True)
+        steps = 18
+        for k in range(steps):
+            f = k / (steps - 1)
+            (x, y), (nx, ny) = rim(t + direction * span * f)
+            h = 0.02 + rise * (f ** 1.6) + 0.05 * math.sin(f * math.pi * 2.2) * f
+            # enroulement en bout de flamme : la pointe repart vers l'arrière
+            ang = curl * max(0.0, f - 0.45) ** 2 * 10
+            tx, ty = -ny * direction, nx * direction
+            bx = x + nx * h - tx * ang
+            by = y + ny * h - ty * ang
+            pts.append((bx, by, 0.12 + 0.25 * f + 0.1 * math.sin(f * 5)))
+            radii.append(max(0.12, (1 - f) ** 0.55 * (0.8 + 0.2 * math.sin(f * 4 + t * 40))))  # bouts arrondis : du métal liquide, pas des épines
+        curve('Flamme', pts, radii, mat, thick)
 
-    # 4. éclats chromés en flammes : effilés, courbés vers l'extérieur ; plus nombreux et grands en haut
-    def blade(t, length, width, bend, mat):
+    # couche serrée de petites flammes tout le long
+    for i in range(110):
+        t = i / 110 + rng.random() * 0.004
         (x, y), (nx, ny) = rim(t)
-        tx, ty = -ny, nx  # tangente
-        pts, radii = [], []
-        steps = 9
-        for s in range(steps):
-            f = s / (steps - 1)
-            out = 0.05 + length * f
-            side = bend * f * f
-            pts.append((x + nx * out + tx * side, y + ny * out + ty * side, 0.1 + 0.15 * f))
-            radii.append(max(0.02, (1 - f) ** 1.3))
-        curve('Eclat', pts, radii, mat, width)
-
-    for i in range(64):
+        top = ny > 0.5
+        rise = 0.12 + rng.random() * 0.16 + (0.22 * rng.random() if top else 0)
+        wisp(t, 0.022 + rng.random() * 0.025, rise, 0.04 + rng.random() * 0.06, 0.1 + rng.random() * 0.06,
+             redchrome if rng.random() < 0.12 else chrome, 1 if rng.random() < 0.6 else -1)
+    # grandes flammes : en haut, aux coins, et quelques-unes qui jaillissent sur les côtés
+    for t0, n, big in ((0.0, 9, 1.0), (0.12, 7, 0.8), (0.25, 6, 0.75), (0.5, 9, 1.0), (0.75, 6, 0.75), (0.62, 5, 0.6), (0.37, 5, 0.6), (0.88, 5, 0.6)):
+        for k in range(n):
+            t = t0 + (k - n / 2) * 0.006 + rng.random() * 0.003
+            wisp(t, 0.035 + rng.random() * 0.04, (0.3 + rng.random() * 0.4) * big, 0.08 + rng.random() * 0.08, 0.14 + rng.random() * 0.06,
+                 redchrome if k == n // 2 else chrome, 1 if k % 2 else -1)
+    # fines mèches rouges lumineuses glissées entre les flammes
+    for i in range(40):
         t = rng.random()
-        (x, y), (nx, ny) = rim(t)
-        top = 1.0 if ny > 0.5 else 0.0
-        length = 0.15 + rng.random() * 0.25 + top * rng.random() * 0.45
-        blade(t, length, 0.045 + rng.random() * 0.03, (rng.random() - 0.5) * 0.9, redchrome if rng.random() < 0.15 else chrome)
-    # grandes flammes chromées aux coins haut-gauche et bas-droit (comme un feu de métal), plus discrètes ailleurs
-    corner_t = [0.0 - 0.004, 0.5 - 0.004]
-    for t0 in corner_t:
-        for k in range(7):
-            blade(t0 + (k - 3) * 0.007, 0.6 + (3 - abs(k - 3)) * 0.28, 0.075, (k - 3) * 0.32 + 0.4, redchrome if k == 3 else chrome)
-    for t0 in (0.25 - 0.004, 0.75 - 0.004):
-        for k in range(4):
-            blade(t0 + (k - 1.5) * 0.006, 0.45 + (k % 2) * 0.2, 0.06, (k - 1.5) * 0.3, chrome)
+        wisp(t, 0.02 + rng.random() * 0.02, 0.08 + rng.random() * 0.2, 0.05, 0.03, red, 1 if rng.random() < 0.5 else -1)
 
 
 def studio():
@@ -166,13 +159,15 @@ def studio():
         p.data.materials.append(m)
         p.visible_camera = False
 
-    panel((0, 0, 9), (7, 3), (1, 1, 1), 5)
+    panel((0, 0, 9), (7, 3), (1, 1, 1), 2)
     panel((-6, 3, 5), (1.5, 9), (0.8, 0.9, 1), 10)
     panel((6, -2, 5), (1.2, 9), (1, 0.85, 0.85), 8)
     panel((0, 7, 4), (9, 1.2), (1, 1, 1), 9)
     panel((1, -8, 3), (8, 2), (1, 0.05, 0.1), 2.2)    # contre-jour rouge : quelques reflets écarlates dans le chrome
     panel((0, -5, 8), (6, 2), (1, 1, 1), 7)           # lumière basse : le chrome reste clair partout
     panel((-3, -2, 7), (1.2, 1.2), (1, 1, 1), 16)
+    for k in range(-4, 5):
+        panel((k * 1.6, 0.8 * k, 10), (0.35, 12), (1, 1, 1), 12)  # rayures de lumière : reflets nets dans le chrome
 
     cam_data = bpy.data.cameras.new('Cam')
     cam_data.type = 'ORTHO'
@@ -203,7 +198,22 @@ def main():
     path = os.path.join(OUT, 'cadre_chrome.png')
     bpy.context.scene.render.filepath = path
     bpy.ops.render.render(write_still=True)
+    glow(path)
     print('rendu :', path)
+
+
+def glow(path):
+    """Halo rouge derrière le cadre (comme une aura) : flou de la silhouette, teinté, glissé dessous."""
+    from PIL import Image, ImageFilter
+    fr = Image.open(path).convert('RGBA')
+    a = fr.split()[3]
+    halo = Image.new('RGBA', fr.size, (255, 20, 50, 0))
+    soft = a.filter(ImageFilter.GaussianBlur(16)).point(lambda v: min(200, int(v * 1.1)))
+    halo.putalpha(soft)
+    out = Image.new('RGBA', fr.size, (0, 0, 0, 0))
+    out.alpha_composite(halo)
+    out.alpha_composite(fr)
+    out.save(path)
 
 
 main()
