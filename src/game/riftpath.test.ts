@@ -12,9 +12,9 @@ describe('Chemin du Rift', () => {
     expect(rollPath(p, new Date(2026, 10, 26))).toBe(p)
     expect(rollPath(p, new Date(2026, 11, 22))).toEqual({ season: 2, xp: 0, claimed: [] })
   })
-  it('un palier tous les 100 XP, plafonné', () => {
-    expect(tierOf(99)).toBe(0); expect(tierOf(250)).toBe(2); expect(tierOf(999999)).toBe(TIERS)
-    expect(claimableTiers({ season: 1, xp: 350, claimed: [2] })).toEqual([1, 3])
+  it('des paliers de plus en plus chers, plafonnés', () => {
+    expect(tierOf(249)).toBe(0); expect(tierOf(250)).toBe(1); expect(tierOf(514)).toBe(1); expect(tierOf(515)).toBe(2); expect(tierOf(999999)).toBe(TIERS)
+    expect(claimableTiers({ season: 1, xp: 800, claimed: [2] })).toEqual([1, 3])
   })
   it('donne une carte tous les 10 paliers et des sceaux tous les 5', () => {
     expect(tierReward(10).card).toBe(true); expect(tierReward(40).tickets).toBe(10)

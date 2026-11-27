@@ -7,7 +7,7 @@ import { ANILIST_ID } from '../data/anilist'
 
 export type RemoteStatus = 'loading' | 'ok' | 'blocked'
 const API = 'https://graphql.anilist.co'
-const KEY = 'anime-rift-anilist-v3'
+const KEY = 'anime-rift-anilist-v4'
 const WEEK = 7 * 24 * 3600 * 1000
 const QUERY = 'query($ids:[Int]){Page(perPage:50){characters(id_in:$ids){id favourites image{large} media(type:ANIME,perPage:1,sort:POPULARITY_DESC){edges{voiceActors(language:JAPANESE){name{full}}}}}}}'
 
@@ -25,32 +25,40 @@ const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
 // (hors ligne, ou page qui interdit les chargements externes) : les cartes gardent alors leur portrait de remplacement.
 export const loadRemoteArt = async (onUrls: (urls: Record<string, string>, fans: Record<string, number>, seiyu: Record<string, string>) => void): Promise<RemoteStatus> => {
   const cached = readCache()
-  if (cached) { onUrls(cached.urls, cached.fans ?? {}, cached.seiyu ?? {}); return 'ok' }
   const heroesOf = new Map<number, string[]>() // un même personnage AniList peut illustrer plusieurs cartes
   for (const [hero, id] of Object.entries(ANILIST_ID)) heroesOf.set(id, [...(heroesOf.get(id) ?? []), hero])
-  const ids = [...heroesOf.keys()]
-  const urls: Record<string, string> = {}
-  const fans: Record<string, number> = {}
-  const seiyu: Record<string, string> = {}
+  const urls: Record<string, string> = { ...(cached?.urls ?? {}) }
+  const fans: Record<string, number> = { ...(cached?.fans ?? {}) }
+  const seiyu: Record<string, string> = { ...(cached?.seiyu ?? {}) }
+  if (cached) onUrls({ ...urls }, { ...fans }, { ...seiyu })
+  // seulement les personnages dont on n'a pas encore l'image (nouveaux persos, ou chargement interrompu la dernière fois)
+  const ids = [...heroesOf.keys()].filter((id) => (heroesOf.get(id) ?? []).some((h) => !urls[h]))
+  if (!ids.length) return 'ok'
+  let failed = 0
   for (let i = 0; i < ids.length; i += 50) {
-    try {
-      const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ query: QUERY, variables: { ids: ids.slice(i, i + 50) } }) })
-      if (!res.ok) throw new Error(String(res.status))
-      const json = (await res.json()) as { data: { Page: { characters: { id: number; favourites: number | null; image: { large: string | null }; media: { edges: { voiceActors: { name: { full: string | null } }[] | null }[] } | null }[] } } }
-      for (const c of json.data.Page.characters) for (const hero of heroesOf.get(c.id) ?? []) {
-        if (c.image.large) urls[hero] = c.image.large
-        if (c.favourites) fans[hero] = c.favourites
-        const voice = c.media?.edges[0]?.voiceActors?.[0]?.name.full
-        if (voice) seiyu[hero] = voice
-      }
-      onUrls({ ...urls }, { ...fans }, { ...seiyu })
-    } catch {
-      return Object.keys(urls).length ? 'ok' : 'blocked'
+    let ok = false
+    for (let attempt = 0; attempt < 4 && !ok; attempt++) {
+      try {
+        const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ query: QUERY, variables: { ids: ids.slice(i, i + 50) } }) })
+        if (res.status === 429) { await wait(Number(res.headers.get('Retry-After') ?? 0) * 1000 || 20000); continue } // trop de demandes : on attend puis on réessaie
+        if (!res.ok) throw new Error(String(res.status))
+        const json = (await res.json()) as { data: { Page: { characters: { id: number; favourites: number | null; image: { large: string | null }; media: { edges: { voiceActors: { name: { full: string | null } }[] | null }[] } | null }[] } } }
+        for (const c of json.data.Page.characters) for (const hero of heroesOf.get(c.id) ?? []) {
+          if (c.image.large) urls[hero] = c.image.large
+          if (c.favourites) fans[hero] = c.favourites
+          const voice = c.media?.edges[0]?.voiceActors?.[0]?.name.full
+          if (voice) seiyu[hero] = voice
+        }
+        onUrls({ ...urls }, { ...fans }, { ...seiyu })
+        ok = true
+      } catch { await wait(3000 * (attempt + 1)) }
     }
-    await wait(700) // on ménage l'API
+    if (!ok) failed++
+    await wait(900) // on ménage l'API
   }
-  try { localStorage.setItem(KEY, JSON.stringify({ t: Date.now(), urls, fans, seiyu })) } catch { /* pas de mémoire locale : on redemandera */ }
-  return 'ok'
+  // on garde en mémoire ce qui est arrivé ; ce qui manque sera redemandé à la prochaine visite
+  try { localStorage.setItem(KEY, JSON.stringify({ t: cached?.t ?? Date.now(), urls, fans, seiyu })) } catch { /* pas de mémoire locale */ }
+  return Object.keys(urls).length ? 'ok' : failed ? 'blocked' : 'ok'
 }
 
 // Image de fond de chaque bannière : la bannière officielle de l'animé sur AniList, chargée par le navigateur du joueur.

@@ -16,6 +16,7 @@ import { Coin } from '../ui/Coin'
 import { SummonCinematic } from '../summon/SummonCinematic'
 import { primeAudio } from '../summon/audio'
 import { LrBanner } from './LrBanner'
+import { KeyTimer } from '../ui/Chrome'
 
 const pct = (x: number) => `${(x * 100).toLocaleString('fr-FR', { maximumFractionDigits: 3 })} %`
 const two = (n: number) => String(n).padStart(2, '0')
@@ -113,6 +114,7 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
               <button role="radio" aria-checked={currency === 'ticket'} className={currency === 'ticket' ? 'is-on' : ''} onClick={() => setCurrency('ticket')}><Coin name="seal" size={26} />Clés<b>{store.tickets}</b></button>
               <button role="radio" aria-checked={currency === 'gems'} className={currency === 'gems' ? 'is-on' : ''} onClick={() => setCurrency('gems')}><Coin name="soul" size={26} />Éclats<b>{store.gems}</b></button>
             </div>
+              <KeyTimer long />
             <div className="bh__pulls">
               {[1, 5, 10].map((n) => (
                 <button key={n} className={n === 10 ? 'is-gold' : ''} disabled={!store.canAfford(currency, n)} onClick={() => summon(n)}>

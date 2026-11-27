@@ -42,6 +42,7 @@ type State = {
   shards: number // Fragments d'âme
   energy: number // éclairs au moment `energyAt` (ils remontent avec le temps, voir energyNow)
   energyAt: number
+  keyAt?: number // départ du décompte de la prochaine Clé de Faille gratuite (une toutes les 5 minutes)
   saga: Record<string, number> // étoiles gagnées à chaque combat de l’Aventure
   team: string[] // équipe de combat (3 cartes au plus)
   notifs: Notif[] // les plus récentes d'abord
@@ -176,6 +177,8 @@ const START: State = {
 }
 
 // La progression est gardée dans le navigateur de cet appareil (pas de compte en ligne pour l'instant).
+export const FREE_KEY_MS = 5 * 60 * 1000
+export const FREE_KEY_CAP = 50
 const SAVE_KEY = 'anime-rift-save-v1'
 // numéro de joueur à quatre chiffres, tiré une fois
 const newTag = () => String(1000 + Math.floor(Math.random() * 9000))
@@ -239,6 +242,21 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       return { ...s, seen, achDone: [...new Set([...(s.achDone ?? []), ...done])], notifs }
     })
   }, [state])
+  // Une Clé de Faille gratuite toutes les 5 minutes, tant que le joueur en a moins de FREE_KEY_CAP (même hors ligne).
+  useEffect(() => {
+    const tick = () => setState((s) => {
+      const at = s.keyAt ?? Date.now()
+      if (s.tickets >= FREE_KEY_CAP) return s.keyAt ? { ...s, keyAt: undefined } : s
+      if (!s.keyAt) return { ...s, keyAt: Date.now() }
+      const n = Math.floor((Date.now() - at) / FREE_KEY_MS)
+      if (n < 1) return s
+      const give = Math.min(n, FREE_KEY_CAP - s.tickets)
+      return { ...s, tickets: s.tickets + give, keyAt: s.tickets + give >= FREE_KEY_CAP ? undefined : at + n * FREE_KEY_MS }
+    })
+    tick()
+    const t = setInterval(tick, 5000)
+    return () => clearInterval(t)
+  }, [])
   const [now, setNow] = useState(Date.now()) // fait remonter l'énergie à l'écran
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 15000)

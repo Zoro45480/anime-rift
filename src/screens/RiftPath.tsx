@@ -3,7 +3,7 @@ import { iconArt, uiArt } from '../assets/manifest'
 import type { Hero } from '../data/heroes'
 import { RARITIES } from '../data/rarities'
 import { BANNERS } from '../data/banners'
-import { premiumReward, CARD_ODDS, claimableTiers, PATH_XP, rollPath, seasonOf, TIER_REWARDS, TIER_XP, tierOf, TIERS, type PathReward } from '../game/riftpath'
+import { premiumReward, CARD_ODDS, claimableTiers, PATH_XP, rollPath, seasonOf, TIER_REWARDS, TIER_XP, tierOf, TIERS, tierCost, tierStart, type PathReward } from '../game/riftpath'
 import { SCROLLS } from '../game/progression'
 import { challengesFor, CHALLENGE_TIMES, challengeState, msToDayEnd } from '../game/contracts'
 import { useStore } from '../state/store'
@@ -34,7 +34,8 @@ export const RiftPath = ({ now }: { now: Date }) => {
   const seasonWorld = BANNERS[(season.number - 1) % BANNERS.length]
   const tier = tierOf(path.xp)
   const ready = claimableTiers(path)
-  const inTier = tier >= TIERS ? TIER_XP : path.xp % TIER_XP
+  const need = tierCost(Math.min(TIERS, tier + 1))
+  const inTier = tier >= TIERS ? need : path.xp - tierStart(tier)
   const [cards, setCards] = useState<Hero[]>([])
   const track = useRef<HTMLOListElement>(null)
 
@@ -67,7 +68,7 @@ export const RiftPath = ({ now }: { now: Date }) => {
       <div className="pt__duo">
         <section className="pt__prog2">
           <div className="pt__lvl2"><small>Niveau</small><b>{tier}</b></div>
-          <div className="pt__xp2"><small>Progression</small><b>{tier >= TIERS ? 'Terminé !' : `${inTier} / ${TIER_XP} XP`}</b><div className="pt__bar"><i style={{ width: `${(inTier / TIER_XP) * 100}%` }} /></div></div>
+          <div className="pt__xp2"><small>Progression</small><b>{tier >= TIERS ? 'Terminé !' : `${inTier} / ${need} XP`}</b><div className="pt__bar"><i style={{ width: `${(inTier / need) * 100}%` }} /></div></div>
           <div className="pt__next"><small>Prochaine récompense</small>{tier < TIERS ? <Loot r={TIER_REWARDS[tier]} /> : <b>—</b>}
             <p className="pt__wait"><b>{ready.length} palier{ready.length > 1 ? 's' : ''} t'attend{ready.length > 1 ? 'ent' : ''}</b><span>{ready.length ? 'Touche « Récupérer » sur la piste ou « Tout récupérer ».' : 'Fais tes quêtes de saison pour avancer.'}</span></p>
           </div>
@@ -82,7 +83,7 @@ export const RiftPath = ({ now }: { now: Date }) => {
       </div>
 
       <div className="pt__head2">
-        <div><h3>Les paliers</h3><p>Un palier tous les {TIER_XP} XP. La récompense premium s'ajoutera à la gratuite.</p></div>
+        <div><h3>Les paliers</h3><p>Le 1er palier coûte {TIER_XP} XP, puis chaque palier coûte un peu plus. La récompense premium s'ajoutera à la gratuite.</p></div>
         <p className="pt__legend"><span className="is-done">Récupéré</span><span className="is-ready">Prêt</span><span className="is-next">À venir</span></p>
         <div className="pt__arrows"><button onClick={() => slide(-1)} aria-label="Paliers précédents">‹</button><button onClick={() => slide(1)} aria-label="Paliers suivants">›</button></div>
       </div>
@@ -134,7 +135,7 @@ export const RiftPath = ({ now }: { now: Date }) => {
             ["Contrat d'histoire récupéré", PATH_XP.storyContract], ['Combat gagné', PATH_XP.win], ['Invocation', PATH_XP.pull], ['Étage de La Tour de l’Infini', PATH_XP.floor]] as [string, number][])
             .map(([label, xp]) => <li key={label}><span>{label}</span><b>+{xp} XP</b></li>)}
         </ul>
-        <p className="set__note">Un palier tous les {TIER_XP} XP. Tous les 10 paliers : une carte ({CARD_ODDS.map(([id, p]) => `${RARITIES[id].short} ${Math.round(p * 100)} %`).join(', ')}), 10 sceaux et un grand parchemin. À la fin de la saison, le chemin repart de zéro avec un nouveau thème : récupère tes récompenses avant !</p>
+        <p className="set__note">Le 1er palier coûte {TIER_XP} XP, puis chaque palier coûte un peu plus (le 40e : {tierCost(TIERS)} XP). Tous les 10 paliers : une carte ({CARD_ODDS.map(([id, p]) => `${RARITIES[id].short} ${Math.round(p * 100)} %`).join(', ')}), 10 sceaux et un grand parchemin. À la fin de la saison, le chemin repart de zéro avec un nouveau thème : récupère tes récompenses avant !</p>
       </div>
 
       {cards.length > 0 && (

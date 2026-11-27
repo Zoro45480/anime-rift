@@ -1,4 +1,5 @@
 import { useOnline } from '../state/online'
+import { FREE_KEY_CAP, FREE_KEY_MS } from '../state/store'
 import { accountLevel, ENERGY_MAX } from '../game/progression'
 import { LevelBadge } from './LevelBadge'
 import { Avatar, Settings } from './Settings'
@@ -22,6 +23,17 @@ export const Logo = () => (
 // Barre du haut : logo et ressources du joueur, chaque ressource dans sa plaquette en biais.
 export type QuestTab = 'daily' | 'contracts' | 'rift' | 'path'
 export type NavProps = { tab: TabId; profileOn: boolean; onTab: (t: TabId) => void; onQuest: (t: QuestTab) => void; onCommunity: (t: CommunityTab) => void }
+// Décompte de la prochaine Clé de Faille gratuite (une toutes les 5 minutes).
+export const KeyTimer = ({ long }: { long?: boolean }) => {
+  const { keyAt, tickets } = useStore()
+  const [t, setT] = useState(Date.now())
+  useEffect(() => { const i = setInterval(() => setT(Date.now()), 1000); return () => clearInterval(i) }, [])
+  if (!keyAt || tickets >= FREE_KEY_CAP) return long ? <span className="keytimer keytimer--full">Clés gratuites au maximum ({FREE_KEY_CAP})</span> : null
+  const left = Math.max(0, keyAt + FREE_KEY_MS - t)
+  const mm = Math.floor(left / 60000), ss = Math.floor((left % 60000) / 1000)
+  return <span className="keytimer" title="Une Clé de Faille gratuite toutes les 5 minutes">{long ? 'Prochaine Clé gratuite dans ' : '+1 '}{mm}:{String(ss).padStart(2, '0')}</span>
+}
+
 export const TopBar = ({ onPlay, onSummon, onProfile, onGo, nav }: { onPlay: () => void; onSummon: () => void; onProfile: () => void; onGo: NotifGo; nav: NavProps }) => {
   const { tickets, gems, energyLeft, accountXp, rebirths, notifs, readNotifs, clearNotifs } = useStore()
   const [open, setOpen] = useState(false)
@@ -41,7 +53,7 @@ export const TopBar = ({ onPlay, onSummon, onProfile, onGo, nav }: { onPlay: () 
           <div className="hud">
             <button className="wallet__energy" onClick={onPlay} aria-label={`Flux : ${energyLeft} sur ${ENERGY_MAX}. Aller à Jouer`}><Coin name="bolt" size={24} /><b>{energyLeft}<small>/{ENERGY_MAX}</small></b></button>
             <button className="wallet__energy" onClick={onSummon} aria-label={`Éclats : ${gems}. Aller aux invocations`}><Coin name="soul" size={24} /><b>{gems}</b></button>
-            <button className="wallet__energy" onClick={onSummon} aria-label={`Clés de Faille : ${tickets}. Aller aux invocations`}><Coin name="seal" size={24} /><b>{tickets}</b></button>
+            <button className="wallet__energy" onClick={onSummon} aria-label={`Clés de Faille : ${tickets}. Aller aux invocations`}><Coin name="seal" size={24} /><b>{tickets}</b><KeyTimer /></button>
           </div>
           <button className={`bell ${unread ? 'has-unread' : ''}`} onClick={toggle} aria-expanded={open} aria-label={`Notifications${unread ? ` : ${unread} non lue${unread > 1 ? 's' : ''}` : ''}`}>
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z" /><path d="M10 20a2.2 2.2 0 0 0 4 0" /></svg>

@@ -224,7 +224,8 @@ export const CHALLENGE_POOL: Challenge[] = [
   { id: 'c-floors4', title: 'Monte 4 étages de La Tour de l’Infini', counter: 'floors', target: 4, xp: 80, gems: 20 },
 ]
 // Les quêtes du pass : 8 tirées pour toute la saison du Chemin du Rift ; elles changent quand la saison se termine.
-export const challengesFor = (now: Date): Challenge[] => pickFrom(CHALLENGE_POOL, 8, `saison|${seasonOf(now).number}`)
+// Pass beaucoup plus dur : les défis donnent moitié moins d’XP qu’avant.
+export const challengesFor = (now: Date): Challenge[] => pickFrom(CHALLENGE_POOL, 8, `saison|${seasonOf(now).number}`).map((c) => ({ ...c, xp: Math.round(c.xp / 2) }))
 // Combien de fois le défi a été récupéré aujourd'hui, et où en est la prochaine fois.
 export const challengeState = (c: Challenge, q: Quests, now: Date) => {
   const r = roll(q, now)

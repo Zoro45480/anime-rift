@@ -920,3 +920,10 @@ body:has(.sc) .chat__toggle, body:has(.sc) .chat__panel { display: none !importa
 .lrb-index__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 34px 26px; padding: 18px 14px; }
 .lrb-index__grid figure { margin: 0; display: grid; gap: 6px; text-align: center; } .lrb-index__grid figcaption { font-size: 13px; color: var(--muted); }
 .lrb-got { display: grid; justify-items: center; gap: 12px; text-align: center; } .lrb-got__card { width: 240px; }
+.keytimer { margin-left: 4px; font-family: var(--font-num); font-size: 11px; font-weight: 700; color: var(--accent2); white-space: nowrap; }
+.keytimer--full { color: var(--muted); }
+.bh .keytimer, .lineup .keytimer { display: block; margin: 8px 0 0; font-size: 12.5px; }
+@media (max-width: 760px) { .hud .keytimer { display: none; } }
+/* bouton Chat plus grand */
+.chat__toggle { padding: 14px 24px !important; font-size: 17px !important; min-height: 56px; }
+@media (max-width: 760px) { .chat__toggle { padding: 12px 18px !important; font-size: 15px !important; min-height: 50px; } }

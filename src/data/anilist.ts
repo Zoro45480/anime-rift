@@ -2,6 +2,9 @@
 // au lancement, le navigateur du joueur demande à l'API publique d'AniList l'adresse du portrait officiel et l'affiche.
 // Sans identifiant (personnage absent d'AniList), la carte garde son portrait de remplacement.
 export const ANILIST_ID: Record<string, number> = {
+  higuruma: 248818, naoya: 208204, yorozu: 306195, takako_uro: 283136, ryu_ishigori: 280468, reggie_star: 306194, fumihiko_takaba: 280467, hana_kurusu: 220724,
+  charles_bernard: 274304, dhruv_lakdawalla: 306266, hazenoki: 306243, amai_rin: 306187, jin_itadori: 283137, tsurugi_okkotsu: 374242, ogi_zenin: 227443, jinichi_zenin: 229952,
+  gido: 64513, nagato: 3180, hakuji: 141694, ancien_pilier_de_leau: 137773,
   naruto: 17, sasuke: 13, kaguya: 126069, madara: 53901, hashirama: 12464, obito: 3149, minato: 2535, itachi: 14,
   guy: 307, kakashi: 85, jiraya: 2423, pain: 3180, tobirama: 12465, hiruzen: 7571, tsunade: 2767, orochimaru: 2455,
   bee: 18473, gaara: 1662, sakura: 145, lee: 306, neji: 1694, shikamaru: 2007, hinata: 1555, kisame: 2672,
