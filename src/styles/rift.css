@@ -802,3 +802,91 @@ body:has(.sc) .chat__toggle, body:has(.sc) .chat__panel { display: none !importa
 .nx__head { position: relative; padding-left: 104px; min-height: 96px; }
 .nx__headimg { position: absolute; left: 0; top: 4px; width: 88px; height: 88px; object-fit: contain; filter: drop-shadow(0 0 16px rgba(34, 211, 238, 0.45)); }
 @media (max-width: 540px) { .page-head { grid-template-columns: 62px 1fr; } .page-head img { width: 62px; height: 62px; } .nx__head { padding-left: 76px; } .nx__headimg { width: 64px; height: 64px; } }
+
+/* ══════════ Parrainage ══════════ */
+.rf2 { display: grid; gap: 18px; }
+.rf2-head p { color: var(--muted); margin-top: 6px; }
+.rf2-grid { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 22px; align-items: start; }
+@media (max-width: 1000px) { .rf2-grid { grid-template-columns: 1fr; } .rf2-side { order: -1; } }
+.rf2-main, .rf2-box { padding: 22px 24px; border-radius: 12px; background: #141319; box-shadow: inset 0 0 0 1px var(--line2); }
+.rf2-tabs { display: flex; gap: 24px; border-bottom: 1px solid var(--line2); margin-bottom: 18px; }
+.rf2-tabs button { position: relative; display: inline-flex; align-items: center; gap: 8px; padding: 10px 0 12px; font-size: 14.5px; font-weight: 700; color: var(--muted); }
+.rf2-tabs button.is-active { color: #fff; }
+.rf2-tabs button.is-active::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: #e8473a; }
+.rf2-tabs i { font-style: normal; font-family: var(--font-num); font-size: 12px; padding: 2px 8px; border-radius: 6px; background: rgba(255, 255, 255, 0.1); color: #fff; }
+.rf2-prog { display: flex; justify-content: space-between; align-items: baseline; }
+.rf2-prog h2 { font-size: 19px; font-weight: 800; }
+.rf2-prog span { font-family: var(--font-num); font-weight: 700; color: var(--muted); }
+.rf2-bar { height: 5px; margin: 14px 0 22px; border-radius: 5px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+.rf2-bar i { display: block; height: 100%; background: linear-gradient(90deg, #ff7a4a, #e8473a); }
+.rf2-cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; padding: 0; margin: 0; list-style: none; }
+@media (max-width: 760px) { .rf2-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.rf2-card { position: relative; display: grid; justify-items: center; align-content: start; gap: 8px; min-height: 290px; padding: 38px 10px 12px; border-radius: 8px; text-align: center; background: #0b0b10; box-shadow: inset 0 0 0 1px var(--line2); }
+.rf2-card img, .rf2-card .rf2-gems { object-fit: contain; filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.5)); }
+.rf2-card.is-next { box-shadow: inset 0 0 0 1.5px #e8473a; }
+.rf2-card.is-ready { box-shadow: inset 0 0 0 1.5px var(--gold), 0 0 26px -10px var(--gold); }
+.rf2-card.is-done { opacity: 0.55; }
+.rf2-card__n { position: absolute; top: 11px; left: 11px; font-size: 12.5px; font-weight: 700; color: #fff; }
+.rf2-card__lock { position: absolute; top: 10px; right: 10px; color: var(--muted); }
+.rf2-card > b { font-size: 13px; font-weight: 800; color: #fff; min-height: 34px; }
+.rf2-card__tag { font-style: normal; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.1); }
+.rf2-card__btn { margin-top: auto; display: grid; place-items: center; width: 100%; height: 44px; border-radius: 4px; font-size: 13px; font-weight: 700; color: var(--muted); background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(255, 255, 255, 0.18); }
+.rf2-card__btn.is-ready { border: 0; color: #2a1800; background: linear-gradient(180deg, #ffe39a, #ffc24a); cursor: pointer; }
+.rf2-card__btn.is-done { border-style: solid; color: var(--ok); }
+.rf2-gems { display: grid; place-items: center; }
+.rf2-more { margin-top: 22px; padding: 18px 22px; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--line2); }
+.rf2-more h3 { font-size: 17px; font-weight: 800; }
+.rf2-more p { margin-top: 6px; font-size: 13.5px; }
+.rf2-more small { display: block; margin-top: 8px; color: var(--muted); }
+.rf2-how { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 22px 0 0; padding: 22px 0 0; list-style: none; border-top: 1px solid var(--line2); text-align: center; }
+.rf2-how li { display: grid; justify-items: center; gap: 10px; font-size: 13.5px; color: var(--text); }
+.rf2-how li:first-child svg, .rf2-how li:last-child svg { color: #e8473a; }
+@media (max-width: 600px) { .rf2-how { grid-template-columns: 1fr; } }
+.rf2-box h2 { font-size: 18px; font-weight: 800; }
+.rf2-box > p { color: var(--muted); font-size: 13px; margin: 4px 0 16px; }
+.rf2-side { display: grid; gap: 16px; }
+.rf2-code { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.rf2-code small { display: block; font-size: 10.5px; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+.rf2-code b { font-family: var(--font-num); font-size: 24px; letter-spacing: 0.04em; user-select: all; }
+.rf2-icobtn { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--line2); }
+.rf2-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 46px; margin-bottom: 10px; border-radius: 4px; font-weight: 700; box-shadow: inset 0 0 0 1px var(--line2); }
+.rf2-btn--main { background: #e8473a; box-shadow: none; color: #fff; }
+.rf2-stats { display: grid; grid-template-columns: repeat(3, 1fr); margin: 8px 0 14px; padding: 16px 0 0; list-style: none; border-top: 1px solid var(--line2); text-align: center; }
+.rf2-stats li + li { border-left: 1px solid var(--line2); }
+.rf2-stats b { display: block; font-family: var(--font-num); font-size: 24px; }
+.rf2-stats span { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.rf2-next { display: grid; grid-template-columns: 64px 1fr; gap: 6px 14px; align-items: center; }
+.rf2-next small { font-size: 10.5px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #e8473a; }
+.rf2-next b { display: block; font-size: 18px; }
+.rf2-next span { font-size: 12.5px; color: var(--muted); }
+.rf2-next strong { grid-column: 1 / -1; text-align: center; font-family: var(--font-num); font-size: 18px; margin-top: 8px; }
+.rf2-next .rf2-bar { grid-column: 1 / -1; margin: 4px 0 0; }
+.rf2-ticket { display: grid; grid-template-columns: 54px 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+.rf2-ticket b { font-size: 13.5px; } .rf2-ticket span { display: block; font-size: 12px; color: var(--muted); }
+.rf2-ticket .btn { min-height: 36px; padding: 6px 14px !important; }
+.rf2-sub { margin-bottom: 10px; }
+.rf2-empty { padding: 40px 10px; text-align: center; color: var(--muted); }
+.rf2-list, .rf2-top ol { display: grid; gap: 6px; padding: 0; margin: 0 0 16px; list-style: none; }
+.rf2-list li { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; background: #0b0b10; }
+.rf2-face { display: grid; place-items: center; width: 38px; height: 38px; overflow: hidden; border-radius: 50%; font-weight: 800; background: linear-gradient(135deg, var(--accent), var(--hot)); }
+.rf2-face img { width: 100%; height: 100%; object-fit: cover; }
+.rf2-list__id { display: grid; min-width: 0; } .rf2-list__id i { font-style: normal; font-size: 12px; color: var(--muted); }
+.rf2-st { margin-left: auto; font-style: normal; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 99px; white-space: nowrap; }
+.rf2-st--valide { color: #062a1a; background: var(--ok); } .rf2-st--attente { color: #2a1800; background: #ffc24a; } .rf2-st--refuse { color: #fff; background: var(--danger); }
+.rf2-top { padding-top: 16px; border-top: 1px solid var(--line2); }
+.rf2-top summary { cursor: pointer; font-weight: 800; font-size: 15px; }
+.rf2-top ol { margin-top: 12px; }
+.rf2-top li { display: flex; gap: 10px; align-items: center; padding: 8px 12px; border-radius: 8px; background: #0b0b10; }
+.rf2-top li span { width: 22px; font-family: var(--font-num); color: var(--gold); } .rf2-top li i { font-style: normal; color: var(--dim); } .rf2-top li em { margin-left: auto; font-style: normal; font-weight: 700; }
+.rf2-found { display: grid; gap: 12px; max-width: 420px; }
+.rf2-found ul, .rf2-pick { display: grid; gap: 6px; padding: 0; margin: 0; list-style: none; max-height: 340px; overflow: auto; }
+.rf2-found li, .rf2-pick button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 8px; text-align: left; background: #0b0b10; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rc) 50%, transparent); }
+.rf2-found li b, .rf2-pick b { font-family: var(--font-rarity); font-size: 20px; color: var(--rc); min-width: 34px; }
+.rf2-found li span, .rf2-pick span { display: grid; font-weight: 700; } .rf2-found small, .rf2-pick small { font-weight: 500; color: var(--muted); }
+.rf2-intro { color: var(--muted); }
+.rf2-card { display: flex !important; flex-direction: column; align-items: center; }
+.rf2-card__btn { margin-top: auto !important; }
+.rf2-card__tag { margin-bottom: 6px; }
+.rf2-ticket b em { font-style: normal; font-family: var(--font-num); color: var(--gold); white-space: nowrap; }
+.rf2-ticket { grid-template-columns: 54px minmax(0, 1fr); }
+.rf2-ticket .btn { grid-column: 2; justify-self: start; }

@@ -54,7 +54,7 @@ export const startOnline = () => {
   if (started) return
   started = true
   // lien de parrainage : ?ref=NUMERO, gardé jusqu'à la première connexion
-  try { const ref = new URLSearchParams(window.location.search).get('ref'); if (ref && /^\d+$/.test(ref)) localStorage.setItem('anime-rift-ref', ref); const ami = new URLSearchParams(window.location.search).get('ami'); if (ami) localStorage.setItem('anime-rift:friend-code', ami.slice(0, 12)) } catch { /* rien */ }
+  try { const ref = new URLSearchParams(window.location.search).get('ref'); if (ref) { const no = /^\d+$/.test(ref) ? Number(ref) : codeToNo(ref); if (no) localStorage.setItem('anime-rift-ref', String(no)) } const ami = new URLSearchParams(window.location.search).get('ami'); if (ami) localStorage.setItem('anime-rift:friend-code', ami.slice(0, 12)) } catch { /* rien */ }
   void supa.auth.getSession().then(async ({ data }) => {
     set({ session: data.session, ready: true })
     if (data.session) { await fetchMe(data.session.user.id); await adopt(data.session) }
@@ -392,3 +392,17 @@ export const guildPowers = async () => {
   }
   return out
 }
+
+// Parrainage détaillé (fichier SQL 05) ; sans lui, on retombe sur l'ancien compteur.
+export type Filleul = { name: string; player_no: number; avatar: string; level: number; play_days: number; created_at: string; status: 'valide' | 'attente' | 'refuse' }
+export const myReferralList = async () => {
+  const { data, error } = await supa.rpc('my_referral_list')
+  if (error) return null
+  return (data ?? []) as Filleul[]
+}
+export const referralTop = async () => {
+  const { data, error } = await supa.rpc('referral_top')
+  if (error) return null
+  return (data ?? []) as { name: string; player_no: number; avatar: string; validated: number }[]
+}
+export const referralCode = (no: number) => friendCode(no).replace('RIFT-', '')

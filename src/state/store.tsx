@@ -14,7 +14,7 @@ import { applyRule, floor as spireFloor, spireFoes, type Floor } from '../game/s
 import { ACHIEVEMENTS, doneIds, METAL_LABEL } from '../game/achievements'
 import { colossusFoes, colossusOf, DIFFICULTIES, eventDone, isOpen as colOpen, rollCol, TRIES_PER_DAY, WIN_SOULS, type ColState, type Difficulty } from '../game/colossus'
 import { emptyTourney, ROUNDS, tourneyRival, type Tourney, DUELS_PER_DAY, eloChange, emptyArena, PVP_GOALS, rivalsFor, rivalUnits, rollWeek, WIN_SOULS as DUEL_SOULS, type ArenaState, type Rival } from '../game/arena'
-import { REFERRAL } from '../game/referral'
+import { CHEST, refStep } from '../game/referral'
 import { emptyShop, giftOf, rollAtLeast, weeklyOffers, type ShopState } from '../game/shop'
 import { AUCTION_HOURS, auctionResult, emptyBazaar, quickPrice, stallOf, type BazaarState } from '../game/bazaar'
 import { loadAllArt, removeArt, saveArt } from './customArt'
@@ -56,6 +56,7 @@ type State = {
   tourney: Tourney // Le Grand Rift : tournoi du jour, titres gagnés
   arena: ArenaState // L'Arène : cote, ligue, duels du jour, défis de la semaine
   refClaimed: number[] // cases du calendrier de parrainage déjà ouvertes
+  items?: { lr: number; trade: number } // tickets LR garantis et tickets d'échange (Lien de Faille)
   gtries: { day: string; n: number } // essais du jour contre le boss d’Ordre
   btries?: Record<string, { day: string; n: number }> // essais du jour contre le boss mondial et les raids
   col: ColState // Les Colosses : semaine, difficultés battues, essais du jour, objectifs d'événement
@@ -96,7 +97,7 @@ type Store = State & {
   claimAllChallenges: () => number // tous les défis du Chemin prêts
   claimAllPvp: () => number // tous les défis d'arène prêts
   claimEverything: () => number // contrats + défis du Chemin + défis d'arène, en une fois
-  claimAllReferral: (friends: number) => number // toutes les cases du Lien de Faille ouvertes
+  claimAllReferral: (friends: number) => Hero[] | null // toutes les cases du Lien de Faille ouvertes
   claimDaily: () => boolean // récompense quotidienne
   markVisit: () => void // « passe voir ta collection »
   claimChallenge: (id: string) => boolean // défi du Chemin (3 fois par jour)
@@ -113,7 +114,9 @@ type Store = State & {
   guildTries: number
   fightBig: (key: string, perDay: number, hpMult: number) => { result: ColResult; damage: number } | null // boss mondial, raid : dégâts sur un boss géant
   bigTries: (key: string, perDay: number) => number
-  claimReferral: (step: number, friends: number) => boolean // ouvre une case du calendrier de parrainage
+  claimReferral: (step: number, friends: number) => Hero[] | null // les cartes trouvées dans les coffres
+  useLrTicket: () => Hero | null // ticket LR garanti : une carte LR au hasard
+  useTradeTicket: (heroId: string) => Hero | null // ticket d'échange : un doublon contre une autre carte de même rareté // ouvre une case du calendrier de parrainage
   fightColossus: (diff: Difficulty['id']) => ColResult | null // combat contre le Colosse de la semaine
   claimEvent: () => Hero | null // récompense finale de l'événement : une carte SR ou mieux
   colTries: number // essais restants aujourd'hui
@@ -583,13 +586,43 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setState(tracked({ ...state, btries: { ...(state.btries ?? {}), [key]: { day, n: used + 1 } } }, { damage }))
       return { result: { diff, allies, foes, events, win: false, first: false, card: null }, damage }
     }
+    // Lien de Faille : une case donne des Éclats, des coffres (ouverts tout de suite) et des tickets rangés dans l'inventaire.
+    const openRefStep = (from: State, step: number, found: Hero[]): State => {
+      const g = refStep(step).gift
+      let next: State = { ...from, refClaimed: [...from.refClaimed, step], gems: from.gems + (g.gems ?? 0), items: { lr: (from.items?.lr ?? 0) + (g.lr ?? 0), trade: (from.items?.trade ?? 0) + (g.trade ?? 0) } }
+      for (let k = 0; k < (g.chests ?? 0); k++) {
+        const c = rollAtLeast('epic', Math.random)
+        found.push(c)
+        next = { ...next, gems: next.gems + CHEST.gems, tickets: next.tickets + CHEST.tickets, owned: { ...next.owned, [c.id]: (next.owned[c.id] ?? 0) + 1 },
+          log: withLog(next.log, c.id, { k: 'pull', note: 'Obtenue · coffre du Lien de Faille' }) }
+      }
+      return next
+    }
     const claimReferral = (step: number, friends: number) => {
-      const r = REFERRAL[step - 1]
-      if (!r || friends < step || state.refClaimed.includes(step)) return false
-      let next: State = grant({ ...state, refClaimed: [...state.refClaimed, step] }, r.reward)
-      if (r.card) { const c = rollAtLeast(r.card, Math.random); next = { ...next, owned: { ...next.owned, [c.id]: (next.owned[c.id] ?? 0) + 1 }, notifs: notify(next.notifs, [['pull', `Lien de Faille : ${c.name} (${RARITIES[c.rarity].short}) rejoint ta collection.`]]) } }
-      setState(next)
-      return true
+      if (step < 1 || friends < step || state.refClaimed.includes(step)) return null
+      const found: Hero[] = []
+      const next = openRefStep(state, step, found)
+      setState({ ...next, notifs: found.length ? notify(next.notifs, [['pull', `Coffre du Lien de Faille : ${found.map((c) => `${c.name} (${RARITIES[c.rarity].short})`).join(', ')}.`]]) : next.notifs })
+      return found
+    }
+    const useLrTicket = () => {
+      if ((state.items?.lr ?? 0) < 1) return null
+      const pool = HEROES.filter((h) => h.rarity === 'legend')
+      const c = pool[Math.floor(Math.random() * pool.length)]
+      setState({ ...state, items: { lr: (state.items?.lr ?? 0) - 1, trade: state.items?.trade ?? 0 }, owned: { ...state.owned, [c.id]: (state.owned[c.id] ?? 0) + 1 },
+        accountXp: state.accountXp + ACCOUNT_XP[c.rarity], log: withLog(state.log, c.id, { k: 'pull', note: 'Obtenue · ticket LR garanti' }), notifs: notify(state.notifs, [['pull', `Ticket LR : ${c.name} rejoint ta collection !`]]) })
+      return c
+    }
+    const useTradeTicket = (heroId: string) => {
+      const h = heroById(heroId)
+      if (!h || h.rarity === 'rift' || (state.items?.trade ?? 0) < 1 || (state.owned[heroId] ?? 0) < 2) return null
+      const pool = HEROES.filter((x) => x.rarity === h.rarity && x.id !== h.id)
+      const missing = pool.filter((x) => !state.owned[x.id])
+      const from = missing.length ? missing : pool // de préférence une carte qui te manque
+      const c = from[Math.floor(Math.random() * from.length)]
+      setState({ ...state, items: { lr: state.items?.lr ?? 0, trade: (state.items?.trade ?? 0) - 1 }, owned: { ...state.owned, [heroId]: state.owned[heroId] - 1, [c.id]: (state.owned[c.id] ?? 0) + 1 },
+        log: withLog(state.log, c.id, { k: 'pull', note: `Obtenue · ticket d’échange (contre ${h.name})` }) })
+      return c
     }
     const claimEvent = () => {
       const col = rollCol(state.col, new Date())
@@ -764,16 +797,13 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     const claimAllPvp = () => run(allPvp)
     const claimEverything = () => run((s0) => { const a = allContracts(s0), b = allChallenges(a.next), c = allPvp(b.next); return { next: c.next, n: a.n + b.n + c.n } })
     const claimAllReferral = (friends: number) => {
-      let next = state, n = 0
-      REFERRAL.forEach((r, i) => {
-        const step = i + 1
-        if (friends < step || next.refClaimed.includes(step)) return
-        next = grant({ ...next, refClaimed: [...next.refClaimed, step] }, r.reward)
-        if (r.card) { const c = rollAtLeast(r.card, Math.random); next = { ...next, owned: { ...next.owned, [c.id]: (next.owned[c.id] ?? 0) + 1 }, notifs: notify(next.notifs, [['pull', `Lien de Faille : ${c.name} (${RARITIES[c.rarity].short}) rejoint ta collection.`]]) } }
-        n++
-      })
-      if (n) setState(next)
-      return n
+      let next = state
+      const found: Hero[] = []
+      let n = 0
+      for (let step = 1; step <= Math.min(friends, 5000); step++) if (!next.refClaimed.includes(step)) { next = openRefStep(next, step, found); n++ }
+      if (!n) return null
+      setState({ ...next, notifs: found.length ? notify(next.notifs, [['pull', `Coffres du Lien de Faille : ${found.map((c) => `${c.name} (${RARITIES[c.rarity].short})`).join(', ')}.`]]) : next.notifs })
+      return found
     }
     const claimChallenge = (id: string) => {
       const t = new Date()
@@ -852,7 +882,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setArt((a) => Object.fromEntries(Object.entries(a).filter(([k]) => k !== heroId)))
       void removeArt(heroId)
     }
-    return { ...state, canAfford, summon, merge, mergeAll, dupes, useScroll, scrollsUseful, toggleFav, takeCards, spendGems, addGems, giveCards, toggleWish, togglePin, fightSpire, fightGuildBoss, guildTries, fightBig, bigTries, claimReferral, tourneyFight, buyStall, quickSell, listAuction, setAlert, levelOf, buyOffer, claimGift, giftReady, duel, newRivals, claimPvp, duelsLeft, arenaPower, fightColossus, claimEvent, colTries, claimContract, claimAllContracts, claimAllChallenges, claimAllPvp, claimEverything, claimAllReferral, claimDaily, claimChallenge, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
+    return { ...state, canAfford, summon, merge, mergeAll, dupes, useScroll, scrollsUseful, toggleFav, takeCards, spendGems, addGems, giveCards, toggleWish, togglePin, fightSpire, fightGuildBoss, guildTries, fightBig, bigTries, claimReferral, useLrTicket, useTradeTicket, tourneyFight, buyStall, quickSell, listAuction, setAlert, levelOf, buyOffer, claimGift, giftReady, duel, newRivals, claimPvp, duelsLeft, arenaPower, fightColossus, claimEvent, colTries, claimContract, claimAllContracts, claimAllChallenges, claimAllPvp, claimEverything, claimAllReferral, claimDaily, claimChallenge, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
   }, [state, customArt, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, now])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>
