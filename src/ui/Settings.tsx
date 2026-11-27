@@ -162,7 +162,6 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
           </button>
         </section>
 
-        <SaveCard />
 
         <section className="set-card set__danger" style={{ ['--sc' as string]: '#ff5d7a' }}>
           <header className="set-card__head"><img src={extraArt('set-reset')} alt="" /><h3>Recommencer la partie</h3></header>
@@ -176,51 +175,6 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
 }
 
 // Sauvegarde : un code à copier (ou un fichier) pour garder sa partie ou la reprendre sur un autre appareil.
-const SAVE_KEY = 'anime-rift-save-v1'
-const encode = (text: string) => btoa(unescape(encodeURIComponent(text)))
-const decode = (code: string) => decodeURIComponent(escape(atob(code.trim())))
-const SaveCard = () => {
-  const [code, setCode] = useState('')
-  const [paste, setPaste] = useState('')
-  const [msg, setMsg] = useState('')
-  const current = () => localStorage.getItem(SAVE_KEY) ?? '{}'
-  const load = (text: string) => {
-    try {
-      const data = JSON.parse(text)
-      if (typeof data !== 'object' || data === null || typeof data.owned !== 'object') throw new Error('format')
-      localStorage.setItem(SAVE_KEY, JSON.stringify(data))
-      setMsg('Partie chargée : le jeu redémarre…')
-      setTimeout(() => window.location.reload(), 600)
-    } catch { setMsg('Ce code ou ce fichier ne contient pas une partie d’ANIME RIFT.') }
-  }
-  const download = () => {
-    const url = URL.createObjectURL(new Blob([current()], { type: 'application/json' }))
-    const a = document.createElement('a')
-    a.href = url; a.download = `anime-rift-${new Date().toISOString().slice(0, 10)}.json`; a.click()
-    setTimeout(() => URL.revokeObjectURL(url), 1000)
-    setMsg('Fichier préparé. S’il ne se télécharge pas ici, utilise plutôt le code.')
-  }
-  return (
-    <section className="set-card" style={{ ['--sc' as string]: '#4be3a4' }}>
-      <header className="set-card__head"><img src={extraArt('set-phone')} alt="" /><h3>Ma sauvegarde</h3></header>
-      <p className="set__note">Ta partie est gardée sur cet appareil. Pour la mettre à l’abri ou la reprendre ailleurs, copie ton code de sauvegarde (ou télécharge le fichier), puis colle-le sur l’autre appareil.</p>
-      <div className="set__row">
-        <button className="cd-btn cd-btn--small" onClick={() => { const c = encode(current()); setCode(c); navigator.clipboard?.writeText(c).then(() => setMsg('Code copié !'), () => setMsg('Sélectionne le code ci-dessous et copie-le.')) }}>Copier mon code</button>
-        <button className="cd-btn cd-btn--small" onClick={download}>Télécharger le fichier</button>
-        <label className="cd-btn cd-btn--small" htmlFor="set-load">Charger un fichier</label>
-        <input id="set-load" type="file" accept="application/json,.json" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) void f.text().then(load) }} />
-      </div>
-      {code && <textarea className="set__input set__code" readOnly value={code} onFocus={(e) => e.currentTarget.select()} aria-label="Mon code de sauvegarde" />}
-      <form className="set__row" onSubmit={(e) => { e.preventDefault(); try { load(decode(paste)) } catch { setMsg('Ce code n’est pas valide.') } }}>
-        <input className="set__input" placeholder="Colle ici un code de sauvegarde" aria-label="Code de sauvegarde à charger" value={paste} onChange={(e) => setPaste(e.target.value)} />
-        <button className="cd-btn cd-btn--small" type="submit" disabled={!paste.trim()}>Charger</button>
-      </form>
-      <p className="set__note" role="status">{msg || 'Attention : charger une sauvegarde remplace la partie de cet appareil.'}</p>
-    </section>
-  )
-}
-
-// Compte en ligne : la partie est sauvegardée sur le serveur et retrouvée sur tous les appareils.
 const AccountCard = () => {
   const { session, me, ready } = useOnline()
   const [msg, setMsg] = useState('')
