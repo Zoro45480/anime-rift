@@ -1034,3 +1034,4 @@ body:has(.sc) .chat__toggle, body:has(.sc) .chat__panel { display: none !importa
 .mrtest__done { padding: 12px; border-radius: 10px; background: rgba(124,92,255,.18); }
 .mrtest__link small { word-break: break-all; color: var(--text-dim, #aab); }
 .mrtest > *, .mrtest__row > * { min-width: 0; } .mrtest input, .mrtest select { width: 100%; box-sizing: border-box; } .mrtest p { margin: 0; overflow-wrap: anywhere; }
+.mrtest__go--full { background: linear-gradient(90deg, #ff3d9a, #7c5cff); color: #fff; } .mrtest__note { color: var(--text-dim, #aab); font-size: 14px; }

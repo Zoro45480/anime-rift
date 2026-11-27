@@ -1,5 +1,10 @@
 import { useState } from 'react'
 import { heroById, HEROES } from '../data/heroes'
+import { createPortal } from 'react-dom'
+import { MR_YOUTUBE } from '../data/mrVideos'
+import { StoreProvider } from '../state/store'
+import { SummonCinematic } from '../summon/SummonCinematic'
+import { CardViewerProvider } from '../ui/CardViewer'
 import { YtEdit } from '../summon/MrEdit'
 
 // Page de test des edits MR (adresse : …/?mrtest=naruto). Rien n'est enregistré : on règle le passage, on regarde, on recommence.
@@ -10,11 +15,13 @@ const fmt = (n: number) => `${Math.floor(n / 60)}:${String(n % 60).padStart(2, '
 export const MrTest = () => {
   const q = new URLSearchParams(location.search)
   const [heroId, setHeroId] = useState(q.get('mrtest') || 'naruto')
-  const [url, setUrl] = useState(q.get('yt') || 'https://youtu.be/XvioQrCOP24')
-  const [start, setStart] = useState(fmt(Number(q.get('t') || 0)))
-  const [end, setEnd] = useState(fmt(Number(q.get('fin') || 10)))
+  const saved = MR_YOUTUBE[heroId]
+  const [url, setUrl] = useState(q.get('yt') || saved?.id || 'https://youtu.be/XvioQrCOP24')
+  const [start, setStart] = useState(fmt(Number(q.get('t') ?? saved?.start ?? 0)))
+  const [end, setEnd] = useState(fmt(Number(q.get('fin') ?? saved?.end ?? 10)))
   const [play, setPlay] = useState(false)
   const [ended, setEnded] = useState(false)
+  const [full, setFull] = useState(false)
   const hero = heroById(heroId) ?? heroById('naruto')
   const id = ytId(url)
   const s = toSec(start), e = Math.max(toSec(end), s + 1)
@@ -31,9 +38,12 @@ export const MrTest = () => {
         <span>Durée : {e - s} s</span>
       </div>
       <button className="mrtest__go" disabled={!id} onClick={() => { setEnded(false); setPlay(true) }}>▶ Lancer l'edit</button>
+      <button className="mrtest__go mrtest__go--full" disabled={!id} onClick={() => { MR_YOUTUBE[hero.id] = { id, start: s, end: e }; setFull(true) }}>✦ Tester l'invocation complète (comme dans le jeu)</button>
+      <p className="mrtest__note">L'invocation complète joue toute l'animation de tirage de {hero.name}, puis l'edit et la carte. C'est un test : la carte n'est pas ajoutée à ta collection.</p>
       {ended && <p className="mrtest__done">Fin de l'edit : ici la carte MR de {hero.name} apparaît.</p>}
       <p className="mrtest__link">Quand c'est bon, envoie-moi ces réglages : <b>{hero.name} · {fmt(s)} → {fmt(e)}</b><br /><small>{link}</small></p>
       {play && id && <YtEdit hero={hero} clip={{ id, start: s, end: e }} onDone={() => { setPlay(false); setEnded(true) }} />}
+      {full && createPortal(<StoreProvider><CardViewerProvider><SummonCinematic heroes={[hero]} onClose={() => setFull(false)} /></CardViewerProvider></StoreProvider>, document.body)}
     </main>
   )
 }
