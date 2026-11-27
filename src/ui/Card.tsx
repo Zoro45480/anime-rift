@@ -34,7 +34,7 @@ export const Card = ({ hero, count, locked, inert, hd, className = '', style }: 
   // MR : cadre dessiné propre à son univers, lueur à sa couleur, et particules animées sur la carte en grand
   const theme = frameOf(hero.world)
   const mrSrc = hero.rarity === 'rift' ? mrFrameArt(theme, hd) : ''
-  const nrSrc = hero.rarity === 'common' || hero.rarity === 'rare' ? nrFrameArt(hero.rarity, theme, hd) : ''
+  const nrSrc = hero.rarity === 'common' || hero.rarity === 'rare' || hero.rarity === 'legend' ? nrFrameArt(hero.rarity, theme, hd) : ''
   const fxRef = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
     if (!mrSrc || !fxRef.current || document.documentElement.dataset.fxchoice === 'low') return // coupé seulement si le joueur a choisi « Fluide »

@@ -779,3 +779,11 @@ body:has(.sc) .chat__toggle, body:has(.sc) .chat__panel { display: none !importa
 .card--nrframe .card__mono { display: none !important; } /* le cadre porte déjà sa lettre N ou R */
 .card--nrframe .card__face { box-shadow: none !important; }
 .col-fav { left: auto !important; right: 6% !important; top: auto !important; bottom: 22% !important; }
+
+/* Cadres LR par univers */
+.card__frame--nr-legend-demonslayer { left: -26.62%; top: -8.92%; width: 150.09%; height: 117.83%; }
+.card__frame--nr-legend-jujutsu { left: -18.89%; top: -10.15%; width: 137.77%; height: 120.29%; }
+.card__frame--nr-legend-hunter { left: -12.85%; top: -6.95%; width: 125.71%; height: 115.76%; }
+.card__frame--nr-legend-dragonball { left: -16.82%; top: -11.69%; width: 133.64%; height: 121.08%; }
+.card__frame--nr-legend-bleach { left: -16.46%; top: -15.05%; width: 131.46%; height: 124.86%; }
+.card__frame--nr[class*="nr-legend"] { filter: drop-shadow(0 0 1cqw rgba(255,255,255,.25)) drop-shadow(0 0.8cqw 1.6cqw rgba(0,0,0,.55)); }
