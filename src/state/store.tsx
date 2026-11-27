@@ -49,7 +49,7 @@ type State = {
   pulls: number // invocations réalisées depuis le début
   wins: number // combats gagnés depuis le début
   cosmetics: string[] // objets d'apparence achetés
-  seen: { last: string; days: number } // jours de jeu différents (succès d'ancienneté)
+  seen: { last: string; days: number; first?: string } // jours de jeu différents (succès d'ancienneté)
   achDone: string[] | null // succès déjà annoncés (null : ancienne sauvegarde, on les marque sans notification)
   bazaar: BazaarState // Bazar : achats du jour, enchères en cours, journal des transactions, alertes de prix
   shop: ShopState // boutique : offres achetées cette semaine, cadeau du jour, historique
@@ -222,7 +222,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     const fresh = state.achDone ? done.filter((id) => !state.achDone!.includes(id)) : []
     if (!seenNew && state.achDone && fresh.length === 0) return
     setState((s) => {
-      const seen = s.seen.last !== today ? { last: today, days: s.seen.days + 1 } : s.seen
+      const seen = s.seen.last !== today ? { last: today, days: s.seen.days + 1, first: s.seen.first ?? today } : s.seen
       const news = ACHIEVEMENTS.filter((a) => fresh.includes(a.id))
       const notifs = news.length ? [...news.map((a, i) => ({ id: Date.now() * 100 + i, t: Date.now(), kind: 'ach' as const, text: `Succès ${METAL_LABEL[a.metal].toLowerCase()} : ${a.name}. Titre « ${a.title} » débloqué.`, read: false })), ...s.notifs].slice(0, NOTIF_MAX) : s.notifs
       return { ...s, seen, achDone: [...new Set([...(s.achDone ?? []), ...done])], notifs }

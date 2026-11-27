@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { extraArt, uiArt } from '../assets/manifest'
 import { PlayerMarket } from './PlayerMarket'
+import { TradeDesk } from './TradeDesk'
 import { openSettings } from '../state/online'
 import { BANNERS } from '../data/banners'
 import { AFFINITY_LIST, type AffinityId } from '../data/affinities'
 import { AffinityIcon } from '../ui/AffinityIcon'
 import { HEROES, heroById, ROLE_KINDS, roleKind, type Hero, type RoleKind } from '../data/heroes'
 import { RARITIES, RARITY_ORDER, type RarityId } from '../data/rarities'
-import { AUCTION_HOURS, auctionNow, coteOf, QUICK_SALE, quickPrice, stallOf, valueOf, type Trade } from '../game/bazaar'
+import { AUCTION_HOURS, auctionNow, bazaarUnlocked, coteOf, unlockSteps, quickPrice, stallOf, valueOf, type Trade } from '../game/bazaar'
 import { dayKey, msToDayEnd } from '../game/contracts'
 import { useStore } from '../state/store'
 import { Card } from '../ui/Card'
@@ -28,7 +29,7 @@ export const Spark = ({ trades }: { trades: Trade[] }) => {
   return <svg className="bz-spark" viewBox="0 0 100 30" preserveAspectRatio="none" aria-label="Évolution de tes prix"><polyline points={path} /></svg>
 }
 
-type Tab = 'players' | 'buy' | 'sell' | 'auctions' | 'mine'
+type Tab = 'players' | 'buy' | 'sell' | 'auctions' | 'trade' | 'mine'
 type BzSort = 'value-desc' | 'price-asc' | 'rarity' | 'name'
 const BZ_SORTS: [BzSort, string][] = [['value-desc', 'Valeur décroissante'], ['price-asc', 'Valeur croissante'], ['rarity', 'Rareté'], ['name', 'Nom']]
 type Only = 'missing' | 'wish' | 'afford'
@@ -51,6 +52,8 @@ export const Bazaar = () => {
   const [alertQ, setAlertQ] = useState('')
   const [alertPrice, setAlertPrice] = useState('')
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t) }, [])
+  const steps = unlockSteps(store.seen, store.wins, now)
+  const unlocked = bazaarUnlocked(store.seen, store.wins, now)
   const day = dayKey(new Date(now))
   const stall = stallOf(day, store.wish)
   const bought = store.bazaar.day === day ? store.bazaar.bought : []
@@ -99,21 +102,24 @@ export const Bazaar = () => {
     <div className="bz">
       <header className="bz__head">
         <img src={uiArt('nav-bazaar')} alt="" />
-        <div><p className="eyebrow">Le marché</p><h1>Bazar des Failles</h1><p>Achète, vends, mets aux enchères. Tes Éclats : <Price v={store.gems} /></p></div>
+        <div><p className="eyebrow">Entre collectionneurs</p><h1 className="page-title">Le Bazar des Failles</h1><p>Achète, vends, mets aux enchères et échange. Tes Éclats : <Price v={store.gems} /></p></div>
       </header>
-      <ul className="bz__rules">
-        <li>Onglet Joueurs : le vrai marché entre joueurs. Onglets Marchands et Vendre aux marchands : des personnages joués par le jeu.</li>
-        <li>Vente immédiate : {Math.round(QUICK_SALE * 100)} % de la valeur du jour. Enchères : {AUCTION_HOURS} h, 5 à la fois.</li>
+      <ul className="bz__rules bz__rules--v5">
+        <li><b>Sans ticket</b> : mettre en vente ne coûte rien.</li>
+        <li><b>10 % de commission</b> sur chaque vente entre joueurs.</li>
+        <li><b>24 h</b> : une carte reçue ne peut pas être revendue ni échangée avant 24 h.</li>
         <li>Seuls les doublons se vendent : ta dernière copie reste toujours dans ta collection.</li>
       </ul>
+      <Unlock steps={steps} open={!unlocked} />
       <div className="coltabs__bar" role="tablist" aria-label="Sections du Bazar">
-        {([['players', 'Joueurs'], ['buy', 'Marchands'], ['sell', 'Vendre aux marchands'], ['auctions', `Enchères (${store.bazaar.auctions.length})`], ['mine', 'Mon Bazar']] as [Tab, string][]).map(([id, label]) => (
+        {([['players', 'Acheter'], ['buy', 'Marchands'], ['sell', 'Vendre aux marchands'], ['auctions', `Enchères (${store.bazaar.auctions.length})`], ['trade', 'Échanger'], ['mine', 'Mon Bazar']] as [Tab, string][]).map(([id, label]) => (
           <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>{label}</button>
         ))}
       </div>
       <p className="cd__notice" role="status">{msg}</p>
 
-      {tab === 'players' && <PlayerMarket onConnect={openSettings} />}
+      {tab === 'players' && <PlayerMarket onConnect={openSettings} locked={!unlocked} />}
+      {tab === 'trade' && <TradeDesk onConnect={openSettings} locked={!unlocked} />}
 
       {tab === 'buy' && <section className="bz-sec">
         <p className="cn__meta">L'étal du jour · nouveaux marchands dans <b>{clock(msToDayEnd(new Date(now)))}</b>{store.wish.length ? ' · les cartes de ta liste d’envies passent en premier' : ' · ajoute des cartes à tes envies pour les voir ici'}</p>
@@ -213,3 +219,22 @@ export const Bazaar = () => {
   )
 }
 export type { Hero }
+
+// Bandeau « Débloque le Bazar » : trois étapes, repliable.
+const Unlock = ({ steps, open }: { steps: ReturnType<typeof unlockSteps>; open: boolean }) => {
+  const [shut, setShut] = useState(false)
+  if (!open) return null
+  const done = steps.filter((x) => x.done).length
+  return (
+    <section className={`bz-unlock ${shut ? 'is-shut' : ''}`} aria-label="Débloquer le Bazar">
+      <header><div><p className="eyebrow">Anti-abus</p><h2>Débloque le Bazar entre joueurs <small>{done}/3</small></h2></div>
+        <button className="linkbtn" onClick={() => setShut(!shut)} aria-expanded={!shut}>{shut ? 'Afficher' : 'Replier'}</button></header>
+      {!shut && <>
+        <p className="set__note">En attendant, tu peux regarder les annonces, mais pas acheter, vendre ni échanger avec les joueurs. Les marchands restent ouverts.</p>
+        <ol className="bz-unlock__steps">{steps.map((x) => (
+          <li key={x.id} className={x.done ? 'is-done' : ''}><span>{x.done ? '✓' : ''}</span><b>{x.label}</b><div className="cd-bar"><i style={{ width: `${(x.have / x.need) * 100}%` }} /></div><small>{x.have} / {x.need} {x.unit}</small></li>
+        ))}</ol>
+      </>}
+    </section>
+  )
+}

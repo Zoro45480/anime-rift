@@ -33,3 +33,22 @@ describe('Bazar', () => {
     expect(c.d7).toBe(10); expect(c.d30).toBe(20); expect(c.count30).toBe(2)
   })
 })
+
+import { bazaarUnlocked, heldUntil, tradeProblem, unlockSteps } from './bazaar'
+describe('règles du Bazar entre joueurs', () => {
+  it('se débloque avec ancienneté, connexions et victoires', () => {
+    const now = new Date('2026-12-10T12:00:00').getTime()
+    expect(bazaarUnlocked({ days: 1, first: '2026-12-10' }, 0, now)).toBe(false)
+    expect(unlockSteps({ days: 3, first: '2026-12-06' }, 4, now).map((s) => s.done)).toEqual([true, true, false])
+    expect(bazaarUnlocked({ days: 5, first: '2026-12-01' }, 12, now)).toBe(true)
+  })
+  it('bloque 24 h une carte reçue', () => {
+    expect(heldUntil([{ t: 1000, note: 'Achat au marché' }], 2000)).toBe(1000 + 24 * 3600 * 1000)
+    expect(heldUntil([{ t: 1000 }], 2000)).toBe(0)
+  })
+  it('n’accepte que les échanges équitables', () => {
+    expect(tradeProblem([{ rarity: 'epic' }], [{ rarity: 'rift' }])).toMatch(/Raretés/)
+    expect(tradeProblem([{ rarity: 'epic' }], [])).toMatch(/au moins/)
+    expect(tradeProblem([{ rarity: 'epic' }, { rarity: 'rare' }], [{ rarity: 'rare' }, { rarity: 'epic' }])).toBe('')
+  })
+})

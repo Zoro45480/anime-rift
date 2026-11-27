@@ -227,14 +227,16 @@ export const sendMessage = async (to: string, body: string) => {
 export const markRead = (from: string) => supa.from('messages').update({ read: true }).eq('from_id', from).eq('to_id', myId() ?? '').eq('read', false)
 
 // Échanges
-export type Trade = { id: number; from_id: string; to_id: string; give: string[]; want: string[]; status: 'open' | 'accepted' | 'refused' | 'cancelled'; created_at: string }
+export type Trade = { id: number; from_id: string; to_id: string; give: string[]; want: string[]; note?: string | null; status: 'open' | 'accepted' | 'refused' | 'cancelled'; created_at: string }
 export const fetchTrades = async () => {
   const { data } = await supa.from('trades').select('*').order('id', { ascending: false }).limit(50)
   return (data ?? []) as Trade[]
 }
-export const proposeTrade = async (to: string, give: string[], want: string[]) => {
-  const { error } = await supa.from('trades').insert({ from_id: myId(), to_id: to, give, want })
-  return error ? error.message : 'ok'
+export const proposeTrade = async (to: string, give: string[], want: string[], note = '') => {
+  const row: Record<string, unknown> = { from_id: myId(), to_id: to, give, want }
+  let { error } = await supa.from('trades').insert(note ? { ...row, note } : row)
+  if (error && note && /note/.test(error.message)) ({ error } = await supa.from('trades').insert(row)) // fichier SQL 03 pas encore lancé
+  return error ? (/equitable|check/i.test(error.message) ? 'Échange refusé : il faut autant de cartes de chaque côté (1 à 3).' : error.message) : 'ok'
 }
 export const answerTrade = (id: number, accept: boolean) => rpc('answer_trade', { trade: id, accept })
 

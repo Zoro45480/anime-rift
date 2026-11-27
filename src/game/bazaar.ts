@@ -71,3 +71,37 @@ export const coteOf = (trades: Trade[], heroId: string, now: number) => {
 export type Alert = { heroId: string; below: number }
 export type BazaarState = { bought: string[]; day: string; auctions: Auction[]; trades: Trade[]; alerts: Alert[]; alerted: string }
 export const emptyBazaar = (): BazaarState => ({ bought: [], day: '', auctions: [], trades: [], alerts: [], alerted: '' })
+
+// ───── Déblocage du Bazar entre joueurs (anti-abus) ─────
+export const UNLOCK = { ageDays: 3, loginDays: 3, wins: 10 }
+export const accountAgeDays = (first: string | undefined, days: number, now = Date.now()) => {
+  if (!first) return Math.max(0, days - 1)
+  return Math.max(0, Math.floor((now - new Date(`${first}T00:00:00`).getTime()) / 86400000))
+}
+export type UnlockStep = { id: 'age' | 'login' | 'wins'; label: string; have: number; need: number; unit: string; done: boolean }
+export const unlockSteps = (seen: { days: number; first?: string }, wins: number, now = Date.now()): UnlockStep[] => {
+  const age = accountAgeDays(seen.first, seen.days, now)
+  return [
+    { id: 'age', label: 'Ancienneté du compte', have: Math.min(age, UNLOCK.ageDays), need: UNLOCK.ageDays, unit: 'jours', done: age >= UNLOCK.ageDays },
+    { id: 'login', label: 'Jours de connexion', have: Math.min(seen.days, UNLOCK.loginDays), need: UNLOCK.loginDays, unit: 'jours', done: seen.days >= UNLOCK.loginDays },
+    { id: 'wins', label: 'Victoires en Aventure', have: Math.min(wins, UNLOCK.wins), need: UNLOCK.wins, unit: 'victoires', done: wins >= UNLOCK.wins },
+  ]
+}
+export const bazaarUnlocked = (seen: { days: number; first?: string }, wins: number, now = Date.now()) => unlockSteps(seen, wins, now).every((x) => x.done)
+
+// Une carte reçue (achat, échange, enchère) ne repart pas avant 24 h.
+export const HOLD_MS = 24 * 3600 * 1000
+export const heldUntil = (log: { t: number; note?: string }[] | undefined, now = Date.now()) => {
+  const last = (log ?? []).find((e) => e.note && now - e.t < HOLD_MS)
+  return last ? last.t + HOLD_MS : 0
+}
+
+// Échanges équitables : autant de cartes de chaque côté (1 à 3), et les mêmes raretés.
+export const TRADE_MAX = 3
+export const tradeProblem = (give: { rarity: string }[], want: { rarity: string }[]): string => {
+  if (!give.length || !want.length) return 'Choisis au moins une carte de chaque côté.'
+  if (give.length !== want.length) return 'Il faut autant de cartes de chaque côté.'
+  const a = give.map((h) => h.rarity).sort().join(), b = want.map((h) => h.rarity).sort().join()
+  if (a !== b) return 'Raretés différentes : chaque carte doit être échangée contre une carte de même rareté.'
+  return ''
+}
