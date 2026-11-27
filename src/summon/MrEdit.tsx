@@ -1,19 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Hero } from '../data/heroes'
+import { MR_VIDEOS } from '../data/mrVideos'
 
 // « Edit » plein écran quand une carte MR tombe.
-// Si le joueur a choisi une vidéo pour ce perso (lien collé sur sa fiche), c'est elle qui passe.
+// Si une vidéo d'edit est fournie pour ce perso (dossier public/mr-videos, liste dans data/mrVideos.ts), c'est elle qui passe.
 // Sinon, le jeu monte son propre edit avec l'image du perso : coupes, zooms, flashs, nom qui claque.
-const KEY = 'anime-rift-mr-videos'
-export const getMrVideos = (): Record<string, string> => { try { return JSON.parse(localStorage.getItem(KEY) ?? '{}') as Record<string, string> } catch { return {} } }
-export const setMrVideo = (heroId: string, url: string) => {
-  const all = getMrVideos()
-  if (url.trim()) all[heroId] = url.trim(); else delete all[heroId]
-  try { localStorage.setItem(KEY, JSON.stringify(all)) } catch { /* rien */ }
-}
-// Lien YouTube (watch, shorts, youtu.be) → identifiant de la vidéo
-export const youtubeId = (url: string) => url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]{11})/)?.[1] ?? null
-export const isVideoUrl = (url: string) => Boolean(youtubeId(url)) || /^https:\/\/\S+\.(mp4|webm|mov)(\?\S*)?$/i.test(url)
+const videoOf = (heroId: string) => (MR_VIDEOS.includes(heroId) ? `mr-videos/${heroId}.mp4` : '')
 
 export const EDIT_MS = 5600
 const CUTS = [ // [début (ms), cadrage x %, cadrage y %, zoom, rotation] : zooms modérés pour garder l'image nette
@@ -21,9 +13,16 @@ const CUTS = [ // [début (ms), cadrage x %, cadrage y %, zoom, rotation] : zoom
 ] as const
 
 export const MrEdit = ({ hero, art, onDone }: { hero: Hero; art: string; onDone: () => void }) => {
-  const video = getMrVideos()[hero.id]
-  const yt = video ? youtubeId(video) : null
+  const video = videoOf(hero.id)
   const [cut, setCut] = useState(0)
+  const vidRef = useRef<HTMLVideoElement>(null)
+  // d'abord avec le son ; si le navigateur le refuse, la vidéo part en muet plutôt que de ne pas partir
+  useEffect(() => {
+    const v = vidRef.current
+    if (!v) return
+    v.muted = false
+    v.play().catch(() => { v.muted = true; void v.play().catch(() => done.current()) })
+  }, [video])
   const done = useRef(onDone)
   done.current = onDone
   useEffect(() => {
@@ -38,8 +37,7 @@ export const MrEdit = ({ hero, art, onDone }: { hero: Hero; art: string; onDone:
 
   if (video) return (
     <div className="mredit mredit--video">
-      {yt ? <iframe src={`https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&controls=0&modestbranding=1&rel=0&playsinline=1`} title={`Edit de ${hero.name}`} allow="autoplay; encrypted-media" />
-        : <video src={video} autoPlay playsInline onEnded={() => done.current()} onError={() => done.current()} />}
+      <video ref={vidRef} src={video} playsInline preload="auto" onEnded={() => done.current()} onError={() => done.current()} />
       <p className="mredit__tag"><b>MR</b>{hero.name}</p>
     </div>
   )
