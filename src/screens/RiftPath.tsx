@@ -82,7 +82,7 @@ export const RiftPath = ({ now }: { now: Date }) => {
           <p className="pt__prem-sub">Une 2e récompense à chaque palier</p>
           <p className="pt__prem-txt">Valable jusqu’au {new Date(season.end.getTime() - 1).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}.</p>
           <label className="pt__prem-check"><input type="checkbox" checked={waive} onChange={(e) => setWaive(e.target.checked)} /> Je veux recevoir le pass premium tout de suite, et je renonce donc à mon droit de rétractation de 14 jours une fois la livraison faite.</label>
-          <button className="pt__prem-btn" disabled>Passer premium <b>14,99 €</b></button>
+          <button className="pt__prem-btn" disabled>Passer premium <b>10 €</b></button>
           <small>Paiement sécurisé par Stripe · une fois par saison. Bientôt disponible : le paiement n’est pas encore ouvert.</small>
         </section>
       </div>
