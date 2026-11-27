@@ -1,3 +1,4 @@
+import { TabIcon } from '../ui/TabIcon'
 import { useCallback, useEffect, useState } from 'react'
 import { colossusOf } from '../game/colossus'
 import { weekKey } from '../game/contracts'
@@ -73,7 +74,7 @@ const NoGuild = ({ reload }: { reload: () => Promise<void> }) => {
     <div className="gd">
       <Hero />
       <div className="coltabs__bar so__tabs" role="tablist">
-        {([['find', 'Trouver un Ordre'], ['create', 'Créer un Ordre'], ['rank', 'Classement']] as [Tab, string][]).map(([id, l]) => <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>{l}</button>)}
+        {([['find', 'Trouver un Ordre'], ['create', 'Créer un Ordre'], ['rank', 'Classement']] as [Tab, string][]).map(([id, l]) => <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}><TabIcon id={id} />{l}</button>)}
       </div>
       {msg && <p className="cd__notice" role="status">{msg}</p>}
       {tab === 'find' && <div className="so__grid">
@@ -152,7 +153,7 @@ const MyGuild = ({ data, reload }: { data: NonNullable<Awaited<ReturnType<typeof
         </ul>
       </header>
       <div className="coltabs__bar so__tabs" role="tablist">
-        {([['ops', 'Opérations'], ['boss', 'Boss de la semaine'], ['rival', 'Rivalité'], ['members', `Membres (${members.length})`], ...(lead ? [['requests', `Candidatures (${requests.length})`]] : []), ['rank', 'Classement'], ['badges', 'Insignes'], ['settings', 'Paramètres']] as [typeof tab, string][]).map(([id, l]) => <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>{l}</button>)}
+        {([['ops', 'Opérations'], ['boss', 'Boss de la semaine'], ['rival', 'Rivalité'], ['members', `Membres (${members.length})`], ...(lead ? [['requests', `Candidatures (${requests.length})`]] : []), ['rank', 'Classement'], ['badges', 'Insignes'], ['settings', 'Paramètres']] as [typeof tab, string][]).map(([id, l]) => <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}><TabIcon id={id} />{l}</button>)}
       </div>
       {msg && <p className="cd__notice" role="status">{msg}</p>}
       {tab === 'boss' && <div className="so__grid">
@@ -277,7 +278,7 @@ const Operations = ({ guildId, total, tries, team, onFight }: { guildId: string;
   const level = hqLevel(renown ?? 0)
   return (
     <div className="ops">
-      <div className="coltabs__bar" role="tablist">{([['ops', 'Opérations'], ['hq', 'Quartier général'], ['squads', 'Escouades']] as const).map(([id, l]) => <button key={id} role="tab" aria-selected={sub === id} className={sub === id ? 'is-active' : ''} onClick={() => setSub(id)}>{l}</button>)}</div>
+      <div className="coltabs__bar" role="tablist">{([['ops', 'Opérations'], ['hq', 'Quartier général'], ['squads', 'Escouades']] as const).map(([id, l]) => <button key={id} role="tab" aria-selected={sub === id} className={sub === id ? 'is-active' : ''} onClick={() => setSub(id)}><TabIcon id={id} />{l}</button>)}</div>
       {sub === 'ops' && <>
         <p className="set__note">Cette semaine, l’Ordre a infligé <b>{n(total)}</b> dégâts. Chaque combat contre le boss d’Ordre fait avancer le secteur en cours. 3 essais par jour et par joueur.</p>
         {OPERATIONS.map((ch, ci) => (

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
-import { gateArt, heroArt } from '../assets/manifest'
+import { gateArt, heroArt, uiArt } from '../assets/manifest'
 import { ENERGY_OVER, ENERGY_REFILL, ENERGY_REFILL_COST, ENERGY_MAX, ENERGY_REGEN_MS, accountLevel, REBIRTH_KEEP, REBIRTH_LEVEL, REBIRTH_STAT, REBIRTH_XP } from '../game/progression'
 import { useStore } from '../state/store'
 import { Guide } from '../ui/Guide'
@@ -107,6 +107,7 @@ export const Play = ({ onRebirth, onProfile, start }: { onRebirth: () => void; o
         <p>Un éclair par combat · +1 toutes les {ENERGY_REGEN_MS / 60000} minutes. {energyLeft >= ENERGY_MAX ? 'Énergie pleine.' : 'Elle remonte toute seule.'} Elle se dépense dans L’Aventure. Le bouton + rend {ENERGY_REFILL} éclairs pour {ENERGY_REFILL_COST} Éclats (jusqu'à {ENERGY_OVER} en réserve).</p>
       </section>
       <header className="nx__head">
+        <img className="nx__headimg" src={uiArt('nav-nexus')} alt="" />
         <p className="eyebrow">Le Nexus</p>
         <h1>Six portes.<br />{GATES.every((g) => modeOpen(g.id, acc.level, rebirths)) ? 'Toutes sont ouvertes.' : 'Monte de niveau pour les ouvrir.'}</h1>
         <button className="nx__who" onClick={onProfile} aria-label="Voir mon profil"><Avatar size={40} /><b>{profile.name.trim() || 'Joueur'}</b><span>Voir mon profil →</span></button>

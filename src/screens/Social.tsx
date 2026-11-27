@@ -1,3 +1,4 @@
+import { TabIcon } from '../ui/TabIcon'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { HEROES, heroById } from '../data/heroes'
 import { RARITIES, RARITY_ORDER } from '../data/rarities'
@@ -65,10 +66,10 @@ export const Social = ({ onGuild, onProfile, onConnect }: { onGuild: () => void;
         </div>
       </header>
       <div className="coltabs__bar so__tabs" role="tablist">
-        <button role="tab" aria-selected={tab === 'friends'} className={tab === 'friends' ? 'is-active' : ''} onClick={() => setTab('friends')}>Amis{incoming.length > 0 && <i className="dot" />}</button>
-        <button role="tab" aria-selected={tab === 'messages'} className={tab === 'messages' ? 'is-active' : ''} onClick={() => setTab('messages')}>Messages{unread > 0 && <i className="dot" />}</button>
-        <button role="tab" aria-selected={tab === 'trades'} className={tab === 'trades' ? 'is-active' : ''} onClick={() => setTab('trades')}>Échanges{tradesIn.length > 0 && <i className="dot" />}</button>
-        <button role="tab" onClick={onGuild}>Ordre →</button>
+        <button role="tab" aria-selected={tab === 'friends'} className={tab === 'friends' ? 'is-active' : ''} onClick={() => setTab('friends')}><TabIcon id="friends" />Amis{incoming.length > 0 && <i className="dot" />}</button>
+        <button role="tab" aria-selected={tab === 'messages'} className={tab === 'messages' ? 'is-active' : ''} onClick={() => setTab('messages')}><TabIcon id="messages" />Messages{unread > 0 && <i className="dot" />}</button>
+        <button role="tab" aria-selected={tab === 'trades'} className={tab === 'trades' ? 'is-active' : ''} onClick={() => setTab('trades')}><TabIcon id="trades" />Échanges{tradesIn.length > 0 && <i className="dot" />}</button>
+        <button role="tab" onClick={onGuild}><TabIcon id="guild" />Ordre →</button>
       </div>
       {notice && <p className="cd__notice" role="status">{notice}</p>}
 

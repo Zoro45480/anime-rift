@@ -1,3 +1,4 @@
+import { TabIcon } from '../ui/TabIcon'
 import { useState } from 'react'
 import { Social } from './Social'
 import { GuildPage } from './Guild'
@@ -12,6 +13,8 @@ import { accountLevel } from '../game/progression'
 import { useStore } from '../state/store'
 import { Avatar } from '../ui/Settings'
 
+import { uiArt } from '../assets/manifest'
+const HEAD_ART = { social: 'nav-profile', guild: 'league-gold', fame: 'crown', referral: 'chest' } as const
 export type CommunityTab = 'social' | 'guild' | 'fame' | 'referral'
 export const COMMUNITY: [CommunityTab, string][] = [['social', 'Social'], ['guild', 'Ordre'], ['fame', 'Panthéon'], ['referral', 'Lien de Faille']]
 const n = (x: number) => x.toLocaleString('fr-FR')
@@ -31,9 +34,9 @@ export const Community = ({ start = 'fame', onProfile }: { start?: CommunityTab;
   ]
   return (
     <div className="cm">
-      <header className="cm__head"><div><p className="eyebrow">Communauté</p><h1>{COMMUNITY.find((x) => x[0] === tab)![1]}</h1></div></header>
+      <header className="cm__head page-head"><img src={uiArt(HEAD_ART[tab])} alt="" /><div><p className="eyebrow">Communauté</p><h1>{COMMUNITY.find((x) => x[0] === tab)![1]}</h1></div></header>
       <div className="coltabs__bar" role="tablist" aria-label="Communauté">
-        {COMMUNITY.map(([id, label]) => <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>{label}</button>)}
+        {COMMUNITY.map(([id, label]) => <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}><TabIcon id={id} />{label}</button>)}
       </div>
       {tab === 'referral' ? <Referral /> : tab === 'guild' ? <GuildPage onConnect={openSettings} /> : tab === 'social' ? <Social onGuild={() => setTab('guild')} onProfile={onProfile} onConnect={openSettings} /> : tab === 'fame' ? (<>
         <Pantheon />
