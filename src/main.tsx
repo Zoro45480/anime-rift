@@ -29,3 +29,8 @@ createRoot(document.getElementById('root')!).render(
 )
 
 applyGraphics()
+
+// Appli installable : seulement sur le vrai site (pas dans un aperçu intégré).
+if ('serviceWorker' in navigator && location.protocol === 'https:' && window.top === window.self && /github\.io$/.test(location.hostname)) {
+  window.addEventListener('load', () => { void navigator.serviceWorker.register('sw.js').catch(() => undefined) })
+}

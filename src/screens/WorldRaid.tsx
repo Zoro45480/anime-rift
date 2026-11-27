@@ -8,7 +8,7 @@ import {
 import { useStore, type ColResult } from '../state/store'
 import { Battle, TeamPanel } from './Saga'
 
-const n = (x: number) => Math.round(x).toLocaleString('fr-FR')
+const n = (x: number) => Math.round(x).toLocaleString('fr-FR').replace(/\u202f/g, ' ')
 export const WORLD_BOSS_HP = 2_000_000_000 // PV du boss mondial de la semaine, pour tous les joueurs réunis
 export const WORLD_TRIES = 3
 export const RAID_TRIES = 3
@@ -92,8 +92,6 @@ export const Raids = ({ onBack }: { onBack: () => void }) => {
   }, [])
   useEffect(() => { if (session) void myRaids().then(setMine) }, [session, cur])
   useEffect(() => { const t = setInterval(() => { setNow(Date.now()); if (cur) void open(cur.raid.code) }, 10000); return () => clearInterval(t) }, [cur, open])
-  if (!session) return <div className="wb"><button className="linkbtn" onClick={onBack}>← Jouer</button><Login title="Raids" text="Les raids se jouent à 3 joueurs. Connecte-toi avec Discord ou Google." /></div>
-
   const make = async () => { const r = await createRaid(); if ('code' in r && r.code) { setMsg(`Groupe créé : donne le code ${r.code} à 2 amis.`); await open(r.code) } else setMsg(r.error ?? 'Erreur') }
   const join = async () => { const r = await joinRaid(code); if (r === 'ok') { setMsg('Tu as rejoint le groupe !'); await open(code) } else setMsg(r) }
   const total = cur ? cur.members.reduce((s, m) => s + Number(m.damage), 0) : 0
@@ -114,7 +112,7 @@ export const Raids = ({ onBack }: { onBack: () => void }) => {
         <p>Formez un groupe avec un code, frappez le boss chacun 3 fois. Le coffre du destin : 100 Éclats garantis, et 300 Éclats + 3 Clés de Faille si le boss tombe.</p>
       </header>
 
-      {!cur ? <div className="so__grid">
+      {!session ? <Login title="Rejoindre un raid" text="Les raids se jouent à 3 joueurs. Connecte-toi avec Discord ou Google." /> : !cur ? <div className="so__grid">
         <section className="so-box"><header className="so-box__head"><h2>Ton équipe t’attend ?</h2></header>
           <form className="so-code__form" onSubmit={(e) => { e.preventDefault(); void join() }}><input className="set__input" placeholder="Code du groupe" maxLength={6} value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} aria-label="Code du groupe" /><button className="cd-btn cd-btn--small" disabled={code.length < 6}>Rejoindre →</button></form>
           <p className="set__note">Ou crée ton propre groupe et partage son code.</p>

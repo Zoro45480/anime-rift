@@ -133,7 +133,8 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
         </section>
 
         <section className="set-card" style={{ ['--sc' as string]: '#4be3a4' }}>
-          <header className="set-card__head"><img src={extraArt('set-phone')} alt="" /><h3>Ajouter à l'écran d'accueil</h3></header>
+          <header className="set-card__head"><img src={extraArt('set-phone')} alt="" /><h3>Installer l'appli</h3></header>
+          <InstallButton />
           <ol className="set__steps">
             <li>Ouvre le jeu dans le navigateur de ton téléphone (Safari sur iPhone, Chrome sur Android).</li>
             <li>Touche le bouton de partage (iPhone) ou le menu ⋮ (Android).</li>
@@ -204,4 +205,16 @@ const AccountCard = () => {
       {msg && <p className="cd__notice" role="status">{msg}</p>}
     </section>
   )
+}
+
+// Bouton « Installer l'appli » : proposé par le navigateur (Chrome, Edge, Android) quand le jeu peut s'installer.
+type InstallEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }
+let deferred: InstallEvent | null = null
+if (typeof window !== 'undefined') window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferred = e as InstallEvent })
+const InstallButton = () => {
+  const [state, setState] = useState<'idle' | 'done'>('idle')
+  const standalone = typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches
+  if (standalone) return <p className="set__note">Le jeu est déjà installé comme une appli. ✓</p>
+  if (!deferred) return <p className="set__note">Sur ordinateur (Chrome ou Edge), l'icône d'installation apparaît dans la barre d'adresse. Sur téléphone :</p>
+  return <button className="cd-btn cd-btn--main cd-btn--small" disabled={state === 'done'} onClick={async () => { await deferred?.prompt(); setState('done') }}>{state === 'done' ? 'C’est parti !' : 'Installer l’appli'}</button>
 }
