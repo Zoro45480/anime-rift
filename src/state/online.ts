@@ -331,3 +331,48 @@ export const pushTeamLater = (team: { id: string; level: number }[]) => {
 // Ouvre les Réglages (où se trouve la connexion) depuis n'importe quel écran.
 export const openCommunity = (tab: string) => window.dispatchEvent(new CustomEvent('anime-rift:community', { detail: tab }))
 export const openSettings = () => window.dispatchEvent(new Event('anime-rift:settings'))
+
+// ═════════ Étape 4 : boss mondial, raids, rivalités (fichier SQL 04) ═════════
+const missing = (m: string) => /function|relation|does not exist|schema cache/i.test(m)
+export const SQL04 = 'Pas encore activé sur le serveur : lance le fichier SQL 04 dans Supabase.'
+export const hitWorldBoss = async (week: string, damage: number) => { const r = await rpc('hit_world_boss', { wk: week, dmg: Math.round(damage) }); return missing(r) ? SQL04 : r }
+export const worldTotal = async (week: string) => {
+  const { data, error } = await supa.rpc('world_total', { wk: week })
+  if (error) return null
+  const row = (Array.isArray(data) ? data[0] : data) as { damage: number; players: number } | undefined
+  return { damage: Number(row?.damage ?? 0), players: Number(row?.players ?? 0) }
+}
+export const worldTop = async (week: string) => {
+  const { data } = await supa.from('world_damage').select('user_id, damage').eq('week', week).order('damage', { ascending: false }).limit(10)
+  return (data ?? []) as { user_id: string; damage: number }[]
+}
+
+export type Raid = { id: number; code: string; leader: string; boss_hp: number; ends_at: string }
+export type RaidMember = { raid_id: number; user_id: string; damage: number; hits: number; claimed: boolean }
+export const createRaid = async () => { const r = await rpc('create_raid', {}); return missing(r) ? { error: SQL04 } : /^[A-Z0-9]{6}$/.test(r) ? { code: r } : { error: r } }
+export const joinRaid = async (code: string) => { const r = await rpc('join_raid', { c: code.trim().toUpperCase() }); return missing(r) ? SQL04 : r }
+export const hitRaid = (code: string, damage: number) => rpc('hit_raid', { c: code, dmg: Math.round(damage) })
+export const claimRaid = (code: string) => rpc('claim_raid', { c: code })
+export const fetchRaid = async (code: string) => {
+  const { data: r } = await supa.from('raids').select('*').eq('code', code.toUpperCase()).maybeSingle()
+  if (!r) return null
+  const { data: m } = await supa.from('raid_members').select('*').eq('raid_id', (r as Raid).id)
+  return { raid: r as Raid, members: (m ?? []) as RaidMember[] }
+}
+export const myRaids = async () => {
+  const id = myId()
+  if (!id) return [] as Raid[]
+  const { data: m } = await supa.from('raid_members').select('raid_id').eq('user_id', id)
+  const ids = (m ?? []).map((x: { raid_id: number }) => x.raid_id)
+  if (!ids.length) return [] as Raid[]
+  const { data } = await supa.from('raids').select('*').in('id', ids).order('id', { ascending: false }).limit(10)
+  return (data ?? []) as Raid[]
+}
+
+export type Rivalry = { id: number; a: string; b: string; week: string; status: 'pending' | 'accepted' | 'refused'; created_at: string; a_name: string; a_tag: string; b_name: string; b_tag: string; a_score: number; b_score: number; finished: boolean }
+export const fetchRivalries = async (guildId: string) => {
+  const { data } = await supa.from('rivalry_board').select('*').or(`a.eq.${guildId},b.eq.${guildId}`).order('id', { ascending: false }).limit(30)
+  return (data ?? []) as Rivalry[]
+}
+export const declareRivalry = async (target: string) => { const r = await rpc('declare_rivalry', { target }); return missing(r) ? SQL04 : r }
+export const answerRivalry = (id: number, accept: boolean) => rpc('answer_rivalry', { rid: id, accept })

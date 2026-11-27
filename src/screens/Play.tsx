@@ -9,6 +9,7 @@ import { Saga } from './Saga'
 import { Spire } from './Spire'
 import { Colossus } from './Colossus'
 import { Arena } from './Arena'
+import { Raids, WorldBoss } from './WorldRaid'
 import { Coin } from '../ui/Coin'
 import { IconLock } from '../ui/icons'
 import { LEVEL_STYLE_NAME, LevelBadge, levelStyle } from '../ui/LevelBadge'
@@ -23,6 +24,10 @@ const GATES = [
     points: ['Un étage après l’autre, de plus en plus dur', 'Une règle spéciale par étage', 'Des fragments d’âme pour libérer tes cartes'] },
   { id: 'arena', anime: 'dragonball', model: 'Sendagaya_Shibu', numeral: 'IV', kanji: '闘', title: 'L’Arène', tag: 'Duel', text: 'Des duels classés contre les Rivaux du Rift. Grimpe de Bronze à Légende.', hue: '#ff6a2b',
     points: ['Une cote elo et six ligues, de Bronze à Légende', '5 duels par jour et des défis chaque semaine', 'Les bonus d’Ascension n’y comptent pas : seul le talent parle'] },
+  { id: 'world', art: 'raids', anime: 'bleach', model: 'Darkness_Shibu', numeral: 'V', kanji: '界', title: 'Boss mondial', tag: 'Tous ensemble', text: 'Tous les joueurs du Rift contre un seul boss chaque semaine.', hue: '#22d3ee',
+    points: ['Une barre de PV commune à tout le monde', '3 essais par jour', 'Le classement des meilleurs frappeurs'] },
+  { id: 'coop', art: 'arena', anime: 'jujutsu', model: 'Sendagaya_Shibu', numeral: 'VI', kanji: '共闘', title: 'Raids', tag: 'Coop à 3', text: 'Un groupe de 3 joueurs, 9 cartes et 30 minutes pour abattre un boss.', hue: '#7c5cff',
+    points: ['Un code de groupe à partager', '3 combats par joueur', 'Le coffre du destin : Éclats garantis'] },
 ] as const
 
 type Gate = (typeof GATES)[number]
@@ -37,7 +42,7 @@ const GateTile = ({ gate, featured, playable, onOpen }: { gate: Gate; featured?:
   <button className={`nx-gate ${featured ? 'nx-gate--hero' : ''} ${playable ? 'nx-gate--play' : ''} ${show ? 'nx-gate--anime' : ''}`} style={{ ['--hue' as string]: gate.hue }} onClick={onOpen} aria-label={`${gate.title} : ${playable ? 'jouer' : 'voir le mode'}`}>
     {show
       ? <img className="nx-gate__anime" src={anime} alt="" loading="lazy" referrerPolicy="no-referrer" onError={() => setFailed(true)} />
-      : <><img className="nx-gate__scene" src={gateArt(gate.id)} alt="" loading="lazy" /><img className="nx-gate__art" src={heroArt(gate.model, 'full')} alt="" loading="lazy" /></>}
+      : <><img className="nx-gate__scene" src={gateArt('art' in gate ? gate.art : gate.id)} alt="" loading="lazy" /><img className="nx-gate__art" src={heroArt(gate.model, 'full')} alt="" loading="lazy" /></>}
     <span className="nx-gate__slash" aria-hidden="true" />
     <span className="nx-gate__numeral" aria-hidden="true">{gate.numeral}</span>
     <span className="nx-gate__kanji" lang="ja" aria-hidden="true">{gate.kanji}</span>
@@ -59,7 +64,11 @@ export const Play = ({ onRebirth, onProfile, start }: { onRebirth: () => void; o
   const [spire, setSpire] = useState(start === 'spire')
   const [colossus, setColossus] = useState(start === 'colossus')
   const [arena, setArena] = useState(start === 'arena')
+  const [world, setWorld] = useState(false)
+  const [coop, setCoop] = useState(false)
   const acc = accountLevel(accountXp, rebirths)
+  if (world) return <WorldBoss onBack={() => { setWorld(false); window.scrollTo(0, 0) }} />
+  if (coop) return <Raids onBack={() => { setCoop(false); window.scrollTo(0, 0) }} />
   if (arena) return <Arena onBack={() => { setArena(false); window.scrollTo(0, 0) }} />
   if (colossus) return <Colossus onBack={() => { setColossus(false); window.scrollTo(0, 0) }} />
   if (spire) return <Spire onBack={() => { setSpire(false); window.scrollTo(0, 0) }} />
@@ -78,13 +87,13 @@ export const Play = ({ onRebirth, onProfile, start }: { onRebirth: () => void; o
       </section>
       <header className="nx__head">
         <p className="eyebrow">Le Nexus</p>
-        <h1>Quatre portes.<br />Toutes sont ouvertes.</h1>
+        <h1>Six portes.<br />Toutes sont ouvertes.</h1>
         <button className="nx__who" onClick={onProfile} aria-label="Voir mon profil"><Avatar size={40} /><b>{profile.name.trim() || 'Joueur'}</b><span>Voir mon profil →</span></button>
         <p className="nx__level"><LevelBadge level={acc.level} rebirths={rebirths} size={40} /><span>Style {LEVEL_STYLE_NAME[levelStyle(acc.level, rebirths)]} · {acc.need ? `${acc.into.toLocaleString('fr-FR')} / ${acc.need.toLocaleString('fr-FR')} XP de compte` : 'Niveau maximum'}</span></p>
       </header>
       <GateTile gate={GATES[0]} featured playable onOpen={() => { setSaga(true); window.scrollTo(0, 0) }} />
       <div className="nx__row">
-        {GATES.slice(1).map((g) => <GateTile key={g.id} gate={g} playable onOpen={() => { if (g.id === 'spire') setSpire(true); else if (g.id === 'raids') setColossus(true); else setArena(true); window.scrollTo(0, 0) }} />)}
+        {GATES.slice(1).map((g) => <GateTile key={g.id} gate={g} playable onOpen={() => { if (g.id === 'spire') setSpire(true); else if (g.id === 'raids') setColossus(true); else if (g.id === 'world') setWorld(true); else if (g.id === 'coop') setCoop(true); else setArena(true); window.scrollTo(0, 0) }} />)}
       </div>
 
       {/* Ascension : tout en bas du Nexus */}
@@ -110,7 +119,7 @@ export const Play = ({ onRebirth, onProfile, start }: { onRebirth: () => void; o
       {open && createPortal(
         <div className="modal" role="dialog" aria-modal="true" aria-label={open.title} onClick={() => setOpen(null)}>
           <div className="modal__box gate-sheet" style={{ ['--hue' as string]: open.hue }} onClick={(e) => e.stopPropagation()}>
-            <div className="gate-sheet__art"><img src={gateArt(open.id)} alt="" /><span lang="ja" aria-hidden="true">{open.kanji}</span></div>
+            <div className="gate-sheet__art"><img src={gateArt('art' in open ? open.art : open.id)} alt="" /><span lang="ja" aria-hidden="true">{open.kanji}</span></div>
             <p className="gate__kicker">Porte {open.numeral} · {open.tag}</p>
             <h2>{open.title}</h2>
             <p className="gate-sheet__desc">{open.text}</p>

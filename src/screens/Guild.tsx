@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { colossusOf } from '../game/colossus'
 import { weekKey } from '../game/contracts'
 import {
-  answerRequest, createGuild, fetchGuilds, fetchMyGuild, hitGuildBoss, joinGuild, leaveGuild, playersById, setMemberRole, useOnline, weekDamage,
+  answerRequest, answerRivalry, declareRivalry, fetchRivalries, type Rivalry, createGuild, fetchGuilds, fetchMyGuild, hitGuildBoss, joinGuild, leaveGuild, playersById, setMemberRole, useOnline, weekDamage,
   type Guild, type GuildMember, type PublicPlayer,
 } from '../state/online'
 import { useStore } from '../state/store'
@@ -116,10 +116,11 @@ const NoGuild = ({ reload }: { reload: () => Promise<void> }) => {
 const MyGuild = ({ data, reload }: { data: NonNullable<Awaited<ReturnType<typeof fetchMyGuild>>>; reload: () => Promise<void> }) => {
   const store = useStore()
   const { guild, me, members, requests } = data
-  const [tab, setTab] = useState<'boss' | 'members' | 'requests' | 'rank' | 'badges' | 'settings'>('boss')
+  const [tab, setTab] = useState<'boss' | 'rival' | 'members' | 'requests' | 'rank' | 'badges' | 'settings'>('boss')
   const [people, setPeople] = useState<Record<string, PublicPlayer>>({})
   const [dmg, setDmg] = useState<{ user_id: string; damage: number; tries: number }[]>([])
   const [rank, setRank] = useState<Guild[]>([])
+  const [rivals, setRivals] = useState<Rivalry[]>([])
   const [fight, setFight] = useState<{ result: ColResult; damage: number } | null>(null)
   const [msg, setMsg] = useState('')
   const week = weekKey(new Date())
@@ -128,6 +129,7 @@ const MyGuild = ({ data, reload }: { data: NonNullable<Awaited<ReturnType<typeof
     const ids = [...new Set([...members.map((m) => m.user_id), ...requests.map((r) => r.user_id)])]
     const [list, d, g] = await Promise.all([playersById(ids), weekDamage(guild.id, week), fetchGuilds()])
     setPeople(Object.fromEntries(list.map((p) => [p.id, p]))); setDmg(d); setRank(g)
+    setRivals(await fetchRivalries(guild.id).catch(() => []))
   }, [members, requests, guild.id, week])
   useEffect(() => { void load() }, [load])
   const total = dmg.reduce((s, x) => s + Number(x.damage), 0)
@@ -148,7 +150,7 @@ const MyGuild = ({ data, reload }: { data: NonNullable<Awaited<ReturnType<typeof
         </ul>
       </header>
       <div className="coltabs__bar so__tabs" role="tablist">
-        {([['boss', 'Boss de la semaine'], ['members', `Membres (${members.length})`], ...(lead ? [['requests', `Candidatures (${requests.length})`]] : []), ['rank', 'Classement'], ['badges', 'Insignes'], ['settings', 'Paramètres']] as [typeof tab, string][]).map(([id, l]) => <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>{l}</button>)}
+        {([['boss', 'Boss de la semaine'], ['rival', 'Rivalité'], ['members', `Membres (${members.length})`], ...(lead ? [['requests', `Candidatures (${requests.length})`]] : []), ['rank', 'Classement'], ['badges', 'Insignes'], ['settings', 'Paramètres']] as [typeof tab, string][]).map(([id, l]) => <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>{l}</button>)}
       </div>
       {msg && <p className="cd__notice" role="status">{msg}</p>}
       {tab === 'boss' && <div className="so__grid">
@@ -179,7 +181,8 @@ const MyGuild = ({ data, reload }: { data: NonNullable<Awaited<ReturnType<typeof
         <li key={r.user_id} className="gd-row"><div className="gd-row__id"><b>{people[r.user_id]?.name ?? '…'} <i>#{people[r.user_id]?.player_no}</i></b><small>Niveau {people[r.user_id]?.level ?? 1} · {n(people[r.user_id]?.collection ?? 0)} persos</small></div>
           <button className="btn btn--gold gd-join" onClick={() => void answerRequest(guild.id, r.user_id, true).then(reload)}>Accepter</button><button className="cd-btn cd-btn--small" onClick={() => void answerRequest(guild.id, r.user_id, false).then(reload)}>Refuser</button></li>
       ))}</ul>}</section>}
-      {tab === 'badges' && <Insignias guild={guild} members={members.length} total={total} place={place} />}
+      {tab === 'rival' && <Rivals guildId={guild.id} lead={lead} rivals={rivals} rank={rank} reload={load} say={setMsg} />}
+      {tab === 'badges' && <Insignias guild={guild} members={members.length} total={total} place={place} rivals={rivals} />}
       {tab === 'rank' && <section className="so-box"><header className="so-box__head"><h2>Classement de la semaine</h2></header><ul className="gd-list">{rank.map((g, i) => <GuildRow key={g.id} g={g} i={i} />)}</ul></section>}
       {tab === 'settings' && <section className="so-box"><p className="set__note">{me.role === 'chef' ? 'Si tu quittes l’Ordre, un adjoint (ou le plus ancien membre) devient chef. Si tu étais seul, l’Ordre est dissous.' : 'Tu peux quitter l’Ordre quand tu veux.'}</p>
         <button className="cd-btn cd-btn--small" onClick={async () => { const r = await leaveGuild(); setMsg(r === 'ok' ? 'Tu as quitté l’Ordre.' : r); await reload() }}>Quitter l’Ordre</button></section>}
@@ -194,9 +197,13 @@ const MyGuild = ({ data, reload }: { data: NonNullable<Awaited<ReturnType<typeof
 export const weekTitle = (place: number) => (place === 1 ? 'Légende' : place >= 2 && place <= 3 ? 'Maîtres' : place >= 4 && place <= 10 ? 'Élite' : '')
 
 // Les 13 insignes d'un Ordre. Ceux des rivalités arrivent avec les rivalités.
-export const insigniasOf = (g: { created_at?: string }, members: number, total: number, place: number, now = Date.now()) => {
+export const insigniasOf = (g: { id?: string; created_at?: string }, members: number, total: number, place: number, rivals: Rivalry[] = [], now = Date.now()) => {
   const age = g.created_at ? Math.floor((now - new Date(g.created_at).getTime()) / 86400000) : 0
   const kills = Math.floor(total / GUILD_BOSS_HP)
+  const done = rivals.filter((r) => r.status === 'accepted' && r.finished)
+  const mine = (r: Rivalry) => (r.a === g.id ? [Number(r.a_score), Number(r.b_score)] : [Number(r.b_score), Number(r.a_score)])
+  const won = done.filter((r) => { const [x, y] = mine(r); return x > y }).length
+  const lost = done.filter((r) => { const [x, y] = mine(r); return x < y }).length
   return [
     { id: 'found', name: 'Première pierre', need: '30 jours d’existence', done: age >= 30, soon: false },
     { id: 'old', name: 'Gardiens anciens', need: '180 jours d’existence', done: age >= 180, soon: false },
@@ -205,20 +212,54 @@ export const insigniasOf = (g: { created_at?: string }, members: number, total: 
     { id: 'hunt', name: 'Traqueurs de Faille', need: 'Abattre le boss de la semaine', done: kills >= 1, soon: false },
     { id: 'break', name: 'Brise-Colosses', need: 'Abattre le boss 3 fois en une semaine', done: kills >= 3, soon: false },
     { id: 'stars', name: 'Mangeurs d’étoiles', need: 'Abattre le boss 10 fois en une semaine', done: kills >= 10, soon: false },
-    { id: 'rival1', name: 'Premier duel', need: 'Gagner une rivalité', done: false, soon: true },
-    { id: 'rival5', name: 'Rivaux redoutés', need: 'Gagner 5 rivalités', done: false, soon: true },
-    { id: 'unbeaten', name: 'Invaincus', need: '5 rivalités sans défaite', done: false, soon: true },
+    { id: 'rival1', name: 'Premier duel', need: 'Gagner une rivalité', done: won >= 1, soon: false },
+    { id: 'rival5', name: 'Rivaux redoutés', need: 'Gagner 5 rivalités', done: won >= 5, soon: false },
+    { id: 'unbeaten', name: 'Invaincus', need: '5 rivalités sans défaite', done: won >= 5 && lost === 0, soon: false },
     { id: 'elite', name: 'Élite', need: 'Finir la semaine dans le top 10', done: place >= 1 && place <= 10, soon: false },
     { id: 'podium', name: 'Podium', need: 'Finir la semaine dans le top 3', done: place >= 1 && place <= 3, soon: false },
     { id: 'legend', name: 'Légende du Rift', need: 'Finir la semaine 1er', done: place === 1, soon: false },
   ]
 }
-const Insignias = ({ guild, members, total, place }: { guild: { created_at?: string }; members: number; total: number; place: number }) => {
-  const list = insigniasOf(guild, members, total, place)
+const Insignias = ({ guild, members, total, place, rivals }: { guild: { id?: string; created_at?: string }; members: number; total: number; place: number; rivals: Rivalry[] }) => {
+  const list = insigniasOf(guild, members, total, place, rivals)
   return (
     <section className="so-box"><header className="so-box__head"><h2>Insignes de l’Ordre</h2><span><b>{list.filter((x) => x.done).length}</b> / {list.length}</span></header>
       <ul className="gd-ins">{list.map((x) => <li key={x.id} className={x.done ? 'is-done' : ''}><i aria-hidden="true">{x.done ? '✦' : '◇'}</i><b>{x.name}</b><small>{x.need}{x.soon ? ' · bientôt' : ''}</small></li>)}</ul>
-      <p className="set__note">Les insignes de classement comptent la semaine en cours. Ceux des rivalités s’ouvriront avec les rivalités entre Ordres.</p>
+      <p className="set__note">Les insignes de classement comptent la semaine en cours ; ceux des rivalités comptent les rivalités terminées.</p>
     </section>
+  )
+}
+
+// Rivalité : un duel d'une semaine contre un autre Ordre. Le score = les dégâts au boss d'Ordre de la semaine.
+const Rivals = ({ guildId, lead, rivals, rank, reload, say }: { guildId: string; lead: boolean; rivals: Rivalry[]; rank: Guild[]; reload: () => Promise<void>; say: (t: string) => void }) => {
+  const [target, setTarget] = useState('')
+  const week = rivals.find((r) => !r.finished && r.status !== 'refused')
+  const side = (r: Rivalry) => (r.a === guildId ? { me: r.a_name, them: r.b_name, x: Number(r.a_score), y: Number(r.b_score) } : { me: r.b_name, them: r.a_name, x: Number(r.b_score), y: Number(r.a_score) })
+  const act = async (p: Promise<string>, ok: string) => { const r = await p; say(r === 'ok' ? ok : r); await reload() }
+  return (
+    <div className="so__grid">
+      <section className="so-box">
+        <header className="so-box__head"><h2>Rivalité de la semaine</h2><span>fin lundi</span></header>
+        {!week ? <>
+          <p className="set__note">Le chef ou un adjoint déclare une rivalité par semaine contre l’Ordre de son choix. L’autre Ordre a 48 h pour accepter. Il faut au moins 3 membres de chaque côté. L’Ordre qui inflige le plus de dégâts à son boss de la semaine l’emporte.</p>
+          {lead ? <div className="so-code__form">
+            <select className="set__input" value={target} onChange={(e) => setTarget(e.target.value)} aria-label="Ordre à défier"><option value="">Choisis un Ordre…</option>{rank.filter((g) => g.id !== guildId).map((g) => <option key={g.id} value={g.id}>{g.name} [{g.tag}] · {g.members} membres</option>)}</select>
+            <button className="cd-btn cd-btn--small" disabled={!target} onClick={() => void act(declareRivalry(target), 'Rivalité déclarée : l’autre Ordre a 48 h pour répondre.')}>Défier</button>
+          </div> : <p className="set__note">Seuls le chef et les adjoints peuvent déclarer une rivalité.</p>}
+        </> : week.status === 'pending' ? (
+          week.b === guildId ? <>
+            <p><b>{week.a_name}</b> défie ton Ordre cette semaine !</p>
+            {lead ? <div className="pmini__btns"><button className="cd-btn cd-btn--main cd-btn--small" onClick={() => void act(answerRivalry(week.id, true), 'Rivalité acceptée : que le meilleur gagne !')}>Accepter</button><button className="cd-btn cd-btn--small" onClick={() => void act(answerRivalry(week.id, false), 'Rivalité refusée.')}>Refuser</button></div> : <p className="set__note">Le chef ou un adjoint doit répondre sous 48 h.</p>}
+          </> : <p>En attente de la réponse de <b>{week.b_name}</b> (48 h maximum).</p>
+        ) : (() => { const s = side(week); return (
+          <div className="rv-duel"><div><b>{s.me}</b><strong>{n(s.x)}</strong></div><span>VS</span><div><b>{s.them}</b><strong>{n(s.y)}</strong></div>
+            <p className="set__note">{s.x === s.y ? 'Égalité pour l’instant.' : s.x > s.y ? 'Ton Ordre mène ! Frappez le boss pour garder l’avance.' : 'Ton Ordre est derrière : tous au boss !'}</p></div>) })()}
+      </section>
+      <section className="so-box">
+        <header className="so-box__head"><h2>Palmarès</h2></header>
+        {rivals.filter((r) => r.finished && r.status === 'accepted').length === 0 ? <p className="set__note">Aucune rivalité terminée pour l’instant.</p> :
+          <ul className="wb-top">{rivals.filter((r) => r.finished && r.status === 'accepted').map((r) => { const s = side(r); return <li key={r.id}><b>{s.x > s.y ? 'Victoire' : s.x < s.y ? 'Défaite' : 'Égalité'}</b><i>contre {s.them} · semaine du {r.week}</i><em>{n(s.x)} – {n(s.y)}</em></li> })}</ul>}
+      </section>
+    </div>
   )
 }

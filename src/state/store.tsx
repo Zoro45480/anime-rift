@@ -57,6 +57,7 @@ type State = {
   arena: ArenaState // L'Arène : cote, ligue, duels du jour, défis de la semaine
   refClaimed: number[] // cases du calendrier de parrainage déjà ouvertes
   gtries: { day: string; n: number } // essais du jour contre le boss d’Ordre
+  btries?: Record<string, { day: string; n: number }> // essais du jour contre le boss mondial et les raids
   col: ColState // Les Colosses : semaine, difficultés battues, essais du jour, objectifs d'événement
   multis: Record<string, number> // grande garantie : multis ×10 d'affilée sans MR, par bannière
   spire: { best: number } // La Tour de l’Infini : plus haut étage gagné
@@ -105,6 +106,8 @@ type Store = State & {
   setTeam: (ids: string[]) => void
   fightGuildBoss: () => { result: ColResult; damage: number } | null // boss d’Ordre : 3 essais par jour, les dégâts comptent pour toute l’Ordre
   guildTries: number
+  fightBig: (key: string, perDay: number, hpMult: number) => { result: ColResult; damage: number } | null // boss mondial, raid : dégâts sur un boss géant
+  bigTries: (key: string, perDay: number) => number
   claimReferral: (step: number, friends: number) => boolean // ouvre une case du calendrier de parrainage
   fightColossus: (diff: Difficulty['id']) => ColResult | null // combat contre le Colosse de la semaine
   claimEvent: () => Hero | null // récompense finale de l'événement : une carte SR ou mieux
@@ -560,6 +563,21 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setState(tracked({ ...state, gtries: { day, n: used + 1 } }, { damage }))
       return { result: { diff, allies, foes, events, win: false, first: false, card: null }, damage }
     }
+    const bigTries = (key: string, perDay: number) => perDay - ((state.btries ?? {})[key]?.day === today ? (state.btries ?? {})[key].n : 0)
+    const fightBig = (key: string, perDay: number, hpMult: number) => {
+      const day = dayKey(new Date())
+      const cur = (state.btries ?? {})[key]
+      const used = cur?.day === day ? cur.n : 0
+      if (teamNow.length === 0 || used >= perDay) return null
+      const { boss, minions } = colossusOf(new Date())
+      const diff = DIFFICULTIES[3]
+      const allies = teamNow.map((hid, i) => makeUnit(heroById(hid), cardState(heroById(hid), state.xp, state.owned, state.rebirths, state.awakened, teamNow).stats, 0, i))
+      const foes = colossusFoes(boss, minions, diff).slice(0, 1).map((u) => ({ ...u, maxHp: u.maxHp * hpMult, hp: u.maxHp * hpMult }))
+      const { events } = simulate(allies, foes, Math.random)
+      const damage = events.filter((e) => e.actor.startsWith('0-')).reduce((n, e) => n + e.hits.reduce((m, h) => m + h.amount, 0), 0)
+      setState(tracked({ ...state, btries: { ...(state.btries ?? {}), [key]: { day, n: used + 1 } } }, { damage }))
+      return { result: { diff, allies, foes, events, win: false, first: false, card: null }, damage }
+    }
     const claimReferral = (step: number, friends: number) => {
       const r = REFERRAL[step - 1]
       if (!r || friends < step || state.refClaimed.includes(step)) return false
@@ -781,7 +799,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setArt((a) => Object.fromEntries(Object.entries(a).filter(([k]) => k !== heroId)))
       void removeArt(heroId)
     }
-    return { ...state, canAfford, summon, merge, mergeAll, dupes, useScroll, scrollsUseful, toggleFav, takeCards, spendGems, addGems, giveCards, toggleWish, togglePin, fightSpire, fightGuildBoss, guildTries, claimReferral, tourneyFight, buyStall, quickSell, listAuction, setAlert, levelOf, buyOffer, claimGift, giftReady, duel, newRivals, claimPvp, duelsLeft, arenaPower, fightColossus, claimEvent, colTries, claimContract, claimDaily, claimChallenge, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
+    return { ...state, canAfford, summon, merge, mergeAll, dupes, useScroll, scrollsUseful, toggleFav, takeCards, spendGems, addGems, giveCards, toggleWish, togglePin, fightSpire, fightGuildBoss, guildTries, fightBig, bigTries, claimReferral, tourneyFight, buyStall, quickSell, listAuction, setAlert, levelOf, buyOffer, claimGift, giftReady, duel, newRivals, claimPvp, duelsLeft, arenaPower, fightColossus, claimEvent, colTries, claimContract, claimDaily, claimChallenge, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
   }, [state, customArt, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, now])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>
