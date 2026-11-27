@@ -744,3 +744,15 @@ body:has(.sc) .chat__toggle, body:has(.sc) .chat__panel { display: none !importa
 .card__affinity { width: 16cqw !important; height: 16cqw !important; background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--ac) 45%, #0a0a12), rgba(7, 8, 18, 0.88)) !important; box-shadow: 0 0 0 0.6cqw color-mix(in srgb, var(--ac) 70%, transparent), 0 0 3cqw color-mix(in srgb, var(--ac) 60%, transparent); }
 .card__affinity svg { width: 10cqw !important; height: 10cqw !important; color: #fff; filter: drop-shadow(0 0 1cqw var(--ac)); }
 .card--mrframe .card__affinity { left: 9cqw !important; top: 9cqw !important; }
+
+/* ── Affinité : l'icône seule, sans rond, avec sa lueur ── */
+.card__affinity { background: none !important; box-shadow: none !important; width: 15cqw !important; height: 15cqw !important; }
+.card__affinity svg { width: 13cqw !important; height: 13cqw !important; color: color-mix(in srgb, var(--ac) 75%, #fff); filter: drop-shadow(0 0 0.6cqw var(--ac)) drop-shadow(0 0 2cqw var(--ac)) drop-shadow(0 0.4cqw 0.6cqw rgba(0, 0, 0, 0.8)); }
+
+/* ── Bouton profil de la barre du haut : avatar rond, anneau violet, point « en ligne » ── */
+.bell.bell--me { overflow: visible !important; padding: 0 !important; border-radius: 50% !important; background: none !important; border-image: none !important; box-shadow: 0 0 0 2px var(--accent), 0 0 12px -2px var(--accent) !important; }
+.bell.bell--me > .avatar { width: 100% !important; height: 100% !important; border-radius: 50% !important; overflow: hidden; border: 0 !important; border-image: none !important; clip-path: none !important; transform: none !important; }
+.bell.bell--me > .avatar--letter { display: grid !important; place-items: center; font-family: var(--font) !important; font-style: normal !important; font-weight: 800 !important; font-size: 16px !important; color: #fff !important; text-shadow: none !important;
+  background: linear-gradient(135deg, var(--accent), var(--hot)) !important; }
+.bell.bell--me > .avatar::before, .bell.bell--me > .avatar::after { display: none !important; }
+.bell.bell--me .bell__online { width: 11px !important; height: 11px !important; right: -2px; bottom: -2px; box-shadow: 0 0 0 2.5px var(--bg) !important; }
