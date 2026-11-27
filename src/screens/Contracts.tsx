@@ -57,6 +57,23 @@ const Row = ({ c, now }: { c: Contract; now: Date }) => {
   )
 }
 
+
+// Icônes au trait des onglets (même style que le menu du haut).
+const CT_ICON: Record<string, string> = {
+  daily: 'M5 7h14v13H5zM5 11h14M9 4v5M15 4v5M12 14v3',
+  contracts: 'M8 4h8a2 2 0 0 1 2 2v14l-3-2-3 2-3-2-3 2V6a2 2 0 0 1 2-2Zm1 5h6m-6 4h4',
+  rift: 'M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5Z',
+  path: 'M4 19c4 0 4-6 8-6s4-6 8-6M4 19h.01M20 7h.01M12 13h.01',
+  day: 'M12 4v2m0 12v2M4 12h2m12 0h2M6.3 6.3l1.4 1.4m8.6 8.6 1.4 1.4m0-11.4-1.4 1.4m-8.6 8.6-1.4 1.4M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z',
+  week: 'M5 6h14v14H5zM5 10h14M9 3v4M15 3v4M8 14h2m2 0h2m2 0h0M8 17h2m2 0h2',
+  story: 'M5 5a2 2 0 0 1 2-2h11v16H7a2 2 0 0 0-2 2V5Zm0 14a2 2 0 0 1 2-2h11',
+  career: 'M8 4h8v4a4 4 0 0 1-8 0V4Zm0 2H5v1a3 3 0 0 0 3 3m8-4h3v1a3 3 0 0 1-3 3m-4 2v4m-4 4h8m-6-4h4',
+  pass: 'M4 8a2 2 0 0 0 0 4v4h16v-4a2 2 0 0 1 0-4V4H4v4Zm9-4v12',
+  event: 'M12 3l3 6 6 .9-4.5 4.3 1 6.3L12 17.5 6.5 20.5l1-6.3L3 9.9 9 9Z',
+  pvp: 'M5 5l9 9m-2 4 2-2 4 4 2-2-4-4 2-2M19 5l-9 9m2 4-2-2-4 4-2-2 4-4-2-2',
+}
+const CtIcon = ({ id }: { id: string }) => <svg className="ct-ico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={CT_ICON[id] ?? CT_ICON.contracts} /></svg>
+
 type Tab = 'daily' | 'contracts' | 'rift' | 'path'
 type Sub = 'day' | 'week' | 'story' | 'career' | 'pass' | 'event' | 'pvp'
 
@@ -97,7 +114,7 @@ export const Contracts = ({ start = 'daily' }: { start?: 'daily' | 'contracts' |
       </header>
       <div className="coltabs__bar" role="tablist" aria-label="Sections des contrats">
         {([['daily', 'Chaque jour', st.claimed ? 0 : 1], ['contracts', 'Contrats', readyIn([...daily, DAILY_BONUS, ...weekly, ...STORY, ...CAREER]) + passReady + eventReady + pvpReady], ['rift', 'Chemin du Rift', claimableTiers(rollPath(store.path, now)).length + challengesFor(now).filter((c) => challengeState(c, store.quests, now).ready).length], ['path', 'Parcours', 0]] as [Tab, string, number][]).map(([id, label, dot]) => (
-          <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>{label}{dot > 0 && <i className="dot" aria-label={`${dot} à récupérer`} />}</button>
+          <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}><CtIcon id={id} />{label}{dot > 0 && <i className="dot" aria-label={`${dot} à récupérer`} />}</button>
         ))}
       </div>
 
@@ -138,7 +155,7 @@ export const Contracts = ({ start = 'daily' }: { start?: 'daily' | 'contracts' |
         <section className="cn__list">
           <div className="pe__kinds" role="tablist" aria-label="Sortes de contrats">
             {([['day', 'Quotidiennes', readyIn([...daily, DAILY_BONUS])], ['week', 'Hebdomadaires', readyIn(weekly)], ['story', 'Histoire', readyIn(STORY)], ['career', 'Carrière', readyIn(CAREER)], ['pass', 'Défis du pass', passReady], ['event', 'Événement', eventReady], ['pvp', 'PvP', pvpReady]] as [Sub, string, number][]).map(([id, label, dot]) => (
-              <button key={id} role="tab" aria-selected={sub === id} className={sub === id ? 'is-on' : ''} onClick={() => setSub(id)}>{label}{dot > 0 && <i className="dot" />}</button>
+              <button key={id} role="tab" aria-selected={sub === id} className={sub === id ? 'is-on' : ''} onClick={() => setSub(id)}><CtIcon id={id} />{label}{dot > 0 && <i className="dot" />}</button>
             ))}
           </div>
           {totalReady > 0 && <div className="claim-all"><span><b>{totalReady}</b> récompense{totalReady > 1 ? 's' : ''} à récupérer dans tous les contrats</span>

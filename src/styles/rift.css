@@ -787,3 +787,9 @@ body:has(.sc) .chat__toggle, body:has(.sc) .chat__panel { display: none !importa
 .card__frame--nr-legend-dragonball { left: -16.82%; top: -11.69%; width: 133.64%; height: 121.08%; }
 .card__frame--nr-legend-bleach { left: -16.46%; top: -15.05%; width: 131.46%; height: 124.86%; }
 .card__frame--nr[class*="nr-legend"] { filter: drop-shadow(0 0 1cqw rgba(255,255,255,.25)) drop-shadow(0 0.8cqw 1.6cqw rgba(0,0,0,.55)); }
+
+/* Icônes des onglets des Contrats */
+.cn .coltabs__bar button, .cn .pe__kinds button { display: inline-flex; align-items: center; gap: 8px; }
+.ct-ico { flex: none; opacity: 0.75; }
+.cn .coltabs__bar button.is-active .ct-ico, .cn .pe__kinds button.is-on .ct-ico { opacity: 1; color: var(--accent); }
+.cn .pe__kinds button.is-on .ct-ico { color: var(--hot); }
