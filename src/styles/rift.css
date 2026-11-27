@@ -707,13 +707,13 @@ body:has(.sc) .chat__toggle, body:has(.sc) .chat__panel { display: none !importa
 .nx-lock small { font-size: 10.5px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 
 /* ══════════ Cadres MR par univers (fournis par le joueur) + effets ══════════ */
-.card__frame--mr-onepiece { left: -24.90%; top: -10.93%; width: 149.40%; height: 122.10%; }
-.card__frame--mr-naruto { left: -25.05%; top: -10.34%; width: 149.70%; height: 120.99%; }
-.card__frame--mr-jujutsu { left: -21.58%; top: -9.58%; width: 140.71%; height: 118.98%; }
-.card__frame--mr-hunter { left: -24.88%; top: -10.35%; width: 149.25%; height: 123.23%; }
-.card__frame--mr-dragonball { left: -28.31%; top: -11.72%; width: 154.96%; height: 124.07%; }
-.card__frame--mr-demonslayer { left: -22.22%; top: -9.39%; width: 138.89%; height: 120.34%; }
-.card__frame--mr-bleach { left: -18.02%; top: -11.22%; width: 135.14%; height: 123.99%; }.card__frame--mr { position: absolute; max-width: none; pointer-events: none; z-index: 2; filter: drop-shadow(0 0 0.8cqw var(--mr-glow)) drop-shadow(0 1.2cqw 2cqw rgba(0, 0, 0, 0.55)); animation: mr-glow 2.6s ease-in-out infinite; animation-delay: var(--delay, 0s); }
+.card__frame--mr-onepiece { left: -16.66%; top: -6.14%; width: 132.97%; height: 112.51%; }
+.card__frame--mr-naruto { left: -16.80%; top: -5.60%; width: 133.24%; height: 111.49%; }
+.card__frame--mr-jujutsu { left: -13.71%; top: -4.90%; width: 125.23%; height: 109.63%; }
+.card__frame--mr-hunter { left: -16.64%; top: -5.61%; width: 132.83%; height: 113.55%; }
+.card__frame--mr-dragonball { left: -19.70%; top: -6.87%; width: 137.92%; height: 114.32%; }
+.card__frame--mr-demonslayer { left: -14.28%; top: -4.72%; width: 123.61%; height: 110.89%; }
+.card__frame--mr-bleach { left: -10.54%; top: -6.41%; width: 120.28%; height: 114.25%; }.card__frame--mr { position: absolute; max-width: none; pointer-events: none; z-index: 2; filter: drop-shadow(0 0 0.8cqw var(--mr-glow)) drop-shadow(0 1.2cqw 2cqw rgba(0, 0, 0, 0.55)); animation: mr-glow 2.6s ease-in-out infinite; animation-delay: var(--delay, 0s); }
 .card__mrshine { position: absolute; z-index: 3; pointer-events: none; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
   background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.85) 48%, rgba(255, 255, 255, 0) 60%); background-size: 250% 100%; mix-blend-mode: screen; animation: mr-shine 3.8s ease-in-out infinite; animation-delay: var(--delay, 0s); }
 .card__mrfx { position: absolute; left: -20%; top: -14%; width: 140%; height: 128%; z-index: 4; pointer-events: none; }
@@ -739,3 +739,8 @@ body:has(.sc) .chat__toggle, body:has(.sc) .chat__panel { display: none !importa
 @keyframes fire-core { to { transform: scale(0.9, 1.08); } }
 :root[data-fx='low'] .dr__fire, :root[data-fx='low'] .dr__fire-in { animation: none; }
 @media (prefers-reduced-motion: reduce) { .dr__fire, .dr__fire-in { animation: none; } }
+
+/* ── Icône d'affinité plus grande, avec la couleur de l'affinité ── */
+.card__affinity { width: 16cqw !important; height: 16cqw !important; background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--ac) 45%, #0a0a12), rgba(7, 8, 18, 0.88)) !important; box-shadow: 0 0 0 0.6cqw color-mix(in srgb, var(--ac) 70%, transparent), 0 0 3cqw color-mix(in srgb, var(--ac) 60%, transparent); }
+.card__affinity svg { width: 10cqw !important; height: 10cqw !important; color: #fff; filter: drop-shadow(0 0 1cqw var(--ac)); }
+.card--mrframe .card__affinity { left: 9cqw !important; top: 9cqw !important; }
