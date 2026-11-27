@@ -56,7 +56,6 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
   const [graphics, setGfx] = useState(getGraphics())
   const [titles, setTitles] = useState(getTitleMode())
   const [replay, setReplay] = useState(false)
-  const [armed, setArmed] = useState(false)
   const acc = accountLevel(store.accountXp, store.rebirths)
 
   const onFile = async (file: File | undefined) => {
@@ -72,12 +71,6 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
     img.onload = () => { store.setProfile({ avatar: url }); setLink(''); setError('') }
     img.onerror = () => setError('Ce lien n’a pas pu être chargé comme image.')
     img.src = url
-  }
-  const reset = () => {
-    if (!armed) return setArmed(true)
-    store.resetGame()
-    setArmed(false)
-    onClose()
   }
 
   return createPortal(
@@ -171,11 +164,6 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
         </section>
 
 
-        <section className="set-card set__danger" style={{ ['--sc' as string]: '#ff5d7a' }}>
-          <header className="set-card__head"><img src={extraArt('set-reset')} alt="" /><h3>Recommencer la partie</h3></header>
-          <p className="set__note">Efface toutes tes cartes, tes niveaux, tes Ascensions et ta progression sur cet appareil. Ton pseudo et ta photo sont gardés.</p>
-          <button className="cd-btn cd-btn--small" onClick={reset}>{armed ? 'Appuie encore pour tout effacer : c’est définitif' : 'Effacer ma partie'}</button>
-        </section>
       </div>
     </div>,
     document.body,
