@@ -273,7 +273,7 @@ const Edit = ({ ach, start, onClose }: { ach: AchState; start: EditTab; onClose:
                   )
                 })}
               </ul>
-              <p className="set__note">{cat === 'frame' ? 'Sans cadre choisi, ton profil porte celui de ton niveau. Les cadres d’animé sont offerts en finissant leur arc dans La Saga.' : 'Touche un objet équipé pour le retirer.'}</p>
+              <p className="set__note">{cat === 'frame' ? 'Sans cadre choisi, ton profil porte celui de ton niveau. Les cadres d’animé sont offerts en finissant leur arc dans L’Aventure.' : 'Touche un objet équipé pour le retirer.'}</p>
             </>}
           </section>
         )}
@@ -376,7 +376,7 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
   const arcs = byRarity.filter((r) => r.count > 0).map((r) => { const len = (r.count / Math.max(1, mine.length)) * C; const a = { ...r, len, offset }; offset += len; return a })
   const stats: [string, string, string][] = [
     ['集', 'Cartes collectées', `${n(mine.length)} / ${n(HEROES.length)}`], ['光', 'Cartes LR et MR', n(legends)], ['闘', 'Combats gagnés', n(store.wins)],
-    ['界', 'Univers collectionnés', `${collected} / ${BANNERS.length}`], ['星', 'Étoiles de La Saga', `${stars} / ${STAGES.length * 3}`], ['召', 'Invocations réalisées', n(store.pulls)],
+    ['界', 'Univers collectionnés', `${collected} / ${BANNERS.length}`], ['星', 'Étoiles de L’Aventure', `${stars} / ${STAGES.length * 3}`], ['召', 'Invocations réalisées', n(store.pulls)],
     ['剣', 'Victoires en arène', n(store.arena.wins)], ['塔', 'Meilleur étage de La Tour de l’Infini', n(store.spire.best)],
   ]
 
@@ -418,7 +418,7 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
           <li style={{ ['--dc' as string]: '#ff9a4a' }}><img src={extraArt('dist-rebirth')} alt="" /><b>{store.rebirths}</b><span>Ascension{store.rebirths > 1 ? 's' : ''}</span></li>
           <li style={{ ['--dc' as string]: '#ff7ab8' }}><img src={extraArt('dist-legend')} alt="" /><b>{legends}</b><span>Cartes LR et MR</span></li>
           <li style={{ ['--dc' as string]: '#4be3a4' }}><img src={extraArt('dist-collection')} alt="" /><b>{((mine.length / HEROES.length) * 100).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} %</b><span>{n(mine.length)} persos</span></li>
-          <li style={{ ['--dc' as string]: '#ffc94d' }}><img src={extraArt('dist-stars')} alt="" /><b>{stars}</b><span>Étoiles de La Saga</span></li>
+          <li style={{ ['--dc' as string]: '#ffc94d' }}><img src={extraArt('dist-stars')} alt="" /><b>{stars}</b><span>Étoiles de L’Aventure</span></li>
           <li style={{ ['--dc' as string]: '#b78bff' }}><img src={extraArt('dist-trophy')} alt="" /><b>{done} / {ACHIEVEMENTS.length}</b><span>Succès</span></li>
           <li style={{ ['--dc' as string]: '#5aa8ff' }}><img src={extraArt('dist-summon')} alt="" /><b>{n(store.pulls)}</b><span>Invocations</span></li>
         </ul>

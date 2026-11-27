@@ -58,9 +58,9 @@ export const ACHIEVEMENTS: Achievement[] = [
   // ── Aventure (10)
   ...tiers('Aventure', '闘', 'wins', [[10, 'Échauffement', 'Gagne 10 combats.', 'Combattant'], [50, 'Rodé', 'Gagne 50 combats.', 'Guerrier'], [100, 'Vétéran', 'Gagne 100 combats.', 'Vétéran'],
     [250, 'Inarrêtable', 'Gagne 250 combats.', 'Champion'], [500, 'Invaincu', 'Gagne 500 combats.', 'Seigneur de guerre']], (s) => s.wins),
-  ...tiers('Aventure', '星', 'stars', [[15, 'Arc parfait', 'Gagne 15 étoiles dans La Saga.', 'Chasseur d’étoiles'], [60, 'Ciel étoilé', 'Gagne 60 étoiles dans La Saga.', 'Astronome'],
-    [STAGES.length * 3, 'Toutes les étoiles', `Gagne les ${STAGES.length * 3} étoiles de La Saga.`, 'Étoile de la Saga']], stars),
-  ...tiers('Aventure', '章', 'arcs', [[1, 'Premier arc', 'Termine un arc de La Saga.', 'Voyageur'], [ARCS, 'Fin de la Saga', 'Termine tous les arcs de La Saga.', 'Héros de la Saga']], arcs),
+  ...tiers('Aventure', '星', 'stars', [[15, 'Arc parfait', 'Gagne 15 étoiles dans L’Aventure.', 'Chasseur d’étoiles'], [60, 'Ciel étoilé', 'Gagne 60 étoiles dans L’Aventure.', 'Astronome'],
+    [STAGES.length * 3, 'Toutes les étoiles', `Gagne les ${STAGES.length * 3} étoiles de L’Aventure.`, 'Étoile de l’Aventure']], stars),
+  ...tiers('Aventure', '章', 'arcs', [[1, 'Premier arc', 'Termine un arc de L’Aventure.', 'Voyageur'], [ARCS, 'Fin de l’Aventure', 'Termine tous les arcs de L’Aventure.', 'Héros de l’Aventure']], arcs),
   ...tiers('Aventure', '闘', 'arena', [[10, 'Gladiateur', 'Gagne 10 duels d’arène.', 'Gladiateur'], [50, 'Duelliste émérite', 'Gagne 50 duels d’arène.', 'Duelliste émérite']], (s) => s.arena?.wins ?? 0),
   one('Aventure', '闘', 'league-gold', 'Ligue Or', 'Atteins la ligue Or en arène (1 250).', 'Lame d’or', 1250, 'silver', (s) => s.arena?.best ?? 0),
   one('Aventure', '闘', 'league-diamond', 'Ligue Diamant', 'Atteins la ligue Diamant (1 700).', 'Éclat de diamant', 1700, 'gold', (s) => s.arena?.best ?? 0),

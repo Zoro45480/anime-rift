@@ -24,7 +24,7 @@ export const logoArt = (variant: 'full' | 'emblem'): string => logos[`./logo/${v
 const frames = import.meta.glob('./frames/**/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 
 // Cadre d'une rareté, rendu avec Blender (tools/blender/build_frames.py). L'image déborde de la carte : voir .card__frame.
-// `theme` = famille de cadres de la bannière ; à défaut, on retombe sur les cadres d'origine.
+// `theme` = famille de cadres du Portail ; à défaut, on retombe sur les cadres d'origine.
 const framesSm = import.meta.glob('./frames-sm/**/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 // `hd` : le grand cadre, réservé à la carte affichée en grand. Partout ailleurs, la petite version (tools/make_small_frames.py),
 // six fois plus légère en mémoire : indispensable sur téléphone quand des dizaines de cartes sont à l'écran.
@@ -46,7 +46,7 @@ export const uiArt = (name: UiName): string => ui[`./ui/${name}.webp`] ?? ''
 
 const gates = import.meta.glob('./gates/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 
-// Illustrations 3D des portes du Nexus et de la Ascension (tools/blender/build_gates.py).
+// Illustrations 3D des portes du Nexus et de l’Ascension (tools/blender/build_gates.py).
 export const gateArt = (name: 'saga' | 'raids' | 'spire' | 'arena' | 'rebirth'): string => gates[`./gates/${name}.webp`] ?? ''
 
 const digits = import.meta.glob('./digits/**/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>

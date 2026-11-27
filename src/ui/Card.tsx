@@ -82,7 +82,7 @@ export const Card = ({ hero, count, locked, inert, hd, className = '', style }: 
             <span className="card__stats">
               <b><small>Dégâts</small>{locked ? '?' : state.stats.atk.toLocaleString('fr-FR')}</b>
               <b><small>Défense</small>{locked ? '?' : state.stats.def.toLocaleString('fr-FR')}</b>
-              <em>N° {String(hero.no).padStart(4, '0')}</em>
+              <em>N° {String(hero.no).padStart(4, '0')}{owned[hero.id] > 0 ? ` · ex. ${owned[hero.id]}` : ''}</em>
             </span>
           </div>
         </div>

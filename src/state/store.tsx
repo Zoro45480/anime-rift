@@ -37,12 +37,12 @@ type State = {
   favs: string[] // cartes favorites (étoile)
   log: Record<string, LogEntry[]> // historique de chaque carte, du plus récent au plus ancien
   accountXp: number // XP du compte depuis la dernière Ascension
-  rebirths: number // nombre de Ascensions
+  rebirths: number // nombre d’Ascensions
   gemsSpent: number // Éclats dépensées depuis la dernière Ascension
   shards: number // Fragments d'âme
   energy: number // éclairs au moment `energyAt` (ils remontent avec le temps, voir energyNow)
   energyAt: number
-  saga: Record<string, number> // étoiles gagnées à chaque combat de la Saga
+  saga: Record<string, number> // étoiles gagnées à chaque combat de l’Aventure
   team: string[] // équipe de combat (3 cartes au plus)
   notifs: Notif[] // les plus récentes d'abord
   profile: Profile // pseudo, photo, bio, titre affiché et bannière du profil, gardés sur cet appareil
@@ -122,7 +122,7 @@ type Store = State & {
   newRivals: () => void // propose trois autres rivaux
   claimPvp: (id: string) => boolean // défi d'arène de la semaine
   duelsLeft: number
-  arenaPower: number // puissance de l'équipe en arène (sans bonus de Ascension)
+  arenaPower: number // puissance de l'équipe en arène (sans bonus d’Ascension)
   fightSpire: () => SpireResult | null // combat l'étage suivant de La Tour de l’Infini (sans éclair)
   fight: (stageId: string) => FightResult | null // null = combat impossible (verrouillé, pas d'énergie ou pas d'équipe)
   canAfford: (currency: Currency, count: number) => boolean
@@ -296,7 +296,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       const after = accountLevel(xpAfter, state.rebirths).level
       if (after <= before) return []
       const style = after % 25 === 0 && after < REBIRTH_LEVEL ? ' Nouveau style de niveau débloqué.' : ''
-      return [['level', after >= REBIRTH_LEVEL ? `Compte niveau ${REBIRTH_LEVEL} : la Ascension est disponible.` : `Compte niveau ${after}.${style}`]]
+      return [['level', after >= REBIRTH_LEVEL ? `Compte niveau ${REBIRTH_LEVEL} : l’Ascension est disponible.` : `Compte niveau ${after}.${style}`]]
     }
     const readNotifs = () => { if (state.notifs.some((x) => !x.read)) setState({ ...state, notifs: state.notifs.map((x) => ({ ...x, read: true })) }) }
     const clearNotifs = () => setState({ ...state, notifs: [] })
@@ -491,8 +491,8 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         gems: state.gems + newStars * SOULS_PER_STAR,
         accountXp: state.accountXp + stage.accountXp,
         notifs: notify(state.notifs, [
-          ...(stage.boss && !(state.saga[stage.id] > 0) ? [['saga', `Arc ${stage.world} terminé.${stageById(`${stage.arc + 1}-0`) ? ` L'arc ${stageById(`${stage.arc + 1}-0`)!.world} est ouvert.` : ' Tu as fini La Saga !'}`] as [Notif['kind'], string]] : []),
-          ...drops.filter((id) => id !== 'small').map((id): [Notif['kind'], string] => ['drop', `${SCROLLS[id].label} obtenu dans La Saga (${stage.world}).`]),
+          ...(stage.boss && !(state.saga[stage.id] > 0) ? [['saga', `Arc ${stage.world} terminé.${stageById(`${stage.arc + 1}-0`) ? ` L'arc ${stageById(`${stage.arc + 1}-0`)!.world} est ouvert.` : ' Tu as fini L’Aventure !'}`] as [Notif['kind'], string]] : []),
+          ...drops.filter((id) => id !== 'small').map((id): [Notif['kind'], string] => ['drop', `${SCROLLS[id].label} obtenu dans L’Aventure (${stage.world}).`]),
           ...levelNote(state.accountXp + stage.accountXp),
         ]),
       }, { wins: 1, win3: stars === 3 ? 1 : 0, bosses: stage.boss ? 1 : 0, damage, levels }))
@@ -577,7 +577,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       return card
     }
 
-    // L'Arène : 5 duels par jour contre des rivaux du jeu ; la Ascension ne compte pas.
+    // L'Arène : 5 duels par jour contre des rivaux du jeu ; l’Ascension ne compte pas.
     const arenaUnits = () => teamNow.map((hid, i) => makeUnit(heroById(hid), cardState(heroById(hid), state.xp, state.owned, 0, state.awakened, teamNow).stats, 0, i))
     const arenaPower = arenaUnits().reduce((s, u) => s + power(u), 0)
     const duelsLeft = DUELS_PER_DAY - (state.arena.day === today ? state.arena.duels : 0)
@@ -586,7 +586,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       const a = state.arena
       const day = dayKey(t)
       const used = a.day === day ? a.duels : 0
-      // un vrai joueur : son équipe affichée, avec le niveau de chaque carte (sans bonus de Ascension, comme toi)
+      // un vrai joueur : son équipe affichée, avec le niveau de chaque carte (sans bonus d’Ascension, comme toi)
       const rival: Rival | undefined = real
         ? { id: `p-${real.id}`, name: `${real.name} #${real.no}`, elo: real.elo, heroes: real.team.map((x) => heroById(x.id)).filter(Boolean), scale: 1 }
         : rivalsFor(a.elo, a.seed).find((r) => r.id === rivalId)

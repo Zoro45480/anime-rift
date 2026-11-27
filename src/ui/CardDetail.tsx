@@ -148,11 +148,11 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
               <li key={m.kind} className={`cd-kit--${m.kind === 'Attaque' ? 'a' : m.kind === 'Technique' ? 't' : m.kind === 'Ultime' ? 'u' : 'p'}`}><small>{m.kind}</small><b>{m.name}</b><p>{m.text}</p>{m.cost && <em>{m.cost}</em>}</li>
             ))}
           </ul>
-          <p className="cd-note">Les chiffres sont calculés sur les statistiques actuelles de la carte : ils montent avec son niveau. Ils sont donnés avant la défense de la cible. Les techniques servent dans La Saga.</p>
+          <p className="cd-note">Les chiffres sont calculés sur les statistiques actuelles de la carte : ils montent avec son niveau. Ils sont donnés avant la défense de la cible. Les techniques servent dans L’Aventure.</p>
         </Section>
 
         <Section hue="#4be3a4" title="Collectifs" aside={`${state.groups.filter((g) => g.counted).length} actif${state.groups.filter((g) => g.counted).length > 1 ? 's' : ''} sur ${state.groups.length}`}>
-          <p className="cd-note">Un collectif s'active quand cette carte est dans ton équipe de La Saga avec au moins un autre membre (les noms entourés de vert sont dans l'équipe). {MAX_GROUPS} collectifs au plus comptent pour une carte : les plus forts.</p>
+          <p className="cd-note">Un collectif s'active quand cette carte est dans ton équipe de L’Aventure avec au moins un autre membre (les noms entourés de vert sont dans l'équipe). {MAX_GROUPS} collectifs au plus comptent pour une carte : les plus forts.</p>
           {state.groups.map((g) => <Group key={g.id} group={g} owned={owned} team={teamNow} current={hero} onOpen={onOpen} />)}
         </Section>
 
@@ -188,7 +188,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
           </div>
           <p className="cd-note">Les Fragments d'âme se gagnent dans La Tour de l’Infini (Nexus), sur le Chemin du Rift et dans les contrats ; chaque Ascension en offre aussi quelques-uns.</p>
           <p className="cd-note">« Max » utilise juste ce qu'il faut pour atteindre le niveau maximum : aucun parchemin n'est gaspillé.</p>
-          <p className="cd-note">Les parchemins se gagnent dans La Saga (Nexus) : chaque combat affiche son taux de drop.{!has ? ' Il faut posséder la carte pour l’améliorer.' : ''}</p>
+          <p className="cd-note">Les parchemins se gagnent dans L’Aventure (Nexus) : chaque combat affiche son taux de drop.{!has ? ' Il faut posséder la carte pour l’améliorer.' : ''}</p>
         </Section>}
 
         {has && <Section hue="#5ee6ff" title="Historique" aside={history.length ? `${history.length} ligne${history.length > 1 ? 's' : ''}` : undefined}>

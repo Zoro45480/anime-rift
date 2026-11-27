@@ -50,7 +50,7 @@ export const Arena = ({ onBack }: { onBack: () => void }) => {
         </ul>
       </header>
 
-      <p className="ar__note">Connecté, tu affrontes les équipes des vrais joueurs (leur équipe affichée, sans bonus de Ascension). Les Rivaux du Rift, joués par le jeu, sont toujours là pour s'entraîner. Les bonus de Ascension ne comptent pas ici.</p>
+      <p className="ar__note">Connecté, tu affrontes les équipes des vrais joueurs (leur équipe affichée, sans bonus d’Ascension). Les Rivaux du Rift, joués par le jeu, sont toujours là pour s'entraîner. Les bonus d’Ascension ne comptent pas ici.</p>
 
       <TeamPanel />
       <p className="ar__power">Puissance en arène (sans Ascension) : <b>{n(store.arenaPower)}</b></p>

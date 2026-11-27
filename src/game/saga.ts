@@ -4,7 +4,7 @@ import type { RarityId } from '../data/rarities'
 import { makeUnit, type Unit } from './battle'
 import { baseStats, type ScrollId } from './progression'
 
-// La Saga : un arc par univers, cinq combats par arc. Les adversaires sont les personnages de l'univers,
+// L’Aventure : un arc par univers, cinq combats par arc. Les adversaires sont les personnages de l'univers,
 // ramenés à la force du combat (un boss MR du premier arc reste battable par des cartes débutantes).
 
 export const TEAM_SIZE = 3

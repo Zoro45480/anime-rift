@@ -27,7 +27,7 @@ export const Community = ({ start = 'fame', onProfile }: { start?: CommunityTab;
     ['Collection', `${n(mine)} / ${n(HEROES.length)}`, 'cartes uniques'], ['Cartes MR', n(HEROES.filter((h) => h.rarity === 'rift' && store.owned[h.id]).length), 'mythiques'],
     ['Niveau de compte', String(acc.level), `${store.rebirths} Ascension${store.rebirths > 1 ? 's' : ''}`], ['Succès', `${done} / ${ACHIEVEMENTS.length}`, 'obtenus'],
     ['La Tour de l’Infini', `Étage ${store.spire.best}`, 'meilleur étage'], ['Arène', n(store.arena.best), `meilleure cote · ${leagueOf(store.arena.best).label}`],
-    ['Grand Rift', String(store.tourney.titles), 'tournois gagnés'], ['La Saga', `${stars} ★`, 'étoiles'], ['Invocations', n(store.pulls), 'au total'],
+    ['Grand Rift', String(store.tourney.titles), 'tournois gagnés'], ['L’Aventure', `${stars} ★`, 'étoiles'], ['Invocations', n(store.pulls), 'au total'],
   ]
   return (
     <div className="cm">

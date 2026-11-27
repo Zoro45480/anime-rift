@@ -9,7 +9,7 @@ import { useBusy } from './busy'
 const KINDS: Record<Notif['kind'] | 'energy', { title: string; hue: string; icon: string }> = {
   pull: { title: 'Gros tirage', hue: '#ff5d7a', icon: iconArt('seal') },
   level: { title: 'Niveau de compte', hue: '#ffc94d', icon: iconArt('bolt') },
-  saga: { title: 'La Saga', hue: '#2bc8d9', icon: gateArt('saga') },
+  saga: { title: 'L’Aventure', hue: '#2bc8d9', icon: gateArt('saga') },
   drop: { title: 'Parchemin obtenu', hue: '#a56bff', icon: iconArt('scroll-medium') },
   rebirth: { title: 'Ascension', hue: '#ff9a4a', icon: gateArt('rebirth') },
   ach: { title: 'Succès débloqué', hue: '#b78bff', icon: extraArt('dist-trophy') },
@@ -51,7 +51,7 @@ export const NotifPanel = ({ notifs, full, onClear, onClose, onGo }: { notifs: N
           <button className="nt-panel__close" onClick={onClose} aria-label="Fermer">×</button>
         </header>
         <div className="nt-panel__list">
-          {full && <ul><Row kind="energy" text={`Tes ${ENERGY_MAX} éclairs sont prêts : La Saga t’attend.`} onGo={go} /></ul>}
+          {full && <ul><Row kind="energy" text={`Tes ${ENERGY_MAX} éclairs sont prêts : L’Aventure t’attend.`} onGo={go} /></ul>}
           {days.map((g) => (
             <div key={g.day}>
               <h3>{g.day}</h3>

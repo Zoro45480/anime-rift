@@ -33,7 +33,7 @@ const useCountdown = (iso: string) => {
 }
 
 // Les deux garanties d'une bannière. Petite : une SSR ou mieux au plus tard à la 50e invocation.
-// Grande : une MR au 30e multi ×10 d'affilée sans MR sur cette bannière.
+// Grande : une MR au 30e multi ×10 d'affilée sans MR sur ce Portail.
 const PityBar = ({ value, multis, banner }: { value: number; multis: number; banner: Banner }) => (
   <div className="pity" role="group" aria-label="Garanties">
     <div role="meter" aria-valuemin={0} aria-valuemax={PITY_MAX} aria-valuenow={value} aria-label="Garantie SSR ou mieux">
@@ -61,7 +61,7 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
   const [currency, setCurrency] = useState<Currency>('ticket')
   const [results, setResults] = useState<Hero[] | null>(null)
   const [showIndex, setShowIndex] = useState(false)
-  const [focus, setFocus] = useState(false) // « Voir la bannière » : n'affiche plus que la bannière choisie
+  const [focus, setFocus] = useState(false) // « Voir le Portail » : n'affiche plus que la bannière choisie
   const banner = BANNERS[index]
   const star = heroById(banner.star)
   const starArt = store.customArt[star.id] ?? store.remoteArt[star.id] ?? heroArt(star.model, 'full')
@@ -91,7 +91,7 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
       <section className="bh" key={`bh-${banner.id}`}>
         {store.bannerArt[banner.id] && <img className="bh__bg" src={store.bannerArt[banner.id]} alt="" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
         <span className="bh__glyph" aria-hidden="true">{banner.glyph}</span>
-        {!focus && <div className="bh__chips" role="tablist" aria-label="Bannières">
+        {!focus && <div className="bh__chips" role="tablist" aria-label="Portails">
           {BANNERS.map((b, i) => (
             <button key={b.id} role="tab" aria-selected={i === index} className={i === index ? 'is-on' : ''} style={{ ['--hue' as string]: b.hue }} onClick={() => setIndex(i)}>
               <img src={extraArt(`emblem-${b.id}`)} alt="" />{b.world}
@@ -100,16 +100,16 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
         </div>}
         <div className="bh__main">
           <div className="bh__left">
-            <p className="bh__kicker">✦ MR {pct(RARITIES.rift.rate)} · bannière ouverte pendant <b>{left}</b></p>
+            <p className="bh__kicker">✦ MR {pct(RARITIES.rift.rate)} · Portail ouvert pendant <b>{left}</b></p>
             <h1>{banner.world}</h1>
             <p className="bh__sub">{banner.subtitle}</p>
             <div className="bh__links">
-              <button className="linkbtn" onClick={() => setShowIndex(true)}><IconInfo />Index de la bannière</button>
-              {!focus && <button className="linkbtn" onClick={() => { setFocus(true); window.scrollTo({ top: 0 }) }}>Voir la bannière ↗</button>}
+              <button className="linkbtn" onClick={() => setShowIndex(true)}><IconInfo />Index du Portail</button>
+              {!focus && <button className="linkbtn" onClick={() => { setFocus(true); window.scrollTo({ top: 0 }) }}>Voir le Portail ↗</button>}
             </div>
             <p className="bh__label">Moyen d'invocation</p>
             <div className="bh__pay" role="radiogroup" aria-label="Moyen d'invocation">
-              <button role="radio" aria-checked={currency === 'ticket'} className={currency === 'ticket' ? 'is-on' : ''} onClick={() => setCurrency('ticket')}><Coin name="seal" size={26} />Sceaux<b>{store.tickets}</b></button>
+              <button role="radio" aria-checked={currency === 'ticket'} className={currency === 'ticket' ? 'is-on' : ''} onClick={() => setCurrency('ticket')}><Coin name="seal" size={26} />Clés<b>{store.tickets}</b></button>
               <button role="radio" aria-checked={currency === 'gems'} className={currency === 'gems' ? 'is-on' : ''} onClick={() => setCurrency('gems')}><Coin name="soul" size={26} />Éclats<b>{store.gems}</b></button>
             </div>
             <div className="bh__pulls">
@@ -130,11 +130,11 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
             ))}
           </div>
         </div>
-        {!focus && <button className="bh__nav bh__nav--prev" onClick={() => turn(-1)} aria-label="Bannière précédente"><IconChevron left /></button>}
-        {!focus && <button className="bh__nav bh__nav--next" onClick={() => turn(1)} aria-label="Bannière suivante"><IconChevron /></button>}
+        {!focus && <button className="bh__nav bh__nav--prev" onClick={() => turn(-1)} aria-label="Portail précédent"><IconChevron left /></button>}
+        {!focus && <button className="bh__nav bh__nav--next" onClick={() => turn(1)} aria-label="Portail suivant"><IconChevron /></button>}
       </section>
 
-      {/* Affiche de la bannière (téléphone) */}
+      {/* Affiche du Portail (téléphone) */}
       <section className="poster" key={banner.id}>
         {store.bannerArt[banner.id] && <img className="poster__bg" src={store.bannerArt[banner.id]} alt="" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
         <div className="poster__slash" aria-hidden="true" />
@@ -149,12 +149,12 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
             <span className="chip">MR {pct(RARITIES.rift.rate)} · LR {pct(RARITIES.legend.rate)}</span>
           </div>
         </div>
-        {!focus && <button className="poster__nav poster__nav--prev" onClick={() => turn(-1)} aria-label="Bannière précédente"><IconChevron left /></button>}
-        {!focus && <button className="poster__nav poster__nav--next" onClick={() => turn(1)} aria-label="Bannière suivante"><IconChevron /></button>}
+        {!focus && <button className="poster__nav poster__nav--prev" onClick={() => turn(-1)} aria-label="Portail précédent"><IconChevron left /></button>}
+        {!focus && <button className="poster__nav poster__nav--next" onClick={() => turn(1)} aria-label="Portail suivant"><IconChevron /></button>}
       </section>
 
-      {/* Choix de la bannière */}
-      {!focus && <div className="rail" role="tablist" aria-label="Bannières">
+      {/* Choix du Portail */}
+      {!focus && <div className="rail" role="tablist" aria-label="Portails">
         {BANNERS.map((b, i) => {
           const have = b.featured.filter((id) => store.owned[id]).length
           return (
@@ -187,7 +187,7 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
         <div className="console__top">
           <div className="pay" role="radiogroup" aria-label="Moyen d'invocation">
             <button role="radio" aria-checked={currency === 'ticket'} className={currency === 'ticket' ? 'is-active' : ''} onClick={() => setCurrency('ticket')}>
-              <Coin name="seal" size={40} /><span>Sceaux<b>{store.tickets}</b></span>
+              <Coin name="seal" size={40} /><span>Clés<b>{store.tickets}</b></span>
             </button>
             <button role="radio" aria-checked={currency === 'gems'} className={currency === 'gems' ? 'is-active' : ''} onClick={() => setCurrency('gems')}>
               <Coin name="soul" size={40} /><span>Éclats<b>{store.gems}</b></span>
@@ -212,7 +212,7 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
       {/* Bannière seule : ses têtes d'affiche, une par une */}
       {focus && (
         <section className="heads">
-          <header className="section__head"><span>{two(banner.featured.length)}</span><div><h2>Têtes d'affiche</h2><p>Les cartes les plus rares de la bannière {banner.world}.</p></div></header>
+          <header className="section__head"><span>{two(banner.featured.length)}</span><div><h2>Têtes d'affiche</h2><p>Les cartes les plus rares du Portail {banner.world}.</p></div></header>
           {banner.featured.map((id) => {
             const h = heroById(id)
             const rate = cardRate(banner, h)
@@ -222,7 +222,7 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
                 <div className="head__text">
                   <p className="head__kicker">Tête d'affiche · {RARITIES[h.rarity].short}</p>
                   <h3>{h.name} <i>({h.title})</i></h3>
-                  <p className="head__desc">L'une des cartes les plus rares du jeu. Elle ne tombe que sur cette bannière. {store.owned[id] ? `Vous en possédez ${store.owned[id]}.` : 'Vous ne la possédez pas encore.'}</p>
+                  <p className="head__desc">L'une des cartes les plus rares du jeu. Elle ne tombe que sur ce Portail. {store.owned[id] ? `Vous en possédez ${store.owned[id]}.` : 'Vous ne la possédez pas encore.'}</p>
                   <ul className="head__facts">
                     <li><b>{pct(rate)}</b><span>par carte invoquée · 1 chance sur {Math.round(1 / rate).toLocaleString('fr-FR')}</span></li>
                     <li><b>{h.role}</b><span>son rôle en combat</span></li>
@@ -257,27 +257,27 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
       )}
       {focus && (
         <section className="bplus">
-          <h2>Les plus de la bannière</h2>
+          <h2>Les plus du Portail</h2>
           <div className="bplus__box">
             <h3>Garantie SSR ou mieux</h3>
             <div className="pity__track"><i style={{ width: `${(pity / PITY_MAX) * 100}%` }} /></div>
-            <p><b>{pity} / {PITY_MAX}</b> invocations. À la {PITY_MAX}e sans carte SSR, LR ou MR, la suivante en est une à coup sûr. Le compteur est propre à cette bannière.</p>
+            <p><b>{pity} / {PITY_MAX}</b> invocations. À la {PITY_MAX}e sans carte SSR, LR ou MR, la suivante en est une à coup sûr. Le compteur est propre à ce Portail.</p>
           </div>
           <div className="bplus__box">
             <h3>Taux par rareté</h3>
             <dl>{RARITY_ORDER.map((rid) => <div key={rid} style={{ ['--rc' as string]: RARITIES[rid].color }}><dt>{RARITIES[rid].short} <small>{RARITIES[rid].label}</small></dt><dd>{pct(RARITIES[rid].rate)}</dd></div>)}</dl>
-            <button className="bplus__btn" onClick={() => setShowIndex(true)}>Index de la bannière</button>
+            <button className="bplus__btn" onClick={() => setShowIndex(true)}>Index du Portail</button>
           </div>
           <div className="bplus__box">
             <h3>Parchemins et Éclats</h3>
-            <p>Les invocations ne donnent que des cartes. Les parchemins d'XP et les Éclats se gagnent dans La Saga.</p>
+            <p>Les invocations ne donnent que des cartes. Les parchemins d'XP et les Éclats se gagnent dans L’Aventure.</p>
           </div>
         </section>
       )}
 
       {/* Toutes les bannières : informations, progression et carte vedette */}
       {!focus && <section className="showcase">
-        <header className="section__head"><span>{two(BANNERS.length)}</span><div><h2>À l'affiche</h2><p>Les bannières ouvertes en ce moment.</p></div></header>
+        <header className="section__head"><span>{two(BANNERS.length)}</span><div><h2>À l'affiche</h2><p>Les Portails ouverts en ce moment.</p></div></header>
         <div className="showcase__list">
           {BANNERS.map((b, i) => {
             const s = heroById(b.star)
@@ -288,10 +288,10 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
                   {store.bannerArt[b.id] && <img className="show__bg" src={store.bannerArt[b.id]} alt="" loading="lazy" referrerPolicy="no-referrer" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
                   <span className="show__glyph" lang="ja" aria-hidden="true">{b.glyph}</span>
                   <div className="show__text">
-                    <p className="show__kicker"><img className="show__emblem" src={extraArt(`emblem-${b.id}`)} alt="" />Bannière limitée</p>
+                    <p className="show__kicker"><img className="show__emblem" src={extraArt(`emblem-${b.id}`)} alt="" />Portail limité</p>
                     <h3>{b.world}</h3>
                     <p className="show__star"><b>{RARITIES[s.rarity].short}</b>{s.name} ({s.title})</p>
-                    <button className="show__link" onClick={() => { setIndex(i); setFocus(true); window.scrollTo({ top: 0 }) }}>Voir la bannière ↗</button>
+                    <button className="show__link" onClick={() => { setIndex(i); setFocus(true); window.scrollTo({ top: 0 }) }}>Voir le Portail ↗</button>
                   </div>
                   <div className="show__card"><Card hero={s} /></div>
                 </div>
@@ -306,15 +306,15 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
       </section>}
 
       {!focus && <>
-        {/* Échos des failles : les anciennes bannières, rouvertes par la Ascension */}
+        {/* Échos des failles : les anciens Portails, rouvertes par l’Ascension */}
         <section className="echo">
-          <header className="section__head"><span>00</span><div><h2>Échos des failles</h2><p>Les anciennes bannières, rouvertes après chaque Ascension.</p></div></header>
+          <header className="section__head"><span>00</span><div><h2>Échos des failles</h2><p>Les anciens Portails, rouvertes après chaque Ascension.</p></div></header>
           <div className="echo__box">
-            <h3>{store.rebirths > 0 ? 'Débloqué par ta Ascension' : 'Débloqué par la Ascension'}</h3>
-            <p>{store.rebirths > 0 ? 'Tu as accès aux Échos.' : 'Fais une Ascension (niveau de compte 100) pour ouvrir les Échos.'} Les bannières qui ont fermé reviendront ici.</p>
-            <button className="echo__btn" onClick={onRebirth}>Voir la Ascension ↗</button>
+            <h3>{store.rebirths > 0 ? 'Débloqué par ton Ascension' : 'Débloqué par l’Ascension'}</h3>
+            <p>{store.rebirths > 0 ? 'Tu as accès aux Échos.' : 'Fais une Ascension (niveau de compte 100) pour ouvrir les Échos.'} Les Portails qui ont fermé reviendront ici.</p>
+            <button className="echo__btn" onClick={onRebirth}>Voir l’Ascension ↗</button>
           </div>
-          <p className="echo__empty">Aucune bannière n'a encore fermé : il n'y a donc pas d'Écho pour l'instant. Les {BANNERS.length} bannières du jeu sont toutes ouvertes ci-dessus.</p>
+          <p className="echo__empty">Aucun Portail n'a encore fermé : il n'y a donc pas d'Écho pour l'instant. Les {BANNERS.length} Portails du jeu sont tous ouverts ci-dessus.</p>
         </section>
 
         {/* Mes gros tirages */}
@@ -333,24 +333,24 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
         <section className="howto">
           <details open>
             <summary><img src={iconArt('seal')} alt="" /><span><b>Invoque</b><small>Obtiens de nouvelles cartes.</small></span><i aria-hidden="true" /></summary>
-            <p>Choisis une bannière : une invocation coûte {COST.ticket} sceau ou {COST.gems} Éclats, par 1, 5 ou 10. Les taux sont publics (« Index et taux ») et chaque tirage est réellement aléatoire. Une carte SSR, LR ou MR est garantie au plus tard à la {PITY_MAX}e invocation.</p>
+            <p>Choisis un Portail : une invocation coûte {COST.ticket} Clé de Faille ou {COST.gems} Éclats, par 1, 5 ou 10. Les taux sont publics (« Index et taux ») et chaque tirage est réellement aléatoire. Une carte SSR, LR ou MR est garantie au plus tard à la {PITY_MAX}e invocation.</p>
           </details>
           <details open>
             <summary><img src={iconArt('soul')} alt="" /><span><b>Gagne tes Éclats</b><small>Cumule des Éclats et invoque.</small></span><i aria-hidden="true" /></summary>
-            <p>Tu commences avec 600 Éclats et 20 sceaux. Chaque nouvelle étoile gagnée dans La Saga rapporte 10 Éclats, et la Ascension rend 25 % de celles dépensées. Dépense-les avec soin.</p>
+            <p>Tu commences avec 600 Éclats et 20 Clés de Faille. Chaque nouvelle étoile gagnée dans L’Aventure rapporte 10 Éclats, et l’Ascension rend 25 % de celles dépensées. Dépense-les avec soin.</p>
           </details>
           <details open>
             <summary><img src={iconArt('scroll-medium')} alt="" /><span><b>Renforce tes cartes</b><small>Fais évoluer tes cartes favorites.</small></span><i aria-hidden="true" /></summary>
-            <p>Un doublon n'est jamais perdu : il se fond dans sa carte et lui donne de l'XP. Les parchemins d'XP se gagnent dans La Saga, et chaque victoire donne de l'XP à ton équipe. Une carte monte jusqu'au niveau {LEVEL_CAP}, puis jusqu'au niveau {MAX_LEVEL} une fois libérée.</p>
+            <p>Un doublon n'est jamais perdu : il se fond dans sa carte et lui donne de l'XP. Les parchemins d'XP se gagnent dans L’Aventure, et chaque victoire donne de l'XP à ton équipe. Une carte monte jusqu'au niveau {LEVEL_CAP}, puis jusqu'au niveau {MAX_LEVEL} une fois libérée.</p>
           </details>
         </section>
       </>}
 
       {showIndex && createPortal(
-        <div className="modal" role="dialog" aria-modal="true" aria-label="Index de la bannière" onClick={() => setShowIndex(false)}>
+        <div className="modal" role="dialog" aria-modal="true" aria-label="Index du Portail" onClick={() => setShowIndex(false)}>
           <div className="modal__box index" onClick={(e) => e.stopPropagation()}>
             <h2 className="modal__title">Index — {banner.world}</h2>
-            <p className="modal__note">Les cartes SSR, LR et MR de l'univers {banner.world}, avec la chance exacte d'obtenir chacune en une invocation. Toutes les autres cartes des 7 univers (N, R, SR, et les SSR et LR des autres univers) peuvent aussi sortir sur cette bannière ; seules les MR restent propres à leur univers. Les cartes marquées ★ sont à l'affiche : elles sortent plus souvent que les autres cartes de leur rareté. Une carte SSR, LR ou MR est garantie au plus tard à la {PITY_MAX}e invocation.</p>
+            <p className="modal__note">Les cartes SSR, LR et MR de l'univers {banner.world}, avec la chance exacte d'obtenir chacune en une invocation. Toutes les autres cartes des 7 univers (N, R, SR, et les SSR et LR des autres univers) peuvent aussi sortir sur ce Portail ; seules les MR restent propres à leur univers. Les cartes marquées ★ sont à l'affiche : elles sortent plus souvent que les autres cartes de leur rareté. Une carte SSR, LR ou MR est garantie au plus tard à la {PITY_MAX}e invocation.</p>
             {RARITY_ORDER.map((rid) => {
               const cards = indexCards(banner).filter((h) => h.rarity === rid)
               if (cards.length === 0) return null

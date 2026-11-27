@@ -72,7 +72,7 @@ export const pullMany = (banner: Banner, pity: number, count: number, rng: Rng, 
   return { heroes, pity }
 }
 
-// Probabilité exacte d'obtenir CETTE carte en une invocation sur cette bannière (hors garantie).
+// Probabilité exacte d'obtenir CETTE carte en une invocation sur ce Portail (hors garantie).
 // C'est le chiffre affiché dans l'index ; il découle directement de la règle de tirage ci-dessus.
 export const cardRate = (banner: Banner, hero: Hero): number => {
   if (isLocal(hero.rarity) && !banner.pool.includes(hero.world)) return 0

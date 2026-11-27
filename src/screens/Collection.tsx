@@ -272,7 +272,7 @@ const Cards = ({ onSummon }: { onSummon: () => void }) => {
 export type CollectionTab = 'cards' | 'inventory' | 'rebirth' | 'profile'
 const TABS: [CollectionTab, string][] = [['cards', 'Cartes'], ['inventory', 'Inventaire'], ['rebirth', 'Ascension'], ['profile', 'Profil']]
 
-// La Collection et ses onglets : les cartes, la réserve d'objets et la Ascension.
+// La Collection et ses onglets : les cartes, la réserve d'objets et l’Ascension.
 export const Collection = ({ onSummon, tab, onTab }: { onSummon: () => void; tab: CollectionTab; onTab: (t: CollectionTab) => void }) => (
   <div className="coltabs">
     <div className="coltabs__bar" role="tablist" aria-label="Sections de la collection">

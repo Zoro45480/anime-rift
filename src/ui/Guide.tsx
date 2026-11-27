@@ -8,16 +8,16 @@ import { useStore } from '../state/store'
 const TALKS: Record<string, { title: string; lines: string[] }> = {
   banners: { title: 'Les invocations', lines: [
     'Salut ! Moi c’est Nyx, l’esprit de la faille. Ici tu invoques de nouvelles cartes.',
-    'Choisis une bannière, puis ×1, ×5 ou ×10. Un sceau ou 30 Éclats par invocation.',
+    'Choisis un Portail, puis ×1, ×5 ou ×10. Un Clé de Faille ou 30 Éclats par invocation.',
     'Toutes les cartes des 7 univers sortent sur chaque bannière. Seules les MR restent propres à la bannière de leur univers !',
     'Les cartes MR sont très rares. Au bout de 50 invocations sans carte SSR ou mieux, la suivante est garantie.',
   ] },
   play: { title: 'Le Nexus', lines: [
-    'Voici le Nexus : chaque porte est un mode de jeu. La Saga est ouverte, les autres arrivent.',
+    'Voici le Nexus : chaque porte est un mode de jeu. L’Aventure est ouverte, les autres arrivent.',
     'Un combat coûte un éclair. Tes éclairs reviennent tout seuls, un toutes les 6 minutes.',
-    'Tout en bas, la Ascension : au niveau 100, tu repars de zéro mais plus fort, pour toujours.',
+    'Tout en bas, l’Ascension : au niveau 100, tu repars de zéro mais plus fort, pour toujours.',
   ] },
-  saga: { title: 'La Saga', lines: [
+  saga: { title: 'L’Aventure', lines: [
     'Forme une équipe de 3 cartes. Un tank protège, un soigneur soigne, un DPS frappe fort.',
     'Mets ensemble des cartes du même collectif (Équipe 7, Chapeaux de paille…) : elles gagnent un bonus.',
     'Chaque victoire donne de l’XP, des Éclats pour tes nouvelles étoiles, et parfois un parchemin.',

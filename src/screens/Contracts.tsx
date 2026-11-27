@@ -140,7 +140,7 @@ export const Contracts = ({ start = 'daily' }: { start?: 'daily' | 'contracts' |
             <ul>{weekly.map((c) => <Row key={c.id} c={c} now={now} />)}</ul>
           </>}
           {sub === 'story' && <>
-            <p className="cn__meta">Récompenses uniques, gagnées en avançant dans La Saga.</p>
+            <p className="cn__meta">Récompenses uniques, gagnées en avançant dans L’Aventure.</p>
             {BANNERS.map((b, arc) => {
               const list = STORY.filter((c) => c.arc === arc)
               return (

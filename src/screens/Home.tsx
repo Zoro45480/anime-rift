@@ -23,7 +23,7 @@ const icon = (r: Reward, day: number) => (day === 7 ? uiArt('chest') : r.tickets
 // Notes de mise à jour : ce qui a vraiment été ajouté au jeu.
 const NEWS = [
   { title: 'Le Bazar des Failles ouvre', points: ['Achète aux marchands du jour, vends tes doublons ou mets-les aux enchères.', 'Alertes de prix et cote calculée sur tes vraies ventes.'] },
-  { title: 'Toutes les cartes se mélangent', points: ['Chaque bannière donne les cartes des 7 univers.', 'Seules les MR restent propres à leur univers.'] },
+  { title: 'Toutes les cartes se mélangent', points: ['Chaque Portail donne les cartes des 7 univers.', 'Seules les MR restent propres à leur univers.'] },
   { title: 'Les quatre portes sont ouvertes', points: ['Les Colosses, La Tour de l’Infini, l’Arène et le Grand Rift sont jouables.', '79 succès, le Chemin du Rift et la boutique en Éclats.'] },
 ]
 

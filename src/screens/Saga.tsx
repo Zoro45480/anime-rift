@@ -94,7 +94,7 @@ export const Battle = ({ result, onClose, kicker, title, winBody, loseBody }: { 
   )
 }
 
-// Mon équipe : les trois cartes qui combattent (La Saga et La Tour de l’Infini).
+// Mon équipe : les trois cartes qui combattent (L’Aventure et La Tour de l’Infini).
 export const TeamPanel = () => {
   const store = useStore()
   const [picking, setPicking] = useState(false)
@@ -152,7 +152,7 @@ export const Saga = ({ onBack }: { onBack: () => void }) => {
         <img src={gateArt('saga')} alt="" />
         <div>
           <p className="eyebrow">Porte I · Histoire</p>
-          <h1>La Saga</h1>
+          <h1>L’Aventure</h1>
           <p>Traverse chaque univers, combat après combat. <b>{totalStars}</b> / {STAGES.length * 3} étoiles · <Coin name="bolt" size={18} /> {store.energyLeft}/{ENERGY_MAX}</p>
         </div>
       </header>

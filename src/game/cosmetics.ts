@@ -1,5 +1,5 @@
 // Apparence du profil : cadres, ornements, effets, couleurs, thèmes et titres. Certains objets sont offerts, d'autres se
-// gagnent (niveau de compte, arc de La Saga terminé, Ascension), les autres s'achètent en Éclats. Fonctions pures, testées.
+// gagnent (niveau de compte, arc de L’Aventure terminé, Ascension), les autres s'achètent en Éclats. Fonctions pures, testées.
 export type CosmeticKind = 'frame' | 'ornament' | 'aura' | 'effect' | 'color' | 'theme' | 'title'
 export type Rarity = 'common' | 'rare' | 'epic' | 'legend' | 'mythic'
 export type Cosmetic = { id: string; kind: CosmeticKind; name: string; price: number; value: string; rarity: Rarity; needLevel?: number; needRebirth?: boolean; needArc?: string }
@@ -56,11 +56,11 @@ export const COSMETICS: Cosmetic[] = [
 ]
 export const cosmeticById = (id: string) => COSMETICS.find((x) => x.id === id)
 
-// Ce que le joueur a : objets achetés, niveau de compte, Ascensions, arcs de La Saga terminés (identifiants de bannière).
+// Ce que le joueur a : objets achetés, niveau de compte, Ascensions, arcs de L’Aventure terminés (identifiants de bannière).
 export type Owned = { bought: string[]; level: number; rebirths: number; arcs: string[] }
 export const hasCosmetic = (x: Cosmetic, o: Owned) =>
   o.bought.includes(x.id) || (x.needRebirth ? o.rebirths > 0 : (x.price === 0 && !x.needArc) || (x.needLevel !== undefined && o.level >= x.needLevel) || (x.needArc !== undefined && o.arcs.includes(x.needArc)))
-// Peut-on l'acheter ? (les objets de Ascension ne se vendent pas)
+// Peut-on l'acheter ? (les objets d’Ascension ne se vendent pas)
 export const canBuy = (x: Cosmetic, o: Owned, gems: number) => !x.needRebirth && x.price > 0 && !hasCosmetic(x, o) && gems >= x.price
 export const howToGet = (x: Cosmetic) =>
   x.needRebirth ? 'Après une Ascension' : x.needLevel ? `Niveau ${x.needLevel} ou ${x.price} Éclats` : x.needArc ? `Arc terminé ou ${x.price} Éclats` : `${x.price} Éclats`
