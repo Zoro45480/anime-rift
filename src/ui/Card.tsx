@@ -5,7 +5,7 @@ import { roleKind, type Hero } from '../data/heroes'
 import { RARITIES } from '../data/rarities'
 import { cardState, titleOf } from '../game/progression'
 import { getTitleMode } from './graphics'
-import { extraArt, frameArt, frameFx, heroArt, mrFrameArt } from '../assets/manifest'
+import { extraArt, frameArt, frameFx, heroArt, mrFrameArt, nrFrameArt } from '../assets/manifest'
 import { MR_THEMES, startMrFx } from './mrFx'
 import { useStore } from '../state/store'
 import { AffinityIcon } from './AffinityIcon'
@@ -34,6 +34,7 @@ export const Card = ({ hero, count, locked, inert, hd, className = '', style }: 
   // MR : cadre dessiné propre à son univers, lueur à sa couleur, et particules animées sur la carte en grand
   const theme = frameOf(hero.world)
   const mrSrc = hero.rarity === 'rift' ? mrFrameArt(theme, hd) : ''
+  const nrSrc = hero.rarity === 'common' || hero.rarity === 'rare' ? nrFrameArt(hero.rarity, theme, hd) : ''
   const fxRef = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
     if (!mrSrc || !fxRef.current || document.documentElement.dataset.fxchoice === 'low') return // coupé seulement si le joueur a choisi « Fluide »
@@ -59,7 +60,7 @@ export const Card = ({ hero, count, locked, inert, hd, className = '', style }: 
   }
 
   return (
-    <div ref={ref} className={`card card--${hero.rarity} ${mrSrc ? 'card--mrframe' : ''} ${locked ? 'is-locked' : ''} ${className}`}
+    <div ref={ref} className={`card card--${hero.rarity} ${mrSrc ? 'card--mrframe' : ''} ${nrSrc ? 'card--nrframe' : ''} ${locked ? 'is-locked' : ''} ${className}`}
       style={{ ['--rc' as string]: rarity.color, ['--ac' as string]: AFFINITIES[hero.affinity].color, ...(mrSrc ? { ['--mr-glow' as string]: MR_THEMES[theme]?.glow ?? '#ff3d9a' } : {}), ['--delay' as string]: `${-hero.no * 0.9}s`, ...style }}
       {...(openable ? { role: 'button', tabIndex: 0, 'aria-label': `Voir la carte ${hero.name}`, onClick: () => viewer.open(hero), onKeyDown: (e: KeyboardEvent<HTMLDivElement>) => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); viewer.open(hero) } } } : {})}
       onPointerMove={locked ? undefined : onMove} onPointerLeave={onLeave} onPointerCancel={onLeave}>
@@ -99,7 +100,7 @@ export const Card = ({ hero, count, locked, inert, hd, className = '', style }: 
           <img className={`card__frame card__frame--mr card__frame--mr-${theme}`} src={mrSrc} alt="" decoding="async" />
           <span className={`card__mrshine card__frame--mr-${theme}`} style={{ WebkitMaskImage: `url("${mrSrc}")`, maskImage: `url("${mrSrc}")` }} aria-hidden="true" />
           <canvas ref={fxRef} className="card__mrfx" aria-hidden="true" />
-        </> : <>
+        </> : nrSrc ? <img className={`card__frame card__frame--nr card__frame--nr-${hero.rarity}-${theme}`} src={nrSrc} alt="" decoding="async" /> : <>
           <img className="card__frame" src={frameArt(hero.rarity, frameOf(hero.world), hd)} alt="" decoding="async" />
           <img className={`card__fx ${frameOf(hero.world) === 'naruto' ? '' : 'card__fx--own'}`} src={frameFx(hero.rarity, frameOf(hero.world), hd)} alt="" decoding="async" />
         </>}

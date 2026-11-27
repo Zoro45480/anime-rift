@@ -41,6 +41,11 @@ const mrFrames = import.meta.glob('./mr-frames/*.webp', { eager: true, query: '?
 const mrFramesSm = import.meta.glob('./mr-frames-sm/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 export const mrFrameArt = (theme: string, hd = false): string => (hd ? mrFrames[`./mr-frames/${theme}.webp`] : mrFramesSm[`./mr-frames-sm/${theme}.webp`]) ?? ''
 
+// Cadres N et R dessinés par univers (fournis par le joueur).
+const nrFrames = import.meta.glob('./nr-frames/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
+const nrFramesSm = import.meta.glob('./nr-frames-sm/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
+export const nrFrameArt = (rarity: string, theme: string, hd = false): string => (hd ? nrFrames[`./nr-frames/${rarity}-${theme}.webp`] : nrFramesSm[`./nr-frames-sm/${rarity}-${theme}.webp`]) ?? ''
+
 export const frameFx = (rarity: string, theme = 'naruto', hd = false): string => pick(`${rarity}-fx`, theme, hd)
 
 const ui = import.meta.glob('./ui/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>

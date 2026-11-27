@@ -760,3 +760,22 @@ body:has(.sc) .chat__toggle, body:has(.sc) .chat__panel { display: none !importa
   :root:not([data-fxchoice='low']) .card__frame--mr { animation-duration: 2.6s !important; animation-iteration-count: infinite !important; }
   :root:not([data-fxchoice='low']) .card__mrshine { animation-duration: 3.8s !important; animation-iteration-count: infinite !important; }
 }
+
+/* ══════════ Cadres N et R par univers (fournis par le joueur) ══════════ */
+.card__frame--nr-common-naruto { left: 1.51%; top: 1.30%; width: 97.04%; height: 97.68%; }
+.card__frame--nr-common-onepiece { left: 1.51%; top: 1.30%; width: 97.04%; height: 97.68%; }
+.card__frame--nr-common-dragonball { left: 1.51%; top: 1.30%; width: 97.04%; height: 97.68%; }
+.card__frame--nr-common-bleach { left: 1.51%; top: 1.30%; width: 97.04%; height: 97.68%; }
+.card__frame--nr-common-demonslayer { left: 1.51%; top: 1.30%; width: 97.04%; height: 97.68%; }
+.card__frame--nr-common-jujutsu { left: 1.51%; top: 1.30%; width: 97.04%; height: 97.68%; }
+.card__frame--nr-common-hunter { left: 1.51%; top: 1.30%; width: 97.04%; height: 97.68%; }
+.card__frame--nr-rare-naruto { left: -0.39%; top: 0.01%; width: 100.88%; height: 100.29%; }
+.card__frame--nr-rare-onepiece { left: -0.39%; top: 0.01%; width: 100.88%; height: 100.29%; }
+.card__frame--nr-rare-dragonball { left: -0.39%; top: 0.01%; width: 100.88%; height: 100.29%; }
+.card__frame--nr-rare-bleach { left: -0.39%; top: 0.01%; width: 100.88%; height: 100.29%; }
+.card__frame--nr-rare-demonslayer { left: -0.39%; top: 0.01%; width: 100.88%; height: 100.29%; }
+.card__frame--nr-rare-jujutsu { left: -0.39%; top: 0.01%; width: 100.88%; height: 100.29%; }
+.card__frame--nr-rare-hunter { left: -0.39%; top: 0.01%; width: 100.88%; height: 100.29%; }.card__frame--nr { position: absolute; max-width: none; pointer-events: none; z-index: 2; filter: drop-shadow(0 0.6cqw 1.2cqw rgba(0, 0, 0, 0.55)); }
+.card--nrframe .card__mono { display: none !important; } /* le cadre porte déjà sa lettre N ou R */
+.card--nrframe .card__face { box-shadow: none !important; }
+.col-fav { left: auto !important; right: 6% !important; top: auto !important; bottom: 22% !important; }
