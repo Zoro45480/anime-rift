@@ -92,6 +92,11 @@ type Store = State & {
   resetTutorial: () => void
   setProfile: (profile: Partial<Profile>) => void
   claimContract: (id: string) => boolean // récupère la récompense d'un contrat accompli
+  claimAllContracts: () => number // « Tout récupérer » : tous les contrats prêts, toutes périodes
+  claimAllChallenges: () => number // tous les défis du Chemin prêts
+  claimAllPvp: () => number // tous les défis d'arène prêts
+  claimEverything: () => number // contrats + défis du Chemin + défis d'arène, en une fois
+  claimAllReferral: (friends: number) => number // toutes les cases du Lien de Faille ouvertes
   claimDaily: () => boolean // récompense quotidienne
   markVisit: () => void // « passe voir ta collection »
   claimChallenge: (id: string) => boolean // défi du Chemin (3 fois par jour)
@@ -722,6 +727,54 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setState(withPath({ ...grant(state, c.reward), quests: addCounts(markClaimed(c, state.quests, t), { claims: 1 }, t) }, xp))
       return true
     }
+    // « Tout récupérer » : chaque étape repart de l'état laissé par la précédente, rien n'est perdu
+    const allContracts = (from: State) => {
+      const t = new Date()
+      let next = from, n = 0
+      for (let guard = 0; guard < 300; guard++) {
+        const c = claimable(next.quests, next.saga, t)[0]
+        if (!c) break
+        const xp = c.id === 'd-all' ? PATH_XP.dayBonus : c.period === 'day' ? PATH_XP.dayContract : c.period === 'week' ? PATH_XP.weekContract : PATH_XP.storyContract
+        next = withPath({ ...grant(next, c.reward), quests: addCounts(markClaimed(c, next.quests, t), { claims: 1 }, t) }, xp)
+        n++
+      }
+      return { next, n }
+    }
+    const allChallenges = (from: State) => {
+      const t = new Date()
+      let next = from, n = 0
+      for (const c of challengesFor(t)) {
+        for (let k = 0; k < 5 && challengeState(c, next.quests, t).ready; k++) { next = withPath({ ...grant(next, { gems: c.gems }), quests: markChallenge(c, next.quests, t) }, c.xp); n++ }
+      }
+      return { next, n }
+    }
+    const allPvp = (from: State) => {
+      let next = from, n = 0
+      for (const g of PVP_GOALS) {
+        const a = next.arena, w = rollWeek(a, new Date())
+        if (w.claimed.includes(g.id) || g.value(a, w) < g.target) continue
+        next = { ...grant(next, { gems: g.gems, tickets: g.tickets }), arena: { ...a, week: { ...w, claimed: [...w.claimed, g.id] } } }
+        n++
+      }
+      return { next, n }
+    }
+    const run = (f: (s: State) => { next: State; n: number }) => { const r = f(state); if (r.n) setState(r.next); return r.n }
+    const claimAllContracts = () => run(allContracts)
+    const claimAllChallenges = () => run(allChallenges)
+    const claimAllPvp = () => run(allPvp)
+    const claimEverything = () => run((s0) => { const a = allContracts(s0), b = allChallenges(a.next), c = allPvp(b.next); return { next: c.next, n: a.n + b.n + c.n } })
+    const claimAllReferral = (friends: number) => {
+      let next = state, n = 0
+      REFERRAL.forEach((r, i) => {
+        const step = i + 1
+        if (friends < step || next.refClaimed.includes(step)) return
+        next = grant({ ...next, refClaimed: [...next.refClaimed, step] }, r.reward)
+        if (r.card) { const c = rollAtLeast(r.card, Math.random); next = { ...next, owned: { ...next.owned, [c.id]: (next.owned[c.id] ?? 0) + 1 }, notifs: notify(next.notifs, [['pull', `Lien de Faille : ${c.name} (${RARITIES[c.rarity].short}) rejoint ta collection.`]]) } }
+        n++
+      })
+      if (n) setState(next)
+      return n
+    }
     const claimChallenge = (id: string) => {
       const t = new Date()
       const c = challengesFor(t).find((x) => x.id === id)
@@ -799,7 +852,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setArt((a) => Object.fromEntries(Object.entries(a).filter(([k]) => k !== heroId)))
       void removeArt(heroId)
     }
-    return { ...state, canAfford, summon, merge, mergeAll, dupes, useScroll, scrollsUseful, toggleFav, takeCards, spendGems, addGems, giveCards, toggleWish, togglePin, fightSpire, fightGuildBoss, guildTries, fightBig, bigTries, claimReferral, tourneyFight, buyStall, quickSell, listAuction, setAlert, levelOf, buyOffer, claimGift, giftReady, duel, newRivals, claimPvp, duelsLeft, arenaPower, fightColossus, claimEvent, colTries, claimContract, claimDaily, claimChallenge, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
+    return { ...state, canAfford, summon, merge, mergeAll, dupes, useScroll, scrollsUseful, toggleFav, takeCards, spendGems, addGems, giveCards, toggleWish, togglePin, fightSpire, fightGuildBoss, guildTries, fightBig, bigTries, claimReferral, tourneyFight, buyStall, quickSell, listAuction, setAlert, levelOf, buyOffer, claimGift, giftReady, duel, newRivals, claimPvp, duelsLeft, arenaPower, fightColossus, claimEvent, colTries, claimContract, claimAllContracts, claimAllChallenges, claimAllPvp, claimEverything, claimAllReferral, claimDaily, claimChallenge, claimTier, claimAllTiers, markVisit, questsReady, buyCosmetic, buyEnergy, seeTutorial, resetTutorial, setProfile, resetGame, readNotifs, clearNotifs, teamNow, setTeam, fight, energyLeft, spendEnergy, awaken, rebirth, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, customArt, setCustomArt, clearCustomArt }
   }, [state, customArt, remoteArt, remoteStatus, remoteFans, remoteSeiyu, bannerArt, now])
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>

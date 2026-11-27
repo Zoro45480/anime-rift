@@ -75,8 +75,14 @@ export const Contracts = ({ start = 'daily' }: { start?: 'daily' | 'contracts' |
   const passReady = passList.filter((c) => challengeState(c, store.quests, now).ready).length
   const eventReady = eventDone(col) && !col.final ? 1 : 0
   const pvpReady = PVP_GOALS.filter((g) => !pvpWeek.claimed.includes(g.id) && g.value(store.arena, pvpWeek) >= g.target).length
-  const [prize, setPrize] = useState('')
   const readyIn = (list: Contract[]) => list.filter((c) => !isClaimed(c, store.quests, now) && progress(c, store.quests, store.saga, now) >= c.target).length
+  const [prize, setPrize] = useState('')
+  const contractsReady = readyIn([...daily, DAILY_BONUS, ...weekly, ...STORY, ...CAREER])
+  const totalReady = contractsReady + passReady + pvpReady
+  const claimEverything = () => {
+    const total = store.claimEverything()
+    if (total) setPrize(`${total} récompense${total > 1 ? 's' : ''} récupérée${total > 1 ? 's' : ''} d'un coup !`)
+  }
   const mine = HEROES.filter((h) => store.owned[h.id])
   const best = [...mine].sort((a, b) => RARITY_ORDER.indexOf(a.rarity) - RARITY_ORDER.indexOf(b.rarity) || a.no - b.no)[0]
   const life = store.quests.life
@@ -130,6 +136,9 @@ export const Contracts = ({ start = 'daily' }: { start?: 'daily' | 'contracts' |
               <button key={id} role="tab" aria-selected={sub === id} className={sub === id ? 'is-on' : ''} onClick={() => setSub(id)}>{label}{dot > 0 && <i className="dot" />}</button>
             ))}
           </div>
+          {totalReady > 0 && <div className="claim-all"><span><b>{totalReady}</b> récompense{totalReady > 1 ? 's' : ''} à récupérer dans tous les contrats</span>
+            <button className="btn btn--gold" onClick={claimEverything}>Tout récupérer ({totalReady})</button></div>}
+          {prize && sub !== 'event' && <p className="cd__notice" role="status">{prize}</p>}
           {sub === 'day' && <>
             <p className="cn__meta">Univers du jour : <b>{featuredWorld(now)}</b> · de nouvelles quêtes chaque jour, les prochaines dans <b>{clock(msToDayEnd(now))}</b></p>
             <ul>{daily.map((c) => <Row key={c.id} c={c} now={now} />)}</ul>

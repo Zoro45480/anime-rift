@@ -20,6 +20,8 @@ export const Referral = () => {
         <section className="so-box">
           <header className="so-box__head"><h2>Récompenses</h2><span><b>{count}</b> / {REFERRAL.length} recrues</span></header>
           <div className="ct__bar"><i style={{ width: `${Math.min(100, (count / REFERRAL.length) * 100)}%` }} /></div>
+          {(() => { const k = REFERRAL.filter((_, i) => !store.refClaimed.includes(i + 1) && count >= i + 1).length
+            return k > 0 && <div className="claim-all"><span><b>{k}</b> case{k > 1 ? 's' : ''} à ouvrir</span><button className="btn btn--gold" onClick={() => { const n = store.claimAllReferral(count); if (n) setMsg(`${n} case${n > 1 ? 's' : ''} ouverte${n > 1 ? 's' : ''} d'un coup !`) }}>Tout récupérer ({k})</button></div> })()}
           <ol className="rf-grid">{REFERRAL.map((r, i) => {
             const step = i + 1, done = store.refClaimed.includes(step), ready = !done && count >= step
             return (

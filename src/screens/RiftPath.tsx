@@ -104,6 +104,8 @@ export const RiftPath = ({ now }: { now: Date }) => {
       </div>
 
       <div className="pt__ch">
+        {challengesFor(now).some((c) => challengeState(c, store.quests, now).ready) && <div className="claim-all"><span>Des défis de saison sont prêts.</span>
+          <button className="btn btn--gold" onClick={() => store.claimAllChallenges()}>Tout récupérer ({challengesFor(now).filter((c) => challengeState(c, store.quests, now).ready).length})</button></div>}
         <h3 className="pt__qtitle">Quêtes de saison <small>Les quêtes de la saison changent quand le pass se termine (dans {left(season.msLeft)}). Chacune se refait {CHALLENGE_TIMES} fois par jour · compteurs remis à zéro dans {left(msToDayEnd(now))}</small></h3>
         <ul>
           {challengesFor(now).map((c) => {

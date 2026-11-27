@@ -115,6 +115,8 @@ export const Arena = ({ onBack }: { onBack: () => void }) => {
 
       <section className="co-event">
         <h3 className="sp-sub">Défis d'arène de la semaine <small>· nouveaux dans {left(msToWeekEnd(new Date()))}</small></h3>
+        {(() => { const w = rollWeek(store.arena, new Date()); const k = PVP_GOALS.filter((g) => !w.claimed.includes(g.id) && g.value(store.arena, w) >= g.target).length
+          return k > 0 && <div className="claim-all"><span><b>{k}</b> défi{k > 1 ? 's' : ''} terminé{k > 1 ? 's' : ''}</span><button className="btn btn--gold" onClick={() => store.claimAllPvp()}>Tout récupérer ({k})</button></div> })()}
         <ul>
           {PVP_GOALS.map((g) => {
             const v = Math.min(g.target, g.value(a, w)), done = w.claimed.includes(g.id), ready = !done && v >= g.target
