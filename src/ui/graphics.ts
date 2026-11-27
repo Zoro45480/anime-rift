@@ -12,7 +12,7 @@ export const effectiveGraphics = (mode = getGraphics()): 'high' | 'low' => {
   const weak = window.matchMedia('(prefers-reduced-motion: reduce)').matches || ((navigator as { deviceMemory?: number }).deviceMemory ?? 8) <= 2
   return weak ? 'low' : 'high'
 }
-export const applyGraphics = () => { document.documentElement.dataset.fx = effectiveGraphics() }
+export const applyGraphics = () => { document.documentElement.dataset.fx = effectiveGraphics(); document.documentElement.dataset.fxchoice = getGraphics() }
 export const setGraphics = (mode: GraphicsMode) => {
   try { if (mode === 'auto') localStorage.removeItem(KEY); else localStorage.setItem(KEY, mode) } catch { /* non enregistré */ }
   applyGraphics()

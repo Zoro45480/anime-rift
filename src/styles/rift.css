@@ -723,8 +723,7 @@ body:has(.sc) .chat__toggle, body:has(.sc) .chat__panel { display: none !importa
 .card--mrframe .card__brand { top: 9cqw; }
 @keyframes mr-shine { 0% { background-position: 150% 0; } 55%, 100% { background-position: -60% 0; } }
 @keyframes mr-glow { 0%, 100% { filter: drop-shadow(0 0 0.6cqw var(--mr-glow)) drop-shadow(0 1.2cqw 2cqw rgba(0, 0, 0, 0.55)) brightness(1); } 50% { filter: drop-shadow(0 0 2.4cqw var(--mr-glow)) drop-shadow(0 0 4.6cqw var(--mr-glow)) brightness(1.12); } }
-:root[data-fx='low'] .card__frame--mr, :root[data-fx='low'] .card__mrshine { animation: none; }
-@media (prefers-reduced-motion: reduce) { .card__frame--mr, .card__mrshine { animation: none; } }
+:root[data-fxchoice='low'] .card__frame--mr, :root[data-fxchoice='low'] .card__mrshine { animation: none; }
 
 /* ── Nouveau logo ANIME RIFT (chrome et faille) ── */
 .logo img { filter: drop-shadow(0 0 8px rgba(124, 92, 255, 0.45)); }
@@ -756,3 +755,8 @@ body:has(.sc) .chat__toggle, body:has(.sc) .chat__panel { display: none !importa
   background: linear-gradient(135deg, var(--accent), var(--hot)) !important; }
 .bell.bell--me > .avatar::before, .bell.bell--me > .avatar::after { display: none !important; }
 .bell.bell--me .bell__online { width: 11px !important; height: 11px !important; right: -2px; bottom: -2px; box-shadow: 0 0 0 2.5px var(--bg) !important; }
+/* les effets des cadres MR restent animés même si l'appareil demande moins d'animations (on les coupe seulement en « Fluide ») */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-fxchoice='low']) .card__frame--mr { animation-duration: 2.6s !important; animation-iteration-count: infinite !important; }
+  :root:not([data-fxchoice='low']) .card__mrshine { animation-duration: 3.8s !important; animation-iteration-count: infinite !important; }
+}

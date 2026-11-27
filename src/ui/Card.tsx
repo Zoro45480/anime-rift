@@ -36,8 +36,8 @@ export const Card = ({ hero, count, locked, inert, hd, className = '', style }: 
   const mrSrc = hero.rarity === 'rift' ? mrFrameArt(theme, hd) : ''
   const fxRef = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
-    if (!mrSrc || !fxRef.current || document.documentElement.dataset.fx === 'low') return
-    return startMrFx(fxRef.current, theme, hd ? 1 : 0.55)
+    if (!mrSrc || !fxRef.current || document.documentElement.dataset.fxchoice === 'low') return // coupé seulement si le joueur a choisi « Fluide »
+    return startMrFx(fxRef.current, theme, hd ? 1 : 0.8)
   }, [mrSrc, hd, theme])
 
   const onMove = (e: PointerEvent<HTMLDivElement>) => {

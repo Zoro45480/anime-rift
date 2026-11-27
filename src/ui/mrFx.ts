@@ -24,7 +24,7 @@ const edgePoint = (side?: number): [number, number, number] => {
 }
 
 const spawn = (kind: string, col: string, W: number, H: number): P => {
-  const S = W / 600
+  const S = Math.max(W / 600, 0.9) // jamais minuscules, même sur une petite carte
   const side = kind === 'emberR' ? (Math.random() < 0.6 ? 1 : Math.random() < 0.5 ? 0 : 2) : kind === 'bubble' ? (Math.random() < 0.6 ? 3 : Math.random() < 0.5 ? 0 : 2) : undefined
   const [ex, ey, s] = edgePoint(side)
   const p: P = { kind, col, x: ex * W, y: ey * H, life: 0, s: S, max: 1 }
@@ -122,14 +122,10 @@ const draw = (ctx: CanvasRenderingContext2D, p: P, dt: number) => {
 }
 
 // Lance l'animation dans le canvas ; renvoie la fonction qui l'arrête.
-// Au plus MAX_LIVE cartes animées en même temps (les autres gardent lueur et reflet) : les grilles restent fluides.
-const MAX_LIVE = 10
-let live = 0
 export const startMrFx = (cv: HTMLCanvasElement, theme: string, density = 1) => {
   const T = MR_THEMES[theme]
   const ctx = cv.getContext('2d')
-  if (!T || !ctx || live >= MAX_LIVE) return () => {}
-  live++
+  if (!T || !ctx) return () => {}
   let parts: P[] = [], last = performance.now(), raf = 0, visible = true
   const acc = T.fx.map(() => 0)
   const resize = () => { const r = cv.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2); cv.width = Math.round(r.width * d); cv.height = Math.round(r.height * d) }
@@ -145,5 +141,5 @@ export const startMrFx = (cv: HTMLCanvasElement, theme: string, density = 1) => 
     raf = requestAnimationFrame(loop)
   }
   raf = requestAnimationFrame(loop)
-  return () => { cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); parts = []; live-- }
+  return () => { cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); parts = [] }
 }
