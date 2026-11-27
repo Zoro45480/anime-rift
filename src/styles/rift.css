@@ -990,3 +990,35 @@ body:has(.sc) .chat__toggle, body:has(.sc) .chat__panel { display: none !importa
 :is(.bh__card, .show__card, .head__card, .home__ban-card, .lrb__card) .card { perspective: 650px; }
 :is(.bh__card, .show__card, .head__card, .home__ban-card, .lrb__card) .card.is-live .card__tilt { transform: rotateX(calc(var(--rx) * 2.4)) rotateY(calc(var(--ry) * 2.4)) translateZ(18px); }
 :is(.bh__card, .show__card, .head__card, .home__ban-card, .lrb__card) .card.is-live { filter: drop-shadow(0 18px 28px rgba(0, 0, 0, .55)); }
+/* Bords intérieurs de chaque cadre SR / SSR / LR (mesurés sur l'image) : le texte de la carte reste dans le cadre. */
+.card--fr-epic-bleach { --ol: 7.0cqw; --or: 8.4cqw; --ot: 8.3cqw; --ob: 7.0cqw; }
+.card--fr-epic-demonslayer { --ol: 6.1cqw; --or: 9.7cqw; --ot: 7.6cqw; --ob: 9.1cqw; }
+.card--fr-epic-dragonball { --ol: 6.1cqw; --or: 8.7cqw; --ot: 6.5cqw; --ob: 6.4cqw; }
+.card--fr-epic-generique { --ol: 6.6cqw; --or: 8.0cqw; --ot: 6.4cqw; --ob: 8.5cqw; }
+.card--fr-epic-hunter { --ol: 6.6cqw; --or: 8.0cqw; --ot: 7.0cqw; --ob: 9.9cqw; }
+.card--fr-epic-jujutsu { --ol: 9.1cqw; --or: 7.1cqw; --ot: 10.6cqw; --ob: 12.4cqw; }
+.card--fr-epic-naruto { --ol: 7.6cqw; --or: 7.1cqw; --ot: 11.9cqw; --ob: 8.9cqw; }
+.card--fr-epic-onepiece { --ol: 8.3cqw; --or: 7.6cqw; --ot: 8.5cqw; --ob: 7.2cqw; }
+.card--fr-legend-bleach { --ol: 22.6cqw; --or: 10.2cqw; --ot: 4.1cqw; --ob: 12.5cqw; }
+.card--fr-legend-demonslayer { --ol: 20.9cqw; --or: 20.0cqw; --ot: 18.0cqw; --ob: 13.6cqw; }
+.card--fr-legend-dragonball { --ol: 23.6cqw; --or: 11.8cqw; --ot: 10.8cqw; --ob: 22.0cqw; }
+.card--fr-legend-generique { --ol: 24.0cqw; --or: 14.1cqw; --ot: 13.4cqw; --ob: 22.0cqw; }
+.card--fr-legend-hunter { --ol: 22.1cqw; --or: 14.7cqw; --ot: 18.0cqw; --ob: 22.0cqw; }
+.card--fr-legend-jujutsu { --ol: 11.7cqw; --or: 13.3cqw; --ot: 12.8cqw; --ob: 12.1cqw; }
+.card--fr-legend-naruto { --ol: 24.0cqw; --or: 16.7cqw; --ot: 13.5cqw; --ob: 22.0cqw; }
+.card--fr-legend-onepiece { --ol: 24.0cqw; --or: 15.4cqw; --ot: 9.4cqw; --ob: 17.2cqw; }
+.card--fr-ultra-bleach { --ol: 13.9cqw; --or: 13.8cqw; --ot: 14.1cqw; --ob: 18.3cqw; }
+.card--fr-ultra-demonslayer { --ol: 18.8cqw; --or: 8.5cqw; --ot: 10.0cqw; --ob: 14.7cqw; }
+.card--fr-ultra-dragonball { --ol: 18.2cqw; --or: 9.4cqw; --ot: 7.7cqw; --ob: 12.3cqw; }
+.card--fr-ultra-generique { --ol: 14.3cqw; --or: 11.1cqw; --ot: 10.0cqw; --ob: 11.2cqw; }
+.card--fr-ultra-hunter { --ol: 13.5cqw; --or: 14.2cqw; --ot: 14.4cqw; --ob: 14.1cqw; }
+.card--fr-ultra-jujutsu { --ol: 19.9cqw; --or: 11.5cqw; --ot: 8.7cqw; --ob: 18.3cqw; }
+.card--fr-ultra-naruto { --ol: 14.8cqw; --or: 10.9cqw; --ot: 13.1cqw; --ob: 17.1cqw; }
+.card--fr-ultra-onepiece { --ol: 22.2cqw; --or: 13.2cqw; --ot: 15.3cqw; --ob: 22.0cqw; }
+.card--nrframe:is(.card--epic, .card--ultra, .card--legend) .card__plate { padding: 24cqw max(3cqw, calc(var(--or, 6cqw) - 3cqw)) max(3cqw, calc(var(--ob, 6cqw) - 3cqw)) max(3cqw, calc(var(--ol, 6cqw) - 3cqw)); }
+.card--nrframe:is(.card--epic, .card--ultra, .card--legend) .card__brand { right: max(4cqw, calc(var(--or, 6cqw) - 3cqw)); top: max(4cqw, calc(var(--ot, 6cqw) - 3cqw)); }
+.card--nrframe:is(.card--epic, .card--ultra, .card--legend) .card__kana { right: max(4cqw, calc(var(--or, 6cqw) - 3.5cqw)); top: max(14cqw, calc(var(--ot, 6cqw) + 8cqw)); }
+.card--nrframe:is(.card--epic, .card--ultra, .card--legend) .card__affinity { left: max(4cqw, calc(var(--ol, 6cqw) - 3cqw)); top: max(22cqw, calc(var(--ot, 6cqw) + 14cqw)); }
+.card--nrframe:is(.card--epic, .card--ultra, .card--legend) .card__level { right: max(4cqw, calc(var(--or, 6cqw) - 3cqw)); top: max(36cqw, calc(var(--ot, 6cqw) + 30cqw)); }
+.card--nrframe:is(.card--epic, .card--ultra, .card--legend) .card__stats { font-size: 6.6cqw; gap: 3.5cqw; flex-wrap: wrap; }
+.card--nrframe:is(.card--epic, .card--ultra, .card--legend) .card__stats em { width: 100%; margin: 1cqw 0 0; }

@@ -60,7 +60,7 @@ export const Card = ({ hero, count, locked, inert, hd, className = '', style }: 
   }
 
   return (
-    <div ref={ref} className={`card card--${hero.rarity} ${mrSrc ? 'card--mrframe' : ''} ${nrSrc ? 'card--nrframe' : ''} ${locked ? 'is-locked' : ''} ${className}`}
+    <div ref={ref} className={`card card--${hero.rarity} ${mrSrc ? 'card--mrframe' : ''} ${nrSrc ? `card--nrframe card--fr-${hero.rarity}-${nrFrameArt(hero.rarity, theme, hd, true)}` : ''} ${locked ? 'is-locked' : ''} ${className}`}
       style={{ ['--rc' as string]: rarity.color, ['--ac' as string]: AFFINITIES[hero.affinity].color, ...(mrSrc ? { ['--mr-glow' as string]: MR_THEMES[theme]?.glow ?? '#ff3d9a' } : {}), ['--delay' as string]: `${-hero.no * 0.9}s`, ...style }}
       {...(openable ? { role: 'button', tabIndex: 0, 'aria-label': `Voir la carte ${hero.name}`, onClick: () => viewer.open(hero), onKeyDown: (e: KeyboardEvent<HTMLDivElement>) => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); viewer.open(hero) } } } : {})}
       onPointerMove={locked ? undefined : onMove} onPointerLeave={onLeave} onPointerCancel={onLeave}>
