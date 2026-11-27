@@ -64,6 +64,11 @@ export const pullMany = (banner: Banner, pity: number, count: number, rng: Rng, 
     heroes.push(r.hero)
     pity = r.pity
   }
+  // un multi ×10 garantit au moins une SR : la plus faible carte devient une SR s'il n'y en a aucune de SR ou mieux
+  if (count === 10 && !heroes.some((h) => !['common', 'rare'].includes(h.rarity))) {
+    const sr = poolOf(banner, 'epic')
+    if (sr.length) { const low = heroes.findIndex((h) => h.rarity === 'common'); heroes[low >= 0 ? low : 0] = pick(rng, sr) }
+  }
   if (forceRift && !heroes.some((h) => h.rarity === 'rift')) {
     const pool = poolOf(banner, 'rift')
     const featured = pool.filter((h) => banner.featured.includes(h.id))

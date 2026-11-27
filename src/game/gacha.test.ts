@@ -118,3 +118,16 @@ describe('grande garantie MR', () => {
     }
   })
 })
+
+describe('garantie SR du multi ×10', () => {
+  it('un ×10 contient toujours au moins une SR ou mieux, même avec un tirage tout en N', () => {
+    const low = () => 0.99 // tout tombe en N
+    const { heroes } = pullMany(BANNERS[0], 0, 10, low)
+    expect(heroes.some((h) => !['common', 'rare'].includes(h.rarity))).toBe(true)
+    expect(heroes.filter((h) => h.rarity === 'epic')).toHaveLength(1)
+  })
+  it('un ×5 n’a pas cette garantie', () => {
+    const { heroes } = pullMany(BANNERS[0], 0, 5, () => 0.99)
+    expect(heroes.every((h) => h.rarity === 'common')).toBe(true)
+  })
+})

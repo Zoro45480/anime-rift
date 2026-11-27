@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { BANNERS, BIG_PITY, COST, PITY_MAX, type Banner } from '../data/banners'
-import { heroById, type Hero } from '../data/heroes'
+import { heroById } from '../data/heroes'
 import { RARITIES, RARITY_ORDER } from '../data/rarities'
 import { extraArt, heroArt, iconArt } from '../assets/manifest'
 import { HEROES } from '../data/heroes'
@@ -13,7 +13,7 @@ import { useStore, type Currency } from '../state/store'
 import { Card, LazyCard } from '../ui/Card'
 import { IconChevron, IconInfo } from '../ui/icons'
 import { Coin } from '../ui/Coin'
-import { SummonCinematic } from '../summon/SummonCinematic'
+import { RiftSummon } from '../summon/RiftSummon'
 import { primeAudio } from '../summon/audio'
 import { LrBanner } from './LrBanner'
 import { KeyTimer } from '../ui/Chrome'
@@ -61,7 +61,7 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
   const store = useStore()
   const [index, setIndex] = useState(start)
   const [currency, setCurrency] = useState<Currency>('ticket')
-  const [results, setResults] = useState<Hero[] | null>(null)
+  const [rift, setRift] = useState<number | null>(null) // écran d'invocation « faille » ouvert, avec la quantité choisie
   const [showIndex, setShowIndex] = useState(false)
   const [focus, setFocus] = useState(false) // « Voir le Portail » : n'affiche plus que la bannière choisie
   const banner = BANNERS[index]
@@ -82,8 +82,7 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
   }
   const summon = (n: number) => {
     primeAudio() // le son n'est autorisé par le navigateur que pendant ce clic
-    const r = store.summon(banner, currency, n) // le tirage réel : c'est lui qui fixe les raretés
-    if (r) setResults(r)
+    setRift(n) // on ouvre la faille : le tirage se fait quand le joueur l'ouvre
   }
 
   return (
@@ -386,7 +385,7 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
       )}
 
       <Guide id="banners" />
-      {results && createPortal(<SummonCinematic heroes={results} onClose={() => setResults(null)} />, document.body)}
+      {rift !== null && <RiftSummon banner={banner} count={rift} currency={currency} onClose={() => setRift(null)} />}
     </div>
   )
 }
