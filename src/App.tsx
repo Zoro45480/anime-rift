@@ -61,7 +61,7 @@ export const App = () => {
         <button onClick={() => { setColTab('cards'); go('collection') }}>Toutes les cartes</button>
         <button onClick={() => { setCommunityAt('fame'); go('community') }}>Panthéon</button>
         <button onClick={() => window.dispatchEvent(new Event('anime-rift:settings'))}>Réglages</button>
-        <span>© ANIME RIFT</span>
+        <span>© ANIME RIFT · version {__BUILD__}</span>
       </footer>
       <Dock tab={tab} onTab={nav} profileOn={tab === 'collection' && colTab === 'profile'} onProfile={toProfile} />
       <Chat />
