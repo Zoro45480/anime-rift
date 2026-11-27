@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as RPointerEvent } from 'react'
 import { createPortal } from 'react-dom'
-import { COST, PITY_MAX, type Banner } from '../data/banners'
+import { BIG_PITY, COST, PITY_MAX, type Banner } from '../data/banners'
+import { heroById } from '../data/heroes'
+import { cardRate, indexCards, isLocal } from '../game/gacha'
 import type { Hero } from '../data/heroes'
-import { RARITIES, type RarityId } from '../data/rarities'
+import { RARITIES, RARITY_ORDER, type RarityId } from '../data/rarities'
 import type { Currency } from '../state/store'
 import { useStore } from '../state/store'
 import { heroArt } from '../assets/manifest'
@@ -34,6 +36,7 @@ const leftOf = (iso: string) => {
   const m = Math.max(0, Math.floor((new Date(iso).getTime() - Date.now()) / 60000))
   return `${Math.floor(m / 1440)} j ${Math.floor((m % 1440) / 60)} h ${m % 60} min`
 }
+const pct = (x: number, d = 3) => `${(x * 100).toLocaleString('fr-FR', { maximumFractionDigits: d })} %`
 const favKey = 'anime-rift-fav-banners'
 export const toggleFav = (id: string, on: boolean) => { const l = readFav().filter((x) => x !== id); if (on) l.push(id); try { localStorage.setItem(favKey, JSON.stringify(l)) } catch { /* stockage bloqué */ } }
 export const readFav = (): string[] => { try { return JSON.parse(localStorage.getItem(favKey) || '[]') } catch { return [] } }
@@ -80,6 +83,9 @@ export const RiftSummon = ({ banner, count = 10, currency = 'ticket', onClose }:
   const [c1, c2] = ACCENT[banner.id] ?? ACCENT.naruto
   const can = store.canAfford(pay, n)
   const pity = store.pity[banner.id] ?? 0
+  const multis = store.multis[banner.id] ?? 0
+  const pool = indexCards(banner)
+  const star = heroById(banner.star)
   const p = pulls[i]
 
   // Ciel et faille : une seule boucle d'images pour tout l'écran.
@@ -410,7 +416,67 @@ export const RiftSummon = ({ banner, count = 10, currency = 'ticket', onClose }:
           </div>
           <button className="rs__open rs__ui-item" disabled={!can || busy} onClick={summon}>Ouvrir <span>{cost(n)}</span></button>
           {!can && <p className="rs__poor rs__ui-item">Pas assez de {pay === 'ticket' ? 'clés' : 'Éclats'} pour ×{n}.</p>}
-          <div className="rs__pity rs__ui-item"><b>PITY</b><div className="rs__bar"><i style={{ width: `${Math.max(2, (pity / PITY_MAX) * 100)}%` }} /></div><b>{pity}/{PITY_MAX}</b></div>
+          <div className="rs__pity rs__ui-item">
+            <div><span>Garantie SSR</span><b>{pity}<i> / {PITY_MAX}</i></b><div className="rs__bar"><i style={{ width: `${Math.max(2, (pity / PITY_MAX) * 100)}%` }} /></div></div>
+            <div><span>Grande garantie MR</span><b>{multis}<i> / {BIG_PITY} multis</i></b><div className="rs__bar rs__bar--mr"><i style={{ width: `${Math.max(2, (multis / BIG_PITY) * 100)}%` }} /></div></div>
+          </div>
+          <button className="rs__more rs__ui-item" onClick={() => document.querySelector('.rs__cards')?.scrollIntoView({ behavior: 'smooth' })}>Les cartes de la bannière ▾</button>
+        </div>
+
+        {/* ═══ en descendant : les cartes de la bannière et ses « plus » ═══ */}
+        <div className="rs__cards">
+          <header className="rs__chead">
+            <span className="rs__cglyph" lang="ja">{banner.glyph}</span>
+            <div><p>Bannière limitée · {banner.world}</p><h2>Les cartes de la bannière</h2><small>{pool.length} cartes mises en avant. Touche une carte pour ouvrir sa fiche.</small></div>
+            <div className="rs__cend"><small>Se termine dans</small><b>{leftOf(banner.endsAt)}</b></div>
+          </header>
+          {banner.featured.map((id) => {
+            const h = heroById(id)
+            return (
+              <article key={id} className="rs__head">
+                <div className="rs__headcard"><Card hero={h} /></div>
+                <div>
+                  <p className="rs__kick">Tête d'affiche · {RARITIES[h.rarity].short}</p>
+                  <h3>{h.name} <i>({h.title})</i></h3>
+                  <p className="rs__desc">{isLocal(h.rarity) ? 'L’une des cartes les plus rares du jeu. Elle ne tombe que sur cette bannière, en plus des cartes habituelles.' : 'Une carte à l’affiche de cette bannière.'} {store.owned[id] ? `Tu en possèdes ${store.owned[id]}.` : 'Tu ne la possèdes pas encore.'}</p>
+                  <ul className="rs__facts">
+                    <li><b>{pct(cardRate(banner, h))}</b><span>par carte invoquée</span></li>
+                    <li><b>Animée</b><span>cadre et effets en mouvement</span></li>
+                    <li><b>Invocation {RARITIES[h.rarity].short}</b><span>son animation dédiée si elle tombe</span></li>
+                  </ul>
+                </div>
+              </article>
+            )
+          })}
+          {RARITY_ORDER.map((rid) => {
+            const cards = pool.filter((h) => h.rarity === rid)
+            if (!cards.length) return null
+            const rates = [...new Set(cards.map((h) => pct(cardRate(banner, h))))]
+            return (
+              <div key={rid} className="rs__group" style={{ ['--rc' as string]: RARITIES[rid].color }}>
+                <header><i /><b>{RARITIES[rid].short}</b><span>{cards.length} carte{cards.length > 1 ? 's' : ''} · {rates.length === 1 ? `${rates[0]}${cards.length > 1 ? ' chacune' : ''}` : `${pct(RARITIES[rid].rate)} en tout`}</span></header>
+                <div className="rs__ggrid">{cards.map((h) => (
+                  <figure key={h.id}>
+                    {isLocal(h.rarity) && <span className="rs__excl">Exclusive</span>}
+                    <Card hero={h} />
+                    <figcaption>{pct(cardRate(banner, h))}{store.owned[h.id] ? <> · <em>obtenue</em></> : null}</figcaption>
+                  </figure>
+                ))}</div>
+              </div>
+            )
+          })}
+          <h2 className="rs__plustitle">Les plus de la bannière</h2>
+          <div className="rs__plus">
+            <section><h3>Grande garantie MR</h3><div className="rs__bar rs__bar--mr"><i style={{ width: `${Math.max(2, (multis / BIG_PITY) * 100)}%` }} /></div>
+              <p><b>{multis} / {BIG_PITY}</b> multi-invocations ×10. Au {BIG_PITY}e ×10 sans MR, une MR de {banner.world} tombe à coup sûr{star ? ` (souvent ${star.name})` : ''}.</p>
+              <p><b>{pity} / {PITY_MAX}</b> invocations avant une SSR, LR ou MR garantie.</p></section>
+            <section><h3>Taux par carte</h3><ul className="rs__rates">{RARITY_ORDER.map((rid) => <li key={rid}><span>{RARITIES[rid].short}</span><b>{pct(RARITIES[rid].rate, 2)}</b></li>)}</ul>
+              <button className="rs__ghost" onClick={() => document.querySelector('.rs__group')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>Index de la bannière</button></section>
+            <section><h3>Ticket LR</h3><p>Le parrainage offre des tickets LR : une carte LR garantie, tirée au hasard. Tu en as <b>{store.items?.lr ?? 0}</b>.</p>
+              <button className="rs__ghost" onClick={() => { onClose(); window.dispatchEvent(new CustomEvent('anime-rift:community', { detail: 'referral' })) }}>Voir le parrainage ↗</button></section>
+            <section><h3>Raid · {banner.subtitle}</h3><p>Les raids et le boss mondial se jouent dans « Jouer », avec leurs récompenses propres.</p>
+              <button className="rs__ghost" onClick={() => { onClose(); window.dispatchEvent(new CustomEvent('anime-rift:go', { detail: 'play' })) }}>Accéder au raid ↗</button></section>
+          </div>
         </div>
       </section>
 
