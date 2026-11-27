@@ -123,7 +123,7 @@ export const loadFame = async (order: 'score' | 'collection' | 'spire' = 'score'
   ])
   return { top: (data ?? []) as OnlineProfile[], count: Number(count ?? 0) }
 }
-export const myRank = async (me: OnlineProfile, order: 'score' | 'collection' | 'spire' = 'score') => {
+export const myRank = async (me: OnlineProfile, order: 'score' | 'collection' | 'spire' | 'arena' = 'score') => {
   const { count } = await supa.from('profiles').select('id', { count: 'exact', head: true }).gt(order, me[order])
   return (count ?? 0) + 1
 }
@@ -320,4 +320,5 @@ export const pushTeamLater = (team: { id: string; level: number }[]) => {
 }
 
 // Ouvre les Réglages (où se trouve la connexion) depuis n'importe quel écran.
+export const openCommunity = (tab: string) => window.dispatchEvent(new CustomEvent('anime-rift:community', { detail: tab }))
 export const openSettings = () => window.dispatchEvent(new Event('anime-rift:settings'))

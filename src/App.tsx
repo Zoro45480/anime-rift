@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { StoreProvider } from './state/store'
 import { Dock, TopBar, type QuestTab, type TabId } from './ui/Chrome'
 import { Home } from './screens/Home'
@@ -21,6 +21,11 @@ export const App = () => {
   const [playAt, setPlayAt] = useState<'colossus' | undefined>(undefined)
   const [colTab, setColTab] = useState<CollectionTab>('cards')
   const go = (t: TabId) => { setTab(t); setVisit((v) => v + 1); window.scrollTo(0, 0) }
+  useEffect(() => {
+    const on = (e: Event) => { setCommunityAt((e as CustomEvent<CommunityTab>).detail); go('community') }
+    window.addEventListener('anime-rift:community', on)
+    return () => window.removeEventListener('anime-rift:community', on)
+  })
   const nav = (t: TabId) => { if (t === 'collection' && colTab === 'profile') setColTab('cards'); if (t === 'contracts') setQuestAt('daily'); if (t === 'play') setPlayAt(undefined); go(t) }
   const toProfile = () => { setColTab('profile'); go('collection') }
   const toRebirth = () => { setColTab('rebirth'); go('collection') }
@@ -43,7 +48,7 @@ export const App = () => {
         {tab === 'play' && <Play onRebirth={toRebirth} onProfile={toProfile} start={playAt} />}
         {tab === 'contracts' && <Contracts start={questAt} />}
         {tab === 'bazaar' && <Bazaar />}
-        {tab === 'community' && <Community start={communityAt} onProfile={toProfile} />}
+        {tab === 'community' && <Community key={communityAt} start={communityAt} onProfile={toProfile} />}
         {tab === 'collection' && <Collection onSummon={() => go('banners')} tab={colTab} onTab={setColTab} />}
         </ErrorBoundary>
       </main>

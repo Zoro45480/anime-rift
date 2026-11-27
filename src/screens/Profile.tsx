@@ -1,10 +1,11 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { cosmeticArt, extraArt } from '../assets/manifest'
 import { BANNERS } from '../data/banners'
 import { HEROES } from '../data/heroes'
 import { RARITIES, RARITY_ORDER } from '../data/rarities'
-import { friendCode, useOnline } from '../state/online'
+import { fetchMyGuild, friendCode, myRank, openCommunity, useOnline } from '../state/online'
+import { leagueOf } from '../game/arena'
 import { ACHIEVEMENTS, DEFAULT_TITLE, GROUPS, METAL_LABEL, medalOf, progressOf, unlockedTitles, type AchState } from '../game/achievements'
 import { canBuy, COSMETICS, cosmeticById, hasCosmetic, howToGet, RARITY_HUE, RARITY_LABEL, type Cosmetic, type CosmeticKind, type Owned, type Rarity } from '../game/cosmetics'
 import { accountLevel, cardState } from '../game/progression'
@@ -384,10 +385,11 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
       <section className="pf-hero" style={{ ['--tc' as string]: look.theme }}>
         <Banner className="pf-hero__bg" />
         <div className="pf-hero__id">
-          <Photo size={220} />
+          <span className="pf-hero__photo"><Photo size={typeof window !== 'undefined' && window.innerWidth < 640 ? 118 : 220} />{online.me && <i className="pf-online" title="En ligne" />}</span>
           <div>
             <Name />
             <p className="pf-hero__chips"><TitlePlate title={profile.title || DEFAULT_TITLE} /><span title={online.me ? 'Ton numéro de joueur : l’ordre dans lequel tu as rejoint le jeu' : 'Crée un compte (Réglages) pour recevoir ton vrai numéro de joueur'}>#{playerNo(profile.tag)}</span>{online.me && <span className="pf-code" title="Ton code ami : donne-le pour qu'on t'ajoute (Communauté → Social)">Code ami <b>{friendCode(online.me.player_no)}</b></span>}</p>
+            <HeroFacts elo={store.arena.elo} />
             <p className="pf-hero__bio">{profile.bio.trim() || 'Aucune bio pour l’instant. Présente-toi dans « Modifier le profil ».'}</p>
           </div>
         </div>
@@ -499,3 +501,27 @@ const Price = ({ text }: { text: string }) => {
 
 // Numéro de joueur : celui du serveur quand on est connecté (ordre d'inscription), sinon le numéro local.
 const usePlayerNo = () => { const { me } = useOnline(); return (local: string) => (me ? String(me.player_no) : local) }
+
+// Classement en arène et guilde, affichés sous le nom.
+const HeroFacts = ({ elo }: { elo: number }) => {
+  const { me } = useOnline()
+  const [rank, setRank] = useState<number | null>(null)
+  const [guild, setGuild] = useState<string | null>(null)
+  useEffect(() => {
+    if (!me) { setRank(null); setGuild(null); return }
+    let live = true
+    void myRank(me, 'arena').then((r) => { if (live) setRank(r) })
+    void fetchMyGuild().then((g) => { if (live) setGuild(g?.guild?.name ?? null) }).catch(() => undefined)
+    return () => { live = false }
+  }, [me])
+  const lg = leagueOf(elo)
+  return (
+    <ul className="pf-facts">
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 13v4M8 20h8M10 17h4" /></svg>
+        <span>{rank ? `Classé : ${rank.toLocaleString('fr-FR')}e` : 'Classement'}</span><b style={{ color: lg.hue }}>{lg.label}</b><i>({elo.toLocaleString('fr-FR')} élo)</i></li>
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6zM9 10h6M9 14h6" /></svg>
+        <span>Guilde</span>{guild ? <button className="pf-facts__link" onClick={() => openCommunity('guild')}>{guild} <em aria-hidden="true">›</em></button>
+          : <button className="pf-facts__link pf-facts__link--none" onClick={() => openCommunity('guild')}>Aucune <em aria-hidden="true">›</em></button>}</li>
+    </ul>
+  )
+}
