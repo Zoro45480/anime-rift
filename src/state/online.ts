@@ -10,7 +10,7 @@ export const supa = createClient(URL, KEY, { auth: { persistSession: true, stora
 export type OnlineProfile = { id: string; player_no: number; name: string; avatar: string; title: string; bio: string; level: number; rebirths: number; collection: number; mr: number; lr: number; achievements: number; spire: number; arena: number; score: number }
 export type Stats = Pick<OnlineProfile, 'name' | 'avatar' | 'title' | 'bio' | 'level' | 'rebirths' | 'collection' | 'mr' | 'lr' | 'achievements' | 'spire' | 'arena'>
 
-// Score du Hall of Fame : toute la carrière compte.
+// Score du Panthéon : toute la carrière compte.
 export const scoreOf = (s: Stats) => s.collection * 10 + s.mr * 500 + s.lr * 150 + s.level * 20 + s.rebirths * 1000 + s.achievements * 50 + s.spire * 30 + Math.max(0, s.arena - 1000)
 
 // ── Session : un petit état partagé, que l'interface écoute ──
@@ -115,7 +115,7 @@ export const pushCloud = (data: unknown, stats: Stats) => {
   }, 3000)
 }
 
-// Hall of Fame
+// Panthéon
 export const loadFame = async (order: 'score' | 'collection' | 'spire' = 'score') => {
   const [{ data }, { data: count }] = await Promise.all([
     supa.from('profiles').select('*').order(order, { ascending: false }).order('player_no').limit(50),
@@ -128,7 +128,7 @@ export const myRank = async (me: OnlineProfile, order: 'score' | 'collection' | 
   return (count ?? 0) + 1
 }
 
-// ═════════ Étape 2 : boîte de réception, social, échanges, marché, guildes, chat, parrainage ═════════
+// ═════════ Étape 2 : boîte de réception, social, échanges, marché, Ordres, chat, parrainage ═════════
 export const myId = () => current.session?.user.id ?? null
 export type InboxItem = { id: number; gems: number; tickets: number; cards: string[]; note: string; created_at: string }
 export const fetchInbox = async () => {
@@ -256,7 +256,7 @@ export const buyListing = (id: number) => rpc('buy_listing', { listing: id })
 export const bidListing = (id: number, amount: number) => rpc('bid_listing', { listing: id, amount })
 export const closeListing = (id: number) => rpc('close_listing', { listing: id })
 
-// Guildes
+// Ordres
 export type Guild = { id: string; name: string; tag: string; description: string; kind: 'open' | 'invite' | 'closed'; min_level: number; max_members: number; emblem: string; color: string; members: number; week_damage: number }
 export type GuildMember = { guild_id: string; user_id: string; role: 'chef' | 'adjoint' | 'membre'; joined_at: string }
 export const fetchGuilds = async (q = '') => {
@@ -300,7 +300,7 @@ export const sendChat = async (room: string, body: string, card?: string) => {
   return error ? error.message : 'ok'
 }
 
-// Parrainage
+// Lien de Faille
 export const setReferrer = (no: number) => rpc('set_referrer', { no })
 export const myReferrals = async () => { const { data } = await supa.rpc('my_referrals'); return Number(data ?? 0) }
 

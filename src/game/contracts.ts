@@ -102,11 +102,11 @@ export const DAILY_POOL: Contract[] = [
   d('damage10', 'Inflige 100 000 dégâts', 'damage', 100000, { gems: 60, energy: 4 }),
   d('boss', 'Bats un boss', 'bosses', 1, { gems: 35 }),
   d('boss2', 'Bats 2 boss', 'bosses', 2, { gems: 55, scrolls: { medium: 1 } }),
-  d('floors', 'Monte un étage de La Spire', 'floors', 1, { gems: 30, shards: 1 }),
-  d('floors2', 'Monte 2 étages de La Spire', 'floors', 2, { gems: 45, shards: 2 }),
-  d('floors3', 'Monte 3 étages de La Spire', 'floors', 3, { gems: 60, shards: 3 }),
-  d('spend', 'Dépense 60 âmes', 'gemsSpent', 60, { gems: 20, scrolls: { small: 2 } }),
-  d('spend150', 'Dépense 150 âmes', 'gemsSpent', 150, { gems: 45, scrolls: { small: 3 } }),
+  d('floors', 'Monte un étage de La Tour de l’Infini', 'floors', 1, { gems: 30, shards: 1 }),
+  d('floors2', 'Monte 2 étages de La Tour de l’Infini', 'floors', 2, { gems: 45, shards: 2 }),
+  d('floors3', 'Monte 3 étages de La Tour de l’Infini', 'floors', 3, { gems: 60, shards: 3 }),
+  d('spend', 'Dépense 60 Éclats', 'gemsSpent', 60, { gems: 20, scrolls: { small: 2 } }),
+  d('spend150', 'Dépense 150 Éclats', 'gemsSpent', 150, { gems: 45, scrolls: { small: 3 } }),
 ]
 export const DAILY_COUNT = 8 // quêtes du jour, dont celle de l'univers du jour
 export const dailyContracts = (now: Date): Contract[] => [
@@ -117,16 +117,16 @@ export const DAILY_BONUS: Contract = { id: 'd-all', period: 'day', title: 'Termi
 export const WEEKLY_POOL: Contract[] = [
   w('merges', 'Fusionne 10 doublons', 'merges', 10, { gems: 150 }),
   w('merges25', 'Fusionne 25 doublons', 'merges', 25, { gems: 250, scrolls: { large: 1 } }),
-  w('spend', 'Dépense 300 âmes', 'gemsSpent', 300, { gems: 100 }),
-  w('spend800', 'Dépense 800 âmes', 'gemsSpent', 800, { gems: 220, tickets: 2 }),
+  w('spend', 'Dépense 300 Éclats', 'gemsSpent', 300, { gems: 100 }),
+  w('spend800', 'Dépense 800 Éclats', 'gemsSpent', 800, { gems: 220, tickets: 2 }),
   w('damage', 'Inflige 200 000 dégâts', 'damage', 200000, { gems: 150, energy: 10 }),
   w('damage500', 'Inflige 500 000 dégâts', 'damage', 500000, { gems: 250, energy: 15 }),
   w('pulls', 'Fais 20 invocations', 'pulls', 20, { gems: 150, tickets: 1 }),
   w('pulls50', 'Fais 50 invocations', 'pulls', 50, { gems: 300, tickets: 3 }),
   w('bosses', 'Bats 3 boss', 'bosses', 3, { gems: 200, scrolls: { large: 1 } }),
   w('bosses8', 'Bats 8 boss', 'bosses', 8, { gems: 320, shards: 8 }),
-  w('floors', 'Monte 5 étages de La Spire', 'floors', 5, { gems: 150, shards: 4 }),
-  w('floors10', 'Monte 10 étages de La Spire', 'floors', 10, { gems: 260, shards: 8 }),
+  w('floors', 'Monte 5 étages de La Tour de l’Infini', 'floors', 5, { gems: 150, shards: 4 }),
+  w('floors10', 'Monte 10 étages de La Tour de l’Infini', 'floors', 10, { gems: 260, shards: 8 }),
   w('wins15', 'Gagne 15 combats', 'wins', 15, { gems: 150, energy: 10 }),
   w('wins40', 'Gagne 40 combats', 'wins', 40, { gems: 280, tickets: 2 }),
   w('win3x', 'Gagne 10 combats avec 3 étoiles', 'win3', 10, { gems: 200, scrolls: { medium: 2 } }),
@@ -158,9 +158,9 @@ export const CAREER: Contract[] = [
   ...career('merges', [[25, 'Fusionne 25 doublons', { gems: 120 }], [100, 'Fusionne 100 doublons', { gems: 300, scrolls: { large: 1 } }], [300, 'Fusionne 300 doublons', { gems: 600, scrolls: { large: 2 } }]]),
   ...career('levels', [[50, 'Fais gagner 50 niveaux', { gems: 120 }], [200, 'Fais gagner 200 niveaux', { gems: 300, scrolls: { large: 1 } }], [500, 'Fais gagner 500 niveaux', { gems: 600, shards: 10 }]]),
   ...career('bosses', [[10, 'Bats 10 boss', { gems: 150 }], [50, 'Bats 50 boss', { gems: 400, shards: 10 }], [150, 'Bats 150 boss', { gems: 800, shards: 25 }]]),
-  ...career('floors', [[10, 'Monte 10 étages de La Spire', { gems: 150, shards: 5 }], [25, 'Monte 25 étages de La Spire', { gems: 300, shards: 10 }], [50, 'Monte 50 étages de La Spire', { gems: 600, shards: 25 }], [100, 'Monte 100 étages de La Spire', { gems: 1200, shards: 50 }]]),
+  ...career('floors', [[10, 'Monte 10 étages de La Tour de l’Infini', { gems: 150, shards: 5 }], [25, 'Monte 25 étages de La Tour de l’Infini', { gems: 300, shards: 10 }], [50, 'Monte 50 étages de La Tour de l’Infini', { gems: 600, shards: 25 }], [100, 'Monte 100 étages de La Tour de l’Infini', { gems: 1200, shards: 50 }]]),
   ...career('damage', [[1000000, 'Inflige 1 million de dégâts', { gems: 200 }], [10000000, 'Inflige 10 millions de dégâts', { gems: 600, tickets: 5 }]]),
-  ...career('gemsSpent', [[1000, 'Dépense 1 000 âmes', { gems: 150 }], [5000, 'Dépense 5 000 âmes', { gems: 500, tickets: 3 }]]),
+  ...career('gemsSpent', [[1000, 'Dépense 1 000 Éclats', { gems: 150 }], [5000, 'Dépense 5 000 Éclats', { gems: 500, tickets: 3 }]]),
   ...career('dailies', [[7, 'Récupère 7 récompenses du jour', { gems: 150 }], [30, 'Récupère 30 récompenses du jour', { gems: 500, tickets: 3 }], [100, 'Récupère 100 récompenses du jour', { gems: 1500, tickets: 10 }]]),
   ...career('claims', [[50, 'Récupère 50 quêtes', { gems: 200 }], [200, 'Récupère 200 quêtes', { gems: 600, tickets: 3 }], [500, 'Récupère 500 quêtes', { gems: 1500, tickets: 8 }]]),
 ]
@@ -198,7 +198,7 @@ export type Challenge = { id: string; title: string; counter: Counter; target: n
 export const CHALLENGE_TIMES = 3
 export const CHALLENGE_POOL: Challenge[] = [
   { id: 'c-wins', title: 'Gagne 3 combats (tous modes)', counter: 'wins', target: 3, xp: 40, gems: 10 },
-  { id: 'c-floors', title: 'Monte 2 étages de La Spire', counter: 'floors', target: 2, xp: 50, gems: 10 },
+  { id: 'c-floors', title: 'Monte 2 étages de La Tour de l’Infini', counter: 'floors', target: 2, xp: 50, gems: 10 },
   { id: 'c-damage', title: 'Inflige 30 000 dégâts', counter: 'damage', target: 30000, xp: 40, gems: 10 },
   { id: 'c-pulls', title: 'Fais 10 invocations', counter: 'pulls', target: 10, xp: 40, gems: 10 },
   { id: 'c-merges', title: 'Fusionne 2 doublons', counter: 'merges', target: 2, xp: 30, gems: 10 },
@@ -206,9 +206,9 @@ export const CHALLENGE_POOL: Challenge[] = [
   { id: 'c-boss', title: 'Bats 2 boss', counter: 'bosses', target: 2, xp: 50, gems: 15 },
   { id: 'c-new', title: 'Découvre 2 nouveaux persos', counter: 'newCards', target: 2, xp: 40, gems: 10 },
   { id: 'c-win3', title: 'Gagne 2 combats avec 3 étoiles', counter: 'win3', target: 2, xp: 45, gems: 10 },
-  { id: 'c-spend', title: 'Dépense 90 âmes', counter: 'gemsSpent', target: 90, xp: 35, gems: 15 },
+  { id: 'c-spend', title: 'Dépense 90 Éclats', counter: 'gemsSpent', target: 90, xp: 35, gems: 15 },
   { id: 'c-wins6', title: 'Gagne 6 combats', counter: 'wins', target: 6, xp: 60, gems: 15 },
-  { id: 'c-floor1', title: 'Monte un étage de La Spire', counter: 'floors', target: 1, xp: 30, gems: 10 },
+  { id: 'c-floor1', title: 'Monte un étage de La Tour de l’Infini', counter: 'floors', target: 1, xp: 30, gems: 10 },
   { id: 'c-damage8', title: 'Inflige 80 000 dégâts', counter: 'damage', target: 80000, xp: 60, gems: 15 },
   { id: 'c-pulls5', title: 'Fais 5 invocations', counter: 'pulls', target: 5, xp: 25, gems: 10 },
   { id: 'c-pulls20', title: 'Fais 20 invocations', counter: 'pulls', target: 20, xp: 70, gems: 20 },
@@ -220,8 +220,8 @@ export const CHALLENGE_POOL: Challenge[] = [
   { id: 'c-win3a', title: 'Gagne un combat avec 3 étoiles', counter: 'win3', target: 1, xp: 25, gems: 10 },
   { id: 'c-claims', title: 'Récupère 3 quêtes du jour', counter: 'claims', target: 3, xp: 40, gems: 10 },
   { id: 'c-visit', title: 'Passe voir ta collection', counter: 'visit', target: 1, xp: 20, gems: 5 },
-  { id: 'c-spend200', title: 'Dépense 200 âmes', counter: 'gemsSpent', target: 200, xp: 60, gems: 25 },
-  { id: 'c-floors4', title: 'Monte 4 étages de La Spire', counter: 'floors', target: 4, xp: 80, gems: 20 },
+  { id: 'c-spend200', title: 'Dépense 200 Éclats', counter: 'gemsSpent', target: 200, xp: 60, gems: 25 },
+  { id: 'c-floors4', title: 'Monte 4 étages de La Tour de l’Infini', counter: 'floors', target: 4, xp: 80, gems: 20 },
 ]
 // Les quêtes du pass : 8 tirées pour toute la saison du Chemin du Rift ; elles changent quand la saison se termine.
 export const challengesFor = (now: Date): Challenge[] => pickFrom(CHALLENGE_POOL, 8, `saison|${seasonOf(now).number}`)

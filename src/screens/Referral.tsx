@@ -10,12 +10,12 @@ export const Referral = () => {
   const [count, setCount] = useState(0)
   const [msg, setMsg] = useState('')
   useEffect(() => { if (session) void myReferrals().then(setCount) }, [session])
-  if (!session) return <section className="so-login"><h2>Parrainage</h2><p>Connecte-toi pour obtenir ton lien de parrainage et débloquer 10 récompenses.</p><button className="oauth oauth--discord" onClick={openSettings}>Se connecter</button></section>
+  if (!session) return <section className="so-login"><h2>Lien de Faille</h2><p>Connecte-toi pour obtenir ton lien de parrainage et débloquer 10 récompenses.</p><button className="oauth oauth--discord" onClick={openSettings}>Se connecter</button></section>
   const link = `https://zoro45480.github.io/anime-rift/?ref=${me?.player_no ?? ''}`
   const next = REFERRAL.findIndex((_, i) => !store.refClaimed.includes(i + 1))
   return (
     <div className="rf">
-      <header className="gd-hero"><p className="eyebrow">Invite tes amis</p><h1>Parrainage</h1><p>Chaque ami qui rejoint le jeu avec ton lien ouvre une case. La dernière cache le plus gros lot.</p></header>
+      <header className="gd-hero"><p className="eyebrow">Invite tes amis</p><h1>Lien de Faille</h1><p>Chaque ami qui rejoint le jeu avec ton lien ouvre une case. La dernière cache le plus gros lot.</p></header>
       <div className="so__grid">
         <section className="so-box">
           <header className="so-box__head"><h2>Récompenses</h2><span><b>{count}</b> / 10 amis</span></header>

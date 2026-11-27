@@ -68,7 +68,7 @@ export const Social = ({ onGuild, onProfile, onConnect }: { onGuild: () => void;
         <button role="tab" aria-selected={tab === 'friends'} className={tab === 'friends' ? 'is-active' : ''} onClick={() => setTab('friends')}>Amis{incoming.length > 0 && <i className="dot" />}</button>
         <button role="tab" aria-selected={tab === 'messages'} className={tab === 'messages' ? 'is-active' : ''} onClick={() => setTab('messages')}>Messages{unread > 0 && <i className="dot" />}</button>
         <button role="tab" aria-selected={tab === 'trades'} className={tab === 'trades' ? 'is-active' : ''} onClick={() => setTab('trades')}>Échanges{tradesIn.length > 0 && <i className="dot" />}</button>
-        <button role="tab" onClick={onGuild}>Guilde →</button>
+        <button role="tab" onClick={onGuild}>Ordre →</button>
       </div>
       {notice && <p className="cd__notice" role="status">{notice}</p>}
 

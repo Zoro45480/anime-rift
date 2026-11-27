@@ -242,7 +242,7 @@ const Edit = ({ ach, start, onClose }: { ach: AchState; start: EditTab; onClose:
                   const a = ACHIEVEMENTS.find((x) => x.title === t)
                   const shop = COSMETICS.find((x) => x.kind === 'title' && x.name === t)
                   return <li key={t}><button disabled={!ok} className={worn ? 'is-on' : ''} aria-pressed={worn} aria-label={`Titre ${t}`} onClick={() => store.setProfile({ title: t })}>
-                    <TitlePlate title={t} small /><small>{worn ? 'Équipé' : ok ? RARITY_LABEL[titleRarity(t)] : a ? `Succès « ${a.name} »` : shop ? <Price text={`${n(shop.price)} âmes en boutique`} /> : ''}</small>
+                    <TitlePlate title={t} small /><small>{worn ? 'Équipé' : ok ? RARITY_LABEL[titleRarity(t)] : a ? `Succès « ${a.name} »` : shop ? <Price text={`${n(shop.price)} Éclats en boutique`} /> : ''}</small>
                   </button></li>
                 })}
               </ul>
@@ -281,8 +281,8 @@ const Edit = ({ ach, start, onClose }: { ach: AchState; start: EditTab; onClose:
         {tab === 'shop' && (
           <section className="pe__sec">
             <Preview />
-            <p className="pe__wallet"><Coin name="soul" size={26} /><b>{n(store.gems)}</b> âmes</p>
-            <p className="set__note">Tout se paie en âmes, gagnées en jouant. L'objet acheté est équipé aussitôt. Certains objets se gagnent aussi sans payer (niveau, arc terminé) ; le cadre Arc-en-ciel ne s'obtient qu'avec une Renaissance.</p>
+            <p className="pe__wallet"><Coin name="soul" size={26} /><b>{n(store.gems)}</b> Éclats</p>
+            <p className="set__note">Tout se paie en Éclats, gagnées en jouant. L'objet acheté est équipé aussitôt. Certains objets se gagnent aussi sans payer (niveau, arc terminé) ; le cadre Arc-en-ciel ne s'obtient qu'avec une Ascension.</p>
             {CATS.filter(([id]) => id !== 'badge').map(([id, label, kinds]) => {
               const list = COSMETICS.filter((c) => kinds.includes(c.kind) && c.price > 0 && !c.needRebirth && !hasCosmetic(c, own))
               return list.length === 0 ? null : (
@@ -290,7 +290,7 @@ const Edit = ({ ach, start, onClose }: { ach: AchState; start: EditTab; onClose:
                   <h3>{label} <small>{list.length} à vendre</small></h3>
                   <ul className={id === 'title' ? 'pe__titles' : 'pe__items'}>
                     {list.map((c) => (
-                      <li key={c.id}><button disabled={!canBuy(c, own, store.gems)} style={{ ['--rh' as string]: RARITY_HUE[c.rarity] }} onClick={() => store.buyCosmetic(c.id)} aria-label={`Acheter ${c.name} pour ${c.price} âmes`}>
+                      <li key={c.id}><button disabled={!canBuy(c, own, store.gems)} style={{ ['--rh' as string]: RARITY_HUE[c.rarity] }} onClick={() => store.buyCosmetic(c.id)} aria-label={`Acheter ${c.name} pour ${c.price} Éclats`}>
                         {swatch(c)}{c.kind !== 'title' && <b>{c.name}</b>}<small className="pe__price"><Coin name="soul" size={16} />{n(c.price)}</small>
                       </button></li>
                     ))}
@@ -377,7 +377,7 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
   const stats: [string, string, string][] = [
     ['集', 'Cartes collectées', `${n(mine.length)} / ${n(HEROES.length)}`], ['光', 'Cartes LR et MR', n(legends)], ['闘', 'Combats gagnés', n(store.wins)],
     ['界', 'Univers collectionnés', `${collected} / ${BANNERS.length}`], ['星', 'Étoiles de La Saga', `${stars} / ${STAGES.length * 3}`], ['召', 'Invocations réalisées', n(store.pulls)],
-    ['剣', 'Victoires en arène', n(store.arena.wins)], ['塔', 'Meilleur étage de La Spire', n(store.spire.best)],
+    ['剣', 'Victoires en arène', n(store.arena.wins)], ['塔', 'Meilleur étage de La Tour de l’Infini', n(store.spire.best)],
   ]
 
   return (
@@ -415,7 +415,7 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
       <section className="pf-box pf-box--dist">
         <header className="pf-box__head"><h2>Distinctions</h2><button className="linkbtn" onClick={() => setEdit('ach')}>Voir mes {ACHIEVEMENTS.length} succès</button></header>
         <ul className="pf-dist">
-          <li style={{ ['--dc' as string]: '#ff9a4a' }}><img src={extraArt('dist-rebirth')} alt="" /><b>{store.rebirths}</b><span>Renaissance{store.rebirths > 1 ? 's' : ''}</span></li>
+          <li style={{ ['--dc' as string]: '#ff9a4a' }}><img src={extraArt('dist-rebirth')} alt="" /><b>{store.rebirths}</b><span>Ascension{store.rebirths > 1 ? 's' : ''}</span></li>
           <li style={{ ['--dc' as string]: '#ff7ab8' }}><img src={extraArt('dist-legend')} alt="" /><b>{legends}</b><span>Cartes LR et MR</span></li>
           <li style={{ ['--dc' as string]: '#4be3a4' }}><img src={extraArt('dist-collection')} alt="" /><b>{((mine.length / HEROES.length) * 100).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} %</b><span>{n(mine.length)} persos</span></li>
           <li style={{ ['--dc' as string]: '#ffc94d' }}><img src={extraArt('dist-stars')} alt="" /><b>{stars}</b><span>Étoiles de La Saga</span></li>
@@ -481,10 +481,10 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
         <section className="pf-box">
           <h2>Statistiques</h2>
           <ul className="pf-stats">
-            {[...stats, ['解', 'Cartes libérées', n(store.awakened.length)] as [string, string, string], ['力', 'Carte la plus puissante', strongest ? `${strongest.h.name} · ${n(strongest.p)}` : '—'] as [string, string, string], ['魂', 'Âmes dépensées', n(store.gemsSpent)] as [string, string, string]]
+            {[...stats, ['解', 'Cartes libérées', n(store.awakened.length)] as [string, string, string], ['力', 'Carte la plus puissante', strongest ? `${strongest.h.name} · ${n(strongest.p)}` : '—'] as [string, string, string], ['魂', 'Éclats dépensées', n(store.gemsSpent)] as [string, string, string]]
               .map(([k, label, value]) => <li key={label}><i lang="ja">{k}</i><span>{label}</span><b>{value}</b></li>)}
           </ul>
-          <p className="set__note">Le classement contre les autres joueurs et la guilde demandent un jeu en ligne. L'Arène se joue contre les Rivaux du Rift.</p>
+          <p className="set__note">Le classement contre les autres joueurs et l’Ordre demandent un jeu en ligne. L'Arène se joue contre les Rivaux du Rift.</p>
         </section>
       )}
 
@@ -493,16 +493,16 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
   )
 }
 
-// Remplace « 150 âmes » par 150 suivi du logo des âmes.
+// Remplace « 150 Éclats » par 150 suivi du logo des Éclats.
 const Price = ({ text }: { text: string }) => {
-  const parts = text.split(/([\d\s\u202f]+) âmes/)
+  const parts = text.split(/([\d\s\u202f]+) Éclats/)
   return <span className="pe__cost">{parts.map((x, i) => (i % 2 ? <span key={i} className="pe__cost-n">{x.trim()}<Coin name="soul" size={15} /></span> : x))}</span>
 }
 
 // Numéro de joueur : celui du serveur quand on est connecté (ordre d'inscription), sinon le numéro local.
 const usePlayerNo = () => { const { me } = useOnline(); return (local: string) => (me ? String(me.player_no) : local) }
 
-// Classement en arène et guilde, affichés sous le nom.
+// Classement en arène et Ordre, affichés sous le nom.
 const HeroFacts = ({ elo }: { elo: number }) => {
   const { me } = useOnline()
   const [rank, setRank] = useState<number | null>(null)
@@ -520,7 +520,7 @@ const HeroFacts = ({ elo }: { elo: number }) => {
       <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 13v4M8 20h8M10 17h4" /></svg>
         <span>{rank ? `Classé : ${rank.toLocaleString('fr-FR')}e` : 'Classement'}</span><b style={{ color: lg.hue }}>{lg.label}</b><i>({elo.toLocaleString('fr-FR')} élo)</i></li>
       <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6zM9 10h6M9 14h6" /></svg>
-        <span>Guilde</span>{guild ? <button className="pf-facts__link" onClick={() => openCommunity('guild')}>{guild} <em aria-hidden="true">›</em></button>
+        <span>Ordre</span>{guild ? <button className="pf-facts__link" onClick={() => openCommunity('guild')}>{guild} <em aria-hidden="true">›</em></button>
           : <button className="pf-facts__link pf-facts__link--none" onClick={() => openCommunity('guild')}>Aucune <em aria-hidden="true">›</em></button>}</li>
     </ul>
   )

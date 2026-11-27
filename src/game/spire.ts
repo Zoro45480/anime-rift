@@ -4,7 +4,7 @@ import { makeUnit, type Unit } from './battle'
 import type { Reward } from './contracts'
 import { baseStats, type ScrollId } from './progression'
 
-// La Spire : une tour sans fin. Chaque étage a ses adversaires (tirés de tous les univers), une règle spéciale,
+// La Tour de l’Infini : une tour sans fin. Chaque étage a ses adversaires (tirés de tous les univers), une règle spéciale,
 // et une récompense donnée une seule fois, à la première victoire. Les combats ne coûtent pas d'éclair
 // et ne donnent pas d'XP de carte : la Spire mesure la force de ton équipe.
 

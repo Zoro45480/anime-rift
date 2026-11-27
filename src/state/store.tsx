@@ -36,9 +36,9 @@ type State = {
   pinned: string[] // cartes épinglées dans la vitrine
   favs: string[] // cartes favorites (étoile)
   log: Record<string, LogEntry[]> // historique de chaque carte, du plus récent au plus ancien
-  accountXp: number // XP du compte depuis la dernière Renaissance
-  rebirths: number // nombre de Renaissances
-  gemsSpent: number // âmes dépensées depuis la dernière Renaissance
+  accountXp: number // XP du compte depuis la dernière Ascension
+  rebirths: number // nombre de Ascensions
+  gemsSpent: number // Éclats dépensées depuis la dernière Ascension
   shards: number // Fragments d'âme
   energy: number // éclairs au moment `energyAt` (ils remontent avec le temps, voir energyNow)
   energyAt: number
@@ -56,10 +56,10 @@ type State = {
   tourney: Tourney // Le Grand Rift : tournoi du jour, titres gagnés
   arena: ArenaState // L'Arène : cote, ligue, duels du jour, défis de la semaine
   refClaimed: number[] // cases du calendrier de parrainage déjà ouvertes
-  gtries: { day: string; n: number } // essais du jour contre le boss de guilde
+  gtries: { day: string; n: number } // essais du jour contre le boss d’Ordre
   col: ColState // Les Colosses : semaine, difficultés battues, essais du jour, objectifs d'événement
   multis: Record<string, number> // grande garantie : multis ×10 d'affilée sans MR, par bannière
-  spire: { best: number } // La Spire : plus haut étage gagné
+  spire: { best: number } // La Tour de l’Infini : plus haut étage gagné
   path: PathState // Chemin du Rift : saison, XP, paliers récupérés
   quests: Quests // contrats : compteurs du jour, de la semaine, à vie, série quotidienne
   arcHeroes: Record<string, boolean> // cartes qui étaient dans l'équipe quand le boss de leur arc est tombé (titre d'arc)
@@ -86,7 +86,7 @@ export type FightResult = {
 }
 
 type Store = State & {
-  buyEnergy: () => boolean // recharge d'éclairs contre des âmes
+  buyEnergy: () => boolean // recharge d'éclairs contre des Éclats
   seeTutorial: (id: string) => void
   resetTutorial: () => void
   setProfile: (profile: Partial<Profile>) => void
@@ -97,13 +97,13 @@ type Store = State & {
   claimTier: (tier: number) => Hero | true | null // récupère un palier du Chemin du Rift (la carte obtenue, s'il y en a une)
   claimAllTiers: () => Hero[] // récupère tous les paliers prêts
   questsReady: number // contrats et récompense quotidienne à récupérer
-  buyCosmetic: (id: string) => boolean // achat en âmes ; l'objet est équipé aussitôt
+  buyCosmetic: (id: string) => boolean // achat en Éclats ; l'objet est équipé aussitôt
   resetGame: () => void // efface toute la progression
   readNotifs: () => void // tout marquer comme lu
   clearNotifs: () => void
   teamNow: string[] // l'équipe réellement utilisée : celle choisie, sinon les 3 cartes les plus puissantes
   setTeam: (ids: string[]) => void
-  fightGuildBoss: () => { result: ColResult; damage: number } | null // boss de guilde : 3 essais par jour, les dégâts comptent pour toute la guilde
+  fightGuildBoss: () => { result: ColResult; damage: number } | null // boss d’Ordre : 3 essais par jour, les dégâts comptent pour toute l’Ordre
   guildTries: number
   claimReferral: (step: number, friends: number) => boolean // ouvre une case du calendrier de parrainage
   fightColossus: (diff: Difficulty['id']) => ColResult | null // combat contre le Colosse de la semaine
@@ -122,8 +122,8 @@ type Store = State & {
   newRivals: () => void // propose trois autres rivaux
   claimPvp: (id: string) => boolean // défi d'arène de la semaine
   duelsLeft: number
-  arenaPower: number // puissance de l'équipe en arène (sans bonus de Renaissance)
-  fightSpire: () => SpireResult | null // combat l'étage suivant de La Spire (sans éclair)
+  arenaPower: number // puissance de l'équipe en arène (sans bonus de Ascension)
+  fightSpire: () => SpireResult | null // combat l'étage suivant de La Tour de l’Infini (sans éclair)
   fight: (stageId: string) => FightResult | null // null = combat impossible (verrouillé, pas d'énergie ou pas d'équipe)
   canAfford: (currency: Currency, count: number) => boolean
   summon: (banner: Banner, currency: Currency, count: number) => Hero[] | null
@@ -132,7 +132,7 @@ type Store = State & {
   scrollsUseful: (heroId: string, scroll: ScrollId) => number // combien de parchemins servent encore avant le niveau maximum
   toggleFav: (heroId: string) => void
   takeCards: (ids: string[]) => boolean // met de côté des doublons (échange, vente) ; la dernière copie reste toujours
-  spendGems: (n: number) => boolean // âmes mises de côté (achat, enchère entre joueurs)
+  spendGems: (n: number) => boolean // Éclats mises de côté (achat, enchère entre joueurs)
   addGems: (n: number) => void
   giveCards: (ids: string[]) => void // rend des cartes mises de côté si le serveur refuse // remboursement immédiat si le serveur refuse
   mergeAll: () => { merged: number; cards: number } // fusionne tous les doublons (jusqu'au niveau maximum de chaque carte)
@@ -142,7 +142,7 @@ type Store = State & {
   energyLeft: number // éclairs disponibles maintenant
   spendEnergy: () => boolean // un éclair par combat
   awaken: (heroId: string) => boolean // Libération d'une carte contre des Fragments d'âme
-  rebirth: (keep: string[]) => boolean // Renaissance : repart du niveau 1 en gardant ces cartes
+  rebirth: (keep: string[]) => boolean // Ascension : repart du niveau 1 en gardant ces cartes
   remoteArt: Record<string, string> // adresses des portraits officiels sur AniList, par identifiant de personnage
   remoteStatus: RemoteStatus
   bannerArt: Record<string, string> // image de fond de chaque bannière (bannière officielle de l'animé sur AniList)
@@ -251,7 +251,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
           log = { ...log, [id]: [{ t: Date.now(), k: 'pull' as const, note: x.note }, ...(log[id] ?? [])].slice(0, 30) }
         }
         const notes = items.map((x, i) => ({ id: Date.now() * 100 + i, t: Date.now(), kind: 'bazaar' as const, read: false,
-          text: `${x.note}${x.gems ? ` : +${x.gems} âmes` : ''}${x.tickets ? ` · +${x.tickets} sceaux` : ''}${x.cards.length ? ` · ${x.cards.map((id) => heroById(id)?.name ?? id).join(', ')}` : ''}.` }))
+          text: `${x.note}${x.gems ? ` : +${x.gems} Éclats` : ''}${x.tickets ? ` · +${x.tickets} sceaux` : ''}${x.cards.length ? ` · ${x.cards.map((id) => heroById(id)?.name ?? id).join(', ')}` : ''}.` }))
         return { ...s, owned, log, gems: s.gems + items.reduce((n, x) => n + x.gems, 0), tickets: s.tickets + items.reduce((n, x) => n + x.tickets, 0), notifs: [...notes, ...s.notifs].slice(0, NOTIF_MAX) }
       })
     }
@@ -275,9 +275,9 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         const h = heroById(a.heroId)
         const r = auctionResult(a, h)
         if (r.sold) { gems += r.price; trades.unshift({ t: a.ends, heroId: a.heroId, kind: 'auction', price: r.price }) } else owned[a.heroId] = (owned[a.heroId] ?? 0) + 1
-        news.push({ id: t * 100 + news.length, t, kind: 'bazaar', read: false, text: r.sold ? `Bazar : ${h.name} vendu aux enchères pour ${r.price} âmes (${r.bids} offres).` : `Bazar : personne n'a enchéri sur ${h.name}, la carte revient dans ta collection.` })
+        news.push({ id: t * 100 + news.length, t, kind: 'bazaar', read: false, text: r.sold ? `Bazar : ${h.name} vendu aux enchères pour ${r.price} Éclats (${r.bids} offres).` : `Bazar : personne n'a enchéri sur ${h.name}, la carte revient dans ta collection.` })
       }
-      for (const a of hits) { const x = stall.find((y) => y.hero.id === a.heroId)!; news.push({ id: t * 100 + 50 + news.length, t, kind: 'bazaar', read: false, text: `Alerte de prix : ${x.hero.name} est au Bazar à ${x.price} âmes (ton seuil : ${a.below}).` }) }
+      for (const a of hits) { const x = stall.find((y) => y.hero.id === a.heroId)!; news.push({ id: t * 100 + 50 + news.length, t, kind: 'bazaar', read: false, text: `Alerte de prix : ${x.hero.name} est au Bazar à ${x.price} Éclats (ton seuil : ${a.below}).` }) }
       return { ...s, gems, owned, notifs: [...news, ...s.notifs].slice(0, NOTIF_MAX), bazaar: { ...s.bazaar, auctions: s.bazaar.auctions.filter((x) => x.ends > t), trades: trades.slice(0, 300), alerted: s.bazaar.alerts.length ? day : s.bazaar.alerted } }
     })
   }, [state, now])
@@ -296,7 +296,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       const after = accountLevel(xpAfter, state.rebirths).level
       if (after <= before) return []
       const style = after % 25 === 0 && after < REBIRTH_LEVEL ? ' Nouveau style de niveau débloqué.' : ''
-      return [['level', after >= REBIRTH_LEVEL ? `Compte niveau ${REBIRTH_LEVEL} : la Renaissance est disponible.` : `Compte niveau ${after}.${style}`]]
+      return [['level', after >= REBIRTH_LEVEL ? `Compte niveau ${REBIRTH_LEVEL} : la Ascension est disponible.` : `Compte niveau ${after}.${style}`]]
     }
     const readNotifs = () => { if (state.notifs.some((x) => !x.read)) setState({ ...state, notifs: state.notifs.map((x) => ({ ...x, read: true })) }) }
     const clearNotifs = () => setState({ ...state, notifs: [] })
@@ -368,7 +368,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const gain = (heroId: string, baseAmount: number, entry: Omit<LogEntry, 't' | 'note'>, label: string, extra: Partial<State>, adds: Counts = {}) => {
-      const amount = Math.round(baseAmount * (1 + (state.rebirths * REBIRTH_XP) / 100)) // bonus des Renaissances
+      const amount = Math.round(baseAmount * (1 + (state.rebirths * REBIRTH_XP) / 100)) // bonus des Ascensions
       const before = levelFromXp(state.xp[heroId] ?? 0, capOf(heroId)).level
       const xp = (state.xp[heroId] ?? 0) + amount
       const after = levelFromXp(xp, capOf(heroId)).level
@@ -499,7 +499,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       return { stage, allies, foes, events, win, stars, newStars, souls: newStars * SOULS_PER_STAR, accountXp: stage.accountXp, cardXp, scrolls: drops }
     }
 
-    // La Spire : l'étage suivant, gratuit ; la récompense n'est donnée qu'à la première victoire.
+    // La Tour de l’Infini : l'étage suivant, gratuit ; la récompense n'est donnée qu'à la première victoire.
     const fightSpire = (): SpireResult | null => {
       if (teamNow.length === 0) return null
       const f = spireFloor(state.spire.best + 1)
@@ -510,7 +510,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       if (!win) { setState(tracked(state, { damage })); return { floor: f, allies, foes, events, win, first: false } }
       setState(tracked({
         ...grant(state, f.reward), spire: { best: f.n }, wins: state.wins + 1, accountXp: state.accountXp + f.accountXp,
-        notifs: notify(state.notifs, [...(f.boss ? [['saga', `La Spire : gardien de l'étage ${f.n} vaincu !`] as [Notif['kind'], string]] : []), ...levelNote(state.accountXp + f.accountXp)]),
+        notifs: notify(state.notifs, [...(f.boss ? [['saga', `La Tour de l’Infini : gardien de l'étage ${f.n} vaincu !`] as [Notif['kind'], string]] : []), ...levelNote(state.accountXp + f.accountXp)]),
       }, { wins: 1, floors: 1, bosses: f.boss ? 1 : 0, damage }))
       return { floor: f, allies, foes, events, win, first: true }
     }
@@ -553,7 +553,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       const { boss, minions } = colossusOf(new Date())
       const diff = DIFFICULTIES[3]
       const allies = teamNow.map((hid, i) => makeUnit(heroById(hid), cardState(heroById(hid), state.xp, state.owned, state.rebirths, state.awakened, teamNow).stats, 0, i))
-      // le boss de guilde a énormément de PV : on ne le bat pas seul, on lui retire un maximum de PV en 40 tours
+      // le boss d’Ordre a énormément de PV : on ne le bat pas seul, on lui retire un maximum de PV en 40 tours
       const foes = colossusFoes(boss, minions, diff).slice(0, 1).map((u) => ({ ...u, maxHp: u.maxHp * 400, hp: u.maxHp * 400 }))
       const { events } = simulate(allies, foes, Math.random)
       const damage = events.filter((e) => e.actor.startsWith('0-')).reduce((n, e) => n + e.hits.reduce((m, h) => m + h.amount, 0), 0)
@@ -564,7 +564,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       const r = REFERRAL[step - 1]
       if (!r || friends < step || state.refClaimed.includes(step)) return false
       let next: State = grant({ ...state, refClaimed: [...state.refClaimed, step] }, r.reward)
-      if (r.card) { const c = rollAtLeast(r.card, Math.random); next = { ...next, owned: { ...next.owned, [c.id]: (next.owned[c.id] ?? 0) + 1 }, notifs: notify(next.notifs, [['pull', `Parrainage : ${c.name} (${RARITIES[c.rarity].short}) rejoint ta collection.`]]) } }
+      if (r.card) { const c = rollAtLeast(r.card, Math.random); next = { ...next, owned: { ...next.owned, [c.id]: (next.owned[c.id] ?? 0) + 1 }, notifs: notify(next.notifs, [['pull', `Lien de Faille : ${c.name} (${RARITIES[c.rarity].short}) rejoint ta collection.`]]) } }
       setState(next)
       return true
     }
@@ -577,7 +577,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       return card
     }
 
-    // L'Arène : 5 duels par jour contre des rivaux du jeu ; la Renaissance ne compte pas.
+    // L'Arène : 5 duels par jour contre des rivaux du jeu ; la Ascension ne compte pas.
     const arenaUnits = () => teamNow.map((hid, i) => makeUnit(heroById(hid), cardState(heroById(hid), state.xp, state.owned, 0, state.awakened, teamNow).stats, 0, i))
     const arenaPower = arenaUnits().reduce((s, u) => s + power(u), 0)
     const duelsLeft = DUELS_PER_DAY - (state.arena.day === today ? state.arena.duels : 0)
@@ -586,7 +586,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       const a = state.arena
       const day = dayKey(t)
       const used = a.day === day ? a.duels : 0
-      // un vrai joueur : son équipe affichée, avec le niveau de chaque carte (sans bonus de Renaissance, comme toi)
+      // un vrai joueur : son équipe affichée, avec le niveau de chaque carte (sans bonus de Ascension, comme toi)
       const rival: Rival | undefined = real
         ? { id: `p-${real.id}`, name: `${real.name} #${real.no}`, elo: real.elo, heroes: real.team.map((x) => heroById(x.id)).filter(Boolean), scale: 1 }
         : rivalsFor(a.elo, a.seed).find((r) => r.id === rivalId)
@@ -643,7 +643,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       if (!item || b.bought.includes(id) || state.gems < item.price) return false
       const h = item.hero
       setState(tracked({ ...state, gems: state.gems - item.price, gemsSpent: state.gemsSpent + item.price, owned: { ...state.owned, [h.id]: (state.owned[h.id] ?? 0) + 1 },
-        log: withLog(state.log, h.id, { k: 'pull', note: `Achetée au Bazar · ${item.merchant}, ${item.price} âmes` }),
+        log: withLog(state.log, h.id, { k: 'pull', note: `Achetée au Bazar · ${item.merchant}, ${item.price} Éclats` }),
         bazaar: { ...b, bought: [...b.bought, id], trades: [{ t: Date.now(), heroId: h.id, kind: 'buy' as const, price: item.price }, ...b.trades].slice(0, 300) } }, { gemsSpent: item.price, newCards: state.owned[h.id] ? 0 : 1 }))
       return true
     }
@@ -664,7 +664,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     }
     const setAlert = (heroId: string, below: number | null) => setState({ ...state, bazaar: { ...state.bazaar, alerts: [...state.bazaar.alerts.filter((a) => a.heroId !== heroId), ...(below ? [{ heroId, below }] : [])] } })
 
-    // Boutique : tout en âmes, chaque offre une fois par semaine.
+    // Boutique : tout en Éclats, chaque offre une fois par semaine.
     const giftReady = state.shop.gift !== today
     const claimGift = () => {
       const t = new Date()
@@ -768,7 +768,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         accountXp: 0, rebirths: state.rebirths + 1, gemsSpent: 0, saga: {}, team: state.team.filter((id) => kept.includes(id)),
         gems: START_GEMS + Math.floor(state.gemsSpent * REBIRTH_REFUND),
         tickets: state.tickets + REBIRTH_SEALS,
-        notifs: notify(state.notifs, [['rebirth', `Renaissance n° ${state.rebirths + 1} accomplie : tes bonus définitifs sont actifs.`]]),
+        notifs: notify(state.notifs, [['rebirth', `Ascension n° ${state.rebirths + 1} accomplie : tes bonus définitifs sont actifs.`]]),
       })
       return true
     }

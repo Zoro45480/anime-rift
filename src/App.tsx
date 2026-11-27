@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react'
+import { Styleguide } from './screens/Styleguide'
+
+const SHOW_STYLEGUIDE = typeof location !== 'undefined' && /styleguide/.test(location.search + location.hash)
 import { StoreProvider } from './state/store'
 import { Dock, TopBar, type QuestTab, type TabId } from './ui/Chrome'
 import { Home } from './screens/Home'
@@ -41,7 +44,7 @@ export const App = () => {
         else if (k === 'pull' || k === 'free') { setColTab('cards'); go('collection') }
         else go('play')
       }} />
-      <main className="screen" key={`${tab}-${visit}`}>
+      {SHOW_STYLEGUIDE ? <Styleguide /> : <main className="screen" key={`${tab}-${visit}`}>
         <ErrorBoundary>
         {tab === 'home' && <Home go={{ banner: (i) => { setBannerAt(i); go('banners') }, contracts: () => nav('contracts'), collection: () => nav('collection'), play: (m) => { setPlayAt(m); go('play') }, profile: toProfile, community: () => { setCommunityAt('fame'); go('community') } }} />}
         {tab === 'banners' && <Banners onRebirth={toRebirth} start={bannerAt} />}
@@ -51,7 +54,7 @@ export const App = () => {
         {tab === 'community' && <Community key={communityAt} start={communityAt} onProfile={toProfile} />}
         {tab === 'collection' && <Collection onSummon={() => go('banners')} tab={colTab} onTab={setColTab} />}
         </ErrorBoundary>
-      </main>
+      </main>}
       <Dock tab={tab} onTab={nav} profileOn={tab === 'collection' && colTab === 'profile'} />
       <Chat />
       </CardViewerProvider>

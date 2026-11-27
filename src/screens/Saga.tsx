@@ -94,7 +94,7 @@ export const Battle = ({ result, onClose, kicker, title, winBody, loseBody }: { 
   )
 }
 
-// Mon équipe : les trois cartes qui combattent (La Saga et La Spire).
+// Mon équipe : les trois cartes qui combattent (La Saga et La Tour de l’Infini).
 export const TeamPanel = () => {
   const store = useStore()
   const [picking, setPicking] = useState(false)
@@ -186,13 +186,13 @@ export const Saga = ({ onBack }: { onBack: () => void }) => {
                   <p className="sg-sheet__vs">Ton équipe : <b>{n(teamPower)}</b> de puissance · adversaires : <b>{n(foePower)}</b></p>
                   <div className="sg-rewards">
                     <div><small>À chaque victoire</small><b>+{n(stage.accountXp)} XP de compte</b><b>+{n(stage.cardXp)} XP par carte</b></div>
-                    <div><small>Étoiles</small><b>+{SOULS_PER_STAR} âmes par nouvelle étoile</b><span>3 ★ sans aucun K.-O. dans ton équipe</span></div>
+                    <div><small>Étoiles</small><b>+{SOULS_PER_STAR} Éclats par nouvelle étoile</b><span>3 ★ sans aucun K.-O. dans ton équipe</span></div>
                   </div>
                   <h4>Taux de drop des parchemins</h4>
                   <ul className="sg-drops">
                     {SCROLL_IDS.map((id) => <li key={id}><img src={iconArt(`scroll-${id}`)} alt="" /><span>{SCROLLS[id].label}</span><b>{pct(stage.drops[id])}</b></li>)}
                   </ul>
-                  {store.energyLeft < 1 && <button className="cd-btn cd-btn--small" disabled={store.gems < ENERGY_REFILL_COST || store.energyLeft + ENERGY_REFILL > ENERGY_OVER} onClick={store.buyEnergy}>Recharger {ENERGY_REFILL} éclairs · {ENERGY_REFILL_COST} âmes</button>}
+                  {store.energyLeft < 1 && <button className="cd-btn cd-btn--small" disabled={store.gems < ENERGY_REFILL_COST || store.energyLeft + ENERGY_REFILL > ENERGY_OVER} onClick={store.buyEnergy}>Recharger {ENERGY_REFILL} éclairs · {ENERGY_REFILL_COST} Éclats</button>}
                   <button className="btn btn--gold" disabled={store.energyLeft < 1 || team.length === 0} onClick={start}>
                     {team.length === 0 ? 'Il faut au moins une carte' : store.energyLeft < 1 ? 'Plus d’énergie : elle remonte toute seule' : <>Combattre · 1 <Coin name="bolt" size={20} /></>}
                   </button>
@@ -209,7 +209,7 @@ export const Saga = ({ onBack }: { onBack: () => void }) => {
           <ul>
             <li><b>+{n(result.accountXp)}</b> XP de compte</li>
             <li><b>+{n(result.cardXp)}</b> XP pour chaque carte de l'équipe</li>
-            {result.souls > 0 && <li><b>+{result.souls}</b> âmes ({result.newStars} nouvelle{result.newStars > 1 ? 's' : ''} étoile{result.newStars > 1 ? 's' : ''})</li>}
+            {result.souls > 0 && <li><b>+{result.souls}</b> Éclats ({result.newStars} nouvelle{result.newStars > 1 ? 's' : ''} étoile{result.newStars > 1 ? 's' : ''})</li>}
             {result.scrolls.map((id) => <li key={id} className="bt-end__drop"><img src={iconArt(`scroll-${id}`)} alt="" /><b>{SCROLLS[id].label}</b> obtenu</li>)}
             {result.scrolls.length === 0 && <li>Aucun parchemin cette fois.</li>}
           </ul>

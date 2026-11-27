@@ -13,7 +13,7 @@ import { useStore } from '../state/store'
 import { Avatar } from '../ui/Settings'
 
 export type CommunityTab = 'social' | 'guild' | 'fame' | 'referral'
-export const COMMUNITY: [CommunityTab, string][] = [['social', 'Social'], ['guild', 'Guilde'], ['fame', 'Panthéon'], ['referral', 'Parrainage']]
+export const COMMUNITY: [CommunityTab, string][] = [['social', 'Social'], ['guild', 'Ordre'], ['fame', 'Panthéon'], ['referral', 'Lien de Faille']]
 const n = (x: number) => x.toLocaleString('fr-FR')
 
 export const Community = ({ start = 'fame', onProfile }: { start?: CommunityTab; onProfile: () => void }) => {
@@ -25,8 +25,8 @@ export const Community = ({ start = 'fame', onProfile }: { start?: CommunityTab;
   const stars = Object.values(store.saga).reduce((a, b) => a + b, 0)
   const records: [string, string, string][] = [
     ['Collection', `${n(mine)} / ${n(HEROES.length)}`, 'cartes uniques'], ['Cartes MR', n(HEROES.filter((h) => h.rarity === 'rift' && store.owned[h.id]).length), 'mythiques'],
-    ['Niveau de compte', String(acc.level), `${store.rebirths} Renaissance${store.rebirths > 1 ? 's' : ''}`], ['Succès', `${done} / ${ACHIEVEMENTS.length}`, 'obtenus'],
-    ['La Spire', `Étage ${store.spire.best}`, 'meilleur étage'], ['Arène', n(store.arena.best), `meilleure cote · ${leagueOf(store.arena.best).label}`],
+    ['Niveau de compte', String(acc.level), `${store.rebirths} Ascension${store.rebirths > 1 ? 's' : ''}`], ['Succès', `${done} / ${ACHIEVEMENTS.length}`, 'obtenus'],
+    ['La Tour de l’Infini', `Étage ${store.spire.best}`, 'meilleur étage'], ['Arène', n(store.arena.best), `meilleure cote · ${leagueOf(store.arena.best).label}`],
     ['Grand Rift', String(store.tourney.titles), 'tournois gagnés'], ['La Saga', `${stars} ★`, 'étoiles'], ['Invocations', n(store.pulls), 'au total'],
   ]
   return (
@@ -39,7 +39,7 @@ export const Community = ({ start = 'fame', onProfile }: { start?: CommunityTab;
         <FameBoard />
         <section className="cm__fame">
           <h3 className="sp-sub">Tes records</h3>
-          <div className="cm__me"><Avatar size={64} /><div><b>{store.profile.name.trim() || 'Joueur'}</b><small>Ta carrière, avant et après les Renaissances</small></div></div>
+          <div className="cm__me"><Avatar size={64} /><div><b>{store.profile.name.trim() || 'Joueur'}</b><small>Ta carrière, avant et après les Ascensions</small></div></div>
           <ul className="cm__records">{records.map(([k, v, s]) => <li key={k}><small>{k}</small><b>{v}</b><span>{s}</span></li>)}</ul>
         </section>
       </>) : null}
@@ -48,10 +48,10 @@ export const Community = ({ start = 'fame', onProfile }: { start?: CommunityTab;
 }
 
 type FameOrder = 'score' | 'collection' | 'spire'
-const FAME_TABS: [FameOrder, string][] = [['score', 'Global'], ['collection', 'Collection'], ['spire', 'La Spire']]
+const FAME_TABS: [FameOrder, string][] = [['score', 'Global'], ['collection', 'Collection'], ['spire', 'La Tour de l’Infini']]
 const MEDALS = ['Or', 'Argent', 'Bronze']
 
-// Le Hall of Fame : le vrai classement de tous les joueurs inscrits, lu sur le serveur.
+// Le Panthéon : le vrai classement de tous les joueurs inscrits, lu sur le serveur.
 const FameBoard = () => {
   const { me, session } = useOnline()
   const [order, setOrder] = useState<FameOrder>('score')
@@ -69,7 +69,7 @@ const FameBoard = () => {
   return (
     <section className="hf">
       <header className="hf__head">
-        <div><p className="eyebrow">Les plus grandes carrières</p><h2>Hall of Fame</h2><p>Toute ta carrière compte : collection, cartes MR et LR, niveau, Renaissances, succès, La Spire et l'Arène.</p></div>
+        <div><p className="eyebrow">Les plus grandes carrières</p><h2>Panthéon</h2><p>Toute ta carrière compte : collection, cartes MR et LR, niveau, Ascensions, succès, La Tour de l’Infini et l'Arène.</p></div>
         <ul className="hf__mine">
           <li><b>{data ? n(data.count) : '…'}</b><span>Joueurs</span></li>
           <li><b>{me && rank ? `#${n(rank)}` : '—'}</b><span>Ta place</span></li>

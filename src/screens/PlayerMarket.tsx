@@ -12,7 +12,7 @@ const n = (x: number) => x.toLocaleString('fr-FR')
 const left = (iso: string) => { const ms = new Date(iso).getTime() - Date.now(); if (ms <= 0) return 'terminée'; const h = Math.floor(ms / 3600000); return h >= 24 ? `${Math.floor(h / 24)} j ${h % 24} h` : `${h} h ${Math.floor((ms % 3600000) / 60000)} min` }
 const FLOOR: Record<RarityId, number> = { common: 5, rare: 15, epic: 50, ultra: 200, legend: 800, rift: 3000 } // prix minimum par rareté
 
-// Le marché entre vrais joueurs : prix fixe ou enchères, 10 % de commission, la carte et les âmes passent par la boîte de réception.
+// Le marché entre vrais joueurs : prix fixe ou enchères, 10 % de commission, la carte et les Éclats passent par la boîte de réception.
 export const PlayerMarket = ({ onConnect }: { onConnect: () => void }) => {
   const { session } = useOnline()
   const store = useStore()
@@ -42,7 +42,7 @@ export const PlayerMarket = ({ onConnect }: { onConnect: () => void }) => {
   const dupes = HEROES.filter((h) => (store.owned[h.id] ?? 0) >= 2).sort((a, b) => RARITY_ORDER.indexOf(a.rarity) - RARITY_ORDER.indexOf(b.rarity))
   const sellHero = sell.hero ? heroById(sell.hero) : null
   const buy = async (x: Listing) => {
-    if (!store.spendGems(x.price)) return flash('Pas assez d’âmes.')
+    if (!store.spendGems(x.price)) return flash('Pas assez d’Éclats.')
     const r = await buyListing(x.id)
     if (r !== 'ok') { store.addGems(x.price); return flash(r) }
     flash(`${heroById(x.hero_id).name} acheté : la carte arrive dans ta collection dans quelques secondes.`); void load()
@@ -50,15 +50,15 @@ export const PlayerMarket = ({ onConnect }: { onConnect: () => void }) => {
   const bid = async (x: Listing) => {
     const amount = Number(bids[x.id] ?? 0)
     if (!(amount > Math.max(x.price - 1, x.best_bid ?? 0))) return flash('Ton enchère doit dépasser la meilleure offre.')
-    if (!store.spendGems(amount)) return flash('Pas assez d’âmes.')
+    if (!store.spendGems(amount)) return flash('Pas assez d’Éclats.')
     const r = await bidListing(x.id, amount)
     if (r !== 'ok') { store.addGems(amount); return flash(r) }
-    flash('Enchère placée ! Si quelqu’un te dépasse, tes âmes reviennent toutes seules.'); void load()
+    flash('Enchère placée ! Si quelqu’un te dépasse, tes Éclats reviennent toutes seules.'); void load()
   }
   const put = async () => {
     if (!sellHero) return
     const price = Math.round(Number(sell.price))
-    if (!(price >= FLOOR[sellHero.rarity])) return flash(`Prix minimum pour une ${RARITIES[sellHero.rarity].short} : ${FLOOR[sellHero.rarity]} âmes.`)
+    if (!(price >= FLOOR[sellHero.rarity])) return flash(`Prix minimum pour une ${RARITIES[sellHero.rarity].short} : ${FLOOR[sellHero.rarity]} Éclats.`)
     if (!store.takeCards([sellHero.id])) return flash('Il te faut un doublon de cette carte.')
     const lvl = store.levelOf(sellHero.id)
     const r = await createListing(sellHero.id, lvl, sell.kind, price, sell.hours)
@@ -87,7 +87,7 @@ export const PlayerMarket = ({ onConnect }: { onConnect: () => void }) => {
                   <small className="bz-item__who">Nv {x.level} · {people[x.seller]?.name ?? '…'} #{people[x.seller]?.player_no}</small>
                   <div className="bz-item__row"><b className="bz-price bz-price--big"><Coin name="soul" size={22} />{n(x.best_bid ?? x.price)}</b><span>{x.kind === 'auction' ? (x.best_bid ? 'meilleure offre' : 'départ') : `valeur ${n(valueOf(h, x.level, dayKey(new Date())))}`}</span></div>
                   {own ? <small className="bz-item__who">Ton annonce</small> : x.kind === 'fixed'
-                    ? <button className="btn btn--gold" disabled={store.gems < x.price} onClick={() => void buy(x)}>{store.gems < x.price ? 'Pas assez d’âmes' : 'Acheter'}</button>
+                    ? <button className="btn btn--gold" disabled={store.gems < x.price} onClick={() => void buy(x)}>{store.gems < x.price ? 'Pas assez d’Éclats' : 'Acheter'}</button>
                     : <form className="pm__bid" onSubmit={(e) => { e.preventDefault(); void bid(x) }}><input type="number" min={(x.best_bid ?? x.price - 1) + 1} placeholder={String((x.best_bid ?? x.price - 1) + 1)} value={bids[x.id] ?? ''} onChange={(e) => setBids({ ...bids, [x.id]: e.target.value })} aria-label="Montant de l'enchère" /><button className="btn btn--gold" type="submit">Enchérir</button></form>}
                 </li>
               )
@@ -105,7 +105,7 @@ export const PlayerMarket = ({ onConnect }: { onConnect: () => void }) => {
               <div className="set__seg set__seg--two">{(['fixed', 'auction'] as const).map((k) => <button key={k} className={sell.kind === k ? 'is-on' : ''} onClick={() => setSell({ ...sell, kind: k })}><b>{k === 'fixed' ? 'Prix fixe' : 'Enchère'}</b></button>)}</div>
               <label className="pm__lab">{sell.kind === 'fixed' ? 'Prix' : 'Prix de départ'}<input className="set__input" type="number" min={1} value={sell.price} onChange={(e) => setSell({ ...sell, price: e.target.value })} /></label>
               <label className="pm__lab">Durée<select className="set__input" value={sell.hours} onChange={(e) => setSell({ ...sell, hours: Number(e.target.value) })}>{[1, 4, 12, 24, 48, 72].map((h) => <option key={h} value={h}>{h} h</option>)}</select></label>
-              {sellHero && <p className="set__note">Tu recevras {n(Math.max(0, Number(sell.price) - Math.floor(Number(sell.price) / 10)))} âmes après la commission. Minimum : {FLOOR[sellHero.rarity]}.</p>}
+              {sellHero && <p className="set__note">Tu recevras {n(Math.max(0, Number(sell.price) - Math.floor(Number(sell.price) / 10)))} Éclats après la commission. Minimum : {FLOOR[sellHero.rarity]}.</p>}
               <button className="btn btn--gold" disabled={!sellHero} onClick={() => void put()}>Mettre en vente</button>
             </>}
           </section>

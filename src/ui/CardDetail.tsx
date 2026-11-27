@@ -139,7 +139,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
             <div className="cd-stat cd-stat--power"><small>Puissance</small><b>{n(state.power)}</b></div>
             <div className="cd-stat" style={{ ['--sc' as string]: '#b78bff' }}><small>Classement de base</small><b>{baseRank(hero)}<i> / {HEROES.length}</i></b></div>
           </div>
-          <p className="cd-note">Chaque niveau ajoute 2 % aux PV, à l’attaque et à la défense.{state.bonus > 0 ? ` Univers, Renaissances et Libération ajoutent ${state.bonus} % à tout.` : ''} Les collectifs actifs s'ajoutent par statistique.{!has ? ' Valeurs de base : vous ne possédez pas encore cette carte.' : ''}</p>
+          <p className="cd-note">Chaque niveau ajoute 2 % aux PV, à l’attaque et à la défense.{state.bonus > 0 ? ` Univers, Ascensions et Libération ajoutent ${state.bonus} % à tout.` : ''} Les collectifs actifs s'ajoutent par statistique.{!has ? ' Valeurs de base : vous ne possédez pas encore cette carte.' : ''}</p>
         </Section>
 
         <Section hue="#ff9a3d" title="Techniques" aside={hero.role}>
@@ -182,11 +182,11 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
               <small lang="ja">解放 · Libération</small>
               <b>{state.freed ? 'Carte libérée' : 'Libérer cette carte'}</b>
               <p>+{AWAKEN_STAT} % de PV, d'attaque et de défense, et niveau maximum {MAX_LEVEL} au lieu de {LEVEL_CAP}. Définitif pour cette carte.</p>
-              <p className="cd-free__cost">{state.freed ? 'Bonus actif.' : rebirths < 1 ? `Disponible après ta première Renaissance. Coût : ${cost} Fragments d'âme.` : `Coût : ${cost} Fragments d'âme · tu en as ${n(shards)}.`}</p>
+              <p className="cd-free__cost">{state.freed ? 'Bonus actif.' : rebirths < 1 ? `Disponible après ta première Ascension. Coût : ${cost} Fragments d'âme.` : `Coût : ${cost} Fragments d'âme · tu en as ${n(shards)}.`}</p>
             </div>
             {!state.freed && <button className="cd-btn cd-btn--small" disabled={rebirths < 1 || shards < cost} onClick={() => { if (awaken(hero.id)) setNotice('Carte libérée : niveau maximum 100.') }}>Libérer</button>}
           </div>
-          <p className="cd-note">Les Fragments d'âme se gagnent dans La Spire (Nexus), sur le Chemin du Rift et dans les contrats ; chaque Renaissance en offre aussi quelques-uns.</p>
+          <p className="cd-note">Les Fragments d'âme se gagnent dans La Tour de l’Infini (Nexus), sur le Chemin du Rift et dans les contrats ; chaque Ascension en offre aussi quelques-uns.</p>
           <p className="cd-note">« Max » utilise juste ce qu'il faut pour atteindre le niveau maximum : aucun parchemin n'est gaspillé.</p>
           <p className="cd-note">Les parchemins se gagnent dans La Saga (Nexus) : chaque combat affiche son taux de drop.{!has ? ' Il faut posséder la carte pour l’améliorer.' : ''}</p>
         </Section>}
@@ -213,10 +213,10 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
 
         <Section hue="#b78bff" title="Cote de la carte" aside="Bazar">
           <div className="cd-market">
-            <div><small>Valeur du jour</small><b>{n(valueOf(hero, has ? state.level : 1, today))} âmes</b></div>
-            <div><small>Vente immédiate</small><b>{n(quickPrice(hero, has ? state.level : 1, today))} âmes</b></div>
-            <div><small>Médiane 7 j</small><b>{cote.d7 ? `${n(cote.d7)} âmes` : '—'}</b></div>
-            <div><small>Médiane 30 j</small><b>{cote.d30 ? `${n(cote.d30)} âmes` : '—'}</b></div>
+            <div><small>Valeur du jour</small><b>{n(valueOf(hero, has ? state.level : 1, today))} Éclats</b></div>
+            <div><small>Vente immédiate</small><b>{n(quickPrice(hero, has ? state.level : 1, today))} Éclats</b></div>
+            <div><small>Médiane 7 j</small><b>{cote.d7 ? `${n(cote.d7)} Éclats` : '—'}</b></div>
+            <div><small>Médiane 30 j</small><b>{cote.d30 ? `${n(cote.d30)} Éclats` : '—'}</b></div>
             <div><small>Transactions (30 j)</small><b>{cote.count30}</b></div>
             <div><small>Exemplaires chez toi</small><b>{copies}</b></div>
           </div>
@@ -226,7 +226,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
 
         <Section hue="#4be3a4" title="Où l'obtenir">
           <ul className="cd-where">
-            <li><img src={extraArt(`emblem-${frameOf(hero.world)}`)} alt="" onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} /><div><b>Invocation · {hero.rarity === 'rift' ? `bannière ${banner ? banner.world : hero.world} seulement` : 'toutes les bannières'}</b><small>{rate ? `${pct(rate)} par invocation, soit environ 1 sur ${n(Math.round(1 / rate))}.` : 'Cette carte n’est sur aucune bannière en ce moment.'} {hero.rarity === 'rift' ? 'Les cartes MR ne sortent que sur la bannière de leur univers.' : 'Toutes les cartes (sauf MR) sont mélangées : elle peut sortir sur n’importe quelle bannière.'} Avec des âmes ou des sceaux, dans Invoquer.</small></div></li>
+            <li><img src={extraArt(`emblem-${frameOf(hero.world)}`)} alt="" onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} /><div><b>Invocation · {hero.rarity === 'rift' ? `bannière ${banner ? banner.world : hero.world} seulement` : 'toutes les bannières'}</b><small>{rate ? `${pct(rate)} par invocation, soit environ 1 sur ${n(Math.round(1 / rate))}.` : 'Cette carte n’est sur aucune bannière en ce moment.'} {hero.rarity === 'rift' ? 'Les cartes MR ne sortent que sur la bannière de leur univers.' : 'Toutes les cartes (sauf MR) sont mélangées : elle peut sortir sur n’importe quelle bannière.'} Avec des Éclats ou des sceaux, dans Invoquer.</small></div></li>
             {['epic', 'ultra', 'legend'].includes(hero.rarity) && <li><img src={uiArt('card-pack')} alt="" /><div><b>Chemin du Rift</b><small>Les paliers 10, 20, 30 et 40 donnent une carte {RARITIES.epic.short} ou mieux, tirée au hasard parmi toutes les cartes de cette rareté.</small></div></li>}
             <li><img src={iconArt('scroll-medium')} alt="" /><div><b>Doublons</b><small>Chaque nouvel exemplaire peut être fusionné pour faire monter la carte de niveau (+{n(MERGE_XP[hero.rarity])} XP).</small></div></li>
           </ul>

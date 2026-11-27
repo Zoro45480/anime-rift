@@ -49,7 +49,7 @@ export const Spire = ({ onBack }: { onBack: () => void }) => {
         <img src={gateArt('spire')} alt="" />
         <div>
           <p className="eyebrow">Porte III · Tour</p>
-          <h1>La Spire</h1>
+          <h1>La Tour de l’Infini</h1>
           <p>Une tour sans fin. Chaque étage a sa règle. Combats gratuits, sans éclair.</p>
           <p className="sp__best">Meilleur étage : <b>{best}</b></p>
         </div>
@@ -89,13 +89,13 @@ export const Spire = ({ onBack }: { onBack: () => void }) => {
             </li>
           ))}
         </ol>
-        <p className="set__note">Prochain gardien : étage {nextBoss}. Les gardiens donnent des fragments d'âme, un sceau et un parchemin. Les fragments d'âme servent à libérer tes cartes (niveau maximum 100). La Spire ne donne pas d'XP de carte : elle mesure la force de ton équipe. Si tu perds, rien n'est perdu, tu peux réessayer tout de suite.</p>
+        <p className="set__note">Prochain gardien : étage {nextBoss}. Les gardiens donnent des fragments d'âme, un sceau et un parchemin. Les fragments d'âme servent à libérer tes cartes (niveau maximum 100). La Tour de l’Infini ne donne pas d'XP de carte : elle mesure la force de ton équipe. Si tu perds, rien n'est perdu, tu peux réessayer tout de suite.</p>
       </section>
 
       <Guide id="spire" />
-      {result && <Battle result={result} kicker={`La Spire · étage ${result.floor.n}`} title={result.floor.boss ? `Gardien de l'étage ${result.floor.n}` : result.floor.rule.name}
+      {result && <Battle result={result} kicker={`La Tour de l’Infini · étage ${result.floor.n}`} title={result.floor.boss ? `Gardien de l'étage ${result.floor.n}` : result.floor.rule.name}
         winBody={<><p className="sp-win">Étage {result.floor.n} franchi !</p><Loot r={result.floor.reward} /></>}
-        loseBody={<p>Ton équipe est tombée. La Spire ne coûte pas d'éclair : change d'équipe, monte tes cartes de niveau et réessaie quand tu veux.</p>}
+        loseBody={<p>Ton équipe est tombée. La Tour de l’Infini ne coûte pas d'éclair : change d'équipe, monte tes cartes de niveau et réessaie quand tu veux.</p>}
         onClose={() => setResult(null)} />}
     </div>
   )

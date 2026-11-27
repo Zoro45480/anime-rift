@@ -129,7 +129,7 @@ export const RiftPath = ({ now }: { now: Date }) => {
         <h3>Comment avancer</h3>
         <ul>
           {([['Récompense du jour', PATH_XP.daily], ['Contrat du jour récupéré', PATH_XP.dayContract], ['Bonus « tous les contrats du jour »', PATH_XP.dayBonus], ['Contrat de la semaine récupéré', PATH_XP.weekContract],
-            ["Contrat d'histoire récupéré", PATH_XP.storyContract], ['Combat gagné', PATH_XP.win], ['Invocation', PATH_XP.pull], ['Étage de La Spire', PATH_XP.floor]] as [string, number][])
+            ["Contrat d'histoire récupéré", PATH_XP.storyContract], ['Combat gagné', PATH_XP.win], ['Invocation', PATH_XP.pull], ['Étage de La Tour de l’Infini', PATH_XP.floor]] as [string, number][])
             .map(([label, xp]) => <li key={label}><span>{label}</span><b>+{xp} XP</b></li>)}
         </ul>
         <p className="set__note">Un palier tous les {TIER_XP} XP. Tous les 10 paliers : une carte ({CARD_ODDS.map(([id, p]) => `${RARITIES[id].short} ${Math.round(p * 100)} %`).join(', ')}), 10 sceaux et un grand parchemin. À la fin de la saison, le chemin repart de zéro avec un nouveau thème : récupère tes récompenses avant !</p>

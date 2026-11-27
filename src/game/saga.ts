@@ -63,7 +63,7 @@ export const foeUnits = (stage: Stage): Unit[] => stage.foes.map((h, i) => {
 
 // Étoiles : 3 sans aucun allié K.-O., 2 avec un seul, 1 sinon.
 export const starsFor = (fallen: number) => (fallen === 0 ? 3 : fallen === 1 ? 2 : 1)
-export const SOULS_PER_STAR = 10 // âmes gagnées pour chaque nouvelle étoile
+export const SOULS_PER_STAR = 10 // Éclats gagnées pour chaque nouvelle étoile
 
 export const rollDrops = (stage: Stage, rng: () => number): ScrollId[] =>
   (Object.keys(stage.drops) as ScrollId[]).filter((id) => rng() < stage.drops[id])

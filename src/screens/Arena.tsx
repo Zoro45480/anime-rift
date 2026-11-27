@@ -50,10 +50,10 @@ export const Arena = ({ onBack }: { onBack: () => void }) => {
         </ul>
       </header>
 
-      <p className="ar__note">Connecté, tu affrontes les équipes des vrais joueurs (leur équipe affichée, sans bonus de Renaissance). Les Rivaux du Rift, joués par le jeu, sont toujours là pour s'entraîner. Les bonus de Renaissance ne comptent pas ici.</p>
+      <p className="ar__note">Connecté, tu affrontes les équipes des vrais joueurs (leur équipe affichée, sans bonus de Ascension). Les Rivaux du Rift, joués par le jeu, sont toujours là pour s'entraîner. Les bonus de Ascension ne comptent pas ici.</p>
 
       <TeamPanel />
-      <p className="ar__power">Puissance en arène (sans Renaissance) : <b>{n(store.arenaPower)}</b></p>
+      <p className="ar__power">Puissance en arène (sans Ascension) : <b>{n(store.arenaPower)}</b></p>
 
       {online.session && <section className="ar-rivals">
         <header><h3 className="sp-sub">Vrais joueurs</h3><span>Des joueurs proches de ta cote, avec leur équipe</span><button className="linkbtn" onClick={() => void arenaOpponents(a.elo).then(setReal)}>Actualiser</button></header>
@@ -102,7 +102,7 @@ export const Arena = ({ onBack }: { onBack: () => void }) => {
                 <small>{r.label}</small>
                 <b>{st === 'next' ? '???' : rv.name}</b>
                 <span>{n(rv.elo)} · {st === 'won' ? '✓ gagné' : st === 'lost' ? '✗ éliminé' : st === 'now' ? 'à jouer' : 'à venir'}</span>
-                <em>+{r.reward.gems} âmes{'tickets' in r.reward ? ` · ${r.reward.tickets} sceau${r.reward.tickets > 1 ? 'x' : ''}` : ''}{'shards' in r.reward ? ` · ${r.reward.shards} fragments` : ''}</em>
+                <em>+{r.reward.gems} Éclats{'tickets' in r.reward ? ` · ${r.reward.tickets} sceau${r.reward.tickets > 1 ? 'x' : ''}` : ''}{'shards' in r.reward ? ` · ${r.reward.shards} fragments` : ''}</em>
               </li>
             )
           })}
@@ -136,7 +136,7 @@ export const Arena = ({ onBack }: { onBack: () => void }) => {
 
       <Guide id="arena" />
       {result && <Battle result={result} kicker={cup ? 'Le Grand Rift' : `Arène · ${leagueOf(result.rival.elo).label}`} title={result.rival.name}
-        winBody={<p className="sp-win">{cup ? 'Tour gagné : récompense reçue !' : `+${result.delta} de cote (${n(result.elo)}) · +${WIN_SOULS} âmes`}</p>}
+        winBody={<p className="sp-win">{cup ? 'Tour gagné : récompense reçue !' : `+${result.delta} de cote (${n(result.elo)}) · +${WIN_SOULS} Éclats`}</p>}
         loseBody={<p>{cup ? 'Éliminé du Grand Rift pour aujourd’hui.' : `${result.delta} de cote (${n(result.elo)}). Change d'équipe ou choisis un rival moins bien classé.`}</p>}
         onClose={() => setResult(null)} />}
     </div>

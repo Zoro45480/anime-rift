@@ -36,7 +36,7 @@ export const PATH_XP = { dayContract: 20, dayBonus: 50, weekContract: 80, storyC
 
 export const tierOf = (xp: number) => Math.min(TIERS, Math.floor(xp / TIER_XP))
 
-// Récompense de chaque palier (1 à 40) : âmes ou éclairs sur les petits paliers, sceaux tous les 5,
+// Récompense de chaque palier (1 à 40) : Éclats ou éclairs sur les petits paliers, sceaux tous les 5,
 // et tous les 10 : une carte SR ou mieux, dix sceaux (un multi ×10) et un grand parchemin.
 export type PathReward = Reward & { card?: boolean }
 export const tierReward = (tier: number): PathReward => {

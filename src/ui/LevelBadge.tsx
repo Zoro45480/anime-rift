@@ -1,6 +1,6 @@
 import { digitArt } from '../assets/manifest'
 
-// Le style des chiffres change tous les 25 niveaux, et devient arc-en-ciel animé après une Renaissance.
+// Le style des chiffres change tous les 25 niveaux, et devient arc-en-ciel animé après une Ascension.
 export const levelStyle = (level: number, rebirths: number) => (rebirths > 0 ? 'r' : `t${Math.min(4, Math.floor(level / 25))}`)
 export const LEVEL_STYLE_NAME: Record<string, string> = { t0: 'Acier', t1: 'Or', t2: 'Braise', t3: 'Plasma', t4: 'Légende', r: 'Arc-en-ciel' }
 

@@ -5,7 +5,7 @@ import { baseStats, type Stats } from './progression'
 
 // L'Arène, sans serveur : tes duels se jouent contre des « Rivaux du Rift », des équipes contrôlées par le jeu.
 // Elles sont réglées sur ta propre force et sur leur cote : un rival mieux classé est plus fort que toi.
-// Cote elo (départ 1 000), ligues Bronze → Légende, 5 duels par jour. Les bonus de Renaissance n'y comptent pas.
+// Cote elo (départ 1 000), ligues Bronze → Légende, 5 duels par jour. Les bonus de Ascension n'y comptent pas.
 
 export const DUELS_PER_DAY = 5
 export const START_ELO = 1000

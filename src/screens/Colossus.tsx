@@ -72,7 +72,7 @@ export const Colossus = ({ onBack }: { onBack: () => void }) => {
           {foes.map((u, i) => <li key={u.key} style={{ ['--rc' as string]: RARITIES[u.hero.rarity].color }}><b>{i === 0 ? '👑 ' : ''}{u.hero.name}{i === 0 ? ' (colossal)' : ''}</b><small>{u.hero.role} · PV {n(u.maxHp)} · ATK {n(u.atk)} · DEF {n(u.def)}</small></li>)}
         </ul>
         <p className="sg-sheet__vs">Ton équipe : <b>{n(teamPower)}</b> de puissance · Colosse et sbires : <b>{n(foePower)}</b></p>
-        <h3 className="sp-sub">{col.cleared.includes(diff.id) ? `Déjà battu cette semaine : +${WIN_SOULS} âmes par victoire` : `Récompense de la première victoire en ${diff.label} (cette semaine)`}</h3>
+        <h3 className="sp-sub">{col.cleared.includes(diff.id) ? `Déjà battu cette semaine : +${WIN_SOULS} Éclats par victoire` : `Récompense de la première victoire en ${diff.label} (cette semaine)`}</h3>
         {!col.cleared.includes(diff.id) && <Loot r={{ ...diff.reward, gems: (diff.reward.gems ?? 0) + WIN_SOULS }} card={diff.card} />}
         <button className="btn btn--gold" disabled={team.length === 0 || store.colTries < 1} onClick={start}>
           {team.length === 0 ? 'Il faut au moins une carte' : store.colTries < 1 ? 'Plus d’essai aujourd’hui : reviens demain' : `Affronter ${boss.name} en ${diff.label}`}
@@ -101,7 +101,7 @@ export const Colossus = ({ onBack }: { onBack: () => void }) => {
 
       <Guide id="colossus" />
       {result && <Battle result={result} kicker={`Colosse · ${result.diff.label}`} title={boss.name}
-        winBody={<><p className="sp-win">{result.first ? `${result.diff.label} : première victoire de la semaine !` : `+${WIN_SOULS} âmes`}</p>{result.first && <Loot r={{ ...result.diff.reward, gems: (result.diff.reward.gems ?? 0) + WIN_SOULS }} card={result.diff.card} />}{result.card && <div className="pt-reveal__cards"><Card hero={result.card} /></div>}</>}
+        winBody={<><p className="sp-win">{result.first ? `${result.diff.label} : première victoire de la semaine !` : `+${WIN_SOULS} Éclats`}</p>{result.first && <Loot r={{ ...result.diff.reward, gems: (result.diff.reward.gems ?? 0) + WIN_SOULS }} card={result.diff.card} />}{result.card && <div className="pt-reveal__cards"><Card hero={result.card} /></div>}</>}
         loseBody={<p>Le Colosse est trop fort pour l'instant. Un essai est utilisé ; renforce ton équipe ou choisis une difficulté plus basse.</p>}
         onClose={() => setResult(null)} />}
       {prize && (

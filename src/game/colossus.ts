@@ -7,7 +7,7 @@ import { baseStats } from './progression'
 
 // Les Colosses : chaque semaine, un grand méchant d'un univers devient un boss colossal, entouré de deux sbires.
 // Quatre difficultés, chacune s'ouvre quand la précédente est battue. 3 essais gratuits par jour.
-// La récompense d'une difficulté se gagne une fois par semaine ; chaque victoire rapporte aussi un peu d'âmes.
+// La récompense d'une difficulté se gagne une fois par semaine ; chaque victoire rapporte aussi un peu d’Éclats.
 
 const BUDGET: Record<RarityId, number> = { common: 600, rare: 840, epic: 1140, ultra: 1500, legend: 1920, rift: 2400 }
 export const TRIES_PER_DAY = 3

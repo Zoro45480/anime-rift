@@ -110,7 +110,7 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
             <p className="bh__label">Moyen d'invocation</p>
             <div className="bh__pay" role="radiogroup" aria-label="Moyen d'invocation">
               <button role="radio" aria-checked={currency === 'ticket'} className={currency === 'ticket' ? 'is-on' : ''} onClick={() => setCurrency('ticket')}><Coin name="seal" size={26} />Sceaux<b>{store.tickets}</b></button>
-              <button role="radio" aria-checked={currency === 'gems'} className={currency === 'gems' ? 'is-on' : ''} onClick={() => setCurrency('gems')}><Coin name="soul" size={26} />Âmes<b>{store.gems}</b></button>
+              <button role="radio" aria-checked={currency === 'gems'} className={currency === 'gems' ? 'is-on' : ''} onClick={() => setCurrency('gems')}><Coin name="soul" size={26} />Éclats<b>{store.gems}</b></button>
             </div>
             <div className="bh__pulls">
               {[1, 5, 10].map((n) => (
@@ -190,7 +190,7 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
               <Coin name="seal" size={40} /><span>Sceaux<b>{store.tickets}</b></span>
             </button>
             <button role="radio" aria-checked={currency === 'gems'} className={currency === 'gems' ? 'is-active' : ''} onClick={() => setCurrency('gems')}>
-              <Coin name="soul" size={40} /><span>Âmes<b>{store.gems}</b></span>
+              <Coin name="soul" size={40} /><span>Éclats<b>{store.gems}</b></span>
             </button>
           </div>
         </div>
@@ -269,8 +269,8 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
             <button className="bplus__btn" onClick={() => setShowIndex(true)}>Index de la bannière</button>
           </div>
           <div className="bplus__box">
-            <h3>Parchemins et âmes</h3>
-            <p>Les invocations ne donnent que des cartes. Les parchemins d'XP et les âmes se gagnent dans La Saga.</p>
+            <h3>Parchemins et Éclats</h3>
+            <p>Les invocations ne donnent que des cartes. Les parchemins d'XP et les Éclats se gagnent dans La Saga.</p>
           </div>
         </section>
       )}
@@ -306,13 +306,13 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
       </section>}
 
       {!focus && <>
-        {/* Échos des failles : les anciennes bannières, rouvertes par la Renaissance */}
+        {/* Échos des failles : les anciennes bannières, rouvertes par la Ascension */}
         <section className="echo">
-          <header className="section__head"><span>00</span><div><h2>Échos des failles</h2><p>Les anciennes bannières, rouvertes après chaque Renaissance.</p></div></header>
+          <header className="section__head"><span>00</span><div><h2>Échos des failles</h2><p>Les anciennes bannières, rouvertes après chaque Ascension.</p></div></header>
           <div className="echo__box">
-            <h3>{store.rebirths > 0 ? 'Débloqué par ta Renaissance' : 'Débloqué par la Renaissance'}</h3>
-            <p>{store.rebirths > 0 ? 'Tu as accès aux Échos.' : 'Fais une Renaissance (niveau de compte 100) pour ouvrir les Échos.'} Les bannières qui ont fermé reviendront ici.</p>
-            <button className="echo__btn" onClick={onRebirth}>Voir la Renaissance ↗</button>
+            <h3>{store.rebirths > 0 ? 'Débloqué par ta Ascension' : 'Débloqué par la Ascension'}</h3>
+            <p>{store.rebirths > 0 ? 'Tu as accès aux Échos.' : 'Fais une Ascension (niveau de compte 100) pour ouvrir les Échos.'} Les bannières qui ont fermé reviendront ici.</p>
+            <button className="echo__btn" onClick={onRebirth}>Voir la Ascension ↗</button>
           </div>
           <p className="echo__empty">Aucune bannière n'a encore fermé : il n'y a donc pas d'Écho pour l'instant. Les {BANNERS.length} bannières du jeu sont toutes ouvertes ci-dessus.</p>
         </section>
@@ -333,11 +333,11 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
         <section className="howto">
           <details open>
             <summary><img src={iconArt('seal')} alt="" /><span><b>Invoque</b><small>Obtiens de nouvelles cartes.</small></span><i aria-hidden="true" /></summary>
-            <p>Choisis une bannière : une invocation coûte {COST.ticket} sceau ou {COST.gems} âmes, par 1, 5 ou 10. Les taux sont publics (« Index et taux ») et chaque tirage est réellement aléatoire. Une carte SSR, LR ou MR est garantie au plus tard à la {PITY_MAX}e invocation.</p>
+            <p>Choisis une bannière : une invocation coûte {COST.ticket} sceau ou {COST.gems} Éclats, par 1, 5 ou 10. Les taux sont publics (« Index et taux ») et chaque tirage est réellement aléatoire. Une carte SSR, LR ou MR est garantie au plus tard à la {PITY_MAX}e invocation.</p>
           </details>
           <details open>
-            <summary><img src={iconArt('soul')} alt="" /><span><b>Gagne tes âmes</b><small>Cumule des âmes et invoque.</small></span><i aria-hidden="true" /></summary>
-            <p>Tu commences avec 600 âmes et 20 sceaux. Chaque nouvelle étoile gagnée dans La Saga rapporte 10 âmes, et la Renaissance rend 25 % de celles dépensées. Dépense-les avec soin.</p>
+            <summary><img src={iconArt('soul')} alt="" /><span><b>Gagne tes Éclats</b><small>Cumule des Éclats et invoque.</small></span><i aria-hidden="true" /></summary>
+            <p>Tu commences avec 600 Éclats et 20 sceaux. Chaque nouvelle étoile gagnée dans La Saga rapporte 10 Éclats, et la Ascension rend 25 % de celles dépensées. Dépense-les avec soin.</p>
           </details>
           <details open>
             <summary><img src={iconArt('scroll-medium')} alt="" /><span><b>Renforce tes cartes</b><small>Fais évoluer tes cartes favorites.</small></span><i aria-hidden="true" /></summary>

@@ -204,8 +204,8 @@ export const Contracts = ({ start = 'daily' }: { start?: 'daily' | 'contracts' |
           </div>
           <ul className="pc__grid">
             {([[uiArt('nav-summon'), 'Invocations', n(store.pulls)], [uiArt('card-pack'), 'Cartes MR', n(mine.filter((h) => h.rarity === 'rift').length)], [uiArt('card-pack'), 'Cartes LR', n(mine.filter((h) => h.rarity === 'legend').length)],
-              [uiArt('nav-cards'), 'Univers complétés', `${worldsDone} / ${BANNERS.length}`], [iconArt('scroll-medium'), 'Doublons fusionnés', n(life.merges ?? 0)], [iconArt('soul'), 'Âmes dépensées', n(Math.max(store.gemsSpent, life.gemsSpent ?? 0))],
-              [uiArt('role-dps'), 'Combats gagnés', n(store.wins)], [uiArt('floor-boss'), 'Boss battus', n(life.bosses ?? 0)], [uiArt('floor-plate'), 'Meilleur étage de La Spire', n(store.spire.best)],
+              [uiArt('nav-cards'), 'Univers complétés', `${worldsDone} / ${BANNERS.length}`], [iconArt('scroll-medium'), 'Doublons fusionnés', n(life.merges ?? 0)], [iconArt('soul'), 'Éclats dépensées', n(Math.max(store.gemsSpent, life.gemsSpent ?? 0))],
+              [uiArt('role-dps'), 'Combats gagnés', n(store.wins)], [uiArt('floor-boss'), 'Boss battus', n(life.bosses ?? 0)], [uiArt('floor-plate'), 'Meilleur étage de La Tour de l’Infini', n(store.spire.best)],
               [uiArt('role-hybrid'), 'Dégâts infligés', n(life.damage ?? 0)], [iconArt('scroll-large'), 'Niveaux gagnés', n(life.levels ?? 0)], [uiArt('chest'), 'Récompenses du jour', n(life.dailies ?? 0)]] as [string, string, string][])
               .map(([icon, label, value]) => <li key={label}><img src={icon} alt="" /><b>{value}</b><span>{label}</span></li>)}
           </ul>

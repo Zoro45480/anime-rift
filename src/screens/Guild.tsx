@@ -13,7 +13,7 @@ const n = (x: number) => x.toLocaleString('fr-FR')
 const EMBLEMS = ['狐', '龍', '鬼', '侍', '忍', '炎', '雷', '月', '桜', '虎', '神', '影']
 const COLORS = ['#ff3d6e', '#ffc94d', '#22d3ee', '#a855f7', '#4ade80', '#f97316', '#3b82f6', '#e5e7eb']
 const KIND: Record<Guild['kind'], string> = { open: 'Ouverte', invite: 'Sur invitation', closed: 'Fermée' }
-export const GUILD_BOSS_HP = 50_000_000 // PV du boss de guilde de la semaine
+export const GUILD_BOSS_HP = 50_000_000 // PV du boss d’Ordre de la semaine
 type Tab = 'find' | 'create' | 'rank'
 
 const Emblem = ({ g, size = 64 }: { g: { emblem: string; color: string }; size?: number }) => (
@@ -25,21 +25,21 @@ export const GuildPage = ({ onConnect }: { onConnect: () => void }) => {
   const [mine, setMine] = useState<Awaited<ReturnType<typeof fetchMyGuild>> | undefined>(undefined)
   const reload = useCallback(async () => setMine(await fetchMyGuild()), [])
   useEffect(() => { if (session) void reload() }, [session, reload])
-  if (!session) return <section className="so-login"><h2>Guilde</h2><p>Connecte-toi avec Discord ou Google pour rejoindre une guilde ou fonder la tienne.</p><button className="oauth oauth--discord" onClick={onConnect}>Se connecter</button></section>
-  if (mine === undefined) return <p className="pf-empty">Chargement de ta guilde…</p>
+  if (!session) return <section className="so-login"><h2>Ordre</h2><p>Connecte-toi avec Discord ou Google pour rejoindre un Ordre ou fonder la tienne.</p><button className="oauth oauth--discord" onClick={onConnect}>Se connecter</button></section>
+  if (mine === undefined) return <p className="pf-empty">Chargement de ton Ordre…</p>
   return mine ? <MyGuild data={mine} reload={reload} /> : <NoGuild reload={reload} />
 }
 
 const Hero = () => (
   <header className="gd-hero">
     <span className="gd-hero__kanji" lang="ja" aria-hidden="true">組</span>
-    <p className="eyebrow">Anime Rift — Guilde</p>
-    <h1>Guilde</h1>
-    <p>Rejoins une guilde ou fonde la tienne : on est plus forts à plusieurs.</p>
+    <p className="eyebrow">Anime Rift — Ordre</p>
+    <h1>Ordre</h1>
+    <p>Rejoins un Ordre ou fonde la tienne : on est plus forts à plusieurs.</p>
     <ul className="gd-perks">
       <li><b>Boss de la semaine</b><span>Cumulez vos dégâts contre un boss commun.</span></li>
-      <li><b>Classement</b><span>La guilde qui inflige le plus de dégâts mène la semaine.</span></li>
-      <li><b>Entraide</b><span>Discute avec ta guilde et échange tes doublons.</span></li>
+      <li><b>Classement</b><span>L’Ordre qui inflige le plus de dégâts mène la semaine.</span></li>
+      <li><b>Entraide</b><span>Discute avec ton Ordre et échange tes doublons.</span></li>
     </ul>
   </header>
 )
@@ -71,23 +71,23 @@ const NoGuild = ({ reload }: { reload: () => Promise<void> }) => {
     <div className="gd">
       <Hero />
       <div className="coltabs__bar so__tabs" role="tablist">
-        {([['find', 'Trouver une guilde'], ['create', 'Créer une guilde'], ['rank', 'Classement']] as [Tab, string][]).map(([id, l]) => <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>{l}</button>)}
+        {([['find', 'Trouver un Ordre'], ['create', 'Créer un Ordre'], ['rank', 'Classement']] as [Tab, string][]).map(([id, l]) => <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>{l}</button>)}
       </div>
       {msg && <p className="cd__notice" role="status">{msg}</p>}
       {tab === 'find' && <div className="so__grid">
         <section className="so-box">
-          <header className="so-box__head"><h2>Trouver une guilde</h2></header>
+          <header className="so-box__head"><h2>Trouver un Ordre</h2></header>
           <form className="so-send" onSubmit={(e) => { e.preventDefault(); void load() }}><input className="set__input" type="search" placeholder="Nom ou tag…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Nom ou tag" /><button className="btn btn--gold" type="submit">Rechercher</button></form>
           <label className="gd-check"><input type="checkbox" checked={only} onChange={(e) => setOnly(e.target.checked)} /> Seulement celles que je peux rejoindre (niveau, place)</label>
-          {!list ? <p className="pf-empty">Chargement…</p> : shown.length === 0 ? <p className="pf-empty">Aucune guilde pour l'instant : fonde la première !</p> :
+          {!list ? <p className="pf-empty">Chargement…</p> : shown.length === 0 ? <p className="pf-empty">Aucun Ordre pour l'instant : fonde la première !</p> :
             <ul className="gd-list">{shown.map((g) => <GuildRow key={g.id} g={g} action={g.kind === 'closed' ? <small>Fermée</small> : <button className="btn btn--gold gd-join" onClick={() => void join(g)}>{g.kind === 'invite' ? 'Candidater' : 'Rejoindre'}</button>} />)}</ul>}
         </section>
-        <section className="so-box"><header className="so-box__head"><h2>Pas de guilde à ton goût ?</h2></header><p className="set__note">Crée la tienne : tu en deviens le chef, tu choisis son nom, son emblème et qui peut la rejoindre.</p><button className="btn btn--gold" onClick={() => setTab('create')}>+ Créer une guilde</button></section>
+        <section className="so-box"><header className="so-box__head"><h2>Pas d’Ordre à ton goût ?</h2></header><p className="set__note">Crée la tienne : tu en deviens le chef, tu choisis son nom, son emblème et qui peut la rejoindre.</p><button className="btn btn--gold" onClick={() => setTab('create')}>+ Créer un Ordre</button></section>
       </div>}
       {tab === 'create' && <div className="so__grid">
         <section className="so-box">
-          <header className="so-box__head"><h2>Créer une guilde</h2></header>
-          <form className="gd-form" onSubmit={async (e) => { e.preventDefault(); const r = await createGuild(form); setMsg(r === 'ok' ? 'Ta guilde est fondée !' : r); if (r === 'ok') await reload() }}>
+          <header className="so-box__head"><h2>Créer un Ordre</h2></header>
+          <form className="gd-form" onSubmit={async (e) => { e.preventDefault(); const r = await createGuild(form); setMsg(r === 'ok' ? 'Ton Ordre est fondée !' : r); if (r === 'ok') await reload() }}>
             <div className="gd-form__two"><label>Nom<input className="set__input" required minLength={3} maxLength={24} placeholder="Ex. Les Renards de Feu" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></label>
               <label>Tag<input className="set__input" required pattern="[A-Za-z0-9]{2,5}" maxLength={5} placeholder="RDF" value={form.tag} onChange={(e) => setForm({ ...form, tag: e.target.value.toUpperCase() })} /></label></div>
             <label>Description<textarea className="set__input" maxLength={200} placeholder="Notre but : finir La Saga à 3 étoiles" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></label>
@@ -99,16 +99,16 @@ const NoGuild = ({ reload }: { reload: () => Promise<void> }) => {
             <div className="gd-emblems">{EMBLEMS.map((x) => <button type="button" key={x} lang="ja" className={form.emblem === x ? 'is-on' : ''} onClick={() => setForm({ ...form, emblem: x })}>{x}</button>)}</div>
             <p className="gd-label">Couleur</p>
             <div className="gd-colors">{COLORS.map((c) => <button type="button" key={c} aria-label={c} className={form.color === c ? 'is-on' : ''} style={{ background: c }} onClick={() => setForm({ ...form, color: c })} />)}</div>
-            <button className="btn btn--gold" type="submit">Fonder la guilde</button>
+            <button className="btn btn--gold" type="submit">Fonder l’Ordre</button>
           </form>
         </section>
         <section className="so-box"><header className="so-box__head"><h2>Aperçu</h2></header>
-          <div className="gd-preview" style={{ ['--gc' as string]: form.color }}><Emblem g={form} size={96} /><b>{form.name || 'Nom de ta guilde'}</b><i>{form.tag || 'TAG'}</i><small>{KIND[form.kind as Guild['kind']]}</small></div>
-          <ul className="gd-notes"><li>Tu deviens chef : tu nommes tes adjoints et tu règles la guilde.</li><li>Jusqu'à 50 membres : ouverte, sur invitation ou fermée.</li><li>Ton niveau actuel : {store.accountXp ? lvl : 1}.</li></ul>
+          <div className="gd-preview" style={{ ['--gc' as string]: form.color }}><Emblem g={form} size={96} /><b>{form.name || 'Nom de ton Ordre'}</b><i>{form.tag || 'TAG'}</i><small>{KIND[form.kind as Guild['kind']]}</small></div>
+          <ul className="gd-notes"><li>Tu deviens chef : tu nommes tes adjoints et tu règles l’Ordre.</li><li>Jusqu'à 50 membres : ouverte, sur invitation ou fermée.</li><li>Ton niveau actuel : {store.accountXp ? lvl : 1}.</li></ul>
         </section>
       </div>}
       {tab === 'rank' && <section className="so-box"><header className="so-box__head"><h2>Classement de la semaine</h2><span>fin lundi</span></header>
-        {!list ? <p className="pf-empty">Chargement…</p> : list.length === 0 ? <p className="pf-empty">Aucune guilde classée.</p> : <ul className="gd-list">{list.map((g, i) => <GuildRow key={g.id} g={g} i={i} />)}</ul>}</section>}
+        {!list ? <p className="pf-empty">Chargement…</p> : list.length === 0 ? <p className="pf-empty">Aucun Ordre classée.</p> : <ul className="gd-list">{list.map((g, i) => <GuildRow key={g.id} g={g} i={i} />)}</ul>}</section>}
     </div>
   )
 }
@@ -139,7 +139,7 @@ const MyGuild = ({ data, reload }: { data: NonNullable<Awaited<ReturnType<typeof
     <div className="gd">
       <header className="gd-mine" style={{ ['--gc' as string]: guild.color }}>
         <Emblem g={guild} size={110} />
-        <div className="gd-mine__id"><p className="eyebrow">Ta guilde · {role(me)}</p><h1>{guild.name} <i>{guild.tag}</i></h1>
+        <div className="gd-mine__id"><p className="eyebrow">Ton Ordre · {role(me)}</p><h1>{guild.name} <i>{guild.tag}</i></h1>
           <p className="gd-mine__chips"><span>{KIND[guild.kind]}</span><span>{guild.min_level ? `Niveau ${guild.min_level}+` : 'Aucune condition'}</span></p>
           <p>{guild.description || 'Pas encore de description.'}</p></div>
         <ul className="gd-mine__stats">
@@ -154,11 +154,11 @@ const MyGuild = ({ data, reload }: { data: NonNullable<Awaited<ReturnType<typeof
       {tab === 'boss' && <div className="so__grid">
         <section className="so-box gd-boss">
           <p className="eyebrow">Semaine du {week}</p>
-          <h2>{boss.name}</h2><p className="set__note">{boss.title} · un Colosse géant que toute la guilde affronte ensemble.</p>
+          <h2>{boss.name}</h2><p className="set__note">{boss.title} · un Colosse géant que toute l’Ordre affronte ensemble.</p>
           <div className="gd-hp"><i style={{ width: `${Math.max(0, 100 - (total / GUILD_BOSS_HP) * 100)}%` }} /><span>{n(Math.max(0, GUILD_BOSS_HP - total))} / {n(GUILD_BOSS_HP)} PV</span></div>
-          {total >= GUILD_BOSS_HP && <p className="sp-win">Boss vaincu cette semaine, bravo à toute la guilde !</p>}
+          {total >= GUILD_BOSS_HP && <p className="sp-win">Boss vaincu cette semaine, bravo à toute l’Ordre !</p>}
           <button className="btn btn--gold" disabled={store.guildTries < 1 || store.teamNow.length === 0} onClick={attack}>{store.guildTries < 1 ? 'Plus d’essai aujourd’hui' : `Attaquer · ${store.guildTries} essai${store.guildTries > 1 ? 's' : ''} aujourd'hui`}</button>
-          <p className="set__note">3 essais par jour. Ton équipe frappe pendant 40 tours ; tous les dégâts s'ajoutent à ceux de la guilde. Nouveau boss chaque lundi.</p>
+          <p className="set__note">3 essais par jour. Ton équipe frappe pendant 40 tours ; tous les dégâts s'ajoutent à ceux de l’Ordre. Nouveau boss chaque lundi.</p>
         </section>
         <section className="so-box"><header className="so-box__head"><h2>Dégâts des membres</h2></header>
           {dmg.length === 0 ? <p className="pf-empty">Personne n'a encore attaqué cette semaine.</p> : <ol className="gd-dmg">{[...dmg].sort((a, b) => b.damage - a.damage).map((d) => <li key={d.user_id}><b>{people[d.user_id]?.name ?? '…'}</b><span>{n(Number(d.damage))}</span><small>{d.tries} essai{d.tries > 1 ? 's' : ''}</small></li>)}</ol>}
@@ -180,11 +180,11 @@ const MyGuild = ({ data, reload }: { data: NonNullable<Awaited<ReturnType<typeof
           <button className="btn btn--gold gd-join" onClick={() => void answerRequest(guild.id, r.user_id, true).then(reload)}>Accepter</button><button className="cd-btn cd-btn--small" onClick={() => void answerRequest(guild.id, r.user_id, false).then(reload)}>Refuser</button></li>
       ))}</ul>}</section>}
       {tab === 'rank' && <section className="so-box"><header className="so-box__head"><h2>Classement de la semaine</h2></header><ul className="gd-list">{rank.map((g, i) => <GuildRow key={g.id} g={g} i={i} />)}</ul></section>}
-      {tab === 'settings' && <section className="so-box"><p className="set__note">{me.role === 'chef' ? 'Si tu quittes la guilde, un adjoint (ou le plus ancien membre) devient chef. Si tu étais seul, la guilde est dissoute.' : 'Tu peux quitter la guilde quand tu veux.'}</p>
-        <button className="cd-btn cd-btn--small" onClick={async () => { const r = await leaveGuild(); setMsg(r === 'ok' ? 'Tu as quitté la guilde.' : r); await reload() }}>Quitter la guilde</button></section>}
-      {fight && <Battle result={fight.result} kicker={`Boss de guilde · ${guild.name}`} title={boss.name}
-        winBody={null} loseBody={<p className="sp-win">{n(fight.damage)} dégâts infligés pour ta guilde !</p>}
-        onClose={async () => { const d = fight.damage; setFight(null); const r = await hitGuildBoss(week, d); setMsg(r === 'ok' ? `${n(d)} dégâts ajoutés au boss de la guilde.` : r); await load() }} />}
+      {tab === 'settings' && <section className="so-box"><p className="set__note">{me.role === 'chef' ? 'Si tu quittes l’Ordre, un adjoint (ou le plus ancien membre) devient chef. Si tu étais seul, l’Ordre est dissoute.' : 'Tu peux quitter l’Ordre quand tu veux.'}</p>
+        <button className="cd-btn cd-btn--small" onClick={async () => { const r = await leaveGuild(); setMsg(r === 'ok' ? 'Tu as quitté l’Ordre.' : r); await reload() }}>Quitter l’Ordre</button></section>}
+      {fight && <Battle result={fight.result} kicker={`Boss d’Ordre · ${guild.name}`} title={boss.name}
+        winBody={null} loseBody={<p className="sp-win">{n(fight.damage)} dégâts infligés pour ton Ordre !</p>}
+        onClose={async () => { const d = fight.damage; setFight(null); const r = await hitGuildBoss(week, d); setMsg(r === 'ok' ? `${n(d)} dégâts ajoutés au boss de l’Ordre.` : r); await load() }} />}
     </div>
   )
 }

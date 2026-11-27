@@ -15,14 +15,14 @@ import { LEVEL_STYLE_NAME, LevelBadge, levelStyle } from '../ui/LevelBadge'
 
 // Les portes du Nexus. Aucune n'est encore ouverte : chaque fiche dit ce que le mode contiendra.
 const GATES = [
-  { id: 'saga', anime: 'naruto', model: 'Vita', numeral: 'I', kanji: '物語', title: 'La Saga', tag: 'Histoire', text: 'Traverse chaque univers, combat après combat. Gagne de l’XP, des âmes et des parchemins.', hue: '#2bc8d9',
+  { id: 'saga', anime: 'naruto', model: 'Vita', numeral: 'I', kanji: '物語', title: 'La Saga', tag: 'Histoire', text: 'Traverse chaque univers, combat après combat. Gagne de l’XP, des Éclats et des parchemins.', hue: '#2bc8d9',
     points: ['Des chapitres à traverser avec ton équipe de cartes', 'Des combats au tour par tour avec les techniques de tes personnages', 'De l’XP de compte et des parchemins à chaque victoire'] },
   { id: 'raids', anime: 'onepiece', model: 'Darkness_Shibu', numeral: 'II', kanji: '巨人', title: 'Les Colosses', tag: 'Boss', text: 'Chaque semaine, un grand méchant devient un boss colossal. Quatre difficultés, jusqu’à Ultime.', hue: '#ff3d8b',
     points: ['Un nouveau Colosse chaque lundi', 'Normal, Difficile, Extrême et Ultime', 'Un événement de la semaine avec une carte SR ou mieux garantie'] },
-  { id: 'spire', anime: 'hunter', model: 'Victoria_Rubin', numeral: 'III', kanji: '塔', title: 'La Spire', tag: 'Tour', text: 'Une tour sans fin, dont les règles changent à chaque étage.', hue: '#ffb829',
+  { id: 'spire', anime: 'hunter', model: 'Victoria_Rubin', numeral: 'III', kanji: '塔', title: 'La Tour de l’Infini', tag: 'Tour', text: 'Une tour sans fin, dont les règles changent à chaque étage.', hue: '#ffb829',
     points: ['Un étage après l’autre, de plus en plus dur', 'Une règle spéciale par étage', 'Des fragments d’âme pour libérer tes cartes'] },
   { id: 'arena', anime: 'dragonball', model: 'Sendagaya_Shibu', numeral: 'IV', kanji: '闘', title: 'L’Arène', tag: 'Duel', text: 'Des duels classés contre les Rivaux du Rift. Grimpe de Bronze à Légende.', hue: '#ff6a2b',
-    points: ['Une cote elo et six ligues, de Bronze à Légende', '5 duels par jour et des défis chaque semaine', 'Les bonus de Renaissance n’y comptent pas : seul le talent parle'] },
+    points: ['Une cote elo et six ligues, de Bronze à Légende', '5 duels par jour et des défis chaque semaine', 'Les bonus de Ascension n’y comptent pas : seul le talent parle'] },
 ] as const
 
 type Gate = (typeof GATES)[number]
@@ -66,15 +66,15 @@ export const Play = ({ onRebirth, onProfile, start }: { onRebirth: () => void; o
   if (saga) return <Saga onBack={() => { setSaga(false); window.scrollTo(0, 0) }} />
   return (
     <div className="nx">
-      <section className="energy" role="meter" aria-valuemin={0} aria-valuemax={ENERGY_MAX} aria-valuenow={energyLeft} aria-label="Énergie">
+      <section className="energy" role="meter" aria-valuemin={0} aria-valuemax={ENERGY_MAX} aria-valuenow={energyLeft} aria-label="Flux">
         <div className="energy__row">
           <Coin name="bolt" size={34} />
           <b>{energyLeft}<i>/{ENERGY_MAX}</i></b>
           <span className="energy__pips">{Array.from({ length: ENERGY_MAX }, (_, i) => <i key={i} className={i < energyLeft ? 'is-on' : ''} />)}</span>
-          <button className="energy__plus" onClick={buyEnergy} disabled={gems < ENERGY_REFILL_COST || energyLeft + ENERGY_REFILL > ENERGY_OVER} aria-label={`Recharger ${ENERGY_REFILL} éclairs pour ${ENERGY_REFILL_COST} âmes`}>+</button>
+          <button className="energy__plus" onClick={buyEnergy} disabled={gems < ENERGY_REFILL_COST || energyLeft + ENERGY_REFILL > ENERGY_OVER} aria-label={`Recharger ${ENERGY_REFILL} éclairs pour ${ENERGY_REFILL_COST} Éclats`}>+</button>
         </div>
         {energyLeft > ENERGY_MAX && <p className="energy__bonus">Bonus : <b>+{energyLeft - ENERGY_MAX}</b> au-delà du maximum</p>}
-        <p>Un éclair par combat · +1 toutes les {ENERGY_REGEN_MS / 60000} minutes. {energyLeft >= ENERGY_MAX ? 'Énergie pleine.' : 'Elle remonte toute seule.'} Elle se dépense dans La Saga. Le bouton + rend {ENERGY_REFILL} éclairs pour {ENERGY_REFILL_COST} âmes (jusqu'à {ENERGY_OVER} en réserve).</p>
+        <p>Un éclair par combat · +1 toutes les {ENERGY_REGEN_MS / 60000} minutes. {energyLeft >= ENERGY_MAX ? 'Énergie pleine.' : 'Elle remonte toute seule.'} Elle se dépense dans La Saga. Le bouton + rend {ENERGY_REFILL} éclairs pour {ENERGY_REFILL_COST} Éclats (jusqu'à {ENERGY_OVER} en réserve).</p>
       </section>
       <header className="nx__head">
         <p className="eyebrow">Le Nexus</p>
@@ -87,23 +87,23 @@ export const Play = ({ onRebirth, onProfile, start }: { onRebirth: () => void; o
         {GATES.slice(1).map((g) => <GateTile key={g.id} gate={g} playable onOpen={() => { if (g.id === 'spire') setSpire(true); else if (g.id === 'raids') setColossus(true); else setArena(true); window.scrollTo(0, 0) }} />)}
       </div>
 
-      {/* Renaissance : tout en bas du Nexus */}
+      {/* Ascension : tout en bas du Nexus */}
       <section className="nx-rebirth">
         <img className="nx-rebirth__art" src={gateArt('rebirth')} alt="" loading="lazy" />
-        <header><span lang="ja" aria-hidden="true">転生</span><div><h2>Renaissance</h2><p>Recommence plus fort, pour toujours.</p></div></header>
+        <header><span lang="ja" aria-hidden="true">転生</span><div><h2>Ascension</h2><p>Recommence plus fort, pour toujours.</p></div></header>
         <h3>Tu gagnes pour toujours</h3>
         <ul>
           <li>+{REBIRTH_STAT} % de PV, d'attaque et de défense sur toutes tes cartes</li>
           <li>+{REBIRTH_XP} % d'XP pour tes cartes</li>
-          <li>Des sceaux d'invocation et une partie de tes âmes dépensées</li>
-          <li>Des titres exclusifs selon ton nombre de Renaissances</li>
+          <li>Des Clés de Faille et une partie de tes Éclats dépensées</li>
+          <li>Des titres exclusifs selon ton nombre de Ascensions</li>
         </ul>
         <h3>Tu gardes</h3>
         <p>{REBIRTH_KEEP} cartes de ton choix, tes sceaux, tes parchemins et ta liste d'envies.</p>
         <h3>Repart à zéro</h3>
-        <p>Toutes tes autres cartes, ton niveau de compte et ton solde d'âmes.</p>
+        <p>Toutes tes autres cartes, ton niveau de compte et ton solde d’Éclats.</p>
         <p className="nx-rebirth__old">Anciennes bannières : aucune pour l'instant. Elles reviendront ici pour les joueurs renés.</p>
-        <button className="nx-rebirth__btn" onClick={onRebirth}>Voir la Renaissance {acc.level >= REBIRTH_LEVEL ? '(tu es prêt)' : `(niveau ${REBIRTH_LEVEL} requis, tu es niveau ${acc.level})`}</button>
+        <button className="nx-rebirth__btn" onClick={onRebirth}>Voir la Ascension {acc.level >= REBIRTH_LEVEL ? '(tu es prêt)' : `(niveau ${REBIRTH_LEVEL} requis, tu es niveau ${acc.level})`}</button>
       </section>
 
       <Guide id="play" />

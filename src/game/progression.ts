@@ -85,7 +85,7 @@ export const cardState = (hero: Hero, xp: Record<string, number>, owned: Record<
   const cap = freed ? MAX_LEVEL : LEVEL_CAP
   const lv = levelFromXp(xp[hero.id] ?? 0, cap)
   const groups = collectifs(hero, owned, team)
-  // les bonus (collectifs + Renaissances + Libération) ne valent que pour une carte possédée
+  // les bonus (collectifs + Ascensions + Libération) ne valent que pour une carte possédée
   const bonus = owned[hero.id] ? groups[0].bonus + rebirths * REBIRTH_STAT + (freed ? AWAKEN_STAT : 0) : 0
   const extra: Record<GroupStat, number> = { atk: 0, def: 0, hp: 0, speed: 0 } // bonus des groupes, par statistique
   for (const g of groups) if (g.counted && g.stat !== 'all') extra[g.stat] += g.bonus
@@ -100,22 +100,22 @@ export const cardState = (hero: Hero, xp: Record<string, number>, owned: Record<
 export const ENERGY_MAX = 10
 export const ENERGY_REGEN_MS = 6 * 60 * 1000
 export const ENERGY_REFILL = 5 // éclairs rendus par une recharge
-export const ENERGY_REFILL_COST = 20 // âmes
+export const ENERGY_REFILL_COST = 20 // Éclats
 export const ENERGY_OVER = ENERGY_MAX * 2 // on peut dépasser le maximum en rechargeant, jusqu'à cette limite
 export const energyNow = (energy: number, at: number, now: number) =>
   energy >= ENERGY_MAX ? energy : Math.min(ENERGY_MAX, energy + Math.floor(Math.max(0, now - at) / ENERGY_REGEN_MS))
 
-// ───── Compte du joueur et Renaissance ─────
+// ───── Compte du joueur et Ascension ─────
 // Le compte gagne de l'XP à chaque carte invoquée et à chaque amélioration de carte. Au niveau 100, le joueur peut
 // « renaître » : il repart du niveau 1 avec 5 cartes de son choix et garde pour toujours les bonus ci-dessous.
 export const REBIRTH_LEVEL = 100
 export const REBIRTH_KEEP = 5 // cartes conservées
-export const REBIRTH_STAT = 6 // % de PV, d'attaque et de défense en plus sur toutes les cartes, par Renaissance
-export const REBIRTH_XP = 50 // % d'XP en plus des parchemins et des fusions, par Renaissance
-export const REBIRTH_SEALS = 10 // sceaux d'invocation offerts
-export const REBIRTH_REFUND = 0.25 // part des âmes dépensées qui est rendue
+export const REBIRTH_STAT = 6 // % de PV, d'attaque et de défense en plus sur toutes les cartes, par Ascension
+export const REBIRTH_XP = 50 // % d'XP en plus des parchemins et des fusions, par Ascension
+export const REBIRTH_SEALS = 10 // Clés de Faille offerts
+export const REBIRTH_REFUND = 0.25 // part des Éclats dépensées qui est rendue
 export const ACCOUNT_XP: Record<RarityId, number> = { common: 5, rare: 8, epic: 15, ultra: 40, legend: 100, rift: 500 }
-// XP de compte pour passer au niveau suivant : deux fois plus à chaque Renaissance.
+// XP de compte pour passer au niveau suivant : deux fois plus à chaque Ascension.
 // La montée est volontairement lente : une dizaine de combats pour le niveau 2, de plus en plus ensuite.
 export const accountNeed = (level: number, rebirths: number) => (300 + 100 * level) * 2 ** rebirths
 export const accountLevel = (xp: number, rebirths: number): { level: number; into: number; need: number } => {
@@ -132,11 +132,11 @@ export const rebirthTitle = (rebirths: number) => REBIRTH_TITLES.filter(([n]) =>
 export const nextRebirthTitle = (rebirths: number) => REBIRTH_TITLES.find(([n]) => n > rebirths)
 
 // ───── Libération (解放) ─────
-// Après une première Renaissance, une carte peut être « libérée » contre des Fragments d'âme : elle gagne
+// Après une première Ascension, une carte peut être « libérée » contre des Fragments d'âme : elle gagne
 // +15 % de PV, d'attaque et de défense, et son niveau maximum passe de 50 à 100. Définitif pour cette carte.
 export const AWAKEN_STAT = 15
 export const AWAKEN_COST: Record<RarityId, number> = { common: 20, rare: 30, epic: 50, ultra: 80, legend: 120, rift: 200 }
-export const REBIRTH_SHARDS = 30 // fragments offerts à chaque Renaissance
+export const REBIRTH_SHARDS = 30 // fragments offerts à chaque Ascension
 
 // Classement de la carte par puissance de base, parmi toutes les cartes du jeu (1 = la plus puissante).
 const BASE_POWER = new Map(HEROES.map((h) => [h.id, power(baseStats(h))]))
@@ -187,7 +187,7 @@ const EFFECTS: Record<Role, Maker> = {
   ],
 }
 const KINDS = ['Attaque', 'Technique', 'Ultime', 'Passif'] as const
-const COSTS = ['Endurance 10', 'Endurance 25', 'Énergie pleine', undefined]
+const COSTS = ['Endurance 10', 'Endurance 25', 'Flux plein', undefined]
 
 export const kitOf = (hero: Hero, stats: Stats = baseStats(hero)): Move[] => {
   const texts = EFFECTS[hero.role](stats)
@@ -195,7 +195,7 @@ export const kitOf = (hero: Hero, stats: Stats = baseStats(hero)): Move[] => {
 }
 
 // ───── Cote de la carte ─────
-// Barème de départ d'une carte, en âmes, selon sa rareté ; une vente ne pourra pas se faire sous la moitié du barème.
+// Barème de départ d'une carte, en Éclats, selon sa rareté ; une vente ne pourra pas se faire sous la moitié du barème.
 // Le marché entre joueurs n'existe pas encore (il demande un jeu en ligne) : ces valeurs sont la règle prévue, pas des ventes.
 export const MARKET_BASE: Record<RarityId, number> = { common: 50, rare: 150, epic: 500, ultra: 2000, legend: 6000, rift: 16000 }
 export const marketFloor = (rarity: RarityId) => MARKET_BASE[rarity] / 2

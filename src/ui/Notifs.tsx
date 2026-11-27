@@ -11,12 +11,12 @@ const KINDS: Record<Notif['kind'] | 'energy', { title: string; hue: string; icon
   level: { title: 'Niveau de compte', hue: '#ffc94d', icon: iconArt('bolt') },
   saga: { title: 'La Saga', hue: '#2bc8d9', icon: gateArt('saga') },
   drop: { title: 'Parchemin obtenu', hue: '#a56bff', icon: iconArt('scroll-medium') },
-  rebirth: { title: 'Renaissance', hue: '#ff9a4a', icon: gateArt('rebirth') },
+  rebirth: { title: 'Ascension', hue: '#ff9a4a', icon: gateArt('rebirth') },
   ach: { title: 'Succès débloqué', hue: '#b78bff', icon: extraArt('dist-trophy') },
   bazaar: { title: 'Bazar', hue: '#ffc94d', icon: uiArt('nav-bazaar') },
   quest: { title: 'Contrat accompli', hue: '#4be3a4', icon: uiArt('nav-contracts') },
   free: { title: 'Carte libérée', hue: '#7ff0ff', icon: iconArt('shard') },
-  energy: { title: 'Énergie pleine', hue: '#ffd24d', icon: iconArt('bolt') },
+  energy: { title: 'Flux plein', hue: '#ffd24d', icon: iconArt('bolt') },
 }
 const ago = (t: number) => {
   const m = Math.floor((Date.now() - t) / 60000)

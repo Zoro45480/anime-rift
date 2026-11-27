@@ -158,14 +158,14 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
         <section className="set-card" style={{ ['--sc' as string]: '#5aa8ff' }}>
           <header className="set-card__head"><Kiri size={54} /><h3>Didacticiel</h3></header>
           <button className="set__replay" onClick={() => { store.resetTutorial(); setReplay(true) }}>
-            <span><b>Revoir les explications de Kiri</b><small>{replay ? 'C’est noté : Kiri réexpliquera chaque écran.' : 'Kiri réexplique chaque écran la prochaine fois que tu l’ouvres.'}</small></span>
+            <span><b>Revoir les explications de Nyx</b><small>{replay ? 'C’est noté : Nyx réexpliquera chaque écran.' : 'Nyx réexplique chaque écran la prochaine fois que tu l’ouvres.'}</small></span>
           </button>
         </section>
 
 
         <section className="set-card set__danger" style={{ ['--sc' as string]: '#ff5d7a' }}>
           <header className="set-card__head"><img src={extraArt('set-reset')} alt="" /><h3>Recommencer la partie</h3></header>
-          <p className="set__note">Efface toutes tes cartes, tes niveaux, tes Renaissances et ta progression sur cet appareil. Ton pseudo et ta photo sont gardés.</p>
+          <p className="set__note">Efface toutes tes cartes, tes niveaux, tes Ascensions et ta progression sur cet appareil. Ton pseudo et ta photo sont gardés.</p>
           <button className="cd-btn cd-btn--small" onClick={reset}>{armed ? 'Appuie encore pour tout effacer : c’est définitif' : 'Effacer ma partie'}</button>
         </section>
       </div>
@@ -190,7 +190,7 @@ const AccountCard = () => {
         </>
       ) : (
         <>
-          <p className="set__note">Connecte-toi pour sauvegarder ta partie en ligne, recevoir ton numéro de joueur et apparaître dans le Hall of Fame. Ta partie de cet appareil part avec toi.</p>
+          <p className="set__note">Connecte-toi pour sauvegarder ta partie en ligne, recevoir ton numéro de joueur et apparaître dans le Panthéon. Ta partie de cet appareil part avec toi.</p>
           <div className="set-account__oauth">
             <button className="oauth oauth--discord" onClick={() => void go('discord')}><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M20.3 4.4A19.6 19.6 0 0 0 15.4 3l-.6 1.3a18 18 0 0 0-5.6 0L8.6 3a19.6 19.6 0 0 0-4.9 1.4C.6 9 0 13.6.3 18.1a19.8 19.8 0 0 0 6 3l1.3-2a12.8 12.8 0 0 1-2-1l.5-.4a14 14 0 0 0 11.8 0l.5.4c-.6.4-1.3.7-2 1l1.3 2a19.7 19.7 0 0 0 6-3c.4-5.2-.7-9.7-3.4-13.7ZM8.5 15.3c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Z" /></svg>Se connecter avec Discord</button>
             <button className="oauth oauth--google" onClick={() => void go('google')}><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5a5.6 5.6 0 0 1-2.4 3.6v3h3.9c2.2-2.1 3.5-5.2 3.5-8.8Z" /><path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-2.9l-3.9-3c-1.1.7-2.5 1.2-4.1 1.2-3.1 0-5.8-2.1-6.7-5H1.3v3.1A12 12 0 0 0 12 24Z" /><path fill="#FBBC05" d="M5.3 14.3a7.2 7.2 0 0 1 0-4.6V6.6h-4a12 12 0 0 0 0 10.8l4-3.1Z" /><path fill="#EA4335" d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4A12 12 0 0 0 1.3 6.6l4 3.1c.9-2.9 3.6-4.9 6.7-4.9Z" /></svg>Se connecter avec Google</button>

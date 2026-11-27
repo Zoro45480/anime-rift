@@ -99,7 +99,7 @@ export const Bazaar = () => {
     <div className="bz">
       <header className="bz__head">
         <img src={uiArt('nav-bazaar')} alt="" />
-        <div><p className="eyebrow">Le marché</p><h1>Bazar des Failles</h1><p>Achète, vends, mets aux enchères. Tes âmes : <Price v={store.gems} /></p></div>
+        <div><p className="eyebrow">Le marché</p><h1>Bazar des Failles</h1><p>Achète, vends, mets aux enchères. Tes Éclats : <Price v={store.gems} /></p></div>
       </header>
       <ul className="bz__rules">
         <li>Onglet Joueurs : le vrai marché entre joueurs. Onglets Marchands et Vendre aux marchands : des personnages joués par le jeu.</li>
@@ -128,7 +128,7 @@ export const Bazaar = () => {
                 <div className="bz-item__card"><Card hero={x.hero} /></div>
                 <small className="bz-item__who">{x.merchant}</small>
                 <div className="bz-item__row"><Price v={x.price} big /><span>valeur {n(value)}</span></div>
-                <button className="btn btn--gold" disabled={done || store.gems < x.price} onClick={() => { if (store.buyStall(x.id)) flash(`${x.hero.name} acheté pour ${x.price} âmes.`) }}>{done ? 'Acheté' : store.gems < x.price ? 'Pas assez d’âmes' : 'Acheter'}</button>
+                <button className="btn btn--gold" disabled={done || store.gems < x.price} onClick={() => { if (store.buyStall(x.id)) flash(`${x.hero.name} acheté pour ${x.price} Éclats.`) }}>{done ? 'Acheté' : store.gems < x.price ? 'Pas assez d’Éclats' : 'Acheter'}</button>
               </li>
             )
           })}
@@ -146,8 +146,8 @@ export const Bazaar = () => {
               return (
                 <li key={h.id} className="bz-row" style={{ ['--rc' as string]: RARITIES[h.rarity].color }}>
                   <div className="bz-row__id"><b>{RARITIES[h.rarity].short}</b><span>{h.name}</span><small>{h.world} · Nv {lv} · ×{store.owned[h.id]} · valeur du jour {n(value)}</small></div>
-                  <button className="cd-btn cd-btn--small" onClick={() => { const p = store.quickSell(h.id); if (p) flash(`${h.name} vendu : +${p} âmes.`) }}>Vendre tout de suite<small>+{n(quick)} âmes</small></button>
-                  <form className="bz-auc" onSubmit={(e) => { e.preventDefault(); if (store.listAuction(h.id, start)) flash(`${h.name} mis aux enchères à partir de ${start} âmes.`); else flash('Tu as déjà 5 enchères en cours.') }}>
+                  <button className="cd-btn cd-btn--small" onClick={() => { const p = store.quickSell(h.id); if (p) flash(`${h.name} vendu : +${p} Éclats.`) }}>Vendre tout de suite<small>+{n(quick)} Éclats</small></button>
+                  <form className="bz-auc" onSubmit={(e) => { e.preventDefault(); if (store.listAuction(h.id, start)) flash(`${h.name} mis aux enchères à partir de ${start} Éclats.`); else flash('Tu as déjà 5 enchères en cours.') }}>
                     <label><small>Prix de départ</small><input type="number" min={1} value={starts[h.id] ?? Math.round(value * 0.8)} onChange={(e) => setStarts({ ...starts, [h.id]: e.target.value })} /></label>
                     <button className="cd-btn cd-btn--small" type="submit" disabled={store.bazaar.auctions.length >= 5}>Enchères {AUCTION_HOURS} h</button>
                   </form>
@@ -173,7 +173,7 @@ export const Bazaar = () => {
             })}
           </ul>
         )}
-        <p className="set__note">À la fin, les âmes de la meilleure offre arrivent toutes seules (même si tu fermes le jeu : elles seront là à ton retour). Si personne n'enchérit, la carte revient dans ta collection.</p>
+        <p className="set__note">À la fin, les Éclats de la meilleure offre arrivent toutes seules (même si tu fermes le jeu : elles seront là à ton retour). Si personne n'enchérit, la carte revient dans ta collection.</p>
       </section>}
 
       {tab === 'mine' && <section className="bz-sec">
@@ -185,7 +185,7 @@ export const Bazaar = () => {
         </form>
         {alertQ.length >= 2 && <p className="set__note">{alertHero ? <>Carte : <b>{alertHero.name}</b> ({RARITIES[alertHero.rarity].short}) · valeur du jour {n(valueOf(alertHero, 1, day))}</> : 'Aucune carte trouvée.'}</p>}
         <ul className="bz-list">
-          {store.bazaar.alerts.map((a) => { const h = heroById(a.heroId); return <li key={a.heroId} className="bz-row bz-row--alert"><div className="bz-row__id"><span>{h.name}</span><small>Préviens-moi sous {n(a.below)} âmes</small></div><button className="linkbtn" onClick={() => store.setAlert(a.heroId, null)}>Retirer</button></li> })}
+          {store.bazaar.alerts.map((a) => { const h = heroById(a.heroId); return <li key={a.heroId} className="bz-row bz-row--alert"><div className="bz-row__id"><span>{h.name}</span><small>Préviens-moi sous {n(a.below)} Éclats</small></div><button className="linkbtn" onClick={() => store.setAlert(a.heroId, null)}>Retirer</button></li> })}
         </ul>
         <p className="set__note">Chaque jour, si un marchand vend une de ces cartes à ton prix ou moins, tu reçois une notification.</p>
 

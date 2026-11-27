@@ -11,7 +11,7 @@ export type AchState = {
   owned: Record<string, number>; xp: Record<string, number>; saga: Record<string, number>; awakened: string[]; rebirths: number; pulls: number; wins: number
   gemsSpent: number; accountXp: number; quests: Quests; spire: { best: number }; path: PathState; seen: { days: number }; arena?: { wins: number; best: number }; tourney?: { titles: number }
 }
-export const GROUPS = ['Collection', 'Univers', 'Invocations', 'Aventure', 'La Spire', 'Contrats', 'Maîtrise', 'Ancienneté'] as const
+export const GROUPS = ['Collection', 'Univers', 'Invocations', 'Aventure', 'La Tour de l’Infini', 'Contrats', 'Maîtrise', 'Ancienneté'] as const
 export type Group = (typeof GROUPS)[number]
 export type Metal = 'bronze' | 'silver' | 'gold' | 'prism'
 export const METAL_LABEL: Record<Metal, string> = { bronze: 'Commun', silver: 'Rare', gold: 'Épique', prism: 'Légendaire' }
@@ -53,8 +53,8 @@ export const ACHIEVEMENTS: Achievement[] = [
   one('Univers', '界', 'worlds-all', 'Tous les univers', 'Complète les 7 univers.', 'Souverain du Rift', BANNERS.length, 'prism', (s) => BANNERS.filter((b) => worldDone(s, b.world)).length),
   // ── Invocations (8)
   ...tiers('Invocations', '召', 'pulls', [[10, 'Premier rituel', 'Réalise 10 invocations.', 'Invocateur'], [50, 'Appel régulier', 'Réalise 50 invocations.', 'Appelant'], [100, 'Habitué de la faille', 'Réalise 100 invocations.', 'Grand invocateur'],
-    [250, 'Torrent d’âmes', 'Réalise 250 invocations.', 'Tisseur de failles'], [500, 'Faille grande ouverte', 'Réalise 500 invocations.', 'Maître des failles'], [1000, 'Mille appels', 'Réalise 1 000 invocations.', 'Voix du Rift']], (s) => s.pulls),
-  ...tiers('Invocations', '魂', 'spent', [[1000, 'Offrande', 'Dépense 1 000 âmes.', 'Généreux'], [10000, 'Grande offrande', 'Dépense 10 000 âmes.', 'Mécène des failles']], (s) => s.gemsSpent),
+    [250, 'Torrent d’Éclats', 'Réalise 250 invocations.', 'Tisseur de failles'], [500, 'Faille grande ouverte', 'Réalise 500 invocations.', 'Maître des failles'], [1000, 'Mille appels', 'Réalise 1 000 invocations.', 'Voix du Rift']], (s) => s.pulls),
+  ...tiers('Invocations', '魂', 'spent', [[1000, 'Offrande', 'Dépense 1 000 Éclats.', 'Généreux'], [10000, 'Grande offrande', 'Dépense 10 000 Éclats.', 'Mécène des failles']], (s) => s.gemsSpent),
   // ── Aventure (10)
   ...tiers('Aventure', '闘', 'wins', [[10, 'Échauffement', 'Gagne 10 combats.', 'Combattant'], [50, 'Rodé', 'Gagne 50 combats.', 'Guerrier'], [100, 'Vétéran', 'Gagne 100 combats.', 'Vétéran'],
     [250, 'Inarrêtable', 'Gagne 250 combats.', 'Champion'], [500, 'Invaincu', 'Gagne 500 combats.', 'Seigneur de guerre']], (s) => s.wins),
@@ -66,9 +66,9 @@ export const ACHIEVEMENTS: Achievement[] = [
   one('Aventure', '闘', 'league-diamond', 'Ligue Diamant', 'Atteins la ligue Diamant (1 700).', 'Éclat de diamant', 1700, 'gold', (s) => s.arena?.best ?? 0),
   one('Aventure', '闘', 'league-legend', 'Légende de l’Arène', 'Atteins la ligue Légende (2 000).', 'Légende de l’Arène', 2000, 'prism', (s) => s.arena?.best ?? 0),
   ...tiers('Aventure', '冠', 'rift-cup', [[1, 'Vainqueur du Grand Rift', 'Remporte un Grand Rift.', 'Champion du Grand Rift'], [10, 'Maître du Grand Rift', 'Remporte 10 Grands Rifts.', 'Seigneur du tournoi']], (s) => s.tourney?.titles ?? 0),
-  // ── La Spire (7)
-  ...tiers('La Spire', '塔', 'spire', [[1, 'Premier étage', 'Franchis l’étage 1 de La Spire.', 'Grimpeur'], [5, 'Cinq marches', 'Atteins l’étage 5.', 'Alpiniste'], [10, 'Premier gardien', 'Bats le gardien de l’étage 10.', 'Tueur de gardien'],
-    [20, 'Au-dessus des nuages', 'Atteins l’étage 20.', 'Habitant des cimes'], [30, 'Vertige', 'Atteins l’étage 30.', 'Sans vertige'], [50, 'Cœur de la Spire', 'Atteins l’étage 50.', 'Seigneur de la Spire'],
+  // ── La Tour de l’Infini (7)
+  ...tiers('La Tour de l’Infini', '塔', 'spire', [[1, 'Premier étage', 'Franchis l’étage 1 de La Tour de l’Infini.', 'Grimpeur'], [5, 'Cinq marches', 'Atteins l’étage 5.', 'Alpiniste'], [10, 'Premier gardien', 'Bats le gardien de l’étage 10.', 'Tueur de gardien'],
+    [20, 'Au-dessus des nuages', 'Atteins l’étage 20.', 'Habitant des cimes'], [30, 'Vertige', 'Atteins l’étage 30.', 'Sans vertige'], [50, 'Cœur de la Tour', 'Atteins l’étage 50.', 'Seigneur de la Tour'],
     [75, 'Sommet invisible', 'Atteins l’étage 75.', 'Celui qui touche le ciel']], (s) => s.spire?.best ?? 0),
   // ── Contrats (8)
   ...tiers('Contrats', '約', 'dailies', [[7, 'Une semaine fidèle', 'Récupère 7 récompenses du jour.', 'Fidèle'], [30, 'Un mois fidèle', 'Récupère 30 récompenses du jour.', 'Assidu'], [100, 'Cent levers de soleil', 'Récupère 100 récompenses du jour.', 'Pilier du Rift']], (s) => life(s, 'dailies')),
@@ -79,7 +79,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     [75, 'Au-delà', 'Monte une carte au niveau 75.', 'Sensei'], [100, 'Au-delà des limites', 'Monte une carte au niveau 100.', 'Sans limite']], best),
   ...tiers('Maîtrise', '合', 'merges', [[10, 'Fusionneur', 'Fusionne 10 doublons.', 'Alchimiste'], [100, 'Grand creuset', 'Fusionne 100 doublons.', 'Grand alchimiste']], (s) => life(s, 'merges')),
   ...tiers('Maîtrise', '解', 'freed', [[1, 'Chaînes brisées', 'Libère une carte.', 'Libérateur'], [5, 'Libération', 'Libère 5 cartes.', 'Briseur de chaînes']], (s) => s.awakened.length),
-  ...tiers('Maîtrise', '転', 'rebirth', [[1, 'Nouveau départ', 'Accomplis une Renaissance.', 'Revenant'], [3, 'Cycle sans fin', 'Accomplis 3 Renaissances.', 'Marcheur des failles']], (s) => s.rebirths),
+  ...tiers('Maîtrise', '転', 'rebirth', [[1, 'Nouveau départ', 'Accomplis une Ascension.', 'Revenant'], [3, 'Cycle sans fin', 'Accomplis 3 Ascensions.', 'Marcheur des failles']], (s) => s.rebirths),
   // ── Ancienneté (9)
   ...tiers('Ancienneté', '時', 'days', [[3, 'On revient', 'Joue 3 jours différents.', 'Habitué'], [7, 'Une semaine au Rift', 'Joue 7 jours différents.', 'Résident'], [14, 'Deux semaines', 'Joue 14 jours différents.', 'Citoyen du Rift'],
     [30, 'Un mois de Rift', 'Joue 30 jours différents.', 'Ancien'], [60, 'Deux mois', 'Joue 60 jours différents.', 'Doyen'], [100, 'Cent jours', 'Joue 100 jours différents.', 'Légende vivante']], (s) => s.seen?.days ?? 0),
@@ -93,5 +93,5 @@ export const doneIds = (s: AchState) => ACHIEVEMENTS.filter((a) => a.value(s) >=
 export const unlockedTitles = (s: AchState) => [DEFAULT_TITLE, ...ACHIEVEMENTS.filter((a) => a.value(s) >= a.target).map((a) => a.title)]
 
 // Médaille 3D d'un succès : la forme suit sa catégorie, le métal sa rareté.
-const SHAPE: Record<Group, string> = { Collection: 'gem', Univers: 'orb', Invocations: 'portal', Aventure: 'swords', 'La Spire': 'tower', Contrats: 'scroll', 'Maîtrise': 'shield', 'Ancienneté': 'hourglass' }
+const SHAPE: Record<Group, string> = { Collection: 'gem', Univers: 'orb', Invocations: 'portal', Aventure: 'swords', 'La Tour de l’Infini': 'tower', Contrats: 'scroll', 'Maîtrise': 'shield', 'Ancienneté': 'hourglass' }
 export const medalOf = (a: Achievement) => `medal-${SHAPE[a.group]}-${a.metal}`

@@ -17,14 +17,14 @@ const left = (iso: string) => {
 }
 const clock = (ms: number) => { const s = Math.max(0, Math.floor(ms / 1000)); return `${Math.floor(s / 3600)} h ${String(Math.floor((s % 3600) / 60)).padStart(2, '0')} min` }
 const ago = (t: number) => { const m = Math.floor((Date.now() - t) / 60000); return m < 1 ? 'à l’instant' : m < 60 ? `il y a ${m} min` : m < 1440 ? `il y a ${Math.floor(m / 60)} h` : `il y a ${Math.floor(m / 1440)} j` }
-const label = (r: Reward) => [r.gems && `${r.gems} âmes`, r.energy && `${r.energy} éclairs`, r.tickets && `${r.tickets} sceau${r.tickets > 1 ? 'x' : ''}`, r.shards && `${r.shards} fragments`, r.scrolls?.medium && 'parchemin', r.scrolls?.large && 'grand parchemin'].filter(Boolean).join(' + ')
+const label = (r: Reward) => [r.gems && `${r.gems} Éclats`, r.energy && `${r.energy} éclairs`, r.tickets && `${r.tickets} sceau${r.tickets > 1 ? 'x' : ''}`, r.shards && `${r.shards} fragments`, r.scrolls?.medium && 'parchemin', r.scrolls?.large && 'grand parchemin'].filter(Boolean).join(' + ')
 const icon = (r: Reward, day: number) => (day === 7 ? uiArt('chest') : r.tickets ? iconArt('seal') : r.energy ? iconArt('bolt') : r.scrolls ? iconArt('scroll-medium') : iconArt('soul'))
 
 // Notes de mise à jour : ce qui a vraiment été ajouté au jeu.
 const NEWS = [
   { title: 'Le Bazar des Failles ouvre', points: ['Achète aux marchands du jour, vends tes doublons ou mets-les aux enchères.', 'Alertes de prix et cote calculée sur tes vraies ventes.'] },
   { title: 'Toutes les cartes se mélangent', points: ['Chaque bannière donne les cartes des 7 univers.', 'Seules les MR restent propres à leur univers.'] },
-  { title: 'Les quatre portes sont ouvertes', points: ['Les Colosses, La Spire, l’Arène et le Grand Rift sont jouables.', '79 succès, le Chemin du Rift et la boutique en âmes.'] },
+  { title: 'Les quatre portes sont ouvertes', points: ['Les Colosses, La Tour de l’Infini, l’Arène et le Grand Rift sont jouables.', '79 succès, le Chemin du Rift et la boutique en Éclats.'] },
 ]
 
 export type HomeGo = { banner: (i: number) => void; contracts: () => void; collection: () => void; play: (mode?: 'colossus') => void; profile: () => void; community: () => void }
@@ -110,7 +110,7 @@ export const Home = ({ go }: { go: HomeGo }) => {
       <nav className="home__links" aria-label="Raccourcis">
         <button onClick={go.contracts}><small>01</small><span><b>Tes rendez-vous</b><em>Contrats, Chemin du Rift et récompenses</em></span><i>↗</i></button>
         <button onClick={go.collection}><small>02</small><span><b>Ta collection</b><em>{n(mine)} / {n(HEROES.length)} cartes à découvrir</em></span><i>↗</i></button>
-        <button onClick={() => go.play()}><small>03</small><span><b>À toi de jouer</b><em>Saga, Colosses, Spire et Arène</em></span><i>↗</i></button>
+        <button onClick={() => go.play()}><small>03</small><span><b>À toi de jouer</b><em>Aventure, Colosses, Tour de l’Infini et Arène</em></span><i>↗</i></button>
       </nav>
 
       <section className="home__pulls">
