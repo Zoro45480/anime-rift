@@ -54,7 +54,7 @@ export const startOnline = () => {
   if (started) return
   started = true
   // lien de parrainage : ?ref=NUMERO, gardé jusqu'à la première connexion
-  try { const ref = new URLSearchParams(window.location.search).get('ref'); if (ref && /^\d+$/.test(ref)) localStorage.setItem('anime-rift-ref', ref) } catch { /* rien */ }
+  try { const ref = new URLSearchParams(window.location.search).get('ref'); if (ref && /^\d+$/.test(ref)) localStorage.setItem('anime-rift-ref', ref); const ami = new URLSearchParams(window.location.search).get('ami'); if (ami) localStorage.setItem('anime-rift:friend-code', ami.slice(0, 12)) } catch { /* rien */ }
   void supa.auth.getSession().then(async ({ data }) => {
     set({ session: data.session, ready: true })
     if (data.session) { await fetchMe(data.session.user.id); await adopt(data.session) }
@@ -174,6 +174,44 @@ export const acceptFriend = (from: string) => supa.from('friends').update({ stat
 export const removeFriend = async (other: string) => {
   const me = myId() ?? ''
   await supa.from('friends').delete().or(`and(user_id.eq.${me},friend_id.eq.${other}),and(user_id.eq.${other},friend_id.eq.${me})`)
+}
+
+// Code ami : chaque joueur a un code fixe tiré de son numéro (ex. RIFT-K7M2Q), facile à partager.
+const CODE_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+const CODE_MOD = 2 ** 25
+const CODE_MUL = 0x2f5a3b9
+const CODE_ADD = 0x13c6e1
+const mulMod = (a: number, b: number) => Number((BigInt(a) * BigInt(b)) % BigInt(CODE_MOD))
+const CODE_INV = (() => { let x = 1; for (let i = 0; i < 6; i++) x = mulMod(x, (2 - mulMod(CODE_MUL, x) + CODE_MOD * 2) % CODE_MOD); return x })()
+export const friendCode = (no: number) => {
+  let x = (mulMod(no, CODE_MUL) + CODE_ADD) % CODE_MOD
+  let out = ''
+  for (let i = 0; i < 5; i++) { out = CODE_ABC[x % 32] + out; x = Math.floor(x / 32) }
+  return `RIFT-${out}`
+}
+export const codeToNo = (code: string) => {
+  const c = code.toUpperCase().replace(/[^A-Z0-9]/g, '').replace(/^RIFT/, '')
+  if (c.length !== 5) return null
+  let x = 0
+  for (const ch of c) { const v = CODE_ABC.indexOf(ch); if (v < 0) return null; x = x * 32 + v }
+  const no = mulMod((x - CODE_ADD + CODE_MOD) % CODE_MOD, CODE_INV)
+  return no > 0 && no < 10_000_000 ? no : null
+}
+export const FRIEND_PARAM = 'anime-rift:friend-code'
+export const addByCode = async (code: string): Promise<string> => {
+  const no = codeToNo(code)
+  if (!no) return 'Ce code n\'est pas valide. Il ressemble à RIFT-K7M2Q.'
+  const { data } = await supa.from('profiles').select('*').eq('player_no', no).maybeSingle()
+  const p = data as PublicPlayer | null
+  if (!p) return 'Aucun joueur n\'a ce code.'
+  if (p.id === myId()) return 'C\'est ton propre code !'
+  const rows = await fetchFriends()
+  const link = rows.find((r) => (r.user_id === p.id && r.friend_id === myId()) || (r.user_id === myId() && r.friend_id === p.id))
+  if (link?.status === 'accepted') return `${p.name} est déjà ton ami.`
+  if (link && link.user_id === p.id) { await acceptFriend(p.id); return `${p.name} t'avait déjà demandé : vous êtes maintenant amis !` }
+  if (link) return `Demande déjà envoyée à ${p.name}.`
+  const r = await askFriend(p.id)
+  return r === 'ok' ? `Demande d'ami envoyée à ${p.name} !` : r
 }
 
 // Messages

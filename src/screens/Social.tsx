@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { HEROES, heroById } from '../data/heroes'
 import { RARITIES, RARITY_ORDER } from '../data/rarities'
 import {
-  acceptFriend, answerTrade, askFriend, fetchFriends, fetchMessages, fetchTrades, findPlayers, isOnlineNow, markRead, myId, playersById, proposeTrade,
+  acceptFriend, addByCode, answerTrade, FRIEND_PARAM, friendCode, askFriend, fetchFriends, fetchMessages, fetchTrades, findPlayers, isOnlineNow, markRead, myId, playersById, proposeTrade,
   removeFriend, sendMessage, setDmPolicy, useOnline, type FriendRow, type Message, type PublicPlayer, type Trade,
 } from '../state/online'
 import { useStore } from '../state/store'
@@ -89,6 +89,7 @@ export const Social = ({ onGuild, onProfile, onConnect }: { onGuild: () => void;
           {outgoing.length > 0 && <p className="set__note">Demandes envoyées : {outgoing.map((id) => people[id]?.name ?? '…').join(', ')}</p>}
         </section>
         <div className="so-side">
+          <CodeBox onDone={(t) => { flash(t); void refresh() }} />
           <AddFriend known={[...accepted, ...incoming, ...outgoing]} onDone={(t) => { flash(t); void refresh() }} />
           <section className="so-box"><header className="so-box__head"><h2>Échanges</h2><button className="linkbtn" onClick={() => setTab('trades')}>Tout voir →</button></header>
             <div className="so-pair"><div><b>{tradesIn.length}</b><span>reçu{tradesIn.length > 1 ? 's' : ''}</span></div><div><b>{tradesOut.length}</b><span>envoyé{tradesOut.length > 1 ? 's' : ''}</span></div></div>
@@ -129,12 +130,43 @@ export const Social = ({ onGuild, onProfile, onConnect }: { onGuild: () => void;
   )
 }
 
+const CodeBox = ({ onDone }: { onDone: (t: string) => void }) => {
+  const { me } = useOnline()
+  const [code, setCode] = useState(() => { try { return localStorage.getItem(FRIEND_PARAM) ?? '' } catch { return '' } })
+  const [busy, setBusy] = useState(false)
+  const [copied, setCopied] = useState('')
+  const mine = me ? friendCode(me.player_no) : ''
+  const link = mine ? `${location.origin}${location.pathname}?ami=${mine}` : ''
+  const copy = (t: string, what: string) => { void navigator.clipboard?.writeText(t).then(() => { setCopied(what); setTimeout(() => setCopied(''), 2000) }) }
+  const send = async () => {
+    if (!code.trim() || busy) return
+    setBusy(true)
+    const r = await addByCode(code)
+    setBusy(false); setCode('')
+    try { localStorage.removeItem(FRIEND_PARAM) } catch { /* rien */ }
+    onDone(r)
+  }
+  return (
+    <section className="so-box so-code">
+      <header className="so-box__head"><h2>Code ami</h2></header>
+      {mine && <div className="so-code__mine"><span>Ton code</span><b>{mine}</b>
+        <div className="so-code__btns"><button className="cd-btn cd-btn--small" onClick={() => copy(mine, 'code')}>{copied === 'code' ? 'Copié !' : 'Copier le code'}</button>
+          <button className="linkbtn" onClick={() => copy(link, 'lien')}>{copied === 'lien' ? 'Lien copié !' : 'Copier un lien d\'invitation'}</button></div></div>}
+      <p className="set__note">Donne ton code à un ami, ou tape le sien ici pour l'ajouter.</p>
+      <form className="so-code__form" onSubmit={(e) => { e.preventDefault(); void send() }}>
+        <input className="set__input" placeholder="RIFT-XXXXX" value={code} maxLength={12} onChange={(e) => setCode(e.target.value.toUpperCase())} aria-label="Code ami de ton ami" />
+        <button className="cd-btn cd-btn--small" disabled={!code.trim() || busy}>{busy ? '…' : 'Ajouter'}</button>
+      </form>
+    </section>
+  )
+}
+
 const AddFriend = ({ known, onDone }: { known: string[]; onDone: (t: string) => void }) => {
   const [q, setQ] = useState('')
   const [res, setRes] = useState<PublicPlayer[] | null>(null)
   return (
     <section className="so-box">
-      <header className="so-box__head"><h2>Ajouter un ami</h2></header>
+      <header className="so-box__head"><h2>Chercher un joueur</h2></header>
       <p className="set__note">Trouve un joueur par son pseudo ou son numéro (pseudo#12).</p>
       <form onSubmit={(e) => { e.preventDefault(); if (q.trim()) void findPlayers(q).then(setRes) }}><input className="set__input" type="search" placeholder="Pseudo ou pseudo#1234…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Chercher un joueur" /></form>
       {res && (res.length === 0 ? <p className="set__note">Aucun joueur trouvé.</p> : res.map((p) => (

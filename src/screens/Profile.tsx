@@ -4,7 +4,7 @@ import { cosmeticArt, extraArt } from '../assets/manifest'
 import { BANNERS } from '../data/banners'
 import { HEROES } from '../data/heroes'
 import { RARITIES, RARITY_ORDER } from '../data/rarities'
-import { useOnline } from '../state/online'
+import { friendCode, useOnline } from '../state/online'
 import { ACHIEVEMENTS, DEFAULT_TITLE, GROUPS, METAL_LABEL, medalOf, progressOf, unlockedTitles, type AchState } from '../game/achievements'
 import { canBuy, COSMETICS, cosmeticById, hasCosmetic, howToGet, RARITY_HUE, RARITY_LABEL, type Cosmetic, type CosmeticKind, type Owned, type Rarity } from '../game/cosmetics'
 import { accountLevel, cardState } from '../game/progression'
@@ -387,7 +387,7 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
           <Photo size={220} />
           <div>
             <Name />
-            <p className="pf-hero__chips"><TitlePlate title={profile.title || DEFAULT_TITLE} /><span title={online.me ? 'Ton numéro de joueur : l’ordre dans lequel tu as rejoint le jeu' : 'Crée un compte (Réglages) pour recevoir ton vrai numéro de joueur'}>#{playerNo(profile.tag)}</span></p>
+            <p className="pf-hero__chips"><TitlePlate title={profile.title || DEFAULT_TITLE} /><span title={online.me ? 'Ton numéro de joueur : l’ordre dans lequel tu as rejoint le jeu' : 'Crée un compte (Réglages) pour recevoir ton vrai numéro de joueur'}>#{playerNo(profile.tag)}</span>{online.me && <span className="pf-code" title="Ton code ami : donne-le pour qu'on t'ajoute (Communauté → Social)">Code ami <b>{friendCode(online.me.player_no)}</b></span>}</p>
             <p className="pf-hero__bio">{profile.bio.trim() || 'Aucune bio pour l’instant. Présente-toi dans « Modifier le profil ».'}</p>
           </div>
         </div>
