@@ -26,8 +26,10 @@ export const App = () => {
   const go = (t: TabId) => { setTab(t); setVisit((v) => v + 1); window.scrollTo(0, 0) }
   useEffect(() => {
     const on = (e: Event) => { setCommunityAt((e as CustomEvent<CommunityTab>).detail); go('community') }
+    const onGo = (e: Event) => go((e as CustomEvent<TabId>).detail)
     window.addEventListener('anime-rift:community', on)
-    return () => window.removeEventListener('anime-rift:community', on)
+    window.addEventListener('anime-rift:go', onGo)
+    return () => { window.removeEventListener('anime-rift:community', on); window.removeEventListener('anime-rift:go', onGo) }
   })
   const nav = (t: TabId) => { if (t === 'collection' && colTab === 'profile') setColTab('cards'); if (t === 'contracts') setQuestAt('daily'); if (t === 'play') setPlayAt(undefined); go(t) }
   const toProfile = () => { setColTab('profile'); go('collection') }

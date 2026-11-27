@@ -21,8 +21,9 @@ import { bannerOf, pct } from './CardViewer'
 const n = (x: number) => x.toLocaleString('fr-FR')
 const when = (t: number) => new Date(t).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 
+const slug = (t: string) => 'cd-' + t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z]+/g, '-')
 const Section = ({ title, aside, children, closed, hue }: { title: string; aside?: string; children: ReactNode; closed?: boolean; hue: string }) => (
-  <details className="cd-sec" open={!closed} style={{ ['--sh' as string]: hue }}>
+  <details className="cd-sec" id={slug(title)} open={!closed} style={{ ['--sh' as string]: hue }}>
     <summary><span>{title}</span>{aside && <em>{aside}</em>}<i aria-hidden="true" /></summary>
     <div className="cd-sec__body">{children}</div>
   </details>
@@ -118,10 +119,17 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
               {has && <button className="cd-btn cd-btn--main" disabled={copies < 2 || maxed} onClick={onMerge}>Fusionner un doublon<small>{maxed ? 'Niveau maximum' : copies < 2 ? 'Il faut 2 exemplaires' : `+${n(MERGE_XP[hero.rarity])} XP`}</small></button>}
               {has && <button className={`cd-btn ${isPinned ? 'is-on' : ''}`} aria-pressed={isPinned} onClick={onPin}>{isPinned ? 'Retirer de ma vitrine' : 'Épingler dans ma vitrine'}<small>{pinned.length} / {SHOWCASE_MAX} places</small></button>}
               <button className={`cd-btn ${wished ? 'is-on' : ''}`} aria-pressed={wished} onClick={() => toggleWish(hero.id)}>{wished ? '♥ Dans mes envies' : '♡ Ajouter aux envies'}</button>
+              <button className="cd-btn" onClick={() => { try { sessionStorage.setItem('anime-rift:bz-q', hero.name) } catch { /* rien */ } onClose(); window.dispatchEvent(new CustomEvent('anime-rift:go', { detail: 'bazaar' })) }}>Chercher au Bazar →<small>Annonces de cette carte</small></button>
             </div>
             <p className="cd__notice" role="status">{notice}</p>
           </div>
         </header>
+
+        <nav className="cd-anchors" aria-label="Sections de la fiche">
+          {['Statistiques', 'Techniques', 'Collectifs', 'Amélioration', 'Historique', 'Cote de la carte', 'Où l\'obtenir'].map((t) => (
+            <button key={t} onClick={() => { const el = document.getElementById(slug(t)); if (el) { (el as HTMLDetailsElement).open = true; el.scrollIntoView({ behavior: 'smooth', block: 'start' }) } }}>{t === 'Cote de la carte' ? 'Cote' : t}</button>
+          ))}
+        </nav>
 
         {!has && <p className="cd-locked-note">Tu n'as pas encore cette carte : statistiques au niveau 1, sans bonus.</p>}
 

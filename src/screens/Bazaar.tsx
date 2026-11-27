@@ -38,10 +38,10 @@ const tog = <T,>(list: T[], x: T) => (list.includes(x) ? list.filter((y) => y !=
 
 export const Bazaar = () => {
   const store = useStore()
-  const [tab, setTab] = useState<Tab>('players')
+  const [tab, setTab] = useState<Tab>(() => { try { return sessionStorage.getItem('anime-rift:bz-q') ? 'buy' : 'players' } catch { return 'players' } })
   const [now, setNow] = useState(() => Date.now())
   const [msg, setMsg] = useState('')
-  const [q, setQ] = useState('')
+  const [q, setQ] = useState(() => { try { const v = sessionStorage.getItem('anime-rift:bz-q') ?? ''; sessionStorage.removeItem('anime-rift:bz-q'); return v } catch { return '' } })
   const [rars, setRars] = useState<RarityId[]>([])
   const [worlds, setWorlds] = useState<string[]>([])
   const [roles, setRoles] = useState<RoleKind[]>([])
