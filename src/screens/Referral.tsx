@@ -10,7 +10,7 @@ export const Referral = () => {
   const [count, setCount] = useState(0)
   const [msg, setMsg] = useState('')
   useEffect(() => { if (session) void myReferrals().then(setCount) }, [session])
-  if (!session) return <section className="so-login"><h2>Lien de Faille</h2><p>Connecte-toi pour obtenir ton lien de parrainage et débloquer 10 récompenses.</p><button className="oauth oauth--discord" onClick={openSettings}>Se connecter</button></section>
+  if (!session) return <section className="so-login"><h2>Lien de Faille</h2><p>Connecte-toi pour obtenir ton lien de parrainage et débloquer 20 récompenses.</p><button className="oauth oauth--discord" onClick={openSettings}>Se connecter</button></section>
   const link = `https://zoro45480.github.io/anime-rift/?ref=${me?.player_no ?? ''}`
   const next = REFERRAL.findIndex((_, i) => !store.refClaimed.includes(i + 1))
   return (
@@ -18,12 +18,12 @@ export const Referral = () => {
       <header className="gd-hero"><p className="eyebrow">Invite tes amis</p><h1>Lien de Faille</h1><p>Chaque ami qui rejoint le jeu avec ton lien ouvre une case. La dernière cache le plus gros lot.</p></header>
       <div className="so__grid">
         <section className="so-box">
-          <header className="so-box__head"><h2>Récompenses</h2><span><b>{count}</b> / 10 amis</span></header>
-          <div className="ct__bar"><i style={{ width: `${Math.min(100, count * 10)}%` }} /></div>
+          <header className="so-box__head"><h2>Récompenses</h2><span><b>{count}</b> / {REFERRAL.length} recrues</span></header>
+          <div className="ct__bar"><i style={{ width: `${Math.min(100, (count / REFERRAL.length) * 100)}%` }} /></div>
           <ol className="rf-grid">{REFERRAL.map((r, i) => {
             const step = i + 1, done = store.refClaimed.includes(step), ready = !done && count >= step
             return (
-              <li key={step} className={`rf-step ${done ? 'is-done' : ready ? 'is-ready' : ''} ${step === 10 ? 'is-big' : ''}`}>
+              <li key={step} className={`rf-step ${done ? 'is-done' : ready ? 'is-ready' : ''} ${step === 10 || step === 20 ? 'is-big' : ''}`}>
                 <span className="rf-step__n">{step}</span>
                 <img src={r.card ? uiArt('card-pack') : uiArt('chest')} alt="" />
                 <b>{r.label}</b><small>{step} ami{step > 1 ? 's' : ''}</small>

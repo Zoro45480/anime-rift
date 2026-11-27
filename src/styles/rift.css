@@ -240,3 +240,28 @@ button:focus-visible { outline-color: var(--accent2) !important; }
 .cd-sec { scroll-margin-top: 120px; }
 .cd .cd__hero h1, .cd h1 { font-family: var(--font-display); font-weight: 400; font-style: normal; text-transform: uppercase; letter-spacing: 0.005em; }
 .cd-stat b, .cd-level b { font-family: var(--font-num); }
+
+/* ═════ Panthéon : ma ligne collée, mini-fiche ═════ */
+.hf__stick { position: sticky; bottom: calc(var(--dock-h, 66px) + 12px); z-index: 4; display: flex; align-items: center; gap: 10px; margin-top: 8px; padding: 12px 16px; border-radius: 12px; background: var(--panel2); box-shadow: inset 0 0 0 1.5px var(--accent), 0 12px 30px rgba(0, 0, 0, 0.6); }
+.hf__stick i { color: var(--dim); font-style: normal; }
+.hf__stick u { text-decoration: none; padding: 1px 8px; border-radius: 99px; font-size: 11px; font-weight: 800; background: var(--accent); }
+.hf__stick .hf__score { margin-left: auto; font-family: var(--font-num); font-weight: 800; }
+@media (min-width: 1100px) { .hf__stick { bottom: 12px; } }
+.hf__table td, .hf__score, .hf__rank { font-variant-numeric: tabular-nums; }
+.hf__score { font-family: var(--font-num); }
+.pmini { position: relative; width: min(380px, 100%); overflow: hidden; display: grid; justify-items: center; gap: 6px; padding: 0 20px 20px; border-radius: 18px; text-align: center; background: var(--panel); box-shadow: inset 0 0 0 1px var(--line2), 0 30px 80px rgba(0, 0, 0, 0.7); }
+.pmini__ban { width: calc(100% + 40px); height: 84px; margin: 0 -20px; background: radial-gradient(120% 140% at 20% 0%, rgba(124, 92, 255, 0.6), transparent 60%), linear-gradient(120deg, #1a1030, #0b1a24); }
+.pmini__x { position: absolute; top: 10px; right: 10px; z-index: 2; width: 32px; height: 32px; border-radius: 8px; font-size: 20px; background: rgba(0, 0, 0, 0.5); box-shadow: inset 0 0 0 1px var(--line2); }
+.pmini__av { display: grid; place-items: center; width: 84px; height: 84px; margin-top: -42px; overflow: hidden; border-radius: 50%; font-size: 34px; font-weight: 800; background: var(--panel2); box-shadow: 0 0 0 4px var(--panel), 0 0 0 6px var(--accent); }
+.pmini__av img { width: 100%; height: 100%; object-fit: cover; }
+.pmini h3 { font-size: 20px; font-weight: 800; }
+.pmini h3 i { font-style: normal; color: var(--dim); font-weight: 600; }
+.pmini__title { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); }
+.pmini__lvl, .pmini__bio { font-size: 13px; color: var(--muted); }
+.pmini__nums { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; padding: 0; margin: 6px 0; list-style: none; }
+.pmini__nums li { display: grid; padding: 10px 6px; border-radius: 10px; background: var(--bg2); }
+.pmini__nums b { font-family: var(--font-num); font-size: 18px; }
+.pmini__nums span { font-size: 11px; color: var(--muted); }
+.pmini__code { font-size: 12.5px; color: var(--muted); }
+.pmini__code b { font-family: ui-monospace, Menlo, monospace; color: var(--text); letter-spacing: 0.08em; }
+.pmini__btns { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
