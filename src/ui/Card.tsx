@@ -5,7 +5,8 @@ import { roleKind, type Hero } from '../data/heroes'
 import { RARITIES } from '../data/rarities'
 import { cardState, titleOf } from '../game/progression'
 import { getTitleMode } from './graphics'
-import { extraArt, frameArt, frameFx, heroArt } from '../assets/manifest'
+import { extraArt, frameArt, frameFx, heroArt, mrFrameArt } from '../assets/manifest'
+import { MR_THEMES, startMrFx } from './mrFx'
 import { useStore } from '../state/store'
 import { AffinityIcon } from './AffinityIcon'
 import { useCardViewer } from './CardViewer'
@@ -30,6 +31,14 @@ export const Card = ({ hero, count, locked, inert, hd, className = '', style }: 
   const remote = remoteArt[hero.id] && remoteArt[hero.id] !== failed ? remoteArt[hero.id] : undefined
   // ordre : l'image choisie par le joueur, puis le portrait officiel chargé depuis AniList, sinon le portrait de remplacement
   const art = custom ?? remote ?? heroArt(hero.model, 'full')
+  // MR : cadre dessiné propre à son univers, lueur à sa couleur, et particules animées sur la carte en grand
+  const theme = frameOf(hero.world)
+  const mrSrc = hero.rarity === 'rift' ? mrFrameArt(theme, hd) : ''
+  const fxRef = useRef<HTMLCanvasElement>(null)
+  useEffect(() => {
+    if (!mrSrc || !hd || !fxRef.current || document.documentElement.dataset.fx === 'low') return
+    return startMrFx(fxRef.current, theme)
+  }, [mrSrc, hd, theme])
 
   const onMove = (e: PointerEvent<HTMLDivElement>) => {
     const el = ref.current!
@@ -50,8 +59,8 @@ export const Card = ({ hero, count, locked, inert, hd, className = '', style }: 
   }
 
   return (
-    <div ref={ref} className={`card card--${hero.rarity} ${locked ? 'is-locked' : ''} ${className}`}
-      style={{ ['--rc' as string]: rarity.color, ['--ac' as string]: AFFINITIES[hero.affinity].color, ['--delay' as string]: `${-hero.no * 0.9}s`, ...style }}
+    <div ref={ref} className={`card card--${hero.rarity} ${mrSrc ? 'card--mrframe' : ''} ${locked ? 'is-locked' : ''} ${className}`}
+      style={{ ['--rc' as string]: rarity.color, ['--ac' as string]: AFFINITIES[hero.affinity].color, ...(mrSrc ? { ['--mr-glow' as string]: MR_THEMES[theme]?.glow ?? '#ff3d9a' } : {}), ['--delay' as string]: `${-hero.no * 0.9}s`, ...style }}
       {...(openable ? { role: 'button', tabIndex: 0, 'aria-label': `Voir la carte ${hero.name}`, onClick: () => viewer.open(hero), onKeyDown: (e: KeyboardEvent<HTMLDivElement>) => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); viewer.open(hero) } } } : {})}
       onPointerMove={locked ? undefined : onMove} onPointerLeave={onLeave} onPointerCancel={onLeave}>
       <div className="card__tilt">
@@ -86,8 +95,14 @@ export const Card = ({ hero, count, locked, inert, hd, className = '', style }: 
             </span>
           </div>
         </div>
-        <img className="card__frame" src={frameArt(hero.rarity, frameOf(hero.world), hd)} alt="" decoding="async" />
-        <img className={`card__fx ${frameOf(hero.world) === 'naruto' ? '' : 'card__fx--own'}`} src={frameFx(hero.rarity, frameOf(hero.world), hd)} alt="" decoding="async" />
+        {mrSrc ? <>
+          <img className={`card__frame card__frame--mr card__frame--mr-${theme}`} src={mrSrc} alt="" decoding="async" />
+          <span className={`card__mrshine card__frame--mr-${theme}`} style={{ WebkitMaskImage: `url("${mrSrc}")`, maskImage: `url("${mrSrc}")` }} aria-hidden="true" />
+          {hd && <canvas ref={fxRef} className="card__mrfx" aria-hidden="true" />}
+        </> : <>
+          <img className="card__frame" src={frameArt(hero.rarity, frameOf(hero.world), hd)} alt="" decoding="async" />
+          <img className={`card__fx ${frameOf(hero.world) === 'naruto' ? '' : 'card__fx--own'}`} src={frameFx(hero.rarity, frameOf(hero.world), hd)} alt="" decoding="async" />
+        </>}
         {title && <span className={`card__title card__title--${title.tier} card__title--${frameOf(hero.world)}`}><img src={extraArt(`ribbon-${frameOf(hero.world)}`)} alt="" /><b>{title.name}</b></span>}
         <span className="card__mono" data-t={rarity.short} aria-label={rarity.label}>{rarity.short}</span>
       </div>

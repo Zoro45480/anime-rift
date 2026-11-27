@@ -36,6 +36,11 @@ const pick = (name: string, theme: string, hd: boolean) => {
 export const frameArt = (rarity: string, theme = 'naruto', hd = false): string => pick(rarity, theme, hd)
 
 // Effets lumineux du même cadre (étoiles, arcs, flammes), rendus à part pour que le jeu puisse les animer.
+// Cadres MR dessinés par univers (fournis par le joueur) : grande et petite version.
+const mrFrames = import.meta.glob('./mr-frames/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
+const mrFramesSm = import.meta.glob('./mr-frames-sm/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
+export const mrFrameArt = (theme: string, hd = false): string => (hd ? mrFrames[`./mr-frames/${theme}.webp`] : mrFramesSm[`./mr-frames-sm/${theme}.webp`]) ?? ''
+
 export const frameFx = (rarity: string, theme = 'naruto', hd = false): string => pick(`${rarity}-fx`, theme, hd)
 
 const ui = import.meta.glob('./ui/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
