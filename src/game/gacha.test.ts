@@ -63,7 +63,7 @@ describe('gacha', () => {
       const observed = (seen[r.id] ?? 0) / n
       expect(Math.abs(observed - r.rate)).toBeLessThan(0.0015 + r.rate * 0.1) // marge statistique, même pour 0,05 %
     }
-  })
+  }, 30_000) // 2 millions de tirages : laisse le temps aux machines lentes
 
   it('le taux par carte de l\'index totalise 100 % et correspond aux tirages réels', () => {
     for (const banner of BANNERS) {

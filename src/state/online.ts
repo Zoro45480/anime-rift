@@ -381,3 +381,14 @@ export const guildRenown = async (guildId: string) => {
   const { data } = await supa.from('guild_damage').select('damage').eq('guild_id', guildId)
   return (data ?? []).reduce((s: number, x: { damage: number }) => s + Number(x.damage), 0)
 }
+// Puissance des Ordres pour le Panthéon : somme des scores et des collections de leurs membres.
+export const guildPowers = async () => {
+  const { data } = await supa.from('profiles').select('guild_id, score, collection').not('guild_id', 'is', null).limit(5000)
+  const out: Record<string, { power: number; cards: number }> = {}
+  for (const p of (data ?? []) as { guild_id: string; score: number; collection: number }[]) {
+    const g = (out[p.guild_id] ??= { power: 0, cards: 0 })
+    g.power += Number(p.score) || 0
+    g.cards += Number(p.collection) || 0
+  }
+  return out
+}
