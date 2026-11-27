@@ -9,6 +9,7 @@ import { PRESETS } from './presets'
 import { pickHeadliner } from './timeline'
 import { SummonAudio } from './audio'
 import { effectiveGraphics } from '../ui/graphics'
+import { MrEdit } from './MrEdit'
 import type { Quality, SummonStage } from './SummonStage'
 
 // Cinématique d'invocation. `heroes` est exactement ce que le tirage réel a renvoyé : 1, 5 ou 10 cartes.
@@ -26,7 +27,7 @@ const CUTIN_MS: Partial<Record<RarityId, number>> = { ultra: 1100, legend: 1300,
 const hex = (n: number) => `#${n.toString(16).padStart(6, '0')}`
 
 type Step = 'loading' | 'intro' | 'cards' | 'summary'
-type Sub = 'cutin' | 'card'
+type Sub = 'edit' | 'cutin' | 'card'
 
 // Plan d'annonce d'une carte rare : une bande en biais traverse l'écran avec le personnage, et le mot claque.
 const CutIn = ({ hero, art }: { hero: Hero; art: string }) => (
@@ -52,14 +53,15 @@ export const SummonCinematic = ({ heroes, onClose }: { heroes: Hero[]; onClose: 
   const [index, setIndex] = useState(0)
   const [sub, setSub] = useState<Sub>('card')
   const [quality] = useState<Quality>(effectiveGraphics) // réglé dans les Paramètres (Graphismes)
-  const { customArt } = useStore()
+  const { customArt, remoteArt } = useStore()
 
   const single = heroes.length === 1
   const star = pickHeadliner(heroes) // la carte la plus rare décide des couleurs et de l'ampleur de l'ouverture
   const preset = PRESETS[star.rarity]
   const hero = heroes[Math.min(index, heroes.length - 1)]
   const artOf = (h: Hero) => customArt[h.id] ?? heroArt(h.model, 'full')
-  const firstSub = (h: Hero): Sub => (CUTIN_MS[h.rarity] ? 'cutin' : 'card')
+  const editArt = (h: Hero) => customArt[h.id] ?? remoteArt[h.id] ?? heroArt(h.model, 'full')
+  const firstSub = (h: Hero): Sub => (h.rarity === 'rift' ? 'edit' : CUTIN_MS[h.rarity] ? 'cutin' : 'card') // une MR : d'abord son edit plein écran
 
   const beginCards = useCallback(() => {
     setIndex(0)
@@ -118,7 +120,9 @@ export const SummonCinematic = ({ heroes, onClose }: { heroes: Hero[]; onClose: 
   useEffect(() => {
     if (step !== 'cards') return
     const h = heroes[index]
-    if (sub === 'cutin') {
+    if (sub === 'edit') {
+      audio.current.cutIn(h.rarity) // la durée de l'edit est gérée par MrEdit, qui passe ensuite à la carte
+    } else if (sub === 'cutin') {
       audio.current.cutIn(h.rarity)
       timer.current = window.setTimeout(() => setSub('card'), CUTIN_MS[h.rarity])
     } else {
@@ -134,7 +138,7 @@ export const SummonCinematic = ({ heroes, onClose }: { heroes: Hero[]; onClose: 
     if (step === 'intro') stage.current?.skip()
     else if (step === 'cards') {
       window.clearTimeout(timer.current)
-      if (sub === 'cutin') setSub('card')
+      if (sub === 'edit' || sub === 'cutin') setSub('card')
       else next()
     } else if (step === 'summary') onClose()
   }
@@ -179,7 +183,7 @@ export const SummonCinematic = ({ heroes, onClose }: { heroes: Hero[]; onClose: 
       {step === 'cards' && (
         <>
           <div className="sc__stagecard" key={`${index}-${sub}`}>
-            {sub === 'cutin' ? <CutIn hero={hero} art={artOf(hero)} /> : (
+            {sub === 'edit' ? <MrEdit hero={hero} art={editArt(hero)} onDone={() => setSub('card')} /> : sub === 'cutin' ? <CutIn hero={hero} art={artOf(hero)} /> : (
               <>
                 <div className="sc__burst" />
                 <div className="sc__bigcard"><Card hero={hero} hd /></div>
@@ -209,7 +213,7 @@ export const SummonCinematic = ({ heroes, onClose }: { heroes: Hero[]; onClose: 
           <div className="sc__bigcard sc__bigcard--stay"><Card hero={star} hd /></div>
           <p className="sc__rank"><b>{RARITIES[star.rarity].short}</b>{preset.rank}</p>
           <h2 className="sc__name" aria-label={star.name}>
-            {[...star.name].map((ch, i) => <span key={i} style={{ animationDelay: `${0.15 + i * 0.06}s` }}>{ch}</span>)}
+            {[...star.name].map((ch, i) => <span key={i} style={{ animationDelay: `${0.15 + i * 0.06}s` }}>{ch === ' ' ? '\u00a0' : ch}</span>)}
           </h2>
           <p className="sc__title">{star.title} · {star.world}</p>
           <button className="btn btn--gold sc__continue" onClick={onClose} autoFocus>Continuer</button>

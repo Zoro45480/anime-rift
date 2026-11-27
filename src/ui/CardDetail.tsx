@@ -1,3 +1,4 @@
+import { getMrVideos, isVideoUrl, setMrVideo } from '../summon/MrEdit'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { extraArt, iconArt, uiArt } from '../assets/manifest'
@@ -232,6 +233,10 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
           <p className="cd-note">La valeur suit la rareté, le niveau de la carte et la demande du jour au Bazar. Les médianes viennent uniquement de tes vrais achats et ventes : aucun prix n'est inventé. Le Bazar est dans la barre du bas.</p>
         </Section>
 
+        {hero.rarity === 'rift' && <Section hue="#ff3d9a" title="Vidéo d’invocation" aside="MR">
+          <MrVideoField hero={hero} />
+        </Section>}
+
         <Section hue="#4be3a4" title="Où l'obtenir">
           <ul className="cd-where">
             <li><img src={extraArt(`emblem-${frameOf(hero.world)}`)} alt="" onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} /><div><b>Invocation · {hero.rarity === 'rift' ? `bannière ${banner ? banner.world : hero.world} seulement` : 'toutes les bannières'}</b><small>{rate ? `${pct(rate)} par invocation, soit environ 1 sur ${n(Math.round(1 / rate))}.` : 'Cette carte n’est sur aucune bannière en ce moment.'} {hero.rarity === 'rift' ? 'Les cartes MR ne sortent que sur la bannière de leur univers.' : 'Toutes les cartes (sauf MR) sont mélangées : elle peut sortir sur n’importe quelle bannière.'} Avec des Éclats ou des sceaux, dans Invoquer.</small></div></li>
@@ -268,5 +273,26 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
       </div>
     </div>,
     document.body,
+  )
+}
+
+// Lien d'un edit vidéo à lancer en plein écran quand cette MR tombe (sinon, le jeu joue son propre edit animé).
+const MrVideoField = ({ hero }: { hero: Hero }) => {
+  const [url, setUrl] = useState(() => getMrVideos()[hero.id] ?? '')
+  const [msg, setMsg] = useState('')
+  const save = (v: string) => {
+    if (v.trim() && !isVideoUrl(v.trim())) return setMsg('Colle un lien YouTube (youtube.com ou youtu.be) ou un lien direct vers un fichier .mp4 / .webm.')
+    setMrVideo(hero.id, v); setMsg(v.trim() ? 'Enregistré : cette vidéo passera en plein écran quand tu tireras cette MR.' : 'Vidéo retirée : le jeu jouera son edit animé.')
+  }
+  return (
+    <div className="cd-video">
+      <p className="cd-note">Quand {hero.name} tombe en invocation, un edit passe en plein écran. Par défaut, le jeu monte son propre edit avec l’image de la carte. Tu peux mettre la vidéo de ton choix (YouTube ou fichier vidéo) : elle est gardée sur cet appareil.</p>
+      <form className="so-code__form" onSubmit={(e) => { e.preventDefault(); save(url) }}>
+        <input className="set__input" type="url" placeholder="https://youtu.be/…" value={url} onChange={(e) => setUrl(e.target.value)} aria-label="Lien de la vidéo" />
+        <button className="cd-btn cd-btn--small">Enregistrer</button>
+      </form>
+      {getMrVideos()[hero.id] && <button className="linkbtn" onClick={() => { setUrl(''); save('') }}>Retirer la vidéo</button>}
+      {msg && <p className="cd__notice" role="status">{msg}</p>}
+    </div>
   )
 }
