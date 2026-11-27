@@ -16,8 +16,8 @@ export const youtubeId = (url: string) => url.match(/(?:youtu\.be\/|youtube\.com
 export const isVideoUrl = (url: string) => Boolean(youtubeId(url)) || /^https:\/\/\S+\.(mp4|webm|mov)(\?\S*)?$/i.test(url)
 
 export const EDIT_MS = 5600
-const CUTS = [ // [début (ms), cadrage x %, cadrage y %, zoom, rotation]
-  [0, 50, 22, 2.6, -4], [650, 30, 30, 1.9, 3], [1250, 70, 18, 2.2, -2], [1850, 50, 40, 1.5, 0], [2500, 50, 25, 3.2, 6], [3100, 50, 30, 1.15, 0],
+const CUTS = [ // [début (ms), cadrage x %, cadrage y %, zoom, rotation] : zooms modérés pour garder l'image nette
+  [0, 50, 18, 1.7, -3], [650, 35, 25, 1.45, 2], [1250, 65, 15, 1.6, -2], [1850, 50, 35, 1.3, 0], [2500, 50, 20, 1.9, 4], [3100, 50, 25, 1.05, 0],
 ] as const
 
 export const MrEdit = ({ hero, art, onDone }: { hero: Hero; art: string; onDone: () => void }) => {
