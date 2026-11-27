@@ -15,6 +15,7 @@ import './styles/tokens.css'
 import './styles/base.css'
 import './ui/ui.css'
 import './styles/rift.css'
+import { startI18n } from './ui/i18n'
 import { App } from './App'
 import { installGlitter } from './ui/glitter'
 import { installTheme } from './ui/theme'
@@ -34,3 +35,5 @@ applyGraphics()
 if ('serviceWorker' in navigator && location.protocol === 'https:' && window.top === window.self && /github\.io$/.test(location.hostname)) {
   window.addEventListener('load', () => { void navigator.serviceWorker.register('sw.js').catch(() => undefined) })
 }
+
+startI18n()

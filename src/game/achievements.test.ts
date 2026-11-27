@@ -34,3 +34,18 @@ describe('succès', () => {
     for (const t of ['Grimpeur', 'Alpiniste', 'Tueur de gardien', 'Résident', 'Fidèle', 'Contractant']) expect(titles).toContain(t)
   })
 })
+
+import { currentSector, hqLevel, sectorProgress, ALL_SECTORS } from './operations'
+describe('opérations d’Ordre', () => {
+  it('avance de secteur en secteur avec les dégâts de la semaine', () => {
+    expect(currentSector(0)?.id).toBe('scout')
+    expect(currentSector(6_000_000)?.id).toBe('regen')
+    expect(currentSector(60_000_000)).toBeNull()
+    expect(sectorProgress(ALL_SECTORS[1], 3_500_000)).toBeCloseTo(0.5)
+  })
+  it('monte le QG avec la Renommée, jusqu’au niveau 20', () => {
+    expect(hqLevel(0)).toBe(1)
+    expect(hqLevel(25_000_000)).toBe(3)
+    expect(hqLevel(9e9)).toBe(20)
+  })
+})

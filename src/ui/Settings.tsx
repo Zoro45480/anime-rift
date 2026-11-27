@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { getLang, LANGS, setLang } from './i18n'
 import { deleteAccount, signInWith, signOut, useOnline } from '../state/online'
 import { createPortal } from 'react-dom'
 import { cosmeticArt, extraArt } from '../assets/manifest'
@@ -130,6 +131,12 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
             ))}
           </div>
           <p className="set__note">Qualité en ce moment : <b>{effectiveGraphics(graphics) === 'low' ? 'Fluide' : 'Maximale'}</b>. Le mode Fluide fige les lueurs animées, retire les flous et allège l'animation d'invocation : idéal si le jeu saccade.</p>
+        </section>
+
+        <section className="set-card" style={{ ['--sc' as string]: '#22d3ee' }}>
+          <header className="set-card__head"><h3>Langue</h3></header>
+          <div className="set__seg">{LANGS.map(([id, label]) => <button key={id} className={getLang() === id ? 'is-on' : ''} aria-pressed={getLang() === id} onClick={() => { if (getLang() !== id) setLang(id) }}><b>{label}</b></button>)}</div>
+          <p className="set__note">Le français est la version d’origine. En anglais et en allemand, les menus, onglets et boutons sont traduits ; le reste des textes arrive petit à petit.</p>
         </section>
 
         <section className="set-card" style={{ ['--sc' as string]: '#4be3a4' }}>

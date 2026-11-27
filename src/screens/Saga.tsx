@@ -170,7 +170,7 @@ export const Saga = ({ onBack }: { onBack: () => void }) => {
                 {stages.map((s) => {
                   const ok = isUnlocked(s, store.saga)
                   return (
-                    <button key={s.id} disabled={!ok} className={`sg-stage ${s.id === openId ? 'is-open' : ''} ${s.boss ? 'sg-stage--boss' : ''}`} onClick={() => setOpenId(s.id)} aria-label={`${s.world}, combat ${s.index + 1} : ${s.name}${ok ? '' : ' (verrouillé)'}`}>
+                    <button key={s.id} disabled={!ok} className={`sg-stage ${s.id === openId ? 'is-open' : ''} ${s.boss ? 'sg-stage--boss' : ''} ${(store.saga[s.id] ?? 0) > 0 ? 'is-done' : ok ? 'is-next' : ''}`} onClick={() => setOpenId(s.id)} aria-label={`${s.world}, combat ${s.index + 1} : ${s.name}${ok ? '' : ' (verrouillé)'}`}>
                       <b>{s.boss ? 'BOSS' : s.index + 1}</b>
                       {ok ? <Stars value={store.saga[s.id] ?? 0} /> : <small>Verrouillé</small>}
                     </button>

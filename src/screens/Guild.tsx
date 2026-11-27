@@ -2,10 +2,12 @@ import { useCallback, useEffect, useState } from 'react'
 import { colossusOf } from '../game/colossus'
 import { weekKey } from '../game/contracts'
 import {
-  answerRequest, answerRivalry, declareRivalry, fetchRivalries, type Rivalry, createGuild, fetchGuilds, fetchMyGuild, hitGuildBoss, joinGuild, leaveGuild, playersById, setMemberRole, useOnline, weekDamage,
+  answerRequest, answerRivalry, guildRenown, declareRivalry, fetchRivalries, type Rivalry, createGuild, fetchGuilds, fetchMyGuild, hitGuildBoss, joinGuild, leaveGuild, playersById, setMemberRole, useOnline, weekDamage,
   type Guild, type GuildMember, type PublicPlayer,
 } from '../state/online'
 import { useStore } from '../state/store'
+import { heroById, roleKind } from '../data/heroes'
+import { BRANCHES, currentSector, hqLevel, HQ_STEP, OPERATIONS, sectorProgress } from '../game/operations'
 import { Battle } from './Saga'
 import type { ColResult } from '../state/store'
 
@@ -116,7 +118,7 @@ const NoGuild = ({ reload }: { reload: () => Promise<void> }) => {
 const MyGuild = ({ data, reload }: { data: NonNullable<Awaited<ReturnType<typeof fetchMyGuild>>>; reload: () => Promise<void> }) => {
   const store = useStore()
   const { guild, me, members, requests } = data
-  const [tab, setTab] = useState<'boss' | 'rival' | 'members' | 'requests' | 'rank' | 'badges' | 'settings'>('boss')
+  const [tab, setTab] = useState<'ops' | 'boss' | 'rival' | 'members' | 'requests' | 'rank' | 'badges' | 'settings'>('boss')
   const [people, setPeople] = useState<Record<string, PublicPlayer>>({})
   const [dmg, setDmg] = useState<{ user_id: string; damage: number; tries: number }[]>([])
   const [rank, setRank] = useState<Guild[]>([])
@@ -150,7 +152,7 @@ const MyGuild = ({ data, reload }: { data: NonNullable<Awaited<ReturnType<typeof
         </ul>
       </header>
       <div className="coltabs__bar so__tabs" role="tablist">
-        {([['boss', 'Boss de la semaine'], ['rival', 'Rivalité'], ['members', `Membres (${members.length})`], ...(lead ? [['requests', `Candidatures (${requests.length})`]] : []), ['rank', 'Classement'], ['badges', 'Insignes'], ['settings', 'Paramètres']] as [typeof tab, string][]).map(([id, l]) => <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>{l}</button>)}
+        {([['ops', 'Opérations'], ['boss', 'Boss de la semaine'], ['rival', 'Rivalité'], ['members', `Membres (${members.length})`], ...(lead ? [['requests', `Candidatures (${requests.length})`]] : []), ['rank', 'Classement'], ['badges', 'Insignes'], ['settings', 'Paramètres']] as [typeof tab, string][]).map(([id, l]) => <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>{l}</button>)}
       </div>
       {msg && <p className="cd__notice" role="status">{msg}</p>}
       {tab === 'boss' && <div className="so__grid">
@@ -181,6 +183,7 @@ const MyGuild = ({ data, reload }: { data: NonNullable<Awaited<ReturnType<typeof
         <li key={r.user_id} className="gd-row"><div className="gd-row__id"><b>{people[r.user_id]?.name ?? '…'} <i>#{people[r.user_id]?.player_no}</i></b><small>Niveau {people[r.user_id]?.level ?? 1} · {n(people[r.user_id]?.collection ?? 0)} persos</small></div>
           <button className="btn btn--gold gd-join" onClick={() => void answerRequest(guild.id, r.user_id, true).then(reload)}>Accepter</button><button className="cd-btn cd-btn--small" onClick={() => void answerRequest(guild.id, r.user_id, false).then(reload)}>Refuser</button></li>
       ))}</ul>}</section>}
+      {tab === 'ops' && <Operations guildId={guild.id} total={total} tries={store.guildTries} team={store.teamNow} onFight={attack} />}
       {tab === 'rival' && <Rivals guildId={guild.id} lead={lead} rivals={rivals} rank={rank} reload={load} say={setMsg} />}
       {tab === 'badges' && <Insignias guild={guild} members={members.length} total={total} place={place} rivals={rivals} />}
       {tab === 'rank' && <section className="so-box"><header className="so-box__head"><h2>Classement de la semaine</h2></header><ul className="gd-list">{rank.map((g, i) => <GuildRow key={g.id} g={g} i={i} />)}</ul></section>}
@@ -260,6 +263,52 @@ const Rivals = ({ guildId, lead, rivals, rank, reload, say }: { guildId: string;
         {rivals.filter((r) => r.finished && r.status === 'accepted').length === 0 ? <p className="set__note">Aucune rivalité terminée pour l’instant.</p> :
           <ul className="wb-top">{rivals.filter((r) => r.finished && r.status === 'accepted').map((r) => { const s = side(r); return <li key={r.id}><b>{s.x > s.y ? 'Victoire' : s.x < s.y ? 'Défaite' : 'Égalité'}</b><i>contre {s.them} · semaine du {r.week}</i><em>{n(s.x)} – {n(s.y)}</em></li> })}</ul>}
       </section>
+    </div>
+  )
+}
+
+// Opérations : le boss de la semaine en 4 chapitres et 7 secteurs, plus le Quartier général.
+const Operations = ({ guildId, total, tries, team, onFight }: { guildId: string; total: number; tries: number; team: string[]; onFight: () => void }) => {
+  const [sub, setSub] = useState<'ops' | 'hq' | 'squads'>('ops')
+  const [renown, setRenown] = useState<number | null>(null)
+  useEffect(() => { void guildRenown(guildId).then(setRenown) }, [guildId, total])
+  const cur = currentSector(total)
+  const kinds = team.map((id) => roleKind(heroById(id).role))
+  const level = hqLevel(renown ?? 0)
+  return (
+    <div className="ops">
+      <div className="coltabs__bar" role="tablist">{([['ops', 'Opérations'], ['hq', 'Quartier général'], ['squads', 'Escouades']] as const).map(([id, l]) => <button key={id} role="tab" aria-selected={sub === id} className={sub === id ? 'is-active' : ''} onClick={() => setSub(id)}>{l}</button>)}</div>
+      {sub === 'ops' && <>
+        <p className="set__note">Cette semaine, l’Ordre a infligé <b>{n(total)}</b> dégâts. Chaque combat contre le boss d’Ordre fait avancer le secteur en cours. 3 essais par jour et par joueur.</p>
+        {OPERATIONS.map((ch, ci) => (
+          <section key={ch.name} className="so-box ops-ch">
+            <header className="so-box__head"><h2><small>Chapitre {ci + 1}</small> {ch.name}</h2></header>
+            <ul className="ops-sec">{ch.sectors.map((sct) => {
+              const p = sectorProgress(sct, total), done = p >= 1, active = cur?.id === sct.id, locked = !done && !active
+              const ok = !sct.needs || kinds.some((k) => sct.needs!.includes(k))
+              return (
+                <li key={sct.id} className={done ? 'is-done' : active ? 'is-active' : 'is-locked'}>
+                  <div><b>{done ? '✓ ' : locked ? '🔒 ' : ''}{sct.name}</b><small>{sct.text}</small></div>
+                  <div className="cd-bar"><i style={{ width: `${p * 100}%` }} /></div>
+                  <span className="ops-sec__num">{n(Math.min(total, sct.goal))} / {n(sct.goal)}</span>
+                  {active && <button className="cd-btn cd-btn--main cd-btn--small" disabled={!ok || tries < 1 || team.length === 0} onClick={onFight}>{!ok ? 'Rôle requis dans ton équipe' : tries < 1 ? 'Reviens demain' : 'Contribuer →'}</button>}
+                </li>
+              )
+            })}</ul>
+          </section>
+        ))}
+        {!cur && <p className="td-check is-ok">Toutes les opérations de la semaine sont terminées. Bravo à tout l’Ordre !</p>}
+      </>}
+      {sub === 'hq' && <section className="so-box">
+        <header className="so-box__head"><h2>Quartier général · niveau {level} / 20</h2><span>{renown === null ? '…' : `${n(renown)} de Renommée`}</span></header>
+        <div className="cd-bar"><i style={{ width: level >= 20 ? '100%' : `${(((renown ?? 0) % HQ_STEP) / HQ_STEP) * 100}%` }} /></div>
+        <p className="set__note">La Renommée = tous les dégâts infligés par l’Ordre depuis sa création. Elle ne se dépense pas : chaque tranche de {n(HQ_STEP)} fait monter le QG d’un niveau.</p>
+        <ul className="gd-ins">{BRANCHES.flatMap((b) => b.ranks.map((r, i) => (
+          <li key={`${b.id}${i}`} className={level >= r.level ? 'is-done' : ''}><i aria-hidden="true">{level >= r.level ? '✦' : '◇'}</i><b>{b.name} · rang {i + 1}</b><small>{r.text} (niveau {r.level})</small></li>
+        )))}</ul>
+      </section>}
+      {sub === 'squads' && <section className="so-box"><header className="so-box__head"><h2>Escouades</h2><span>bientôt</span></header>
+        <p className="set__note">Les escouades (groupes de 3 à 10 membres avec une mission commune et des cartes de soutien prêtées) arrivent dans une prochaine mise à jour. En attendant, formez un groupe de 3 dans les Raids (Jouer → Raids).</p></section>}
     </div>
   )
 }

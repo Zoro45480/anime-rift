@@ -376,3 +376,8 @@ export const fetchRivalries = async (guildId: string) => {
 }
 export const declareRivalry = async (target: string) => { const r = await rpc('declare_rivalry', { target }); return missing(r) ? SQL04 : r }
 export const answerRivalry = (id: number, accept: boolean) => rpc('answer_rivalry', { rid: id, accept })
+// Renommée d'un Ordre : tous les dégâts infligés depuis sa création (ne se dépense pas).
+export const guildRenown = async (guildId: string) => {
+  const { data } = await supa.from('guild_damage').select('damage').eq('guild_id', guildId)
+  return (data ?? []).reduce((s: number, x: { damage: number }) => s + Number(x.damage), 0)
+}
