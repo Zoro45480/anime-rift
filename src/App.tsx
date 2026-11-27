@@ -57,7 +57,13 @@ export const App = () => {
         {tab === 'collection' && <Collection onSummon={() => go('banners')} tab={colTab} onTab={setColTab} />}
         </ErrorBoundary>
       </main>}
-      <Dock tab={tab} onTab={nav} profileOn={tab === 'collection' && colTab === 'profile'} />
+      <footer className="foot">
+        <button onClick={() => { setColTab('cards'); go('collection') }}>Toutes les cartes</button>
+        <button onClick={() => { setCommunityAt('fame'); go('community') }}>Panthéon</button>
+        <button onClick={() => window.dispatchEvent(new Event('anime-rift:settings'))}>Réglages</button>
+        <span>© ANIME RIFT</span>
+      </footer>
+      <Dock tab={tab} onTab={nav} profileOn={tab === 'collection' && colTab === 'profile'} onProfile={toProfile} />
       <Chat />
       </CardViewerProvider>
     </StoreProvider>
