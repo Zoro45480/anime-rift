@@ -13,7 +13,7 @@ import { Coin } from '../ui/Coin'
 import { STAGES } from '../game/saga'
 import { SHOWCASE_MAX, useStore } from '../state/store'
 import { Card, LazyCard } from '../ui/Card'
-import { LevelBadge, levelStyle } from '../ui/LevelBadge'
+import { levelStyle } from '../ui/LevelBadge'
 import { Avatar, FramedAvatar } from '../ui/Settings'
 
 const n = (x: number) => x.toLocaleString('fr-FR')
@@ -393,13 +393,21 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
             <p className="pf-hero__bio">{profile.bio.trim() || 'Aucune bio pour l’instant. Présente-toi dans « Modifier le profil ».'}</p>
           </div>
         </div>
-        <div className="pf-hero__level">
-          <LevelBadge level={acc.level} rebirths={store.rebirths} size={54} />
-          <div><div className="cd-bar"><i style={{ width: acc.need ? `${(acc.into / acc.need) * 100}%` : '100%' }} /></div><small>{acc.need ? `${n(acc.into)} / ${n(acc.need)} XP` : 'Niveau maximum'}</small></div>
-        </div>
-        <div className="pf-hero__actions">
-          <button className="cd-btn cd-btn--small" onClick={() => setEdit('id')}>✎ Modifier le profil</button>
-          <button className="cd-btn cd-btn--small" onClick={() => setEdit('look')}>✦ Apparence</button>
+        {/* carte du joueur : avatar, pseudo, titre, chiffres clés et boutons */}
+        <div className="pf-me">
+          <div className="pf-me__top">
+            <Photo size={104} />
+            <div className="pf-me__id">
+              <p className="pf-me__name"><Name tag="b" /><i>#{playerNo(profile.tag)}</i></p>
+              <TitlePlate title={profile.title || DEFAULT_TITLE} small />
+              <p className="pf-me__stats"><b>{n(mine.length)}</b><span>persos</span><b>{n(mine.filter((h) => h.rarity === 'legend').length)}</b><span>LR</span><em>★</em><b>{n(stars)}</b></p>
+            </div>
+            <div className="pf-me__btns">
+              <button onClick={() => setEdit('id')}><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 4-6 8-6s8 2 8 6" /></svg>Modifier le profil</button>
+              <button onClick={() => setEdit('look')}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z" /><path d="M14 6l4 4" /></svg>Personnaliser</button>
+            </div>
+          </div>
+          <div className="pf-me__lvl"><span>Niveau <b>{acc.level}</b></span><div className="cd-bar"><i style={{ width: acc.need ? `${(acc.into / acc.need) * 100}%` : '100%' }} /></div><small>{acc.need ? `${n(acc.into)} / ${n(acc.need)} XP` : 'Niveau maximum'}</small></div>
         </div>
       </section>
 

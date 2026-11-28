@@ -1120,3 +1120,32 @@ body:has(.sc) .chat__toggle, body:has(.sc) .chat__panel { display: none !importa
 .rw__title { padding: 2px 9px !important; border-radius: 999px; font-weight: 800; font-size: 12px; color: #1a1020 !important; background: #c9d3ea; }
 .rw__title--rare { background: #8fb6ff; } .rw__title--epic { background: #c9a6ff; } .rw__title--legend { background: linear-gradient(90deg, #ffe08a, #ffc24d); }
 .rw__title--mythic { background: linear-gradient(90deg, #ff6ad5, #ffd166, #6af0ff); }
+/* ═══ Profil : carte du joueur (à la place du bloc niveau) ═══ */
+.pf-me { position: relative; z-index: 2; display: grid; gap: 12px; padding: 16px 18px; border-radius: 14px; background: rgba(14, 15, 22, .92); border: 1px solid rgba(255, 255, 255, .12); box-shadow: 0 18px 40px -20px rgba(0, 0, 0, .8); }
+.pf-me__top { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px; align-items: center; }
+.pf-me__top > :first-child { flex: none; }
+.pf-me__id { display: grid; gap: 6px; justify-items: start; padding-right: 16px; border-right: 1px solid rgba(255, 255, 255, .12); min-width: 0; }
+.pf-me__name { margin: 0; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.pf-me__name b, .pf-me__name h1 { font-size: 21px; font-weight: 800; margin: 0; }
+.pf-me__name i { font-style: normal; font-size: 18px; color: #8d90a3; font-weight: 600; }
+.pf-me__stats { margin: 0; display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.pf-me__stats b { font-family: var(--font-display); font-weight: 400; font-size: 27px; line-height: 1; color: #f1e6c8; }
+.pf-me__stats span { font-size: 13px; color: #a7aabb; margin-right: 8px; }
+.pf-me__stats em { font-style: normal; color: #ffc94d; font-size: 14px; margin-right: -2px; }
+.pf-me__btns { display: grid; gap: 10px; }
+.pf-me__btns button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 46px; padding: 0 20px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 14px; color: #fff; background: transparent; border: 1px solid rgba(255, 255, 255, .28); transition: background .2s, border-color .2s; white-space: nowrap; }
+.pf-me__btns button:hover { background: rgba(255, 255, 255, .06); border-color: rgba(255, 255, 255, .5); }
+.pf-me__btns svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.pf-me__lvl { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; font-size: 12px; color: #a7aabb; }
+.pf-me__lvl b { color: #fff; } .pf-me__lvl .cd-bar { height: 5px; } .pf-me__lvl .cd-bar i { background: linear-gradient(90deg, var(--tc, #7d5cff), color-mix(in srgb, var(--tc, #7d5cff) 50%, #fff)); }
+@media (min-width: 1100px) {
+  .pf-hero { grid-template-columns: minmax(0, 1fr) auto !important; }
+  .pf-me { grid-column: 2; grid-row: 1 / span 2; align-self: end; }
+}
+@media (max-width: 640px) {
+  .pf-me__top { grid-template-columns: auto minmax(0, 1fr); }
+  .pf-me__id { border-right: 0; padding-right: 0; }
+  .pf-me__btns { grid-column: 1 / -1; grid-template-columns: 1fr 1fr; }
+  .pf-me__btns button { min-height: 42px; padding: 0 10px; font-size: 13px; }
+}
+.pf-me .plate { max-width: 100%; } .pf-me__top > :first-child { margin: -10px -6px; }
