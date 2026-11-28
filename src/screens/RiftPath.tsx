@@ -5,7 +5,7 @@ import { RARITIES } from '../data/rarities'
 import { BANNERS } from '../data/banners'
 import { premiumReward, CARD_ODDS, claimableTiers, PATH_XP, rollPath, seasonOf, TIER_REWARDS, TIER_XP, tierOf, TIERS, tierCost, tierStart, type PathReward } from '../game/riftpath'
 import { SCROLLS } from '../game/progression'
-import { challengesFor, CHALLENGE_TIMES, challengeState, msToDayEnd } from '../game/contracts'
+import { DAILY_COUNT, WEEKLY_COUNT } from '../game/contracts'
 import { useStore } from '../state/store'
 import { Card } from '../ui/Card'
 import { Coin } from '../ui/Coin'
@@ -29,7 +29,7 @@ const Loot = ({ r, big }: { r: PathReward; big?: boolean }) => (
 
 const ticketLr = Object.values(import.meta.glob('../assets/referral/ticket_LR.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>)[0]
 
-export const RiftPath = ({ now }: { now: Date }) => {
+export const RiftPath = ({ now, onGo }: { now: Date; onGo?: (to: 'day' | 'week') => void }) => {
   const store = useStore()
   const path = rollPath(store.path, now)
   const season = seasonOf(now)
@@ -109,35 +109,30 @@ export const RiftPath = ({ now }: { now: Date }) => {
         </ol>
       </div>
 
-      <div className="pt__ch">
-        {challengesFor(now).some((c) => challengeState(c, store.quests, now).ready) && <div className="claim-all"><span>Des défis de saison sont prêts.</span>
-          <button className="btn btn--gold" onClick={() => store.claimAllChallenges()}>Tout récupérer ({challengesFor(now).filter((c) => challengeState(c, store.quests, now).ready).length})</button></div>}
-        <h3 className="pt__qtitle">Quêtes de saison <small>Les quêtes de la saison changent quand le pass se termine (dans {left(season.msLeft)}). Chacune se refait {CHALLENGE_TIMES} fois par jour · compteurs remis à zéro dans {left(msToDayEnd(now))}</small></h3>
-        <ul>
-          {challengesFor(now).map((c) => {
-            const st = challengeState(c, store.quests, now)
-            return (
-              <li key={c.id} className={`ct ${st.ready ? 'is-ready' : ''} ${st.finished ? 'is-done' : ''}`}>
-                <div className="ct__main">
-                  <b>{c.title}</b>
-                  <div className="ct__bar"><i style={{ width: `${st.finished ? 100 : (st.value / c.target) * 100}%` }} /></div>
-                  <small>{st.finished ? 'Terminé pour aujourd’hui' : `${st.value.toLocaleString('fr-FR')} / ${c.target.toLocaleString('fr-FR')}`} · <span className="pt__times">{Array.from({ length: CHALLENGE_TIMES }, (_, i) => <i key={i} className={i < st.done ? 'is-on' : ''} />)}</span></small>
-                </div>
-                <span className="rw"><span className="pt__xpchip">+{c.xp} XP</span><span><Coin name="soul" size={18} />{c.gems}</span></span>
-                {st.finished ? <span className="ct__state">✓ {CHALLENGE_TIMES} / {CHALLENGE_TIMES}</span>
-                  : st.ready ? <button className="ct__claim" onClick={() => store.claimChallenge(c.id)}>Récupérer</button>
-                    : <span className="ct__state">{st.done} / {CHALLENGE_TIMES}</span>}
-              </li>
-            )
-          })}
-        </ul>
+      {/* ce qui fait avancer le pass : les missions du jour et de la semaine */}
+      <div className="pq">
+        <h3 className="pq__title">Quêtes de saison</h3>
+        <p className="pq__intro">Les missions du jour et de la semaine font avancer le pass. En les faisant toutes : {DAILY_COUNT * PATH_XP.dayContract + PATH_XP.dayBonus} XP par jour et {WEEKLY_COUNT * PATH_XP.weekContract} XP par semaine, en plus des défis du pass.</p>
+        <div className="pq__grid">
+          {([['day', 'Missions du jour', PATH_XP.dayContract, 'par mission du jour récupérée', 'M8 4h8a2 2 0 0 1 2 2v14H6V6a2 2 0 0 1 2-2Zm1 5h2m2 0h2M9 13h2m2 0h2M9 17h2'],
+            ['day', 'Toutes celles du jour', PATH_XP.dayBonus, 'de bonus quand toutes les missions du jour sont récupérées', 'M12 3l2.6 5.6 6.1.6-4.6 4.1 1.3 6L12 16.3 6.6 19.3l1.3-6L3.3 9.2l6.1-.6Z'],
+            ['week', 'Missions de la semaine', PATH_XP.weekContract, 'par mission de la semaine récupérée', 'M6 21V4m0 1h11l-2 4 2 4H6']] as ['day' | 'week', string, number, string, string][]).map(([to, title, xp, text, d], i) => (
+            <article key={title} className="pq__card">
+              <svg viewBox="0 0 24 24" className={`pq__ico pq__ico--${i}`} aria-hidden="true"><path d={d} /></svg>
+              <div><h4>{title}</h4><p>{text}</p></div>
+              <b className="pq__xp">+{xp} XP</b>
+              <button className="pq__go" onClick={() => onGo?.(to)}>Y aller →</button>
+            </article>
+          ))}
+        </div>
+        <p className="pq__warn">La saison se termine dans {left(season.msLeft)} : les paliers débloqués et non récupérés sont perdus au changement de saison, pense à les récupérer avant.</p>
       </div>
 
       <div className="pt__how">
         <h3>Comment avancer</h3>
         <ul>
-          {([['Récompense du jour', PATH_XP.daily], ['Contrat du jour récupéré', PATH_XP.dayContract], ['Bonus « tous les contrats du jour »', PATH_XP.dayBonus], ['Contrat de la semaine récupéré', PATH_XP.weekContract],
-            ["Contrat d'histoire récupéré", PATH_XP.storyContract], ['Combat gagné', PATH_XP.win], ['Invocation', PATH_XP.pull], ['Étage de La Tour de l’Infini', PATH_XP.floor]] as [string, number][])
+          {([['Récompense du jour', PATH_XP.daily], ['Mission du jour récupérée', PATH_XP.dayContract], ['Bonus « toutes les missions du jour »', PATH_XP.dayBonus], ['Contrat de la semaine récupéré', PATH_XP.weekContract],
+            ["Mission d'histoire récupérée", PATH_XP.storyContract], ['Combat gagné', PATH_XP.win], ['Invocation', PATH_XP.pull], ['Étage de La Tour de l’Infini', PATH_XP.floor]] as [string, number][])
             .map(([label, xp]) => <li key={label}><span>{label}</span><b>+{xp} XP</b></li>)}
         </ul>
         <p className="set__note">Le 1er palier coûte {TIER_XP} XP, puis chaque palier coûte un peu plus (le 40e : {tierCost(TIERS)} XP). Tous les 10 paliers : une carte ({CARD_ODDS.map(([id, p]) => `${RARITIES[id].short} ${Math.round(p * 100)} %`).join(', ')}), 10 sceaux et un grand parchemin. À la fin de la saison, le chemin repart de zéro avec un nouveau thème : récupère tes récompenses avant !</p>
@@ -146,7 +141,7 @@ export const RiftPath = ({ now }: { now: Date }) => {
       {cards.length > 0 && (
         <div className="pt-reveal" role="dialog" aria-modal="true" aria-label="Nouvelle carte" onClick={() => setCards([])}>
           <div className="pt-reveal__box" onClick={(e) => e.stopPropagation()}>
-            <p className="eyebrow">Chemin du Rift</p>
+            <p className="eyebrow">Pass de combat</p>
             <h3>{cards.length > 1 ? 'Nouvelles cartes !' : 'Nouvelle carte !'}</h3>
             <div className="pt-reveal__cards">{cards.map((h, i) => <Card key={`${h.id}-${i}`} hero={h} />)}</div>
             <button className="btn btn--gold" onClick={() => setCards([])}>Super !</button>

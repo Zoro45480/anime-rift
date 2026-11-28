@@ -9,7 +9,7 @@ const roman = (k: number) => ROMAN[k] ?? String(k)
 const MEDALS = ['Or', 'Argent', 'Bronze']
 type Tab = 'score' | 'collection' | 'spire' | 'guilds'
 
-// Titre de la semaine d'un Ordre selon sa place.
+// Titre de la semaine d'une Guilde selon sa place.
 export const orderTitle = (rank: number) => (rank === 1 ? 'Légende' : rank <= 3 ? 'Maîtres' : rank <= 10 ? 'Élite' : '')
 
 const Ico = ({ d }: { d: string }) => <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={d} /></svg>
@@ -19,19 +19,19 @@ const ICON: Record<Tab, string> = {
   spire: 'M8 4h8v4a4 4 0 0 1-8 0V4Zm4 8v4m-4 4h8m-6-4h4',
   guilds: 'M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-3Zm0 5l1.2 2.4 2.6.4-1.9 1.8.5 2.6-2.4-1.2-2.4 1.2.5-2.6-1.9-1.8 2.6-.4Z',
 }
-const TABS: [Tab, string][] = [['score', 'Global'], ['collection', 'Collection'], ['spire', 'Tour de l’Infini'], ['guilds', 'Ordres']]
+const TABS: [Tab, string][] = [['score', 'Global'], ['collection', 'Collection'], ['spire', 'Tour de l’Infini'], ['guilds', 'Guildes']]
 const HEAD: Record<Tab, [string, string]> = {
   score: ['Les plus grandes carrières', 'Toute ta carrière compte, avant et après les Ascensions : records de collection et de cartes MR, niveaux de toutes les vies, Ascensions, succès, arène et Tour de l’Infini.'],
   collection: ['Les plus grands collectionneurs', 'Classés par persos uniques, puis par cartes MR et LR.'],
   spire: ['Tour de l’Infini', 'Le meilleur étage atteint. À égalité, le premier arrivé passe devant.'],
-  guilds: ['Ordres', 'Les Ordres classés par puissance : la somme des scores de leurs membres.'],
+  guilds: ['Guildes', 'Les Guildes classées par puissance : la somme des scores de leurs membres.'],
 }
 
 // Avatar rond, image du joueur ou son initiale sur un dégradé.
 const Face = ({ p, size }: { p: { name: string; avatar: string }; size: number }) => (
   <span className="pth-face" style={{ width: size, height: size, fontSize: size * 0.42 }}>{p.avatar ? <img src={p.avatar} alt="" referrerPolicy="no-referrer" /> : p.name[0]?.toUpperCase()}</span>
 )
-// Étiquette de l'Ordre : emblème + TAG (+ nom en entier si demandé).
+// Étiquette de l'Guilde : emblème + TAG (+ nom en entier si demandé).
 const GuildTag = ({ g, full }: { g?: Guild; full?: boolean }) => g ? (
   <span className="pth-gtag" style={{ ['--gc' as string]: g.color }} title={g.name}><i lang="ja">{g.emblem}</i><b>{g.tag}</b>{full && <em>{g.name}</em>}</span>
 ) : null
@@ -69,7 +69,7 @@ export const Pantheon = () => {
   const total = HEROES.length
 
   const stats: [string, string][] = tab === 'guilds'
-    ? [[n(orders.length), 'Ordres classés'], [myOrderRank ? `#${myOrderRank}` : '—', 'Ton Ordre'], [myOrderRank ? n(orders[myOrderRank - 1].power) : '—', 'Sa puissance']]
+    ? [[n(orders.length), 'Guildes classées'], [myOrderRank ? `#${myOrderRank}` : '—', 'Ta Guilde'], [myOrderRank ? n(orders[myOrderRank - 1].power) : '—', 'Sa puissance']]
     : tab === 'spire'
       ? [[data ? n(data.top.filter((p) => p.spire > 0).length) : '…', 'Joueurs classés'], [me && rank && me.spire > 0 ? `#${n(rank)}` : '—', 'Ta place'], [me ? n(me.spire) : '0', 'Étage atteint']]
       : tab === 'collection'
@@ -98,7 +98,7 @@ export const Pantheon = () => {
       {!me && <p className="hf__join">Tu n’es pas encore classé : connecte-toi avec Discord ou Google dans les <b>Réglages</b> pour apparaître ici.</p>}
 
       {tab === 'guilds' ? (
-        orders.length === 0 ? <p className="pf-empty">Aucun Ordre classé pour l’instant : crée le premier dans l’onglet Ordre !</p> : <>
+        orders.length === 0 ? <p className="pf-empty">Aucune Guilde classée pour l’instant : crée la première dans l’onglet Guilde !</p> : <>
           <div className="pth-podium">
             <span className="pth-podium__kanji" lang="ja" aria-hidden="true">殿堂</span>
             {[1, 0, 2].map((i) => { const o = orders[i]; if (!o) return <div key={i} className="pth-step" />; return (
@@ -115,12 +115,12 @@ export const Pantheon = () => {
               </div>) })}
           </div>
           <div className="pth-table">
-            <div className="pth-row pth-row--head"><span>#</span><span>Ordre</span><span>Puissance</span></div>
+            <div className="pth-row pth-row--head"><span>#</span><span>Guilde</span><span>Puissance</span></div>
             {orders.map((o, i) => (
               <div key={o.g.id} className={`pth-row ${i < 3 ? `is-top${i + 1}` : ''} ${o.g.id === myGuildId ? 'is-me' : ''}`}>
                 <span className="pth-rank">{i + 1}</span>
                 <span className="pth-who"><span className="pth-emb pth-emb--small" style={{ ['--gc' as string]: o.g.color }} lang="ja">{o.g.emblem}</span>
-                  <span className="pth-who__txt"><b>{o.g.name}</b><span className="pth-tags"><GuildTag g={o.g} />{orderTitle(i + 1) && <span className="pth-title">♛ {orderTitle(i + 1)}</span>}{o.g.id === myGuildId && <span className="pth-you">Ton Ordre</span>}</span></span></span>
+                  <span className="pth-who__txt"><b>{o.g.name}</b><span className="pth-tags"><GuildTag g={o.g} />{orderTitle(i + 1) && <span className="pth-title">♛ {orderTitle(i + 1)}</span>}{o.g.id === myGuildId && <span className="pth-you">Ta Guilde</span>}</span></span></span>
                 <span className="pth-val"><b>{n(o.power)}</b><i><u style={{ width: `${(o.power / Math.max(1, orders[0].power)) * 100}%` }} /></i></span>
               </div>
             ))}
@@ -185,7 +185,7 @@ const PlayerMini = ({ p, guild, onClose }: { p: OnlineProfile; guild?: Guild; on
         <h3>{p.name} <i>#{p.player_no}</i></h3>
         {p.title && <p className="pmini__title">{p.title}</p>}
         <p className="pmini__lvl">Niveau {p.level}{p.rebirths ? ` · ${p.rebirths} Ascension${p.rebirths > 1 ? 's' : ''}` : ''}</p>
-        {guild && <p className="pmini__lvl">Ordre : <GuildTag g={guild} full /></p>}
+        {guild && <p className="pmini__lvl">Guilde : <GuildTag g={guild} full /></p>}
         {p.bio && <p className="pmini__bio">{p.bio}</p>}
         <ul className="pmini__nums"><li><b>{n(p.collection)}</b><span>cartes</span></li><li><b>{p.mr}</b><span>cartes MR</span></li><li><b style={{ color: lg.hue }}>{lg.label}</b><span>{n(p.arena)} élo</span></li></ul>
         <p className="pmini__code">Code ami <b>{friendCode(p.player_no)}</b></p>

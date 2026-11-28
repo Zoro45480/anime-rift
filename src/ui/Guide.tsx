@@ -42,10 +42,10 @@ const TALKS: Record<string, { title: string; lines: string[] }> = {
     'Lis bien la règle de l’étage : parfois elle aide tes Tanks, tes DPS ou tes Soigneurs. Change ton équipe pour en profiter !',
     'Les combats sont gratuits. Tous les 10 étages, un gardien t’attend avec des fragments d’âme pour libérer tes cartes.',
   ] },
-  contracts: { title: 'Les Contrats', lines: [
+  contracts: { title: 'Les Missions', lines: [
     'Ici, tes objectifs. Chaque jour, une récompense t’attend : reviens sept jours de suite pour ouvrir le coffre.',
-    'Les contrats du jour et de la semaine se remplissent tout seuls en jouant : invoquer, combattre, améliorer tes cartes.',
-    'Quand une barre est pleine, touche « Récupérer ». Chaque contrat fait aussi avancer le Chemin du Rift : une récompense par palier, et une carte tous les 10 paliers !',
+    'Les missions du jour et de la semaine se remplissent tout seuls en jouant : invoquer, combattre, améliorer tes cartes.',
+    'Quand une barre est pleine, touche « Récupérer ». Chaque contrat fait aussi avancer le Pass de combat : une récompense par palier, et une carte tous les 10 paliers !',
     'Le Parcours, lui, garde tes records pour toujours.',
   ] },
   collection: { title: 'La Collection', lines: [

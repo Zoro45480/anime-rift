@@ -58,12 +58,12 @@ type State = {
   arena: ArenaState // L'Arène : cote, ligue, duels du jour, défis de la semaine
   refClaimed: number[] // cases du calendrier de parrainage déjà ouvertes
   items?: { lr: number; trade: number } // tickets LR garantis et tickets d'échange (Lien de Faille)
-  gtries: { day: string; n: number } // essais du jour contre le boss d’Ordre
+  gtries: { day: string; n: number } // essais du jour contre le boss de Guilde
   btries?: Record<string, { day: string; n: number }> // essais du jour contre le boss mondial et les raids
   col: ColState // Les Colosses : semaine, difficultés battues, essais du jour, objectifs d'événement
   multis: Record<string, number> // grande garantie : multis ×10 d'affilée sans MR, par bannière
   spire: { best: number } // La Tour de l’Infini : plus haut étage gagné
-  path: PathState // Chemin du Rift : saison, XP, paliers récupérés
+  path: PathState // Pass de combat : saison, XP, paliers récupérés
   quests: Quests // contrats : compteurs du jour, de la semaine, à vie, série quotidienne
   arcHeroes: Record<string, boolean> // cartes qui étaient dans l'équipe quand le boss de leur arc est tombé (titre d'arc)
   tutorialSeen: string[] // écrans dont l'explication de Kiri a déjà été lue
@@ -102,7 +102,7 @@ type Store = State & {
   claimDaily: () => boolean // récompense quotidienne
   markVisit: () => void // « passe voir ta collection »
   claimChallenge: (id: string) => boolean // défi du Chemin (3 fois par jour)
-  claimTier: (tier: number) => Hero | true | null // récupère un palier du Chemin du Rift (la carte obtenue, s'il y en a une)
+  claimTier: (tier: number) => Hero | true | null // récupère un palier du Pass de combat (la carte obtenue, s'il y en a une)
   claimAllTiers: () => Hero[] // récupère tous les paliers prêts
   questsReady: number // contrats et récompense quotidienne à récupérer
   buyCosmetic: (id: string) => boolean // achat en Éclats ; l'objet est équipé aussitôt
@@ -111,7 +111,7 @@ type Store = State & {
   clearNotifs: () => void
   teamNow: string[] // l'équipe réellement utilisée : celle choisie, sinon les 3 cartes les plus puissantes
   setTeam: (ids: string[]) => void
-  fightGuildBoss: () => { result: ColResult; damage: number } | null // boss d’Ordre : 3 essais par jour, les dégâts comptent pour toute l’Ordre
+  fightGuildBoss: () => { result: ColResult; damage: number } | null // boss de Guilde : 3 essais par jour, les dégâts comptent pour toute la Guilde
   guildTries: number
   fightBig: (key: string, perDay: number, hpMult: number) => { result: ColResult; damage: number } | null // boss mondial, raid : dégâts sur un boss géant
   bigTries: (key: string, perDay: number) => number
@@ -179,6 +179,7 @@ const START: State = {
 // La progression est gardée dans le navigateur de cet appareil (pas de compte en ligne pour l'instant).
 export const FREE_KEY_MS = 5 * 60 * 1000
 export const FREE_KEY_CAP = 10
+const uniq = (owned: Record<string, number>) => Object.values(owned).filter((v) => v > 0).length // personnages différents possédés
 const SAVE_KEY = 'anime-rift-save-v1'
 // numéro de joueur à quatre chiffres, tiré une fois
 const newTag = () => String(1000 + Math.floor(Math.random() * 9000))
@@ -341,29 +342,35 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     const resetGame = () => setState({ ...START, profile: state.profile, tutorialSeen: state.tutorialSeen, cosmetics: state.cosmetics })
 
     // Ajoute des compteurs de contrats à un nouvel état, et prévient quand un contrat vient d'être accompli.
-    // Ajoute de l'XP au Chemin du Rift et prévient quand un palier est atteint.
+    // Ajoute de l'XP au Pass de combat et prévient quand un palier est atteint.
     const withPath = (next: State, gain: number): State => {
       if (!gain) return next
       const p = rollPath(next.path, new Date())
       const path = { ...p, xp: p.xp + gain }
       const up = tierOf(path.xp) > tierOf(p.xp)
-      return { ...next, path, notifs: up ? notify(next.notifs, [['quest', `Chemin du Rift : palier ${tierOf(path.xp)} atteint, ta récompense t’attend.`]]) : next.notifs }
+      return { ...next, path, notifs: up ? notify(next.notifs, [['quest', `Pass de combat : palier ${tierOf(path.xp)} atteint, ta récompense t’attend.`]]) : next.notifs }
     }
     const tracked = (base: State, adds: Counts): State => {
       const next = withPath(base, (adds.wins ?? 0) * PATH_XP.win + (adds.pulls ?? 0) * PATH_XP.pull + (adds.floors ?? 0) * PATH_XP.floor)
       const t = new Date()
       const quests = addCounts(next.quests, adds, t)
-      const before = new Set(claimable(state.quests, state.saga, t).map((c) => c.id))
-      const fresh = claimable(quests, next.saga, t).filter((c) => !before.has(c.id))
-      return { ...next, quests, notifs: fresh.length ? notify(next.notifs, fresh.map((c): [Notif['kind'], string] => ['quest', `${c.title} : ta récompense t’attend dans Contrats.`])) : next.notifs }
+      const before = new Set(claimable(state.quests, state.saga, t, uniq(state.owned)).map((c) => c.id))
+      const fresh = claimable(quests, next.saga, t, uniq(next.owned)).filter((c) => !before.has(c.id))
+      return { ...next, quests, notifs: fresh.length ? notify(next.notifs, fresh.map((c): [Notif['kind'], string] => ['quest', `${c.title} : ta récompense t’attend dans Missions.`])) : next.notifs }
     }
     // Donne une récompense (âmes, éclairs au-delà du maximum, sceaux, fragments, parchemins).
     const grant = (s: State, r: Reward): State => {
+      // eslint-disable-next-line no-param-reassign
       const left = energyNow(s.energy, s.energyAt, Date.now())
       const scrolls = { ...s.scrolls }
       for (const [k, v] of Object.entries(r.scrolls ?? {})) scrolls[k as ScrollId] += v ?? 0
       const title = r.title && !s.cosmetics.includes(r.title) ? cosmeticById(r.title) : undefined // titre de quête : ajouté aux titres du joueur
-      return { ...s, gems: s.gems + (r.gems ?? 0), tickets: s.tickets + (r.tickets ?? 0), shards: s.shards + (r.shards ?? 0), scrolls,
+      // carte garantie : une carte au hasard de cette rareté (jamais une MR)
+      const pool = r.sure ? HEROES.filter((h) => h.rarity === r.sure) : []
+      const card = pool.length ? pool[Math.floor(Math.random() * pool.length)] : undefined
+      if (card) s = { ...s, owned: { ...s.owned, [card.id]: (s.owned[card.id] ?? 0) + 1 }, notifs: notify(s.notifs, [['quest', `${card.name} rejoint ta collection (${RARITIES[card.rarity].short} garantie).`]]) }
+      if (r.lr) s = { ...s, items: { lr: (s.items?.lr ?? 0) + r.lr, trade: s.items?.trade ?? 0 } }
+      return { ...s, gems: s.gems + (r.gems ?? 0), tickets: s.tickets + (r.tickets ?? 0) + (r.multi ?? 0) * 10, shards: s.shards + (r.shards ?? 0), scrolls,
         ...(title ? { cosmetics: [...s.cosmetics, title.id], notifs: notify(s.notifs, [['quest', `Nouveau titre : « ${title.name} ». Équipe-le dans ton profil.`]]) } : {}),
         ...(r.energy ? { energy: left + r.energy, energyAt: left >= ENERGY_MAX ? Date.now() : s.energyAt + (left - s.energy) * ENERGY_REGEN_MS } : {}) }
     }
@@ -584,7 +591,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       const { boss, minions } = colossusOf(new Date())
       const diff = DIFFICULTIES[3]
       const allies = teamNow.map((hid, i) => makeUnit(heroById(hid), cardState(heroById(hid), state.xp, state.owned, state.rebirths, state.awakened, teamNow).stats, 0, i))
-      // le boss d’Ordre a énormément de PV : on ne le bat pas seul, on lui retire un maximum de PV en 40 tours
+      // le boss de Guilde a énormément de PV : on ne le bat pas seul, on lui retire un maximum de PV en 40 tours
       const foes = colossusFoes(boss, minions, diff).slice(0, 1).map((u) => ({ ...u, maxHp: u.maxHp * 400, hp: u.maxHp * 400 }))
       const { events } = simulate(allies, foes, Math.random)
       const damage = events.filter((e) => e.actor.startsWith('0-')).reduce((n, e) => n + e.hits.reduce((m, h) => m + h.amount, 0), 0)
@@ -774,7 +781,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     }
     const claimContract = (id: string) => {
       const t = new Date()
-      const c = claimable(state.quests, state.saga, t).find((x) => x.id === id)
+      const c = claimable(state.quests, state.saga, t, uniq(state.owned)).find((x) => x.id === id)
       if (!c) return false
       const xp = c.id === 'd-all' ? PATH_XP.dayBonus : c.period === 'day' ? PATH_XP.dayContract : c.period === 'week' ? PATH_XP.weekContract : PATH_XP.storyContract
       setState(withPath({ ...grant(state, c.reward), quests: addCounts(markClaimed(c, state.quests, t), { claims: 1 }, t) }, xp))
@@ -785,7 +792,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       const t = new Date()
       let next = from, n = 0
       for (let guard = 0; guard < 300; guard++) {
-        const c = claimable(next.quests, next.saga, t)[0]
+        const c = claimable(next.quests, next.saga, t, uniq(next.owned))[0]
         if (!c) break
         const xp = c.id === 'd-all' ? PATH_XP.dayBonus : c.period === 'day' ? PATH_XP.dayContract : c.period === 'week' ? PATH_XP.weekContract : PATH_XP.storyContract
         next = withPath({ ...grant(next, c.reward), quests: addCounts(markClaimed(c, next.quests, t), { claims: 1 }, t) }, xp)
@@ -840,7 +847,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       return true
     }
     const markVisit = () => { if (!roll(state.quests, new Date()).day.c.visit) setState(tracked(state, { visit: 1 })) }
-    // Paliers du Chemin du Rift : la récompense, et une carte SR ou mieux tous les 10 paliers.
+    // Paliers du Pass de combat : la récompense, et une carte SR ou mieux tous les 10 paliers.
     const openTiers = (s: State, tiers: number[]): { s: State; cards: Hero[] } => {
       const path = rollPath(s.path, new Date())
       const ready = claimableTiers(path).filter((t) => tiers.includes(t))
@@ -852,8 +859,8 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         if (r.card) {
           const h = rollCard(Math.random)
           cards.push(h)
-          next = { ...next, owned: { ...next.owned, [h.id]: (next.owned[h.id] ?? 0) + 1 }, accountXp: next.accountXp + ACCOUNT_XP[h.rarity], log: withLog(next.log, h.id, { k: 'pull', note: `Obtenue · Chemin du Rift, palier ${t}` }),
-            notifs: notify(next.notifs, [['pull', `Chemin du Rift : ${h.name} (${RARITIES[h.rarity].short}) rejoint ta collection.`]]) }
+          next = { ...next, owned: { ...next.owned, [h.id]: (next.owned[h.id] ?? 0) + 1 }, accountXp: next.accountXp + ACCOUNT_XP[h.rarity], log: withLog(next.log, h.id, { k: 'pull', note: `Obtenue · Pass de combat, palier ${t}` }),
+            notifs: notify(next.notifs, [['pull', `Pass de combat : ${h.name} (${RARITIES[h.rarity].short}) rejoint ta collection.`]]) }
         }
       }
       return { s: { ...next, path: { ...path, claimed: [...path.claimed, ...ready] } }, cards }
@@ -869,7 +876,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       setState(s)
       return cards
     }
-    const questsReady = claimable(state.quests, state.saga, new Date(now)).length + (dailyStatus(state.quests.daily, new Date(now)).claimed ? 0 : 1) + claimableTiers(rollPath(state.path, new Date(now))).length + challengesFor(new Date(now)).filter((c) => challengeState(c, state.quests, new Date(now)).ready).length + (eventDone(colNow) && !colNow.final ? 1 : 0) + PVP_GOALS.filter((g) => { const w = rollWeek(state.arena, new Date(now)); return !w.claimed.includes(g.id) && g.value(state.arena, w) >= g.target }).length
+    const questsReady = claimable(state.quests, state.saga, new Date(now), uniq(state.owned)).length + (dailyStatus(state.quests.daily, new Date(now)).claimed ? 0 : 1) + claimableTiers(rollPath(state.path, new Date(now))).length + challengesFor(new Date(now)).filter((c) => challengeState(c, state.quests, new Date(now)).ready).length + (eventDone(colNow) && !colNow.final ? 1 : 0) + PVP_GOALS.filter((g) => { const w = rollWeek(state.arena, new Date(now)); return !w.claimed.includes(g.id) && g.value(state.arena, w) >= g.target }).length
     const seeTutorial = (id: string) => { if (!state.tutorialSeen.includes(id)) setState({ ...state, tutorialSeen: [...state.tutorialSeen, id] }) }
     const resetTutorial = () => setState({ ...state, tutorialSeen: [] })
     const awaken = (heroId: string) => {

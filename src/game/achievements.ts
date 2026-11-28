@@ -11,7 +11,7 @@ export type AchState = {
   owned: Record<string, number>; xp: Record<string, number>; saga: Record<string, number>; awakened: string[]; rebirths: number; pulls: number; wins: number
   gemsSpent: number; accountXp: number; quests: Quests; spire: { best: number }; path: PathState; seen: { days: number }; arena?: { wins: number; best: number }; tourney?: { titles: number }
 }
-export const GROUPS = ['Collection', 'Univers', 'Invocations', 'Aventure', 'La Tour de l’Infini', 'Contrats', 'Maîtrise', 'Ancienneté'] as const
+export const GROUPS = ['Collection', 'Univers', 'Invocations', 'Aventure', 'La Tour de l’Infini', 'Missions', 'Maîtrise', 'Ancienneté'] as const
 export type Group = (typeof GROUPS)[number]
 export type Metal = 'bronze' | 'silver' | 'gold' | 'prism'
 export const METAL_LABEL: Record<Metal, string> = { bronze: 'Commun', silver: 'Rare', gold: 'Épique', prism: 'Légendaire' }
@@ -71,9 +71,9 @@ export const ACHIEVEMENTS: Achievement[] = [
     [20, 'Au-dessus des nuages', 'Atteins l’étage 20.', 'Habitant des cimes'], [30, 'Vertige', 'Atteins l’étage 30.', 'Sans vertige'], [50, 'Cœur de la Tour', 'Atteins l’étage 50.', 'Seigneur de la Tour'],
     [75, 'Sommet invisible', 'Atteins l’étage 75.', 'Celui qui touche le ciel']], (s) => s.spire?.best ?? 0),
   // ── Contrats (8)
-  ...tiers('Contrats', '約', 'dailies', [[7, 'Une semaine fidèle', 'Récupère 7 récompenses du jour.', 'Fidèle'], [30, 'Un mois fidèle', 'Récupère 30 récompenses du jour.', 'Assidu'], [100, 'Cent levers de soleil', 'Récupère 100 récompenses du jour.', 'Pilier du Rift']], (s) => life(s, 'dailies')),
-  ...tiers('Contrats', '約', 'claims', [[10, 'Homme de parole', 'Récupère 10 contrats.', 'Contractant'], [50, 'Carnet chargé', 'Récupère 50 contrats.', 'Mercenaire'], [200, 'Contrats à la chaîne', 'Récupère 200 contrats.', 'Agent du Rift']], (s) => life(s, 'claims')),
-  ...tiers('Contrats', '道', 'path', [[10, 'Sur le Chemin', 'Atteins le palier 10 du Chemin du Rift.', 'Pèlerin'], [40, 'Bout du Chemin', 'Atteins le palier 40 du Chemin du Rift.', 'Marcheur du Rift']], (s) => (s.path ? tierOf(s.path.xp) : 0)),
+  ...tiers('Missions', '約', 'dailies', [[7, 'Une semaine fidèle', 'Récupère 7 récompenses du jour.', 'Fidèle'], [30, 'Un mois fidèle', 'Récupère 30 récompenses du jour.', 'Assidu'], [100, 'Cent levers de soleil', 'Récupère 100 récompenses du jour.', 'Pilier du Rift']], (s) => life(s, 'dailies')),
+  ...tiers('Missions', '約', 'claims', [[10, 'Homme de parole', 'Récupère 10 missions.', 'Contractant'], [50, 'Carnet chargé', 'Récupère 50 missions.', 'Mercenaire'], [200, 'Missions à la chaîne', 'Récupère 200 missions.', 'Agent du Rift']], (s) => life(s, 'claims')),
+  ...tiers('Missions', '道', 'path', [[10, 'Sur le Chemin', 'Atteins le palier 10 du Pass de combat.', 'Pèlerin'], [40, 'Bout du Chemin', 'Atteins le palier 40 du Pass de combat.', 'Marcheur du Rift']], (s) => (s.path ? tierOf(s.path.xp) : 0)),
   // ── Maîtrise (11)
   ...tiers('Maîtrise', '力', 'level', [[10, 'Premiers progrès', 'Monte une carte au niveau 10.', 'Apprenti'], [25, 'Carte aguerrie', 'Monte une carte au niveau 25.', 'Entraîneur'], [50, 'Limite atteinte', 'Monte une carte au niveau 50.', 'Maître d’armes'],
     [75, 'Au-delà', 'Monte une carte au niveau 75.', 'Sensei'], [100, 'Au-delà des limites', 'Monte une carte au niveau 100.', 'Sans limite']], best),
@@ -93,5 +93,5 @@ export const doneIds = (s: AchState) => ACHIEVEMENTS.filter((a) => a.value(s) >=
 export const unlockedTitles = (s: AchState) => [DEFAULT_TITLE, ...ACHIEVEMENTS.filter((a) => a.value(s) >= a.target).map((a) => a.title)]
 
 // Médaille 3D d'un succès : la forme suit sa catégorie, le métal sa rareté.
-const SHAPE: Record<Group, string> = { Collection: 'gem', Univers: 'orb', Invocations: 'portal', Aventure: 'swords', 'La Tour de l’Infini': 'tower', Contrats: 'scroll', 'Maîtrise': 'shield', 'Ancienneté': 'hourglass' }
+const SHAPE: Record<Group, string> = { Collection: 'gem', Univers: 'orb', Invocations: 'portal', Aventure: 'swords', 'La Tour de l’Infini': 'tower', Missions: 'scroll', 'Maîtrise': 'shield', 'Ancienneté': 'hourglass' }
 export const medalOf = (a: Achievement) => `medal-${SHAPE[a.group]}-${a.metal}`

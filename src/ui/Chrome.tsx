@@ -110,8 +110,8 @@ export const Dock = ({ tab, onTab, profileOn, onProfile }: { tab: TabId; onTab: 
       {more && <div className="sheet" role="dialog" aria-modal="true" aria-label="Plus" onClick={() => setMore(false)}>
         <div className="sheet__in" onClick={(e) => e.stopPropagation()}>
           <span className="sheet__grip" aria-hidden="true" />
-          <button className="sheet__item" onClick={() => go(() => onTab('contracts'))}><TabIcon d={ICONS.contracts} /><span><b>Contrats</b><small>Quêtes, récompense du jour, Chemin du Rift</small></span>{questsReady > 0 && <i className="dot" />}</button>
-          <button className="sheet__item" onClick={() => go(() => onTab('community'))}><TabIcon d={ICONS.community} /><span><b>Communauté</b><small>Social, Ordre, Panthéon, Lien de Faille</small></span></button>
+          <button className="sheet__item" onClick={() => go(() => onTab('contracts'))}><TabIcon d={ICONS.contracts} /><span><b>Missions</b><small>Quêtes, récompense du jour, Pass de combat</small></span>{questsReady > 0 && <i className="dot" />}</button>
+          <button className="sheet__item" onClick={() => go(() => onTab('community'))}><TabIcon d={ICONS.community} /><span><b>Communauté</b><small>Social, Guilde, Panthéon, Lien de Faille</small></span></button>
           <button className="sheet__item" onClick={() => go(() => (onProfile ? onProfile() : onTab('collection')))}><TabIcon d={ICONS.profile} /><span><b>Profil</b><small>Ta carte de joueur et tes succès</small></span></button>
           <button className="sheet__item" onClick={() => go(() => window.dispatchEvent(new Event('anime-rift:settings')))}><TabIcon d={ICONS.settings} /><span><b>Réglages</b><small>Compte, son, graphismes, langue</small></span></button>
           <button className="sheet__item" onClick={() => go(() => onTab('home'))}><TabIcon d={ICONS.banners} /><span><b>Accueil</b><small>Calendrier du Rift et nouveautés</small></span></button>
@@ -122,7 +122,7 @@ export const Dock = ({ tab, onTab, profileOn, onProfile }: { tab: TabId; onTab: 
 }
 
 // Sur ordinateur : le menu en ligne dans la barre du haut, avec un menu déroulant pour les Quêtes. Raccourcis 1 à 7.
-const QUESTS: [QuestTab, string][] = [['daily', 'Récompense du jour'], ['contracts', 'Contrats'], ['rift', 'Chemin du Rift'], ['path', 'Parcours']]
+const QUESTS: [QuestTab, string][] = [['daily', 'Récompense du jour'], ['contracts', 'Missions'], ['rift', 'Pass de combat'], ['path', 'Parcours']]
 export const TopNav = ({ tab, profileOn, onTab, onQuest, onCommunity, onProfile }: NavProps & { onProfile: () => void }) => {
   const { questsReady } = useStore()
   const [menu, setMenu] = useState<'' | 'quests' | 'community'>('')
@@ -132,7 +132,7 @@ export const TopNav = ({ tab, profileOn, onTab, onQuest, onCommunity, onProfile 
     { id: 'play', label: 'Jouer', icon: 'nav-nexus', key: '3' },
     { id: 'collection', label: 'Collection', icon: 'nav-cards', key: '4' },
     { id: 'bazaar', label: 'Bazar', icon: 'nav-bazaar', key: '5' },
-    { id: 'contracts', label: 'Contrats', icon: 'nav-contracts', key: '6' },
+    { id: 'contracts', label: 'Missions', icon: 'nav-contracts', key: '6' },
     { id: 'community', label: 'Communauté', icon: 'nav-profile', key: '7' },
   ]
   const open = (id: TabId | 'profile') => { setMenu(''); if (id === 'profile') onProfile(); else onTab(id) }

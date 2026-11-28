@@ -24,7 +24,7 @@ const icon = (r: Reward, day: number) => (day === 7 ? uiArt('chest') : r.tickets
 const NEWS = [
   { title: 'Le Bazar des Failles ouvre', points: ['Achète aux marchands du jour, vends tes doublons ou mets-les aux enchères.', 'Alertes de prix et cote calculée sur tes vraies ventes.'] },
   { title: 'Toutes les cartes se mélangent', points: ['Chaque Portail donne les cartes des 7 univers.', 'Seules les MR restent propres à leur univers.'] },
-  { title: 'Les quatre portes sont ouvertes', points: ['Les Colosses, La Tour de l’Infini, l’Arène et le Grand Rift sont jouables.', '79 succès, le Chemin du Rift et la boutique en Éclats.'] },
+  { title: 'Les quatre portes sont ouvertes', points: ['Les Colosses, La Tour de l’Infini, l’Arène et le Grand Rift sont jouables.', '79 succès, le Pass de combat et la boutique en Éclats.'] },
 ]
 
 export type HomeGo = { banner: (i: number) => void; contracts: () => void; collection: () => void; play: (mode?: 'colossus') => void; profile: () => void; community: () => void }
@@ -108,7 +108,7 @@ export const Home = ({ go }: { go: HomeGo }) => {
       </div>
 
       <nav className="home__links" aria-label="Raccourcis">
-        <button onClick={go.contracts}><small>01</small><span><b>Tes rendez-vous</b><em>Contrats, Chemin du Rift et récompenses</em></span><i>↗</i></button>
+        <button onClick={go.contracts}><small>01</small><span><b>Tes rendez-vous</b><em>Missions, Pass de combat et récompenses</em></span><i>↗</i></button>
         <button onClick={go.collection}><small>02</small><span><b>Ta collection</b><em>{n(mine)} / {n(HEROES.length)} cartes à découvrir</em></span><i>↗</i></button>
         <button onClick={() => go.play()}><small>03</small><span><b>À toi de jouer</b><em>Aventure, Colosses, Tour de l’Infini et Arène</em></span><i>↗</i></button>
       </nav>

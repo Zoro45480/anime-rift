@@ -20,9 +20,9 @@ export const setLang = (l: Lang) => { try { localStorage.setItem(KEY, l) } catch
 // [français, anglais, allemand]
 const WORDS: [string, string, string][] = [
   ['Accueil', 'Home', 'Startseite'], ['Portails', 'Portals', 'Portale'], ['Jouer', 'Play', 'Spielen'], ['Collection', 'Collection', 'Sammlung'],
-  ['Bazar', 'Bazaar', 'Basar'], ['Contrats', 'Contracts', 'Aufträge'], ['Communauté', 'Community', 'Community'], ['Social', 'Social', 'Sozial'],
-  ['Ordre', 'Order', 'Orden'], ['Panthéon', 'Pantheon', 'Pantheon'], ['Lien de Faille', 'Rift Link', 'Riss-Link'], ['Profil', 'Profile', 'Profil'],
-  ['Récompense du jour', 'Daily reward', 'Tagesbelohnung'], ['Chemin du Rift', 'Rift Path', 'Pfad des Risses'], ['Parcours', 'Journey', 'Werdegang'],
+  ['Bazar', 'Bazaar', 'Basar'], ['Missions', 'Missions', 'Missionen'], ['Communauté', 'Community', 'Community'], ['Social', 'Social', 'Sozial'],
+  ['Guilde', 'Guild', 'Gilde'], ['Panthéon', 'Pantheon', 'Pantheon'], ['Lien de Faille', 'Rift Link', 'Riss-Link'], ['Profil', 'Profile', 'Profil'],
+  ['Récompense du jour', 'Daily reward', 'Tagesbelohnung'], ['Pass de combat', 'Battle pass', 'Battle Pass'], ['Parcours', 'Journey', 'Werdegang'],
   ['Cartes', 'Cards', 'Karten'], ['Inventaire', 'Inventory', 'Inventar'], ['Ascension', 'Ascension', 'Aufstieg'],
   ['Acheter', 'Buy', 'Kaufen'], ['Marchands', 'Merchants', 'Händler'], ['Vendre aux marchands', 'Sell to merchants', 'An Händler verkaufen'], ['Échanger', 'Trade', 'Tauschen'],
   ['Mon Bazar', 'My Bazaar', 'Mein Basar'], ['Le Bazar des Failles', 'The Rift Bazaar', 'Der Basar der Risse'], ['Entre collectionneurs', 'Between collectors', 'Unter Sammlern'],
@@ -36,7 +36,7 @@ const WORDS: [string, string, string][] = [
   ['Ajouter en ami', 'Add friend', 'Als Freund hinzufügen'], ['Accepter', 'Accept', 'Annehmen'], ['Refuser', 'Decline', 'Ablehnen'], ['Retirer', 'Remove', 'Entfernen'],
   ['Membres', 'Members', 'Mitglieder'], ['Classement', 'Ranking', 'Rangliste'], ['Insignes', 'Badges', 'Abzeichen'], ['Rivalité', 'Rivalry', 'Rivalität'],
   ['Boss de la semaine', 'Boss of the week', 'Boss der Woche'], ['Boss mondial', 'World boss', 'Weltboss'], ['Raids', 'Raids', 'Raids'], ['Les Raids', 'Raids', 'Raids'],
-  ['Global', 'Global', 'Global'], ['Ordres', 'Orders', 'Orden'], ['Tour de l’Infini', 'Tower of Infinity', 'Turm der Unendlichkeit'],
+  ['Global', 'Global', 'Global'], ['Guildes', 'Orders', 'Orden'], ['Tour de l’Infini', 'Tower of Infinity', 'Turm der Unendlichkeit'],
   ['Aperçu', 'Overview', 'Übersicht'], ['Statistiques', 'Stats', 'Statistiken'], ['Techniques', 'Skills', 'Techniken'], ['Collectifs', 'Synergies', 'Synergien'],
   ['Amélioration', 'Upgrade', 'Verbesserung'], ['Historique', 'History', 'Verlauf'], ['Cote', 'Market value', 'Marktwert'], ['Cote de la carte', 'Card market value', 'Marktwert der Karte'],
   ['Où l\'obtenir', 'Where to get it', 'Wo erhältlich'], ['Informations', 'Information', 'Informationen'], ['Titres', 'Titles', 'Titel'],

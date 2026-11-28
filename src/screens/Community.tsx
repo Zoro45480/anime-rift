@@ -16,7 +16,7 @@ import { Avatar } from '../ui/Settings'
 import { uiArt } from '../assets/manifest'
 const HEAD_ART = { social: 'nav-profile', guild: 'league-gold', fame: 'crown', referral: 'chest' } as const
 export type CommunityTab = 'social' | 'guild' | 'fame' | 'referral'
-export const COMMUNITY: [CommunityTab, string][] = [['social', 'Social'], ['guild', 'Ordre'], ['fame', 'Panthéon'], ['referral', 'Parrainage']]
+export const COMMUNITY: [CommunityTab, string][] = [['social', 'Social'], ['guild', 'Guilde'], ['fame', 'Panthéon'], ['referral', 'Parrainage']]
 const n = (x: number) => x.toLocaleString('fr-FR')
 
 export const Community = ({ start = 'fame', onProfile }: { start?: CommunityTab; onProfile: () => void }) => {

@@ -194,7 +194,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
             </div>
             {!state.freed && <button className="cd-btn cd-btn--small" disabled={rebirths < 1 || shards < cost} onClick={() => { if (awaken(hero.id)) setNotice('Carte libérée : niveau maximum 100.') }}>Libérer</button>}
           </div>
-          <p className="cd-note">Les Fragments d'âme se gagnent dans La Tour de l’Infini (Nexus), sur le Chemin du Rift et dans les contrats ; chaque Ascension en offre aussi quelques-uns.</p>
+          <p className="cd-note">Les Fragments d'âme se gagnent dans La Tour de l’Infini (Nexus), sur le Pass de combat et dans les contrats ; chaque Ascension en offre aussi quelques-uns.</p>
           <p className="cd-note">« Max » utilise juste ce qu'il faut pour atteindre le niveau maximum : aucun parchemin n'est gaspillé.</p>
           <p className="cd-note">Les parchemins se gagnent dans L’Aventure (Nexus) : chaque combat affiche son taux de drop.{!has ? ' Il faut posséder la carte pour l’améliorer.' : ''}</p>
         </Section>}
@@ -235,7 +235,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
         <Section hue="#4be3a4" title="Où l'obtenir">
           <ul className="cd-where">
             <li><img src={extraArt(`emblem-${frameOf(hero.world)}`)} alt="" onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} /><div><b>Invocation · {hero.rarity === 'rift' ? `bannière ${banner ? banner.world : hero.world} seulement` : 'toutes les bannières'}</b><small>{rate ? `${pct(rate)} par invocation, soit environ 1 sur ${n(Math.round(1 / rate))}.` : 'Cette carte n’est sur aucune bannière en ce moment.'} {hero.rarity === 'rift' ? 'Les cartes MR ne sortent que sur la bannière de leur univers.' : 'Toutes les cartes (sauf MR) sont mélangées : elle peut sortir sur n’importe quelle bannière.'} Avec des Éclats ou des sceaux, dans Invoquer.</small></div></li>
-            {['epic', 'ultra', 'legend'].includes(hero.rarity) && <li><img src={uiArt('card-pack')} alt="" /><div><b>Chemin du Rift</b><small>Les paliers 10, 20, 30 et 40 donnent une carte {RARITIES.epic.short} ou mieux, tirée au hasard parmi toutes les cartes de cette rareté.</small></div></li>}
+            {['epic', 'ultra', 'legend'].includes(hero.rarity) && <li><img src={uiArt('card-pack')} alt="" /><div><b>Pass de combat</b><small>Les paliers 10, 20, 30 et 40 donnent une carte {RARITIES.epic.short} ou mieux, tirée au hasard parmi toutes les cartes de cette rareté.</small></div></li>}
             <li><img src={iconArt('scroll-medium')} alt="" /><div><b>Doublons</b><small>Chaque nouvel exemplaire peut être fusionné pour faire monter la carte de niveau (+{n(MERGE_XP[hero.rarity])} XP).</small></div></li>
           </ul>
         </Section>

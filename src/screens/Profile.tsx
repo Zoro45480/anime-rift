@@ -492,7 +492,7 @@ export const Profile = ({ onCollection }: { onCollection: () => void }) => {
             {[...stats, ['解', 'Cartes libérées', n(store.awakened.length)] as [string, string, string], ['力', 'Carte la plus puissante', strongest ? `${strongest.h.name} · ${n(strongest.p)}` : '—'] as [string, string, string], ['魂', 'Éclats dépensées', n(store.gemsSpent)] as [string, string, string]]
               .map(([k, label, value]) => <li key={label}><i lang="ja">{k}</i><span>{label}</span><b>{value}</b></li>)}
           </ul>
-          <p className="set__note">Le classement contre les autres joueurs et l’Ordre demandent un jeu en ligne. L'Arène se joue contre les Rivaux du Rift.</p>
+          <p className="set__note">Le classement contre les autres joueurs et la Guilde demandent un jeu en ligne. L'Arène se joue contre les Rivaux du Rift.</p>
         </section>
       )}
 
@@ -528,7 +528,7 @@ const HeroFacts = ({ elo }: { elo: number }) => {
       <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 13v4M8 20h8M10 17h4" /></svg>
         <span>{rank ? `Classé : ${rank.toLocaleString('fr-FR')}e` : 'Classement'}</span><b style={{ color: lg.hue }}>{lg.label}</b><i>({elo.toLocaleString('fr-FR')} élo)</i></li>
       <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6zM9 10h6M9 14h6" /></svg>
-        <span>Ordre</span>{guild ? <button className="pf-facts__link" onClick={() => openCommunity('guild')}>{guild} <em aria-hidden="true">›</em></button>
+        <span>Guilde</span>{guild ? <button className="pf-facts__link" onClick={() => openCommunity('guild')}>{guild} <em aria-hidden="true">›</em></button>
           : <button className="pf-facts__link pf-facts__link--none" onClick={() => openCommunity('guild')}>Aucune <em aria-hidden="true">›</em></button>}</li>
     </ul>
   )

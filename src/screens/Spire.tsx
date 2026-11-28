@@ -72,7 +72,7 @@ export const Spire = ({ onBack }: { onBack: () => void }) => {
         <p className="sg-sheet__vs">Ton équipe : <b>{n(teamPower)}</b> de puissance · adversaires : <b>{n(foePower)}</b>{teamPower < foePower * 0.8 ? ' · ça va être dur !' : ''}</p>
         <h3 className="sp-sub">Récompense de la première victoire</h3>
         <Loot r={f.reward} />
-        <p className="sp-note">+{f.accountXp} XP de compte · +10 XP sur le Chemin du Rift</p>
+        <p className="sp-note">+{f.accountXp} XP de compte · +10 XP sur le Pass de combat</p>
         <button className="btn btn--gold" disabled={team.length === 0} onClick={start}>{team.length === 0 ? 'Il faut au moins une carte' : `Combattre l'étage ${f.n} · gratuit`}</button>
       </section>
 

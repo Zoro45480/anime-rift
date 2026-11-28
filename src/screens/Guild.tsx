@@ -16,7 +16,7 @@ const n = (x: number) => x.toLocaleString('fr-FR')
 const EMBLEMS = ['狐', '龍', '鬼', '侍', '忍', '炎', '雷', '月', '桜', '虎', '神', '影']
 const COLORS = ['#ff3d6e', '#ffc94d', '#22d3ee', '#a855f7', '#4ade80', '#f97316', '#3b82f6', '#e5e7eb']
 const KIND: Record<Guild['kind'], string> = { open: 'Ouvert', invite: 'Sur invitation', closed: 'Fermé' }
-export const GUILD_BOSS_HP = 50_000_000 // PV du boss d’Ordre de la semaine
+export const GUILD_BOSS_HP = 50_000_000 // PV du boss de Guilde de la semaine
 type Tab = 'find' | 'create' | 'rank'
 
 const Emblem = ({ g, size = 64 }: { g: { emblem: string; color: string }; size?: number }) => (
@@ -28,21 +28,21 @@ export const GuildPage = ({ onConnect }: { onConnect: () => void }) => {
   const [mine, setMine] = useState<Awaited<ReturnType<typeof fetchMyGuild>> | undefined>(undefined)
   const reload = useCallback(async () => setMine(await fetchMyGuild()), [])
   useEffect(() => { if (session) void reload() }, [session, reload])
-  if (!session) return <section className="so-login"><h2>Ordre</h2><p>Connecte-toi avec Discord ou Google pour rejoindre un Ordre ou fonder le tien.</p><button className="oauth oauth--discord" onClick={onConnect}>Se connecter</button></section>
-  if (mine === undefined) return <p className="pf-empty">Chargement de ton Ordre…</p>
+  if (!session) return <section className="so-login"><h2>Guilde</h2><p>Connecte-toi avec Discord ou Google pour rejoindre une Guilde ou fonder le tien.</p><button className="oauth oauth--discord" onClick={onConnect}>Se connecter</button></section>
+  if (mine === undefined) return <p className="pf-empty">Chargement de ta Guilde…</p>
   return mine ? <MyGuild data={mine} reload={reload} /> : <NoGuild reload={reload} />
 }
 
 const Hero = () => (
   <header className="gd-hero">
     <span className="gd-hero__kanji" lang="ja" aria-hidden="true">組</span>
-    <p className="eyebrow">Anime Rift — Ordre</p>
-    <h1>Ordre</h1>
-    <p>Rejoins un Ordre ou fonde le tien : on est plus forts à plusieurs.</p>
+    <p className="eyebrow">Anime Rift — Guilde</p>
+    <h1>Guilde</h1>
+    <p>Rejoins une Guilde ou fonde le tien : on est plus forts à plusieurs.</p>
     <ul className="gd-perks">
       <li><b>Boss de la semaine</b><span>Cumulez vos dégâts contre un boss commun.</span></li>
-      <li><b>Classement</b><span>L’Ordre qui inflige le plus de dégâts mène la semaine.</span></li>
-      <li><b>Entraide</b><span>Discute avec ton Ordre et échange tes doublons.</span></li>
+      <li><b>Classement</b><span>La Guilde qui inflige le plus de dégâts mène la semaine.</span></li>
+      <li><b>Entraide</b><span>Discute avec ta Guilde et échange tes doublons.</span></li>
     </ul>
   </header>
 )
@@ -74,23 +74,23 @@ const NoGuild = ({ reload }: { reload: () => Promise<void> }) => {
     <div className="gd">
       <Hero />
       <div className="coltabs__bar so__tabs" role="tablist">
-        {([['find', 'Trouver un Ordre'], ['create', 'Créer un Ordre'], ['rank', 'Classement']] as [Tab, string][]).map(([id, l]) => <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}><TabIcon id={id} />{l}</button>)}
+        {([['find', 'Trouver une Guilde'], ['create', 'Créer une Guilde'], ['rank', 'Classement']] as [Tab, string][]).map(([id, l]) => <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}><TabIcon id={id} />{l}</button>)}
       </div>
       {msg && <p className="cd__notice" role="status">{msg}</p>}
       {tab === 'find' && <div className="so__grid">
         <section className="so-box">
-          <header className="so-box__head"><h2>Trouver un Ordre</h2></header>
+          <header className="so-box__head"><h2>Trouver une Guilde</h2></header>
           <form className="so-send" onSubmit={(e) => { e.preventDefault(); void load() }}><input className="set__input" type="search" placeholder="Nom ou tag…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Nom ou tag" /><button className="btn btn--gold" type="submit">Rechercher</button></form>
           <label className="gd-check"><input type="checkbox" checked={only} onChange={(e) => setOnly(e.target.checked)} /> Seulement celles que je peux rejoindre (niveau, place)</label>
-          {!list ? <p className="pf-empty">Chargement…</p> : shown.length === 0 ? <p className="pf-empty">Aucun Ordre pour l'instant : fonde la première !</p> :
+          {!list ? <p className="pf-empty">Chargement…</p> : shown.length === 0 ? <p className="pf-empty">Aucune Guilde pour l'instant : fonde la première !</p> :
             <ul className="gd-list">{shown.map((g) => <GuildRow key={g.id} g={g} action={g.kind === 'closed' ? <small>Fermée</small> : <button className="btn btn--gold gd-join" onClick={() => void join(g)}>{g.kind === 'invite' ? 'Candidater' : 'Rejoindre'}</button>} />)}</ul>}
         </section>
-        <section className="so-box"><header className="so-box__head"><h2>Pas d’Ordre à ton goût ?</h2></header><p className="set__note">Crée la tienne : tu en deviens le chef, tu choisis son nom, son emblème et qui peut la rejoindre.</p><button className="btn btn--gold" onClick={() => setTab('create')}>+ Créer un Ordre</button></section>
+        <section className="so-box"><header className="so-box__head"><h2>Pas de Guilde à ton goût ?</h2></header><p className="set__note">Crée la tienne : tu en deviens le chef, tu choisis son nom, son emblème et qui peut la rejoindre.</p><button className="btn btn--gold" onClick={() => setTab('create')}>+ Créer une Guilde</button></section>
       </div>}
       {tab === 'create' && <div className="so__grid">
         <section className="so-box">
-          <header className="so-box__head"><h2>Créer un Ordre</h2></header>
-          <form className="gd-form" onSubmit={async (e) => { e.preventDefault(); const r = await createGuild(form); setMsg(r === 'ok' ? 'Ton Ordre est fondée !' : r); if (r === 'ok') await reload() }}>
+          <header className="so-box__head"><h2>Créer une Guilde</h2></header>
+          <form className="gd-form" onSubmit={async (e) => { e.preventDefault(); const r = await createGuild(form); setMsg(r === 'ok' ? 'Ta Guilde est fondée !' : r); if (r === 'ok') await reload() }}>
             <div className="gd-form__two"><label>Nom<input className="set__input" required minLength={3} maxLength={24} placeholder="Ex. Les Renards de Feu" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></label>
               <label>Tag<input className="set__input" required pattern="[A-Za-z0-9]{2,5}" maxLength={5} placeholder="RDF" value={form.tag} onChange={(e) => setForm({ ...form, tag: e.target.value.toUpperCase() })} /></label></div>
             <label>Description<textarea className="set__input" maxLength={200} placeholder="Notre but : finir L’Aventure à 3 étoiles" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></label>
@@ -102,16 +102,16 @@ const NoGuild = ({ reload }: { reload: () => Promise<void> }) => {
             <div className="gd-emblems">{EMBLEMS.map((x) => <button type="button" key={x} lang="ja" className={form.emblem === x ? 'is-on' : ''} onClick={() => setForm({ ...form, emblem: x })}>{x}</button>)}</div>
             <p className="gd-label">Couleur</p>
             <div className="gd-colors">{COLORS.map((c) => <button type="button" key={c} aria-label={c} className={form.color === c ? 'is-on' : ''} style={{ background: c }} onClick={() => setForm({ ...form, color: c })} />)}</div>
-            <button className="btn btn--gold" type="submit">Fonder l’Ordre</button>
+            <button className="btn btn--gold" type="submit">Fonder la Guilde</button>
           </form>
         </section>
         <section className="so-box"><header className="so-box__head"><h2>Aperçu</h2></header>
-          <div className="gd-preview" style={{ ['--gc' as string]: form.color }}><Emblem g={form} size={96} /><b>{form.name || 'Nom de ton Ordre'}</b><i>{form.tag || 'TAG'}</i><small>{KIND[form.kind as Guild['kind']]}</small></div>
-          <ul className="gd-notes"><li>Tu deviens chef : tu nommes tes adjoints et tu règles l’Ordre.</li><li>Jusqu'à 50 membres : ouverte, sur invitation ou fermée.</li><li>Ton niveau actuel : {store.accountXp ? lvl : 1}.</li></ul>
+          <div className="gd-preview" style={{ ['--gc' as string]: form.color }}><Emblem g={form} size={96} /><b>{form.name || 'Nom de ta Guilde'}</b><i>{form.tag || 'TAG'}</i><small>{KIND[form.kind as Guild['kind']]}</small></div>
+          <ul className="gd-notes"><li>Tu deviens chef : tu nommes tes adjoints et tu règles la Guilde.</li><li>Jusqu'à 50 membres : ouverte, sur invitation ou fermée.</li><li>Ton niveau actuel : {store.accountXp ? lvl : 1}.</li></ul>
         </section>
       </div>}
       {tab === 'rank' && <section className="so-box"><header className="so-box__head"><h2>Classement de la semaine</h2><span>fin lundi</span></header>
-        {!list ? <p className="pf-empty">Chargement…</p> : list.length === 0 ? <p className="pf-empty">Aucun Ordre classé.</p> : <ul className="gd-list">{list.map((g, i) => <GuildRow key={g.id} g={g} i={i} />)}</ul>}</section>}
+        {!list ? <p className="pf-empty">Chargement…</p> : list.length === 0 ? <p className="pf-empty">Aucune Guilde classée.</p> : <ul className="gd-list">{list.map((g, i) => <GuildRow key={g.id} g={g} i={i} />)}</ul>}</section>}
     </div>
   )
 }
@@ -144,7 +144,7 @@ const MyGuild = ({ data, reload }: { data: NonNullable<Awaited<ReturnType<typeof
     <div className="gd">
       <header className="gd-mine" style={{ ['--gc' as string]: guild.color }}>
         <Emblem g={guild} size={110} />
-        <div className="gd-mine__id"><p className="eyebrow">Ton Ordre · {role(me)}{weekTitle(place) && <b className="gd-title"> · {weekTitle(place)}</b>}</p><h1>{guild.name} <i>{guild.tag}</i></h1>
+        <div className="gd-mine__id"><p className="eyebrow">Ta Guilde · {role(me)}{weekTitle(place) && <b className="gd-title"> · {weekTitle(place)}</b>}</p><h1>{guild.name} <i>{guild.tag}</i></h1>
           <p className="gd-mine__chips"><span>{KIND[guild.kind]}</span><span>{guild.min_level ? `Niveau ${guild.min_level}+` : 'Aucune condition'}</span></p>
           <p>{guild.description || 'Pas encore de description.'}</p></div>
         <ul className="gd-mine__stats">
@@ -159,11 +159,11 @@ const MyGuild = ({ data, reload }: { data: NonNullable<Awaited<ReturnType<typeof
       {tab === 'boss' && <div className="so__grid">
         <section className="so-box gd-boss">
           <p className="eyebrow">Semaine du {week}</p>
-          <h2>{boss.name}</h2><p className="set__note">{boss.title} · un Colosse géant que toute l’Ordre affronte ensemble.</p>
+          <h2>{boss.name}</h2><p className="set__note">{boss.title} · un Colosse géant que toute la Guilde affronte ensemble.</p>
           <div className="gd-hp"><i style={{ width: `${Math.max(0, 100 - (total / GUILD_BOSS_HP) * 100)}%` }} /><span>{n(Math.max(0, GUILD_BOSS_HP - total))} / {n(GUILD_BOSS_HP)} PV</span></div>
-          {total >= GUILD_BOSS_HP && <p className="sp-win">Boss vaincu cette semaine, bravo à toute l’Ordre !</p>}
+          {total >= GUILD_BOSS_HP && <p className="sp-win">Boss vaincu cette semaine, bravo à toute la Guilde !</p>}
           <button className="btn btn--gold" disabled={store.guildTries < 1 || store.teamNow.length === 0} onClick={attack}>{store.guildTries < 1 ? 'Plus d’essai aujourd’hui' : `Attaquer · ${store.guildTries} essai${store.guildTries > 1 ? 's' : ''} aujourd'hui`}</button>
-          <p className="set__note">3 essais par jour. Ton équipe frappe pendant 40 tours ; tous les dégâts s'ajoutent à ceux de l’Ordre. Nouveau boss chaque lundi.</p>
+          <p className="set__note">3 essais par jour. Ton équipe frappe pendant 40 tours ; tous les dégâts s'ajoutent à ceux de la Guilde. Nouveau boss chaque lundi.</p>
         </section>
         <section className="so-box"><header className="so-box__head"><h2>Dégâts des membres</h2></header>
           {dmg.length === 0 ? <p className="pf-empty">Personne n'a encore attaqué cette semaine.</p> : <ol className="gd-dmg">{[...dmg].sort((a, b) => b.damage - a.damage).map((d) => <li key={d.user_id}><b>{people[d.user_id]?.name ?? '…'}</b><span>{n(Number(d.damage))}</span><small>{d.tries} essai{d.tries > 1 ? 's' : ''}</small></li>)}</ol>}
@@ -188,11 +188,11 @@ const MyGuild = ({ data, reload }: { data: NonNullable<Awaited<ReturnType<typeof
       {tab === 'rival' && <Rivals guildId={guild.id} lead={lead} rivals={rivals} rank={rank} reload={load} say={setMsg} />}
       {tab === 'badges' && <Insignias guild={guild} members={members.length} total={total} place={place} rivals={rivals} />}
       {tab === 'rank' && <section className="so-box"><header className="so-box__head"><h2>Classement de la semaine</h2></header><ul className="gd-list">{rank.map((g, i) => <GuildRow key={g.id} g={g} i={i} />)}</ul></section>}
-      {tab === 'settings' && <section className="so-box"><p className="set__note">{me.role === 'chef' ? 'Si tu quittes l’Ordre, un adjoint (ou le plus ancien membre) devient chef. Si tu étais seul, l’Ordre est dissous.' : 'Tu peux quitter l’Ordre quand tu veux.'}</p>
-        <button className="cd-btn cd-btn--small" onClick={async () => { const r = await leaveGuild(); setMsg(r === 'ok' ? 'Tu as quitté l’Ordre.' : r); await reload() }}>Quitter l’Ordre</button></section>}
-      {fight && <Battle result={fight.result} kicker={`Boss d’Ordre · ${guild.name}`} title={boss.name}
-        winBody={null} loseBody={<p className="sp-win">{n(fight.damage)} dégâts infligés pour ton Ordre !</p>}
-        onClose={async () => { const d = fight.damage; setFight(null); const r = await hitGuildBoss(week, d); setMsg(r === 'ok' ? `${n(d)} dégâts ajoutés au boss de l’Ordre.` : r); await load() }} />}
+      {tab === 'settings' && <section className="so-box"><p className="set__note">{me.role === 'chef' ? 'Si tu quittes la Guilde, un adjoint (ou le plus ancien membre) devient chef. Si tu étais seul, la Guilde est dissous.' : 'Tu peux quitter la Guilde quand tu veux.'}</p>
+        <button className="cd-btn cd-btn--small" onClick={async () => { const r = await leaveGuild(); setMsg(r === 'ok' ? 'Tu as quitté la Guilde.' : r); await reload() }}>Quitter la Guilde</button></section>}
+      {fight && <Battle result={fight.result} kicker={`Boss de Guilde · ${guild.name}`} title={boss.name}
+        winBody={null} loseBody={<p className="sp-win">{n(fight.damage)} dégâts infligés pour ta Guilde !</p>}
+        onClose={async () => { const d = fight.damage; setFight(null); const r = await hitGuildBoss(week, d); setMsg(r === 'ok' ? `${n(d)} dégâts ajoutés au boss de la Guilde.` : r); await load() }} />}
     </div>
   )
 }
@@ -200,7 +200,7 @@ const MyGuild = ({ data, reload }: { data: NonNullable<Awaited<ReturnType<typeof
 // Titre de la semaine selon la place : 1er Légende, 2e-3e Maîtres, 4e-10e Élite.
 export const weekTitle = (place: number) => (place === 1 ? 'Légende' : place >= 2 && place <= 3 ? 'Maîtres' : place >= 4 && place <= 10 ? 'Élite' : '')
 
-// Les 13 insignes d'un Ordre. Ceux des rivalités arrivent avec les rivalités.
+// Les 13 insignes d'une Guilde. Ceux des rivalités arrivent avec les rivalités.
 export const insigniasOf = (g: { id?: string; created_at?: string }, members: number, total: number, place: number, rivals: Rivalry[] = [], now = Date.now()) => {
   const age = g.created_at ? Math.floor((now - new Date(g.created_at).getTime()) / 86400000) : 0
   const kills = Math.floor(total / GUILD_BOSS_HP)
@@ -227,7 +227,7 @@ export const insigniasOf = (g: { id?: string; created_at?: string }, members: nu
 const Insignias = ({ guild, members, total, place, rivals }: { guild: { id?: string; created_at?: string }; members: number; total: number; place: number; rivals: Rivalry[] }) => {
   const list = insigniasOf(guild, members, total, place, rivals)
   return (
-    <section className="so-box"><header className="so-box__head"><h2>Insignes de l’Ordre</h2><span><b>{list.filter((x) => x.done).length}</b> / {list.length}</span></header>
+    <section className="so-box"><header className="so-box__head"><h2>Insignes de la Guilde</h2><span><b>{list.filter((x) => x.done).length}</b> / {list.length}</span></header>
       <ul className="gd-ins">{list.map((x) => <li key={x.id} className={x.done ? 'is-done' : ''}><i aria-hidden="true">{x.done ? '✦' : '◇'}</i><b>{x.name}</b><small>{x.need}{x.soon ? ' · bientôt' : ''}</small></li>)}</ul>
       <p className="set__note">Les insignes de classement comptent la semaine en cours ; ceux des rivalités comptent les rivalités terminées.</p>
     </section>
@@ -245,19 +245,19 @@ const Rivals = ({ guildId, lead, rivals, rank, reload, say }: { guildId: string;
       <section className="so-box">
         <header className="so-box__head"><h2>Rivalité de la semaine</h2><span>fin lundi</span></header>
         {!week ? <>
-          <p className="set__note">Le chef ou un adjoint déclare une rivalité par semaine contre l’Ordre de son choix. L’autre Ordre a 48 h pour accepter. Il faut au moins 3 membres de chaque côté. L’Ordre qui inflige le plus de dégâts à son boss de la semaine l’emporte.</p>
+          <p className="set__note">Le chef ou un adjoint déclare une rivalité par semaine contre la Guilde de son choix. L’autre Guilde a 48 h pour accepter. Il faut au moins 3 membres de chaque côté. La Guilde qui inflige le plus de dégâts à son boss de la semaine l’emporte.</p>
           {lead ? <div className="so-code__form">
-            <select className="set__input" value={target} onChange={(e) => setTarget(e.target.value)} aria-label="Ordre à défier"><option value="">Choisis un Ordre…</option>{rank.filter((g) => g.id !== guildId).map((g) => <option key={g.id} value={g.id}>{g.name} [{g.tag}] · {g.members} membres</option>)}</select>
-            <button className="cd-btn cd-btn--small" disabled={!target} onClick={() => void act(declareRivalry(target), 'Rivalité déclarée : l’autre Ordre a 48 h pour répondre.')}>Défier</button>
+            <select className="set__input" value={target} onChange={(e) => setTarget(e.target.value)} aria-label="Guilde à défier"><option value="">Choisis une Guilde…</option>{rank.filter((g) => g.id !== guildId).map((g) => <option key={g.id} value={g.id}>{g.name} [{g.tag}] · {g.members} membres</option>)}</select>
+            <button className="cd-btn cd-btn--small" disabled={!target} onClick={() => void act(declareRivalry(target), 'Rivalité déclarée : l’autre Guilde a 48 h pour répondre.')}>Défier</button>
           </div> : <p className="set__note">Seuls le chef et les adjoints peuvent déclarer une rivalité.</p>}
         </> : week.status === 'pending' ? (
           week.b === guildId ? <>
-            <p><b>{week.a_name}</b> défie ton Ordre cette semaine !</p>
+            <p><b>{week.a_name}</b> défie ta Guilde cette semaine !</p>
             {lead ? <div className="pmini__btns"><button className="cd-btn cd-btn--main cd-btn--small" onClick={() => void act(answerRivalry(week.id, true), 'Rivalité acceptée : que le meilleur gagne !')}>Accepter</button><button className="cd-btn cd-btn--small" onClick={() => void act(answerRivalry(week.id, false), 'Rivalité refusée.')}>Refuser</button></div> : <p className="set__note">Le chef ou un adjoint doit répondre sous 48 h.</p>}
           </> : <p>En attente de la réponse de <b>{week.b_name}</b> (48 h maximum).</p>
         ) : (() => { const s = side(week); return (
           <div className="rv-duel"><div><b>{s.me}</b><strong>{n(s.x)}</strong></div><span>VS</span><div><b>{s.them}</b><strong>{n(s.y)}</strong></div>
-            <p className="set__note">{s.x === s.y ? 'Égalité pour l’instant.' : s.x > s.y ? 'Ton Ordre mène ! Frappez le boss pour garder l’avance.' : 'Ton Ordre est derrière : tous au boss !'}</p></div>) })()}
+            <p className="set__note">{s.x === s.y ? 'Égalité pour l’instant.' : s.x > s.y ? 'Ta Guilde mène ! Frappez le boss pour garder l’avance.' : 'Ta Guilde est derrière : tous au boss !'}</p></div>) })()}
       </section>
       <section className="so-box">
         <header className="so-box__head"><h2>Palmarès</h2></header>
@@ -280,7 +280,7 @@ const Operations = ({ guildId, total, tries, team, onFight }: { guildId: string;
     <div className="ops">
       <div className="coltabs__bar" role="tablist">{([['ops', 'Opérations'], ['hq', 'Quartier général'], ['squads', 'Escouades']] as const).map(([id, l]) => <button key={id} role="tab" aria-selected={sub === id} className={sub === id ? 'is-active' : ''} onClick={() => setSub(id)}><TabIcon id={id} />{l}</button>)}</div>
       {sub === 'ops' && <>
-        <p className="set__note">Cette semaine, l’Ordre a infligé <b>{n(total)}</b> dégâts. Chaque combat contre le boss d’Ordre fait avancer le secteur en cours. 3 essais par jour et par joueur.</p>
+        <p className="set__note">Cette semaine, la Guilde a infligé <b>{n(total)}</b> dégâts. Chaque combat contre le boss de Guilde fait avancer le secteur en cours. 3 essais par jour et par joueur.</p>
         {OPERATIONS.map((ch, ci) => (
           <section key={ch.name} className="so-box ops-ch">
             <header className="so-box__head"><h2><small>Chapitre {ci + 1}</small> {ch.name}</h2></header>
@@ -298,12 +298,12 @@ const Operations = ({ guildId, total, tries, team, onFight }: { guildId: string;
             })}</ul>
           </section>
         ))}
-        {!cur && <p className="td-check is-ok">Toutes les opérations de la semaine sont terminées. Bravo à tout l’Ordre !</p>}
+        {!cur && <p className="td-check is-ok">Toutes les opérations de la semaine sont terminées. Bravo à toute la Guilde !</p>}
       </>}
       {sub === 'hq' && <section className="so-box">
         <header className="so-box__head"><h2>Quartier général · niveau {level} / 20</h2><span>{renown === null ? '…' : `${n(renown)} de Renommée`}</span></header>
         <div className="cd-bar"><i style={{ width: level >= 20 ? '100%' : `${(((renown ?? 0) % HQ_STEP) / HQ_STEP) * 100}%` }} /></div>
-        <p className="set__note">La Renommée = tous les dégâts infligés par l’Ordre depuis sa création. Elle ne se dépense pas : chaque tranche de {n(HQ_STEP)} fait monter le QG d’un niveau.</p>
+        <p className="set__note">La Renommée = tous les dégâts infligés par la Guilde depuis sa création. Elle ne se dépense pas : chaque tranche de {n(HQ_STEP)} fait monter le QG d’un niveau.</p>
         <ul className="gd-ins">{BRANCHES.flatMap((b) => b.ranks.map((r, i) => (
           <li key={`${b.id}${i}`} className={level >= r.level ? 'is-done' : ''}><i aria-hidden="true">{level >= r.level ? '✦' : '◇'}</i><b>{b.name} · rang {i + 1}</b><small>{r.text} (niveau {r.level})</small></li>
         )))}</ul>

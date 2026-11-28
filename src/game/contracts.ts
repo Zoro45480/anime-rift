@@ -7,12 +7,15 @@ import { seasonOf } from './riftpath'
 // Contrats : récompense quotidienne, contrats du jour (6 + bonus), de la semaine (lundi), d'histoire (une seule fois),
 // et compteurs à vie pour le Parcours. Fonctions pures : la date est toujours passée en argument.
 
-export type Reward = { gems?: number; energy?: number; tickets?: number; shards?: number; scrolls?: Partial<Record<ScrollId, number>>; title?: string } // title : identifiant d'un titre de quête
+export type Reward = { gems?: number; energy?: number; tickets?: number; shards?: number; scrolls?: Partial<Record<ScrollId, number>>; title?: string; sure?: 'epic' | 'ultra' | 'legend'; lr?: number; multi?: number }
+// title : un titre de quête · sure : une carte garantie de cette rareté · lr : tickets LR · multi : invocations ×10 offertes (10 clés chacune)
 export type Counter = 'pulls' | 'newCards' | 'featuredPull' | 'wins' | 'win3' | 'levels' | 'visit' | 'merges' | 'dailyAll' | 'gemsSpent' | 'damage' | 'bosses' | 'floors' | 'claims' | 'dailies'
 export type Counts = Partial<Record<Counter, number>>
 export type Period = { key: string; c: Counts; claimed: string[]; ch?: Record<string, number> } // ch : défis du Chemin récupérés aujourd'hui
 export type Quests = { day: Period; week: Period; story: string[]; life: Counts; daily: { last: string | null; streak: number } }
-export type Contract = { id: string; period: 'day' | 'week' | 'story'; title: string; target: number; reward: Reward; counter?: Counter; arc?: number; perfect?: boolean; stage?: string }
+export type Contract = { id: string; period: 'day' | 'week' | 'story'; title: string; target: number; reward: Reward; counter?: Counter; arc?: number; perfect?: boolean; stage?: string; collect?: boolean }
+// Chaque mission donne aussi +3 éclairs.
+const E = (r: Reward): Reward => ({ ...r, energy: r.energy ?? 3 })
 
 const pad = (n: number) => String(n).padStart(2, '0')
 export const dayKey = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
@@ -62,8 +65,8 @@ export const dailyStatus = (daily: Quests['daily'], now: Date) => {
 }
 
 // ───── Les contrats ─────
-const d = (id: string, title: string, counter: Counter, target: number, reward: Reward): Contract => ({ id: `d-${id}`, period: 'day', title, counter, target, reward })
-const w = (id: string, title: string, counter: Counter, target: number, reward: Reward): Contract => ({ id: `w-${id}`, period: 'week', title, counter, target, reward })
+const d = (id: string, title: string, counter: Counter, target: number, reward: Reward): Contract => ({ id: `d-${id}`, period: 'day', title, counter, target, reward: E(reward) })
+const w = (id: string, title: string, counter: Counter, target: number, reward: Reward): Contract => ({ id: `w-${id}`, period: 'week', title, counter, target, reward: E(reward) })
 
 // Petit tirage déterministe : un même jour (ou une même saison) donne toujours les mêmes quêtes.
 const pickFrom = <T,>(pool: T[], count: number, seedText: string): T[] => {
@@ -158,7 +161,7 @@ export const dailyContracts = (now: Date): Contract[] => {
   const hardest = picked.reduce((b, c, i) => ((c.reward.gems ?? 0) > (picked[b].reward.gems ?? 0) ? i : b), 0)
   return [d('featured', `Obtiens un perso de ${featuredWorld(now)}`, 'featuredPull', 1, { gems: 30 }), ...picked.map((c, i) => (i === hardest ? withTitle(c, dailyTitle(now)) : c))]
 }
-export const DAILY_BONUS: Contract = { id: 'd-all', period: 'day', title: 'Termine toutes les quêtes du jour', target: DAILY_COUNT, reward: { gems: 60, tickets: 1 } }
+export const DAILY_BONUS: Contract = { id: 'd-all', period: 'day', title: 'Termine toutes les missions du jour', target: DAILY_COUNT, reward: E({ gems: 60, tickets: 1, sure: 'epic' }) }
 export const WEEKLY_POOL: Contract[] = [
   w('merges', 'Fusionne 10 doublons', 'merges', 10, { gems: 150 }),
   w('merges25', 'Fusionne 25 doublons', 'merges', 25, { gems: 250, scrolls: { large: 1 } }),
@@ -208,10 +211,10 @@ export const WEEKLY_POOL: Contract[] = [
   w('spend1500', 'Grand mécène : dépense 1 500 Éclats', 'gemsSpent', 1500, { gems: 380, tickets: 3 }),
   w('claims35', 'Machine à quêtes : récupère 35 quêtes du jour', 'claims', 35, { gems: 300, tickets: 2 }),
   w('visit7', 'Tous les jours au Nexus : passe 7 jours', 'visit', 7, { gems: 200, energy: 12 }),
-  w('dailyAll5', 'Semaine parfaite : termine toutes les quêtes du jour 5 fois', 'dailyAll', 5, { gems: 400, tickets: 3 }),
+  w('dailyAll5', 'Semaine parfaite : termine toutes les missions du jour 5 fois', 'dailyAll', 5, { gems: 300, multi: 1 }),
 ]
 // La quête « tous les contrats du jour 3 fois » est toujours là ; 9 autres sont tirées chaque lundi.
-export const WEEKLY_ALL = w('dailyAll', 'Termine toutes les quêtes du jour 3 fois', 'dailyAll', 3, { gems: 200, tickets: 2 })
+export const WEEKLY_ALL = w('dailyAll', 'Termine toutes les missions du jour 3 fois', 'dailyAll', 3, { gems: 200, tickets: 2, sure: 'ultra' })
 export const WEEKLY_COUNT = 12 // quêtes de la semaine tirées chaque lundi, en plus de WEEKLY_ALL
 // Chaque semaine : le grand titre (légendaire, parfois mythique) avec WEEKLY_ALL, un titre épique et un rare sur deux autres quêtes.
 export const weeklyContracts = (now: Date): Contract[] => {
@@ -219,17 +222,17 @@ export const weeklyContracts = (now: Date): Contract[] => {
   const picked = pickFrom(WEEKLY_POOL.filter((c) => c.id !== 'w-dailyAll5'), WEEKLY_COUNT - 1, `semaine|${weekKey(now)}`)
   const order = picked.map((c, i) => [c.reward.gems ?? 0, i]).sort((a, b) => b[0] - a[0])
   const epicAt = order[0][1], rareAt = order[1][1]
-  return [withTitle(WEEKLY_ALL, t.top), w('dailyAll5', 'Semaine parfaite : termine toutes les quêtes du jour 5 fois', 'dailyAll', 5, { gems: 400, tickets: 3 }),
+  return [withTitle(WEEKLY_ALL, t.top), w('dailyAll5', 'Semaine parfaite : termine toutes les missions du jour 5 fois', 'dailyAll', 5, { gems: 300, multi: 1 }),
     ...picked.map((c, i) => (i === epicAt ? withTitle(c, t.epic) : i === rareAt ? withTitle(c, t.rare) : c))]
 }
 export const STORY: Contract[] = BANNERS.flatMap((b, arc) => [
-  ...STAGES.filter((st) => st.arc === arc && !st.boss).map((st): Contract => ({ id: `s-${st.id}`, period: 'story', title: `${b.world} · gagne « ${st.name} »`, target: 1, arc, stage: st.id, reward: { gems: 20 + 5 * arc, scrolls: { small: 1 } } })),
-  { id: `s-${arc}-clear`, period: 'story', title: `Termine l'arc ${b.world}`, target: 1, arc, reward: { gems: 100, tickets: 1 } },
-  { id: `s-${arc}-perfect`, period: 'story', title: `3★ sur tout l'arc ${b.world}`, target: STAGES_PER_ARC * 3, arc, perfect: true, reward: { gems: 200, scrolls: { large: 1 }, shards: 3 } },
+  ...STAGES.filter((st) => st.arc === arc && !st.boss).map((st): Contract => ({ id: `s-${st.id}`, period: 'story', title: `${b.world} · gagne « ${st.name} »`, target: 1, arc, stage: st.id, reward: E({ gems: 20 + 5 * arc, scrolls: { small: 1 } }) })),
+  { id: `s-${arc}-clear`, period: 'story', title: `Termine l'arc ${b.world}`, target: 1, arc, reward: E({ gems: 100, sure: 'ultra' }) },
+  { id: `s-${arc}-perfect`, period: 'story', title: `3★ sur tout l'arc ${b.world}`, target: STAGES_PER_ARC * 3, arc, perfect: true, reward: E({ gems: 200, lr: 1 }) },
 ] as Contract[])
 // Quêtes de carrière : des paliers à vie, chacun récupéré une seule fois.
 const career = (counter: Counter, steps: [number, string, Reward][]): Contract[] =>
-  steps.map(([target, title, reward]) => ({ id: `k-${counter}-${target}`, period: 'story', title, target, counter, arc: -1, reward }))
+  steps.map(([target, title, reward]) => ({ id: `k-${counter}-${target}`, period: 'story', title, target, counter, arc: -1, reward: E(reward) }))
 export const CAREER: Contract[] = [
   ...career('pulls', [[50, 'Fais 50 invocations', { gems: 100 }], [100, 'Fais 100 invocations', { gems: 150, tickets: 2 }], [250, 'Fais 250 invocations', { gems: 300, tickets: 3 }], [500, 'Fais 500 invocations', { gems: 500, tickets: 5 }], [1000, 'Fais 1 000 invocations', { gems: 1000, tickets: 10 }]]),
   ...career('wins', [[25, 'Gagne 25 combats', { gems: 100 }], [100, 'Gagne 100 combats', { gems: 200, energy: 10 }], [250, 'Gagne 250 combats', { gems: 350, tickets: 3 }], [500, 'Gagne 500 combats', { gems: 600, tickets: 5 }]]),
@@ -256,7 +259,8 @@ export const CAREER: Contract[] = [
   ...career('dailies', [[365, 'Récupère 365 récompenses du jour', { gems: 5000, tickets: 30 }]]),
 ]
 
-export const progress = (c: Contract, q: Quests, saga: Record<string, number>, now: Date): number => {
+export const progress = (c: Contract, q: Quests, saga: Record<string, number>, now: Date, owned = 0): number => {
+  if (c.collect) return owned // nombre de personnages différents possédés
   const r = roll(q, now)
   if (c.id === DAILY_BONUS.id) return r.day.claimed.filter((id) => id !== DAILY_BONUS.id).length
   if (c.period === 'story' && c.counter) return r.life[c.counter] ?? 0
@@ -271,9 +275,9 @@ export const isClaimed = (c: Contract, q: Quests, now: Date) => {
   const r = roll(q, now)
   return c.period === 'story' ? q.story.includes(c.id) : (c.period === 'day' ? r.day : r.week).claimed.includes(c.id)
 }
-export const allContracts = (now: Date) => [...dailyContracts(now), DAILY_BONUS, ...weeklyContracts(now), ...STORY, ...CAREER]
-export const claimable = (q: Quests, saga: Record<string, number>, now: Date) =>
-  allContracts(now).filter((c) => !isClaimed(c, q, now) && progress(c, q, saga, now) >= c.target)
+export const allContracts = (now: Date) => [...dailyContracts(now), DAILY_BONUS, ...weeklyContracts(now), ...STORY, ...CAREER, ...COLLECTION]
+export const claimable = (q: Quests, saga: Record<string, number>, now: Date, owned = 0) =>
+  allContracts(now).filter((c) => !isClaimed(c, q, now) && progress(c, q, saga, now, owned) >= c.target)
 
 // Marque un contrat comme récupéré. Le bonus « tous les contrats du jour » compte aussi pour la semaine.
 export const markClaimed = (c: Contract, q: Quests, now: Date): Quests => {
@@ -283,6 +287,13 @@ export const markClaimed = (c: Contract, q: Quests, now: Date): Quests => {
   const next = { ...r, day: { ...r.day, claimed: [...r.day.claimed, c.id] } }
   return c.id === DAILY_BONUS.id ? addCounts(next, { dailyAll: 1 }, now) : next
 }
+
+// Collection : des paliers de personnages différents possédés, chacun récupéré une seule fois.
+const COL_STEPS: [number, Reward][] = [
+  [10, { gems: 30 }], [25, { gems: 50 }], [50, { sure: 'epic' }], [75, { gems: 80 }], [100, { multi: 1 }], [150, { gems: 150 }], [200, { sure: 'ultra' }], [250, { lr: 1 }],
+  [300, { multi: 2 }], [350, { sure: 'ultra' }], [400, { gems: 400 }], [450, { sure: 'legend' }], [500, { lr: 2 }], [550, { multi: 3 }], [600, { sure: 'legend' }], [650, { gems: 2000, lr: 3 }],
+]
+export const COLLECTION: Contract[] = COL_STEPS.map(([target, reward]) => ({ id: `col-${target}`, period: 'story', title: `Possède ${target} personnages différents`, target, arc: -2, collect: true, reward: E(reward) }))
 
 // ───── Défis du Chemin : chacun se refait 3 fois par jour et fait avancer le Chemin du Rift ─────
 export type Challenge = { id: string; title: string; counter: Counter; target: number; xp: number; gems: number }
