@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom'
 import { cosmeticArt } from '../assets/manifest'
 import { accountLevel } from '../game/progression'
 import { useStore } from '../state/store'
-import { getVolume, isSoundOn, setSoundOn, setVolume } from '../summon/audio'
+import { getPackVolume, getVolume, isSoundOn, setPackVolume, setSoundOn, setVolume } from '../summon/audio'
 import { effectiveGraphics, getGraphics, getTitleMode, setGraphics, setTitleMode, type GraphicsMode } from './graphics'
 
 // Réduit une image choisie par le joueur à une petite photo de profil carrée (gardée dans la sauvegarde).
@@ -50,6 +50,7 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
   const [link, setLink] = useState('')
   const [error, setError] = useState('')
   const [volume, setVol] = useState(getVolume())
+  const [pack, setPack] = useState(getPackVolume())
   const [sound, setSound] = useState(isSoundOn())
   const [graphics, setGfx] = useState(getGraphics())
   const [titles, setTitles] = useState(getTitleMode())
@@ -127,6 +128,8 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
             <input type="range" min={0} max={100} value={0} disabled style={{ ['--v' as string]: '0%' }} /><em>0 %</em></label>
           <label className="st-slider"><span className="st-slider__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2 5 5-2-2 5 5 2-5 2 2 5-5-2-2 5-2-5-5 2 2-5-5-2 5-2-2-5 5 2Z" /></svg></span><span className="st-slider__name"><b>Bruitages</b><small>Effets</small></span>
             <input type="range" min={0} max={100} step={5} value={Math.round(volume * 100)} style={{ ['--v' as string]: `${Math.round(volume * 100)}%` }} onChange={(e) => { const v = Number(e.target.value) / 100; setVol(v); setVolume(v) }} /><em>{Math.round(volume * 100)} %</em></label>
+          <label className="st-slider"><span className="st-slider__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-3 2-4 2-7 1 1 2 2 2 4 1-2 1-5 1-7Z" /></svg></span><span className="st-slider__name"><b>Invocations</b><small>Ouverture des packs</small></span>
+            <input type="range" min={0} max={100} step={5} value={Math.round(pack * 100)} style={{ ['--v' as string]: `${Math.round(pack * 100)}%` }} onChange={(e) => { const v = Number(e.target.value) / 100; setPack(v); setPackVolume(v) }} /><em>{Math.round(pack * 100)} %</em></label>
           <button className={`st-btn ${sound ? '' : 'is-on'}`} aria-pressed={!sound} onClick={() => { setSoundOn(!sound); setSound(!sound) }}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4zM17 9a4 4 0 0 1 0 6" /></svg>{sound ? 'Couper le son' : 'Remettre le son'}</button>
         </Row>
 

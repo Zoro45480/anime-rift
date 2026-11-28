@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Hero } from '../data/heroes'
 import { MR_VIDEOS, MR_YOUTUBE, type YtClip } from '../data/mrVideos'
+import { getPackVolume } from './audio'
 
 // « Edit » plein écran quand une carte MR tombe.
 // Si une vidéo d'edit est fournie pour ce perso (dossier public/mr-videos, liste dans data/mrVideos.ts), c'est elle qui passe.
@@ -19,10 +20,15 @@ export const YtEdit = ({ hero, clip, onDone }: { hero: Hero; clip: YtClip; onDon
   done.current = onDone
   useEffect(() => {
     const a = window.setTimeout(() => setSkip(true), 2000)
-    const b = window.setTimeout(() => done.current(), (clip.end - clip.start) * 1000 + 1200) // fin du passage choisi
+    const b = window.setTimeout(() => done.current(), (clip.end - clip.start) * 1000 + 4000) // filet de sécurité si le lecteur ne donne pas son temps
     const onMsg = (e: MessageEvent) => { // le lecteur signale la fin de la vidéo
       if (!/youtube/.test(e.origin) || typeof e.data !== 'string') return
-      try { const d = JSON.parse(e.data); if (d.event === 'onStateChange' && d.info === 0) done.current() } catch { /* message d'un autre type */ }
+      try {
+        const d = JSON.parse(e.data)
+        if (d.event === 'onStateChange' && d.info === 0) done.current()
+        // on coupe juste avant la fin du passage : les suggestions de fin de YouTube n'ont pas le temps d'apparaître
+        if (d.event === 'infoDelivery' && typeof d.info?.currentTime === 'number' && d.info.currentTime >= clip.end - 0.35) done.current()
+      } catch { /* message d'un autre type */ }
     }
     window.addEventListener('message', onMsg)
     return () => { window.clearTimeout(a); window.clearTimeout(b); window.removeEventListener('message', onMsg) }
@@ -30,7 +36,9 @@ export const YtEdit = ({ hero, clip, onDone }: { hero: Hero; clip: YtClip; onDon
   const q = new URLSearchParams({ autoplay: '1', start: String(clip.start), end: String(clip.end), controls: '0', rel: '0', playsinline: '1', modestbranding: '1', iv_load_policy: '3', disablekb: '1', enablejsapi: '1', origin: location.origin })
   return (
     <div className="mredit mredit--video">
-      <iframe src={`https://www.youtube-nocookie.com/embed/${clip.id}?${q}`} title={`Edit de ${hero.name}`} allow="autoplay; encrypted-media; fullscreen" />
+      <iframe className="mredit__yt" src={`https://www.youtube-nocookie.com/embed/${clip.id}?${q}`} title={`Edit de ${hero.name}`} allow="autoplay; encrypted-media; fullscreen" tabIndex={-1}
+        onLoad={(e) => { const w = e.currentTarget.contentWindow; w?.postMessage(JSON.stringify({ event: 'listening', id: 1, channel: 'widget' }), '*'); const v = Math.round(getPackVolume() * 100); [300, 1200, 2500].forEach((ms) => setTimeout(() => w?.postMessage(JSON.stringify({ event: 'command', func: 'setVolume', args: [v] }), '*'), ms)) }} />
+      <span className="mredit__shield" aria-hidden="true" />
       <p className="mredit__tag"><b>MR</b>{hero.name}</p>
       {skip && <button className="mredit__skip" onClick={() => done.current()}>Passer ›</button>}
     </div>

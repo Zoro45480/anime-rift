@@ -6,7 +6,7 @@ import type { RarityId } from '../data/rarities'
 import { MR_VIDEOS, MR_YOUTUBE } from '../data/mrVideos'
 import { heroArt, iconArt } from '../assets/manifest'
 import { useStore, type Currency } from '../state/store'
-import { isSoundOn, primeAudio } from './audio'
+import { getPackVolume, isSoundOn, primeAudio } from './audio'
 import { MrEdit } from './MrEdit'
 import { Card } from '../ui/Card'
 import { RARITIES } from '../data/rarities'
@@ -62,6 +62,7 @@ export const InvocationDemo = ({ banner, count = 10, currency = 'ticket', onClos
       if (m.type === 'ready') {
         balance()
         send({ type: 'open', banner: BANNERS.indexOf(banner), n: count, pay: currency === 'ticket' ? 't' : 'g', ends: BANNERS.map((b) => Date.parse(b.endsAt)) })
+        send({ type: 'volume', v: getPackVolume() }) // volume des invocations (Paramètres)
         if (!isSoundOn()) send({ type: 'mute', muted: true }) // le réglage « Couper le son » du jeu
         setTimeout(() => setReady(true), 60)
         frame.current?.focus()

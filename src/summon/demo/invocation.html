@@ -235,6 +235,7 @@ const BOX=p=>{const b=(window.CADRE_BOX||{})[S.u.id+'_'+p.r];return b?`inset:${b
 addEventListener('message',e=>{const m=e.data||{};if(m.type==='balance'){S.tickets=m.tickets;S.gems=m.gems;S.pity=m.pity;S.ct=m.ct;S.cg=m.cg;refresh()}
  if(m.type==='videodone'&&vidWait){vidWait()}
  if(m.type==='mute'&&m.muted&&!muted){$('#mute').click()}
+ if(m.type==='volume'){MASTER=m.v}
  if(m.type==='pulled'&&pullWait){const w=pullWait;pullWait=null;w(m)}
  if(m.type==='open'){S.n=m.n||S.n;S.pay=m.pay||S.pay;document.querySelectorAll('#qty button').forEach(x=>x.classList.toggle('on',+x.dataset.n===S.n));document.querySelectorAll('#pay button').forEach(x=>x.classList.toggle('on',x.dataset.p===S.pay));
   U.forEach((u,i)=>{u.end=m.ends[i]});openBanner(m.banner,$('#portal'))}});
@@ -326,8 +327,9 @@ const t0=performance.now();
 /* ================= SONS (ElevenLabs) ================= */
 const SND={};['01_ambiance_ciel','02_faille_repos','03_faille_ecarter','04_ui_clic','05_faille_dechirure','06_verre_brise','07_cristal_apparait','08_cristaux_fusion','09_carte_arrive','10_carte_retourne','11_suspense_ssr','12_suspense_lr','13_mr_battement','14_mr_fissures','15_mr_explosion','16_mr_braises','17_revelation_rare','18_recap'].forEach(n=>{const a=new Audio((window.SONS||{})['sfx_'+n]||'sons/sfx_'+n+'.mp3');a.preload='auto';SND[n.slice(3)]=a});
 let muted=false,unlocked=false;const LOOPS={};
-function sfx(k,vol=1,rate=1){if(muted||!SND[k])return null;const a=SND[k].cloneNode();a.volume=Math.min(1,vol);a.preservesPitch=false;a.playbackRate=rate;a.play().catch(()=>{});return a}
-function loopOn(k,vol){if(muted)return;let a=LOOPS[k];if(!a){a=LOOPS[k]=SND[k].cloneNode();a.loop=true}a._t=vol;a.volume=a.volume||0;a.play().catch(()=>{});fadeTo(a,vol)}
+let MASTER=.5;// ANIME RIFT : volume des invocations, réglé dans les Paramètres du jeu
+function sfx(k,vol=1,rate=1){if(muted||!SND[k])return null;const a=SND[k].cloneNode();a.volume=Math.min(1,vol*MASTER);a.preservesPitch=false;a.playbackRate=rate;a.play().catch(()=>{});return a}
+function loopOn(k,vol){if(muted)return;vol*=MASTER;let a=LOOPS[k];if(!a){a=LOOPS[k]=SND[k].cloneNode();a.loop=true;a.volume=0}a._t=vol;a.volume=a.volume||0;a.play().catch(()=>{});fadeTo(a,vol)}
 function loopOff(k){const a=LOOPS[k];if(a)fadeTo(a,0,()=>a.pause())}
 function fadeTo(a,v,done){clearInterval(a._f);a._f=setInterval(()=>{const d=v-a.volume;if(Math.abs(d)<.03){a.volume=v;clearInterval(a._f);done&&done();return}a.volume=Math.max(0,Math.min(1,a.volume+Math.sign(d)*.03))},40)}
 addEventListener('pointerdown',()=>{if(!unlocked){unlocked=true;loopOn('ambiance_ciel',.35);if(S.view==='hub')loopOn('faille_repos',.35)}},{once:false});
@@ -361,7 +363,7 @@ $('#openBtn').onclick=summon;
 /* portail : clic ou glisser */
 {const p=$('#portal');let down=null,moved=false;
  p.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};moved=false;p.classList.add('pressed');p.setPointerCapture(e.pointerId)});
- p.addEventListener('pointermove',e=>{if(!down)return;const d=Math.hypot(e.clientX-down.x,e.clientY-down.y);if(d>8){moved=true;p.classList.remove('pressed')}pullTarget=Math.min(1,d/160);if(pullTarget>.15&&!LOOPS._pull){LOOPS._pull=sfx('faille_ecarter',.6)}if(LOOPS._pull)LOOPS._pull.volume=Math.min(1,.3+pullTarget*.7);if(pullTarget>=1){down=null;pullTarget=0;summon()}});
+ p.addEventListener('pointermove',e=>{if(!down)return;const d=Math.hypot(e.clientX-down.x,e.clientY-down.y);if(d>8){moved=true;p.classList.remove('pressed')}pullTarget=Math.min(1,d/160);if(pullTarget>.15&&!LOOPS._pull){LOOPS._pull=sfx('faille_ecarter',.6)}if(LOOPS._pull)LOOPS._pull.volume=Math.min(1,(.3+pullTarget*.7)*MASTER);if(pullTarget>=1){down=null;pullTarget=0;summon()}});
  const up=()=>{if(LOOPS._pull){LOOPS._pull.pause();LOOPS._pull=null}if(!down)return;p.classList.remove('pressed');down=null;pullTarget=0;if(!moved)summon()};
  p.addEventListener('pointerup',up);p.addEventListener('pointercancel',()=>{down=null;pullTarget=0;p.classList.remove('pressed')});}
 

@@ -37,6 +37,15 @@ export const setVolume = (v: number) => {
   try { localStorage.setItem(VOLUME_KEY, String(Math.min(1, Math.max(0, v)))) } catch { /* non enregistré */ }
 }
 
+// Volume des invocations (sons de la faille, des cristaux, des cartes et de la vidéo MR), de 0 à 1. Plus bas par défaut.
+const PACK_KEY = 'anime-rift-pack-volume'
+export const getPackVolume = (): number => {
+  try { const v = Number(localStorage.getItem(PACK_KEY) ?? '0.5'); return Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : 0.5 } catch { return 0.5 }
+}
+export const setPackVolume = (v: number) => {
+  try { localStorage.setItem(PACK_KEY, String(Math.min(1, Math.max(0, v)))) } catch { /* non enregistré */ }
+}
+
 // Lit un fichier son. Dans la version « un seul fichier » du jeu il est intégré à la page (data:) : on le décode sur place.
 const readBytes = async (url: string): Promise<ArrayBuffer> => {
   if (!url.startsWith('data:')) return (await fetch(url)).arrayBuffer()
