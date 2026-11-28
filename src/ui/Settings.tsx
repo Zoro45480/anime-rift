@@ -1,14 +1,12 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type DragEvent, type FormEvent, type ReactNode } from 'react'
 import { getLang, LANGS, setLang } from './i18n'
 import { deleteAccount, signInWith, signOut, useOnline } from '../state/online'
 import { createPortal } from 'react-dom'
-import { cosmeticArt, extraArt } from '../assets/manifest'
+import { cosmeticArt } from '../assets/manifest'
 import { accountLevel } from '../game/progression'
 import { useStore } from '../state/store'
 import { getVolume, isSoundOn, setSoundOn, setVolume } from '../summon/audio'
 import { effectiveGraphics, getGraphics, getTitleMode, setGraphics, setTitleMode, type GraphicsMode } from './graphics'
-import { Kiri } from './Guide'
-import { LevelBadge, levelStyle } from './LevelBadge'
 
 // Réduit une image choisie par le joueur à une petite photo de profil carrée (gardée dans la sauvegarde).
 const toAvatar = (file: File) => new Promise<string>((resolve, reject) => {
@@ -73,132 +71,163 @@ export const Settings = ({ onClose }: { onClose: () => void }) => {
     img.src = url
   }
 
+  const onDrop = (e: DragEvent<HTMLLabelElement>) => { e.preventDefault(); void onFile(e.dataTransfer.files?.[0]) }
+  const quality = effectiveGraphics(graphics) === 'low' ? 'Fluide' : 'Maximale'
+
   return createPortal(
-    <div className="modal" role="dialog" aria-modal="true" aria-label="Paramètres" onClick={onClose}>
-      <div className="modal__box set" onClick={(e) => e.stopPropagation()}>
-        <header className="set__head">
-          <img className="set__gear" src={extraArt('set-gear')} alt="" />
-          <div><p>Réglages</p><h2>Paramètres</h2></div>
-          <button className="notifs__close" onClick={onClose} aria-label="Fermer">×</button>
+    <div className="st-wrap" role="dialog" aria-modal="true" aria-label="Paramètres" onClick={onClose}>
+      <aside className="st" onClick={(e) => e.stopPropagation()}>
+        <header className="st__head">
+          <p className="st__kick"><i />Réglages du compte</p>
+          <h2>Paramètres</h2>
+          <p>Ton pseudo et ta photo apparaissent dans tes dialogues de l’Aventure, le Panthéon et les gros tirages.</p>
+          <button className="st__close" onClick={onClose} aria-label="Fermer">×</button>
         </header>
 
-        <section className="set__profile">
-          <FramedAvatar size={150} style={levelStyle(acc.level, store.rebirths)} />
-          <div><b>{store.profile.name.trim() || 'Joueur'}</b><LevelBadge level={acc.level} rebirths={store.rebirths} size={26} /></div>
-        </section>
-        <p className="set__note">Ta partie est enregistrée sur cet appareil, et aussi en ligne quand tu es connecté.</p>
+        <AccountHead level={acc.level} />
 
-        <AccountCard />
+        <Row label="Compte"><p className="st__note">Ta partie est enregistrée sur cet appareil, et aussi en ligne quand tu es connecté.</p><DataZone /></Row>
 
-        <section className="set-card" style={{ ['--sc' as string]: '#b78bff' }}>
-          <header className="set-card__head"><img src={extraArt('set-profile')} alt="" /><h3>Profil</h3></header>
-          <h4>Pseudo</h4>
-          <input className="set__input" type="text" maxLength={20} placeholder="Joueur" aria-label="Pseudo" value={name} onChange={(e) => { setName(e.target.value); store.setProfile({ name: e.target.value }) }} />
-          <h4>Photo de profil</h4>
-          <div className="set__row">
-            <label className="cd-btn cd-btn--small" htmlFor="set-avatar">Choisir une image</label>
-            <input id="set-avatar" className="artpick__input" type="file" accept="image/*" onChange={(e) => { void onFile(e.target.files?.[0]); e.target.value = '' }} />
-            {store.profile.avatar && <button className="cd-btn cd-btn--small" onClick={() => store.setProfile({ avatar: '' })}>Retirer</button>}
+        <Row label="Moyens de connexion"><Providers /></Row>
+
+        <Row label="Photo de profil">
+          <div className="st-photo">
+            <div className="st-photo__pic">
+              <Avatar size={112} />
+              {store.profile.avatar && <button className="st-photo__del" onClick={() => store.setProfile({ avatar: '' })}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>Retirer</button>}
+            </div>
+            <div className="st-photo__form">
+              <label className="st__label" htmlFor="st-name">Pseudo</label>
+              <input id="st-name" className="st__input" type="text" maxLength={20} placeholder="Joueur" value={name} onChange={(e) => { setName(e.target.value); store.setProfile({ name: e.target.value }) }} />
+              <label className="st-drop" htmlFor="set-avatar" onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>
+                <span className="st-drop__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V5m0 0-4 4m4-4 4 4M5 19h14" /></svg></span>
+                <span><b>Choisir une image</b><small>ou dépose-la ici</small></span>
+              </label>
+              <input id="set-avatar" className="artpick__input" type="file" accept="image/*" onChange={(e) => { void onFile(e.target.files?.[0]); e.target.value = '' }} />
+              <form className="st-link" onSubmit={onLink}>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" /></svg>
+                <input type="url" inputMode="url" placeholder="…ou colle le lien d’une image (ex. ta photo Discord)" aria-label="Lien d'une image de profil" value={link} onChange={(e) => setLink(e.target.value)} />
+                <button type="submit">OK</button>
+              </form>
+              {error && <p className="artpick__error" role="alert">{error}</p>}
+              <p className="st__note">Sur Discord : clic droit sur ta photo de profil → « Copier le lien de l’image ».</p>
+            </div>
           </div>
-          <form className="set__link" onSubmit={onLink}>
-            <input className="set__input" type="url" inputMode="url" placeholder="…ou colle le lien d’une image" aria-label="Lien d'une image de profil" value={link} onChange={(e) => setLink(e.target.value)} />
-            <button className="cd-btn cd-btn--small" type="submit">OK</button>
-          </form>
-          {error && <p className="artpick__error" role="alert">{error}</p>}
-        </section>
+        </Row>
 
-        <section className="set-card" style={{ ['--sc' as string]: '#5ee6ff' }}>
-          <header className="set-card__head"><img src={extraArt('set-sound')} alt="" /><h3>Son</h3></header>
-          <label className="set__slider"><span>Bruitages</span><b>{Math.round(volume * 100)} %</b>
-            <input type="range" min={0} max={100} step={5} value={Math.round(volume * 100)} onChange={(e) => { const v = Number(e.target.value) / 100; setVol(v); setVolume(v) }} />
-          </label>
-          <button className={`cd-btn cd-btn--small ${sound ? '' : 'is-on'}`} aria-pressed={!sound} onClick={() => { setSoundOn(!sound); setSound(!sound) }}>{sound ? 'Couper le son' : 'Son coupé · remettre'}</button>
-          <p className="set__note">Le jeu n'a pas encore de musique : ce réglage concerne les bruitages d'invocation.</p>
-        </section>
+        <Row label="Langue">
+          <div className="st-seg">{LANGS.map(([id, label]) => <button key={id} className={getLang() === id ? 'is-on' : ''} aria-pressed={getLang() === id} onClick={() => { if (getLang() !== id) setLang(id) }}><b>{label}</b><small>{id === 'fr' ? 'Version d’origine' : id === 'en' ? 'Traduction anglaise' : 'Traduction allemande'}</small></button>)}</div>
+          <p className="st__note">Le français est la version d’origine ; en anglais et en allemand, les menus et les boutons sont traduits.</p>
+        </Row>
 
-        <section className="set-card" style={{ ['--sc' as string]: '#a56bff' }}>
-          <header className="set-card__head"><img src={extraArt('set-graphics')} alt="" /><h3>Graphismes</h3></header>
-          <div className="set__seg" role="radiogroup" aria-label="Qualité graphique">
-            {GRAPHICS.map(([id, label, sub]) => (
-              <button key={id} role="radio" aria-checked={graphics === id} className={graphics === id ? 'is-on' : ''} onClick={() => { setGraphics(id); setGfx(id) }}><b>{label}</b><small>{sub}</small></button>
-            ))}
+        <Row label="Appli et notifications"><InstallButton /></Row>
+
+        <Row label="Son">
+          <label className="st-slider is-off" title="Le jeu n’a pas encore de musique"><span className="st-slider__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm11-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg></span><span className="st-slider__name"><b>Musique</b><small>Bientôt</small></span>
+            <input type="range" min={0} max={100} value={0} disabled style={{ ['--v' as string]: '0%' }} /><em>0 %</em></label>
+          <label className="st-slider"><span className="st-slider__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2 5 5-2-2 5 5 2-5 2 2 5-5-2-2 5-2-5-5 2 2-5-5-2 5-2-2-5 5 2Z" /></svg></span><span className="st-slider__name"><b>Bruitages</b><small>Effets</small></span>
+            <input type="range" min={0} max={100} step={5} value={Math.round(volume * 100)} style={{ ['--v' as string]: `${Math.round(volume * 100)}%` }} onChange={(e) => { const v = Number(e.target.value) / 100; setVol(v); setVolume(v) }} /><em>{Math.round(volume * 100)} %</em></label>
+          <button className={`st-btn ${sound ? '' : 'is-on'}`} aria-pressed={!sound} onClick={() => { setSoundOn(!sound); setSound(!sound) }}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4zM17 9a4 4 0 0 1 0 6" /></svg>{sound ? 'Couper le son' : 'Remettre le son'}</button>
+        </Row>
+
+        <Row label="Graphismes">
+          <div className="st-seg" role="radiogroup" aria-label="Qualité graphique">
+            {GRAPHICS.map(([id, label, sub]) => <button key={id} role="radio" aria-checked={graphics === id} className={graphics === id ? 'is-on' : ''} onClick={() => { setGraphics(id); setGfx(id) }}><b>{label}</b><small>{sub}</small></button>)}
           </div>
-          <p className="set__note">Qualité en ce moment : <b>{effectiveGraphics(graphics) === 'low' ? 'Fluide' : 'Maximale'}</b>. Le mode Fluide fige les lueurs animées, retire les flous et allège l'animation d'invocation : idéal si le jeu saccade.</p>
-        </section>
+          <p className="st-now">Qualité en ce moment <b>{quality}</b></p>
+          <p className="st__note">Le mode Fluide retire les flous d’arrière-plan et fige les lueurs animées : idéal si le jeu saccade.</p>
+        </Row>
 
-        <section className="set-card" style={{ ['--sc' as string]: '#22d3ee' }}>
-          <header className="set-card__head"><h3>Langue</h3></header>
-          <div className="set__seg">{LANGS.map(([id, label]) => <button key={id} className={getLang() === id ? 'is-on' : ''} aria-pressed={getLang() === id} onClick={() => { if (getLang() !== id) setLang(id) }}><b>{label}</b></button>)}</div>
-          <p className="set__note">Le français est la version d’origine. En anglais et en allemand, les menus, onglets et boutons sont traduits ; le reste des textes arrive petit à petit.</p>
-        </section>
+        <Row label="Doublons"><p className="st__note">Tes doublons restent dans ta collection. À toi de choisir quand les fusionner ou les échanger.</p></Row>
 
-        <section className="set-card" style={{ ['--sc' as string]: '#4be3a4' }}>
-          <header className="set-card__head"><img src={extraArt('set-phone')} alt="" /><h3>Installer l'appli</h3></header>
-          <InstallButton />
-          <ol className="set__steps">
-            <li>Ouvre le jeu dans le navigateur de ton téléphone (Safari sur iPhone, Chrome sur Android).</li>
-            <li>Touche le bouton de partage (iPhone) ou le menu ⋮ (Android).</li>
-            <li>Choisis « Sur l'écran d'accueil ».</li>
-          </ol>
-        </section>
-
-        <section className="set-card" style={{ ['--sc' as string]: '#ffc94d' }}>
-          <header className="set-card__head"><img src={extraArt('set-cards')} alt="" /><h3>Doublons</h3></header>
-          <p className="set__note">Tes doublons restent dans ta collection. À toi de choisir quand les fusionner, depuis la fiche d'une carte.</p>
-        </section>
-
-        <section className="set-card" style={{ ['--sc' as string]: '#ff9a4a' }}>
-          <header className="set-card__head"><img src={extraArt('set-medal')} alt="" /><h3>Titres des cartes</h3></header>
-          <div className="set__seg set__seg--two" role="radiogroup" aria-label="Affichage des titres">
+        <Row label="Titres des cartes">
+          <div className="st-seg" role="radiogroup" aria-label="Affichage des titres">
             <button role="radio" aria-checked={titles === 'all'} className={titles === 'all' ? 'is-on' : ''} onClick={() => { setTitleMode('all'); setTitles('all') }}><b>Partout</b><small>Par défaut</small></button>
-            <button role="radio" aria-checked={titles === 'big'} className={titles === 'big' ? 'is-on' : ''} onClick={() => { setTitleMode('big'); setTitles('big') }}><b>Carte ouverte</b><small>Mini-cartes épurées</small></button>
+            <button role="radio" aria-checked={titles === 'big'} className={titles === 'big' ? 'is-on' : ''} onClick={() => { setTitleMode('big'); setTitles('big') }}><b>Fiche et équipe</b><small>Mini-cartes épurées</small></button>
           </div>
-          <p className="set__note">Le ruban du titre gagné s'affiche sur la carte. « Carte ouverte » le retire des petites cartes des grilles.</p>
-        </section>
+          <p className="st__note">Le ruban du titre choisi s’affiche sur ta carte dans la collection, la fiche et l’équipe. « Fiche et équipe » le retire des mini-cartes de la collection.</p>
+        </Row>
 
-        <section className="set-card" style={{ ['--sc' as string]: '#5aa8ff' }}>
-          <header className="set-card__head"><Kiri size={54} /><h3>Didacticiel</h3></header>
-          <button className="set__replay" onClick={() => { store.resetTutorial(); setReplay(true) }}>
-            <span><b>Revoir les explications de Nyx</b><small>{replay ? 'C’est noté : Nyx réexpliquera chaque écran.' : 'Nyx réexplique chaque écran la prochaine fois que tu l’ouvres.'}</small></span>
+        <Row label="Didacticiel">
+          <button className="st-card" onClick={() => { store.resetTutorial(); setReplay(true) }}>
+            <span className="st-card__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v4h4M12 8v4l3 2" /></svg></span>
+            <span><b>Revoir les explications de Nyx</b><small>{replay ? 'C’est noté : Nyx réexpliquera chaque écran.' : 'Nyx réexplique chaque onglet la prochaine fois que tu l’ouvres.'}</small></span>
+            <i>→</i>
           </button>
-        </section>
-
-
-      </div>
+        </Row>
+      </aside>
     </div>,
     document.body,
   )
 }
 
-// Sauvegarde : un code à copier (ou un fichier) pour garder sa partie ou la reprendre sur un autre appareil.
-const AccountCard = () => {
+const Row = ({ label, children }: { label: string; children: ReactNode }) => (
+  <section className="st-row"><h3>{label}</h3><div className="st-row__body">{children}</div></section>
+)
+
+const provider = (p?: string) => (p === 'discord' ? 'Discord' : p === 'google' ? 'Google' : 'ton compte')
+
+// En haut : qui est connecté, et le bouton « Se déconnecter ».
+const AccountHead = ({ level }: { level: number }) => {
   const { session, me, ready } = useOnline()
+  const { profile } = useStore()
   const [msg, setMsg] = useState('')
   const go = async (p: 'google' | 'discord') => { setMsg(''); const e = await signInWith(p); if (e) setMsg(e) }
   return (
-    <section className="set-card set-account" style={{ ['--sc' as string]: '#7d9bff' }}>
-      <header className="set-card__head"><img src={extraArt('set-profile')} alt="" /><h3>Compte en ligne</h3></header>
-      {!ready ? <p className="set__note">Connexion au serveur…</p> : session ? (
-        <>
-          <p className="set-account__me"><b>{me?.name ?? 'Joueur'}</b> <span>#{me?.player_no ?? '…'}</span></p>
-          <p className="set__note">Connecté avec {session.user.app_metadata.provider === 'discord' ? 'Discord' : session.user.app_metadata.provider === 'google' ? 'Google' : 'ton compte'}. Ta partie est sauvegardée en ligne toute seule : tu la retrouves en te connectant sur un autre appareil. Ton numéro de joueur dit dans quel ordre tu as rejoint le jeu.</p>
-          <button className="cd-btn cd-btn--small" onClick={() => void signOut()}>Se déconnecter</button>
-          <details className="set-danger"><summary>Mes données (RGPD)</summary>
-            <p className="set__note">Tu peux supprimer ton compte en ligne : profil, sauvegarde, amis, messages, annonces et place dans ta Guilde. C’est définitif.</p>
-            <button className="cd-btn cd-btn--small set-danger__btn" onClick={() => { if (window.confirm('Supprimer définitivement ton compte en ligne ?')) void deleteAccount().then((r) => setMsg(r === 'ok' ? 'Compte supprimé.' : r)) }}>Supprimer mon compte</button>
-          </details>
-        </>
-      ) : (
-        <>
-          <p className="set__note">Connecte-toi pour sauvegarder ta partie en ligne, recevoir ton numéro de joueur et apparaître dans le Panthéon. Ta partie de cet appareil part avec toi.</p>
-          <div className="set-account__oauth">
-            <button className="oauth oauth--discord" onClick={() => void go('discord')}><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M20.3 4.4A19.6 19.6 0 0 0 15.4 3l-.6 1.3a18 18 0 0 0-5.6 0L8.6 3a19.6 19.6 0 0 0-4.9 1.4C.6 9 0 13.6.3 18.1a19.8 19.8 0 0 0 6 3l1.3-2a12.8 12.8 0 0 1-2-1l.5-.4a14 14 0 0 0 11.8 0l.5.4c-.6.4-1.3.7-2 1l1.3 2a19.7 19.7 0 0 0 6-3c.4-5.2-.7-9.7-3.4-13.7ZM8.5 15.3c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Z" /></svg>Se connecter avec Discord</button>
-            <button className="oauth oauth--google" onClick={() => void go('google')}><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5a5.6 5.6 0 0 1-2.4 3.6v3h3.9c2.2-2.1 3.5-5.2 3.5-8.8Z" /><path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-2.9l-3.9-3c-1.1.7-2.5 1.2-4.1 1.2-3.1 0-5.8-2.1-6.7-5H1.3v3.1A12 12 0 0 0 12 24Z" /><path fill="#FBBC05" d="M5.3 14.3a7.2 7.2 0 0 1 0-4.6V6.6h-4a12 12 0 0 0 0 10.8l4-3.1Z" /><path fill="#EA4335" d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4A12 12 0 0 0 1.3 6.6l4 3.1c.9-2.9 3.6-4.9 6.7-4.9Z" /></svg>Se connecter avec Google</button>
-          </div>
-        </>
-      )}
+    <section className="st-acc">
+      <span className="st-acc__pic"><Avatar size={64} /></span>
+      <div className="st-acc__id">
+        <small className={session ? 'is-on' : ''}>{!ready ? 'Connexion au serveur…' : session ? <>● Connecté avec {provider(session.user.app_metadata.provider)}</> : 'Hors ligne · partie sur cet appareil'}</small>
+        <b>{me?.name ?? (profile.name.trim() || 'Joueur')} {me && <i>#{me.player_no}</i>}</b>
+        <span>Niveau <em>{level}</em></span>
+      </div>
+      {session ? <button className="st-btn st-acc__out" onClick={() => { if (window.confirm('Se déconnecter ? Ta partie reste enregistrée en ligne et sur cet appareil.')) void signOut() }}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10" /></svg>Se déconnecter</button>
+        : ready && <button className="st-btn st-acc__out" onClick={() => void go('discord')}>Se connecter</button>}
       {msg && <p className="cd__notice" role="status">{msg}</p>}
     </section>
+  )
+}
+
+// Moyens de connexion : Discord, Google (et l'e-mail, à venir).
+const Providers = () => {
+  const { session } = useOnline()
+  const [msg, setMsg] = useState('')
+  const cur = session?.user.app_metadata.provider
+  const go = async (p: 'google' | 'discord') => { setMsg(''); const e = await signInWith(p); if (e) setMsg(e) }
+  const item = (id: 'discord' | 'google', name: string, ico: ReactNode) => (
+    <li className="st-prov">
+      <span className="st-prov__ico">{ico}</span>
+      <span><b>{name}</b><small>{cur === id ? 'Lié' : session ? 'Non lié à ce compte' : 'Se connecter avec ' + name}</small></span>
+      {cur === id ? <i className="st-prov__ok">✓</i> : !session ? <button className="st-btn" onClick={() => void go(id)}>Se connecter</button> : null}
+    </li>
+  )
+  return (
+    <>
+      <ul className="st-provs">
+        {item('discord', 'Discord', <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M20.3 4.4A19.6 19.6 0 0 0 15.4 3l-.6 1.3a18 18 0 0 0-5.6 0L8.6 3a19.6 19.6 0 0 0-4.9 1.4C.6 9 0 13.6.3 18.1a19.8 19.8 0 0 0 6 3l1.3-2a12.8 12.8 0 0 1-2-1l.5-.4a14 14 0 0 0 11.8 0l.5.4c-.6.4-1.3.7-2 1l1.3 2a19.7 19.7 0 0 0 6-3c.4-5.2-.7-9.7-3.4-13.7ZM8.5 15.3c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Z" /></svg>)}
+        {item('google', 'Google', <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5a5.6 5.6 0 0 1-2.4 3.6v3h3.9c2.2-2.1 3.5-5.2 3.5-8.8Z" /><path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-2.9l-3.9-3c-1.1.7-2.5 1.2-4.1 1.2-3.1 0-5.8-2.1-6.7-5H1.3v3.1A12 12 0 0 0 12 24Z" /><path fill="#FBBC05" d="M5.3 14.3a7.2 7.2 0 0 1 0-4.6V6.6h-4a12 12 0 0 0 0 10.8l4-3.1Z" /><path fill="#EA4335" d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4A12 12 0 0 0 1.3 6.6l4 3.1c.9-2.9 3.6-4.9 6.7-4.9Z" /></svg>)}
+        <li className="st-prov is-soon">
+          <span className="st-prov__ico"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M3 6h18v12H3zM3 7l9 6 9-6" /></svg></span>
+          <span><b>E-mail + mot de passe</b><small>Pour te connecter sans Discord ni Google</small></span>
+          <button className="st-btn" disabled>Bientôt</button>
+        </li>
+      </ul>
+      {msg && <p className="cd__notice" role="status">{msg}</p>}
+    </>
+  )
+}
+
+// Mes données (RGPD) : suppression du compte en ligne.
+const DataZone = () => {
+  const { session } = useOnline()
+  const [msg, setMsg] = useState('')
+  if (!session) return null
+  return (
+    <details className="set-danger"><summary>Mes données (RGPD)</summary>
+      <p className="st__note">Tu peux supprimer ton compte en ligne : profil, sauvegarde, amis, messages, annonces et place dans ta Guilde. C’est définitif.</p>
+      <button className="st-btn set-danger__btn" onClick={() => { if (window.confirm('Supprimer définitivement ton compte en ligne ?')) void deleteAccount().then((r) => setMsg(r === 'ok' ? 'Compte supprimé.' : r)) }}>Supprimer mon compte</button>
+      {msg && <p className="cd__notice" role="status">{msg}</p>}
+    </details>
   )
 }
 
@@ -207,9 +236,16 @@ type InstallEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{
 let deferred: InstallEvent | null = null
 if (typeof window !== 'undefined') window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferred = e as InstallEvent })
 const InstallButton = () => {
-  const [state, setState] = useState<'idle' | 'done'>('idle')
+  const [state, setState] = useState<'idle' | 'done' | 'help'>('idle')
   const standalone = typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches
-  if (standalone) return <p className="set__note">Le jeu est déjà installé comme une appli. ✓</p>
-  if (!deferred) return <p className="set__note">Sur ordinateur (Chrome ou Edge), l'icône d'installation apparaît dans la barre d'adresse. Sur téléphone :</p>
-  return <button className="cd-btn cd-btn--main cd-btn--small" disabled={state === 'done'} onClick={async () => { await deferred?.prompt(); setState('done') }}>{state === 'done' ? 'C’est parti !' : 'Installer l’appli'}</button>
+  const click = async () => { if (deferred) { await deferred.prompt(); setState('done') } else setState('help') }
+  return (
+    <>
+      <button className="st-card st-card--app" onClick={() => void click()} disabled={standalone || state === 'done'}>
+        <span className="st-card__ico st-card__ico--red"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2" /><path d="M12 7v7m0 0-3-3m3 3 3-3" /></svg></span>
+        <span><b>{standalone ? 'Appli installée ✓' : state === 'done' ? 'C’est parti !' : 'Installer l’appli'}</b><small>ANIME RIFT dans sa propre fenêtre, lancé en un clic</small></span>
+      </button>
+      {state === 'help' && <ol className="set__steps"><li>Sur ordinateur (Chrome ou Edge) : l’icône d’installation est dans la barre d’adresse.</li><li>Sur iPhone : bouton de partage, puis « Sur l’écran d’accueil ».</li><li>Sur Android : menu ⋮, puis « Installer l’application ».</li></ol>}
+    </>
+  )
 }
