@@ -504,7 +504,7 @@ async function flip(){const p=S.pulls[S.i],c=$('#zone .card');if(S.flipped||!c)r
  setTimeout(()=>{c.onclick=onCard},p.k===5?1600:350)}
 function stopFx2Soon(p){if(p.k<5)stopFx2()}
 // après l'explosion MR : braises et aura qui restent autour de la carte
-function mrAfter(p){GAME.postMessage({type:'mr',id:p.id},'*');skyGlow=.7;const run=++revLoop,z=$('#zone').getBoundingClientRect(),cx=z.left+z.width/2,cy=z.top+z.height/2,E=[];
+function mrAfter(p){if(!p.shown){p.shown=1;GAME.postMessage({type:'mr',id:p.id},'*')}skyGlow=.7;const run=++revLoop,z=$('#zone').getBoundingClientRect(),cx=z.left+z.width/2,cy=z.top+z.height/2,E=[];
  document.querySelector('.revbar').style.opacity='';$('#strip').style.opacity='';$('#cnt').style.opacity='';
  (function f(){if(run!==revLoop)return;ctx2.clearRect(0,0,innerWidth,innerHeight);ctx2.globalCompositeOperation='lighter';
   for(let i=0;i<3;i++){const a=Math.random()*6.28;E.push({x:cx+Math.cos(a)*z.width*.6,y:cy+Math.sin(a)*z.height*.55,vy:-(40+Math.random()*90),vx:(Math.random()-.5)*20,l:0,m:1.5+Math.random()*1.5,s:1+Math.random()*2.5})};
@@ -523,7 +523,7 @@ function next(){stopFx2();$('#vig').classList.remove('on');const c=$('#zone .car
 $('#all').onclick=recap;
 
 /* ================= récap ================= */
-function recap(){stopFx2();$('#vig').classList.remove('on');show('recap');skyGlow=.7;const P=S.pulls;const bi=P.reduce((b,p,i)=>p.k>P[b].k?i:b,0);
+function recap(){{const mr=S.pulls.find(p=>p.k===5&&!p.shown);if(mr){mr.shown=1;GAME.postMessage({type:'mr',id:mr.id},'*')}}stopFx2();$('#vig').classList.remove('on');show('recap');skyGlow=.7;const P=S.pulls;const bi=P.reduce((b,p,i)=>p.k>P[b].k?i:b,0);
  let order=P.map((p,i)=>i);if(P.length===10){order=order.filter(i=>i!==bi);order.splice(2,0,bi)}
  const nNew=P.filter(p=>!p.dup).length;$('#rtitle').textContent=S.u.name;
  $('#rsum').textContent=`${nNew} nouvelle${nNew>1?'s':''} carte${nNew>1?'s':''}${P.length-nNew?`, ${P.length-nNew} doublon${P.length-nNew>1?'s':''}`:''}`;

@@ -8,6 +8,8 @@ import { heroArt, iconArt } from '../assets/manifest'
 import { useStore, type Currency } from '../state/store'
 import { primeAudio } from './audio'
 import { MrEdit } from './MrEdit'
+import { Card } from '../ui/Card'
+import { RARITIES } from '../data/rarities'
 // La démo d'invocation, reprise TELLE QUELLE (demo/invocation.html : CSS, shaders et JavaScript inchangés).
 // Seuls changent : le tirage (fait ici par le jeu, avec la pity), l'image des persos, les soldes du joueur et DEMO_MR = false.
 import page from './demo/invocation.html?raw'
@@ -22,7 +24,7 @@ export const InvocationDemo = ({ banner, count = 10, currency = 'ticket', onClos
   live.current = store
   const frame = useRef<HTMLIFrameElement>(null)
   const [ready, setReady] = useState(false)
-  const [edit, setEdit] = useState<Hero | null>(null)
+  const [mr, setMr] = useState<{ hero: Hero; stage: 'video' | 'card'; dup: boolean } | null>(null) // MR obtenue : son edit vidéo, puis sa présentation
   const done = useRef(onClose)
   done.current = onClose
 
@@ -66,7 +68,7 @@ export const InvocationDemo = ({ banner, count = 10, currency = 'ticket', onClos
           return { id: h.id, k: RANK[h.rarity], name: h.name, dup, atk: h.atk, def: h.def, img: s.customArt[h.id] ?? s.remoteArt[h.id] ?? heroArt(h.model, 'full') }
         }) })
       }
-      if (m.type === 'mr' && m.id && (MR_YOUTUBE[m.id] || MR_VIDEOS.includes(m.id))) setEdit(HEROES.find((h) => h.id === m.id) ?? null)
+      if (m.type === 'mr' && m.id) { const h = HEROES.find((x) => x.id === m.id); if (h) setMr({ hero: h, stage: 'video', dup: (s.owned[h.id] ?? 0) > 1 }) }
       if (m.type === 'close') done.current()
       if (m.type === 'collection') { done.current(); window.dispatchEvent(new CustomEvent('anime-rift:go', { detail: 'collection' })) }
     }
@@ -81,8 +83,30 @@ export const InvocationDemo = ({ banner, count = 10, currency = 'ticket', onClos
   return createPortal(
     <div className="inv">
       <iframe ref={frame} className={`inv__frame ${ready ? 'is-ready' : ''}`} srcDoc={doc} title={`Invocation · ${banner.world}`} allow="autoplay; fullscreen" />
-      {edit && <div className="inv__edit"><MrEdit hero={edit} art={store.customArt[edit.id] ?? store.remoteArt[edit.id] ?? heroArt(edit.model, 'full')} onDone={() => setEdit(null)} /></div>}
+      {mr?.stage === 'video' && <div className="inv__edit"><MrEdit hero={mr.hero} art={store.customArt[mr.hero.id] ?? store.remoteArt[mr.hero.id] ?? heroArt(mr.hero.model, 'full')} onDone={() => setMr({ ...mr, stage: 'card' })} /></div>}
+      {mr?.stage === 'card' && <MrShowcase hero={mr.hero} dup={mr.dup} video={Boolean(MR_YOUTUBE[mr.hero.id] || MR_VIDEOS.includes(mr.hero.id))} onClose={() => setMr(null)} />}
     </div>,
     document.body,
+  )
+}
+
+// Après l'edit : la carte MR présentée en grand, avec ses rayons, ses braises et son nom.
+const MrShowcase = ({ hero, dup, onClose }: { hero: Hero; dup: boolean; video: boolean; onClose: () => void }) => {
+  const [shown, setShown] = useState(false)
+  useEffect(() => { const t = setTimeout(() => setShown(true), 900); return () => clearTimeout(t) }, [])
+  return (
+    <div className="mrs" role="dialog" aria-modal="true" aria-label={`${hero.name} obtenu`} onClick={() => { if (shown) onClose() }}>
+      <span className="mrs__flash" aria-hidden="true" />
+      <span className="mrs__rays" aria-hidden="true" />
+      <span className="mrs__rays mrs__rays--2" aria-hidden="true" />
+      <span className="mrs__embers" aria-hidden="true">{Array.from({ length: 28 }, (_, i) => <i key={i} style={{ ['--x' as string]: `${(i * 37) % 100}%`, ['--d' as string]: `${(i % 7) * 0.45}s`, ['--s' as string]: `${3 + (i % 4)}px` }} />)}</span>
+      <p className="mrs__kick">✦ MR obtenue ✦</p>
+      <div className="mrs__card" onClick={(e) => e.stopPropagation()}><Card hero={hero} hd inert /></div>
+      <div className="mrs__text">
+        <h2>{hero.name}</h2>
+        <p>{hero.title} · {hero.world} · <b>{dup ? 'Doublon' : 'Nouvelle carte'}</b> · <em>{RARITIES.rift.label}</em></p>
+      </div>
+      <button className="mrs__go" onClick={(e) => { e.stopPropagation(); onClose() }}>Continuer</button>
+    </div>
   )
 }
