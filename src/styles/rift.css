@@ -1350,3 +1350,8 @@ body:has(.sc) .chat__toggle, body:has(.sc) .chat__panel { display: none !importa
   .st-seg button { padding: 10px; } .st-seg button b { font-size: 15px; }
 }
 .bz-tabs { margin-top: 8px; }
+/* point rouge « à récupérer » : juste après le mot, comme un badge */
+.tnav__item .tnav__dot { position: relative; top: -7px; left: auto; margin: 0 2px 0 -2px; width: 10px; height: 10px; border-radius: 50%; background: #ff3346; box-shadow: 0 0 0 2px #07070c, 0 0 10px rgba(255, 51, 70, .8); animation: dot-pulse 1.8s ease-in-out infinite; }
+.tabbar__dot, .sheet__item .dot, .coltabs__bar .dot { background: #ff3346 !important; box-shadow: 0 0 0 2px #07070c, 0 0 10px rgba(255, 51, 70, .8) !important; }
+@keyframes dot-pulse { 50% { box-shadow: 0 0 0 2px #07070c, 0 0 16px rgba(255, 51, 70, 1); } }
+@media (prefers-reduced-motion: reduce) { .tnav__item .tnav__dot { animation: none; } }
