@@ -48,11 +48,14 @@ export const makeSky = (cv: HTMLCanvasElement, src: string): Gl | null => {
 vec3 samp(vec2 uv){return texture2D(tex,clamp(uv,.001,.999)).rgb;}
 void main(){vec2 uv=gl_FragCoord.xy/res;uv.y=1.-uv.y;
  float ra=res.x/res.y,ia=isz.x/isz.y;vec2 c=uv-.5;if(ra>ia)c.y*=ia/ra;else c.x*=ra/ia;
- c/=1.07+.012*sin(t*.08);vec2 u=c+.5;
- vec3 b0=samp(u);float lum=dot(b0,vec3(.3,.5,.2));float depth=smoothstep(.04,.35,lum)+smoothstep(.35,1.,1.-uv.y)*.4;
- vec2 par=mo*vec2(.018,-.012)*(.25+depth);
- vec2 w=vec2(fbm(u*3.+vec2(t*.03,0.)),fbm(u*3.+vec2(0.,t*.03)+5.))-.5;
- vec2 uu=u+par+w*.006*depth+vec2(t*.0015*depth,0.);
+ c/=1.12+.01*sin(t*.08);vec2 u=c+.5;
+ // profondeur lissée (moyenne de plusieurs points) : les nuages proches bougent plus, sans bords dédoublés
+ float lum=0.;for(int i=0;i<3;i++)for(int j=0;j<3;j++){vec3 q=samp(u+vec2(float(i)-1.,float(j)-1.)*.03);lum+=dot(q,vec3(.3,.5,.2));}lum/=9.;
+ float depth=smoothstep(.06,.4,lum)*.8+smoothstep(.35,1.,1.-uv.y)*.3;
+ vec2 par=mo*vec2(.012,-.008)*(.3+depth);
+ vec2 w=vec2(fbm(u*2.5+vec2(t*.02,0.)),fbm(u*2.5+vec2(0.,t*.02)+5.))-.5;
+ // la dérive oscille au lieu d'avancer sans fin : l'image ne sort jamais du cadre
+ vec2 uu=u+par+w*.004*depth+vec2(sin(t*.04)*.008*depth,0.);
  vec3 col=samp(uu);
  col+=vec3(.22,.1,.32)*(glow*.8+.15+.08*sin(t*.6))*pow(1.-uv.y,2.5)*exp(-pow((uv.x-.5)*2.,2.))*(.4+depth);
  vec2 g=floor(gl_FragCoord.xy/2.);float st=step(.9975,h(g))*(1.-depth)*(.5+.5*sin(t*2.5+h(g)*60.));col+=st*.55;

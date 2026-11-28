@@ -1,3 +1,4 @@
+import { cosmeticById } from '../game/cosmetics'
 import { useEffect, useState } from 'react'
 import { iconArt, uiArt } from '../assets/manifest'
 import { BANNERS } from '../data/banners'
@@ -34,6 +35,7 @@ const Rewards = ({ r }: { r: Reward }) => (
     {r.tickets ? <span><Coin name="seal" size={18} />{r.tickets}</span> : null}
     {r.shards ? <span><img src={iconArt('shard')} alt="" />{r.shards}</span> : null}
     {Object.entries(r.scrolls ?? {}).map(([k, v]) => <span key={k} title={SCROLLS[k as 'small'].label}><img src={iconArt(`scroll-${k as 'small'}`)} alt="" />{v}</span>)}
+    {r.title && cosmeticById(r.title) ? <span className={`rw__title rw__title--${cosmeticById(r.title)!.rarity}`} title="Titre à afficher sur ton profil">Titre « {cosmeticById(r.title)!.name} »</span> : null}
   </span>
 )
 

@@ -226,3 +226,4 @@ body:has(> .rs) .cv { z-index: 650; }
 .rs__ggrid figcaption { position: relative; z-index: 7; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 800; color: #fff; background: rgba(10, 8, 16, .9); border: 1px solid color-mix(in srgb, var(--rc) 60%, transparent); box-shadow: 0 4px 14px rgba(0, 0, 0, .5); }
 .rs__excl { top: 0; left: 8%; }
 @media (max-width: 560px) { .rs__ggrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 34px 14px; padding: 14px 4px 4px; } .rs__ggrid figure .card { width: 82%; } .rs__ggrid figure:has(.card--legend) .card, .rs__ggrid figure:has(.card--rift) .card { width: 70%; } .rs__ggrid figcaption { font-size: 12px; padding: 3px 9px; } }
+.rs__open span { display: inline-flex; align-items: center; gap: 5px; font-size: 14px !important; font-weight: 800; }

@@ -34,16 +34,19 @@ describe('contrats', () => {
 
   it('un contrat se récupère une fois par période ; le bonus du jour demande toutes les quêtes du jour', () => {
     const now = at('2026-11-26')
-    let q = addCounts(emptyQuests(), Object.fromEntries(dailyContracts(now).map((c) => [c.counter!, c.target])), now)
+    const need: Record<string, number> = {}
+    for (const c of dailyContracts(now)) need[c.counter!] = Math.max(need[c.counter!] ?? 0, c.target)
+    let q = addCounts(emptyQuests(), need, now)
     expect(claimable(q, {}, now).map((c) => c.id).sort()).toEqual(dailyContracts(now).map((c) => c.id).sort())
     for (const c of dailyContracts(now)) q = markClaimed(c, q, now)
     expect(progress(DAILY_BONUS, q, {}, now)).toBe(dailyContracts(now).length)
-    expect(claimable(q, {}, now).map((c) => c.id)).toEqual([DAILY_BONUS.id])
+    expect(claimable(q, {}, now).map((c) => c.id)).toContain(DAILY_BONUS.id)
+    expect(claimable(q, {}, now).filter((c) => c.period === 'day')).toEqual([expect.objectContaining({ id: DAILY_BONUS.id })])
     q = markClaimed(DAILY_BONUS, q, now)
     expect(q.week.c.dailyAll).toBe(1)
-    expect(claimable(q, {}, now)).toEqual([])
+    expect(claimable(q, {}, now).filter((c) => c.period === 'day')).toEqual([])
     expect(isClaimed(dailyContracts(now)[0], q, at('2026-11-27'))).toBe(false) // un nouveau jour
-    expect(weeklyContracts(now)).toHaveLength(10)
+    expect(weeklyContracts(now)).toHaveLength(13)
   })
 
   it('contrats d’histoire : arc terminé, puis 3 étoiles partout', () => {
@@ -74,10 +77,10 @@ describe('défis du Chemin', () => {
 })
 
 describe('quêtes qui changent', () => {
-  it('6 quêtes du jour, différentes d’un jour à l’autre, identiques dans la journée', async () => {
+  it('10 quêtes du jour, différentes d’un jour à l’autre, identiques dans la journée', async () => {
     const { dailyContracts } = await import('./contracts')
     const a = dailyContracts(new Date(2026, 10, 26, 9)).map((c) => c.id)
-    expect(a).toHaveLength(8)
+    expect(a).toHaveLength(10)
     expect(dailyContracts(new Date(2026, 10, 26, 22)).map((c) => c.id)).toEqual(a)
     const days = new Set(Array.from({ length: 7 }, (_, i) => dailyContracts(new Date(2026, 10, 20 + i)).map((c) => c.id).join()))
     expect(days.size).toBeGreaterThan(4)
@@ -85,9 +88,31 @@ describe('quêtes qui changent', () => {
   it('les quêtes du pass restent toute la saison et changent à la saison suivante', async () => {
     const { challengesFor } = await import('./contracts')
     const s1 = challengesFor(new Date(2026, 10, 26)).map((c) => c.id)
-    expect(s1).toHaveLength(8)
+    expect(s1).toHaveLength(12)
     expect(challengesFor(new Date(2026, 11, 18)).map((c) => c.id)).toEqual(s1)
     const later = [1, 2, 3].map((k) => challengesFor(new Date(2026, 11, 22 + 28 * (k - 1))).map((c) => c.id).join())
     expect(later.some((x) => x !== s1.join())).toBe(true)
+  })
+})
+
+describe('titres de quête', () => {
+  it('chaque jour une quête offre un titre, qui change d’un jour à l’autre ; chaque semaine trois titres', async () => {
+    const { dailyContracts, weeklyContracts, DAILY_POOL, WEEKLY_POOL, CHALLENGE_POOL } = await import('./contracts')
+    const { cosmeticById, hasCosmetic } = await import('./cosmetics')
+    const titles = Array.from({ length: 14 }, (_, i) => dailyContracts(new Date(2026, 10, 1 + i)).map((c) => c.reward.title).filter(Boolean))
+    for (const t of titles) expect(t).toHaveLength(1)
+    expect(new Set(titles.flat()).size).toBeGreaterThan(8)
+    const wk = weeklyContracts(new Date(2026, 10, 26)).map((c) => c.reward.title).filter(Boolean) as string[]
+    expect(wk).toHaveLength(3)
+    for (const id of [...titles.flat(), ...wk]) {
+      const t = cosmeticById(id!)!
+      expect(t.kind).toBe('title')
+      expect(hasCosmetic(t, { bought: [], level: 100, rebirths: 1, arcs: [] })).toBe(false) // un titre de quête ne se possède qu'après l'avoir gagné
+      expect(hasCosmetic(t, { bought: [t.id], level: 1, rebirths: 0, arcs: [] })).toBe(true)
+    }
+    for (const pool of [DAILY_POOL, WEEKLY_POOL, CHALLENGE_POOL]) expect(new Set(pool.map((c) => c.id)).size).toBe(pool.length)
+    expect(DAILY_POOL.length).toBeGreaterThan(60)
+    expect(WEEKLY_POOL.length).toBeGreaterThan(45)
+    expect(CHALLENGE_POOL.length).toBeGreaterThan(45)
   })
 })

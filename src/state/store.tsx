@@ -178,7 +178,7 @@ const START: State = {
 
 // La progression est gardée dans le navigateur de cet appareil (pas de compte en ligne pour l'instant).
 export const FREE_KEY_MS = 5 * 60 * 1000
-export const FREE_KEY_CAP = 50
+export const FREE_KEY_CAP = 10
 const SAVE_KEY = 'anime-rift-save-v1'
 // numéro de joueur à quatre chiffres, tiré une fois
 const newTag = () => String(1000 + Math.floor(Math.random() * 9000))
@@ -362,7 +362,9 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       const left = energyNow(s.energy, s.energyAt, Date.now())
       const scrolls = { ...s.scrolls }
       for (const [k, v] of Object.entries(r.scrolls ?? {})) scrolls[k as ScrollId] += v ?? 0
+      const title = r.title && !s.cosmetics.includes(r.title) ? cosmeticById(r.title) : undefined // titre de quête : ajouté aux titres du joueur
       return { ...s, gems: s.gems + (r.gems ?? 0), tickets: s.tickets + (r.tickets ?? 0), shards: s.shards + (r.shards ?? 0), scrolls,
+        ...(title ? { cosmetics: [...s.cosmetics, title.id], notifs: notify(s.notifs, [['quest', `Nouveau titre : « ${title.name} ». Équipe-le dans ton profil.`]]) } : {}),
         ...(r.energy ? { energy: left + r.energy, energyAt: left >= ENERGY_MAX ? Date.now() : s.energyAt + (left - s.energy) * ENERGY_REGEN_MS } : {}) }
     }
 

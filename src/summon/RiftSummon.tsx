@@ -9,6 +9,7 @@ import type { Currency } from '../state/store'
 import { useStore } from '../state/store'
 import { heroArt } from '../assets/manifest'
 import { Card } from '../ui/Card'
+import { Coin } from '../ui/Coin'
 import './rift-summon.css'
 import { primeAudio, SummonAudio } from './audio'
 import { MrEdit } from './MrEdit'
@@ -56,7 +57,6 @@ export const RiftSummon = ({ banner, count = 10, currency = 'ticket', onClose }:
   const [whoOn, setWhoOn] = useState(false)
   const [hideUi, setHideUi] = useState(false)
   const [edit, setEdit] = useState<Hero | null>(null)
-  const [intro, setIntro] = useState(0)
   const [fav, setFav] = useState(() => readFav().includes(banner.id))
   const [busy, setBusy] = useState(false)
   const [, tick] = useState(0)
@@ -75,6 +75,7 @@ export const RiftSummon = ({ banner, count = 10, currency = 'ticket', onClose }:
   const vig = useRef<HTMLDivElement>(null)
   const rays = useRef<HTMLDivElement>(null)
   const hubUi = useRef<HTMLDivElement>(null)
+  const hubEl = useRef<HTMLElement>(null)
   const audio = useRef(new SummonAudio())
   // état de l'animation, hors React (lu et écrit à chaque image)
   const anim = useRef({ pull: 0, pullTarget: 0, dive: 0, skyGlow: 0, mo: [0, 0], moT: [0, 0], seq: 0, rev: 0, view: 'hub' as View })
@@ -136,7 +137,8 @@ export const RiftSummon = ({ banner, count = 10, currency = 'ticket', onClose }:
       .sort((x, y) => x.k - y.k) // de la moins rare à la plus rare : la meilleure carte en dernier
     setPulls(list); setBusy(true)
     const run = ++anim.current.seq
-    if (calm()) { setBusy(false); startReveal(); return }
+    // « Réduire les animations » : pas de déchirure ni de secousse, mais on garde une ouverture courte (flash, lumière, âmes)
+    if (calm()) { setBusy(false); shatter(run, list, true); return }
     const tl = topline.current!
     tl.style.transition = 'width .6s'; tl.style.width = '35%'
     const s = performance.now()
@@ -156,19 +158,19 @@ export const RiftSummon = ({ banner, count = 10, currency = 'ticket', onClose }:
     requestAnimationFrame(sp)
   }
 
-  const shatter = (run: number, list: Pull[]) => {
+  const shatter = (run: number, list: Pull[], short = false) => {
     setView('seq')
     const cv = fxCv.current!, ctx = sizeCanvas(cv)
     const W = innerWidth, H = innerHeight, cx = W / 2, cy = H * 0.44, best = Math.max(...list.map((x) => x.k))
     const shards = makeShards(cx, cy, W, H), nn = list.length
     const cr = list.map((x, j) => ({ k: x.k, t0: 700 + j * (1300 / nn), a: (j / nn) * Math.PI * 2 - Math.PI / 2, R: Math.min(W, H) * 0.3, len: 40 + x.k * 8, spin: Math.random() * 6, rang: false }))
     const RAYS = [...Array(11)].map(() => ({ a: Math.random() * 6.28, w: 6 + Math.random() * 40, l: 0.5 + Math.random() * 0.6, o: 0.08 + Math.random() * 0.16 }))
-    const MR = best === 5, T = MR ? 5600 : 3900, start = performance.now()
+    const MR = best === 5 && !short, T = MR ? 5600 : 3900, start = performance.now(), speed = short ? 1.8 : 1 // version courte : tout va 1,8 fois plus vite
     let boom: Boom | null = null, fl = false
     anim.current.skyGlow = 0.4; flash(0.55); audio.current.pop('common', 0)
     const f = () => {
       if (run !== anim.current.seq) return
-      const t = performance.now() - start
+      const t = (performance.now() - start) * speed
       ctx.clearRect(0, 0, W, H)
       if (prog.current) prog.current.style.width = `${Math.min(100, (t / T) * 100)}%`
       // lumière de la faille ouverte et rayons fins
@@ -184,7 +186,7 @@ export const RiftSummon = ({ banner, count = 10, currency = 'ticket', onClose }:
         ctx.fillStyle = rg; ctx.beginPath(); ctx.moveTo(-1, 0); ctx.lineTo(1, 0); ctx.lineTo(ry.w, -H * ry.l); ctx.lineTo(-ry.w, -H * ry.l); ctx.fill(); ctx.restore()
       }
       ctx.restore(); ctx.globalCompositeOperation = 'source-over'
-      drawShards(ctx, shards, t / 1000, c1)
+      if (!short) drawShards(ctx, shards, t / 1000, c1)
       // âmes : une par carte, la plus rare en dernier, puis fusion au centre
       ctx.globalCompositeOperation = 'lighter'
       const merge = t > 2850 ? Math.min(1, (t - 2850) / 450) : 0
@@ -350,7 +352,16 @@ export const RiftSummon = ({ banner, count = 10, currency = 'ticket', onClose }:
   const swipe = useRef<number | null>(null)
 
   /* ================= récap & navigation ================= */
-  const backToHub = () => { stopFx2(); anim.current.skyGlow = 0; setPulls([]); setView('hub'); setIntro((x) => x + 1) }
+  // retour à la faille : on rejoue son arrivée SANS recréer l'écran (sinon la faille WebGL perd sa zone de dessin et disparaît)
+  const backToHub = () => {
+    stopFx2(); anim.current.skyGlow = 0; anim.current.dive = 0; anim.current.pull = 0; anim.current.pullTarget = 0
+    flipping.current = false; setEdit(null); setHideUi(false); setPulls([]); setView('hub'); setBusy(false)
+    if (portal.current) portal.current.style.transform = ''
+    if (hubUi.current) hubUi.current.style.opacity = ''
+    hubEl.current?.scrollTo({ top: 0 })
+    restart(portal.current, 'is-intro')
+    hubEl.current?.querySelectorAll<HTMLElement>('.rs__ui-item').forEach((e) => { e.style.animation = 'none'; void e.offsetWidth; e.style.animation = '' })
+  }
   const again = () => { backToHub(); setTimeout(() => summonRef.current(), 350) }
   const summonRef = useRef(summon)
   summonRef.current = summon
@@ -382,7 +393,7 @@ export const RiftSummon = ({ banner, count = 10, currency = 'ticket', onClose }:
   let order = pulls.map((_, j) => j)
   if (pulls.length === 10) { order = order.filter((j) => j !== bi); order.splice(2, 0, bi) }
   const nNew = pulls.filter((x) => !x.dup).length
-  const cost = (q: number) => (pay === 'ticket' ? `${q} clé${q > 1 ? 's' : ''}` : `${q * COST.gems} Éclats`)
+  const cost = (q: number) => <>{pay === 'ticket' ? q : q * COST.gems}<Coin name={pay === 'ticket' ? 'seal' : 'soul'} size={18} /></>
   const rc = p ? rgb(RARITY_RGB[p.k]) : rgb(c1)
 
   return createPortal(
@@ -392,7 +403,7 @@ export const RiftSummon = ({ banner, count = 10, currency = 'ticket', onClose }:
       <div ref={flashEl} className="rs__flash" />
 
       {/* ═══ la faille au repos ═══ */}
-      <section className={`rs__scr rs__hub ${view === 'hub' ? 'is-on' : ''}`} key={`hub-${intro}`} aria-hidden={view !== 'hub'}>
+      <section ref={hubEl} className={`rs__scr rs__hub ${view === 'hub' ? 'is-on' : ''}`} aria-hidden={view !== 'hub'}>
         <div className="rs__top rs__ui-item">
           <button className="rs__back" onClick={onClose}>‹ Bannières</button>
           <h1 className="rs__cap"><span lang="ja">{banner.glyph}</span> {banner.world}</h1>
@@ -410,8 +421,8 @@ export const RiftSummon = ({ banner, count = 10, currency = 'ticket', onClose }:
           <div className="rs__ctrl rs__ui-item">
             <div className="rs__seg" role="radiogroup" aria-label="Quantité">{[1, 5, 10].map((q) => <button key={q} role="radio" aria-checked={n === q} className={n === q ? 'is-on' : ''} onClick={() => setN(q)}>×{q}</button>)}</div>
             <div className="rs__seg rs__pay" role="radiogroup" aria-label="Moyen de paiement">
-              <button role="radio" aria-checked={pay === 'ticket'} className={pay === 'ticket' ? 'is-on' : ''} onClick={() => setPay('ticket')}>🎟 Clés <i>{store.tickets}</i></button>
-              <button role="radio" aria-checked={pay === 'gems'} className={pay === 'gems' ? 'is-on' : ''} onClick={() => setPay('gems')}>💎 Éclats <i>{store.gems}</i></button>
+              <button role="radio" aria-checked={pay === 'ticket'} className={pay === 'ticket' ? 'is-on' : ''} onClick={() => setPay('ticket')}><Coin name="seal" size={20} />Clés <i>{store.tickets}</i></button>
+              <button role="radio" aria-checked={pay === 'gems'} className={pay === 'gems' ? 'is-on' : ''} onClick={() => setPay('gems')}><Coin name="soul" size={20} />Éclats <i>{store.gems}</i></button>
             </div>
           </div>
           <button className="rs__open rs__ui-item" disabled={!can || busy} onClick={summon}>Ouvrir <span>{cost(n)}</span></button>

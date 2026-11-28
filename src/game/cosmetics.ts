@@ -2,7 +2,7 @@
 // gagnent (niveau de compte, arc de L’Aventure terminé, Ascension), les autres s'achètent en Éclats. Fonctions pures, testées.
 export type CosmeticKind = 'frame' | 'ornament' | 'aura' | 'effect' | 'color' | 'theme' | 'title'
 export type Rarity = 'common' | 'rare' | 'epic' | 'legend' | 'mythic'
-export type Cosmetic = { id: string; kind: CosmeticKind; name: string; price: number; value: string; rarity: Rarity; needLevel?: number; needRebirth?: boolean; needArc?: string }
+export type Cosmetic = { id: string; kind: CosmeticKind; name: string; price: number; value: string; rarity: Rarity; needLevel?: number; needRebirth?: boolean; needArc?: string; needQuest?: boolean }
 export const RARITY_LABEL: Record<Rarity, string> = { common: 'Commun', rare: 'Rare', epic: 'Épique', legend: 'Légendaire', mythic: 'Mythique' }
 export const RARITY_HUE: Record<Rarity, string> = { common: '#9aa6c8', rare: '#4f8dff', epic: '#a56bff', legend: '#ffc94d', mythic: '#ff4d6d' }
 
@@ -54,13 +54,29 @@ export const COSMETICS: Cosmetic[] = [
     ['Maître du Nexus', 800, 'legend'], ['Légende vivante', 1000, 'legend'], ['Élu du destin', 2500, 'mythic'], ['Dieu de la faille', 5000, 'mythic']] as [string, number, Rarity][])
     .map(([name, price, rarity], i) => c('title', `shop${i}`, name, price, rarity, name)),
 ]
+
+// ── Titres de quête : ils ne s'achètent pas. Chaque jour et chaque semaine, des quêtes en offrent de nouveaux (voir contracts.ts).
+const QT = (rarity: Rarity, names: string[]) => names.map((name) => ({ name, rarity }))
+export const QUEST_TITLES: Cosmetic[] = [
+  ...QT('common', ['Apprenti ninja', 'Mousse du navire', 'Élève de l’académie', 'Novice du Nexus', 'Porteur de clés', 'Chasseur débutant', 'Recrue du Gotei', 'Aspirant pourfendeur', 'Étudiant exorciste', 'Petit Saiyan',
+    'Gardien du Nexus', 'Vagabond', 'Main verte', 'Lève-tôt', 'Couche-tard', 'Fan de la première heure', 'Explorateur', 'Débrouillard', 'Optimiste', 'Petit génie', 'Bon camarade', 'Collectionneur', 'Curieux', 'Patient', 'Rêveur']),
+  ...QT('rare', ['Chûnin', 'Pirate au chapeau', 'Combattant Z', 'Shinigami remplaçant', 'Pourfendeur du rang Kinoe', 'Exorciste de grade 2', 'Hunter licencié', 'Briseur de failles', 'Main de fer', 'Œil vif',
+    'Cœur ardent', 'Lame silencieuse', 'Tacticien', 'Esprit libre', 'Vent du nord', 'Marcheur des ombres', 'Fils de la tempête', 'Fille de la tempête', 'Roi des duels', 'Reine des duels', 'Infatigable', 'Chasseur de boss', 'Grimpeur de tour', 'Fusionneur', 'Main chanceuse']),
+  ...QT('epic', ['Jônin d’élite', 'Supernova', 'Super Saiyan', 'Capitaine de division', 'Pilier', 'Exorciste de grade 1', 'Hunter double étoile', 'Maître des failles', 'Ombre écarlate', 'Lame céleste',
+    'Seigneur des tempêtes', 'Mangeur de défis', 'Inarrêtable', 'Sans peur', 'Gardien du sceau', 'Tisseur de destin', 'Éveillé', 'Briseur de limites', 'Brise-tour', 'Chasseur de légendes']),
+  ...QT('legend', ['Hokage', 'Empereur des mers', 'Dieu de la destruction', 'Commandant général', 'Pilier suprême', 'Exorciste de classe spéciale', 'Hunter triple étoile', 'Souverain de la faille', 'Champion des champions', 'Maître du temps',
+    'Légende des quêtes', 'Invaincu', 'Celui qui ne dort jamais', 'Collectionneur ultime', 'Seigneur du Nexus']),
+  ...QT('mythic', ['Au-delà de la faille', 'Roi des pirates', 'Ultra Instinct', 'Sage des six chemins', 'Le plus fort', 'Élu des quêtes', 'Mythe vivant', 'Dieu du gacha']),
+].map((t, i) => c('title', `q${i}`, t.name, 0, t.rarity as Rarity, t.name, { needQuest: true }))
+COSMETICS.push(...QUEST_TITLES)
+
 export const cosmeticById = (id: string) => COSMETICS.find((x) => x.id === id)
 
 // Ce que le joueur a : objets achetés, niveau de compte, Ascensions, arcs de L’Aventure terminés (identifiants de bannière).
 export type Owned = { bought: string[]; level: number; rebirths: number; arcs: string[] }
 export const hasCosmetic = (x: Cosmetic, o: Owned) =>
-  o.bought.includes(x.id) || (x.needRebirth ? o.rebirths > 0 : (x.price === 0 && !x.needArc) || (x.needLevel !== undefined && o.level >= x.needLevel) || (x.needArc !== undefined && o.arcs.includes(x.needArc)))
+  o.bought.includes(x.id) || (!x.needQuest && (x.needRebirth ? o.rebirths > 0 : (x.price === 0 && !x.needArc) || (x.needLevel !== undefined && o.level >= x.needLevel) || (x.needArc !== undefined && o.arcs.includes(x.needArc))))
 // Peut-on l'acheter ? (les objets d’Ascension ne se vendent pas)
-export const canBuy = (x: Cosmetic, o: Owned, gems: number) => !x.needRebirth && x.price > 0 && !hasCosmetic(x, o) && gems >= x.price
+export const canBuy = (x: Cosmetic, o: Owned, gems: number) => !x.needRebirth && !x.needQuest && x.price > 0 && !hasCosmetic(x, o) && gems >= x.price
 export const howToGet = (x: Cosmetic) =>
-  x.needRebirth ? 'Après une Ascension' : x.needLevel ? `Niveau ${x.needLevel} ou ${x.price} Éclats` : x.needArc ? `Arc terminé ou ${x.price} Éclats` : `${x.price} Éclats`
+  x.needQuest ? 'Récompense de quête (un nouveau chaque jour et chaque semaine)' : x.needRebirth ? 'Après une Ascension' : x.needLevel ? `Niveau ${x.needLevel} ou ${x.price} Éclats` : x.needArc ? `Arc terminé ou ${x.price} Éclats` : `${x.price} Éclats`

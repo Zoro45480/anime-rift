@@ -11,6 +11,7 @@ import { cardRate, indexCards } from '../game/gacha'
 import { Guide } from '../ui/Guide'
 import { useStore, type Currency } from '../state/store'
 import { Card, LazyCard } from '../ui/Card'
+import { Coin } from '../ui/Coin'
 import { readFav, RiftSummon, toggleFav } from '../summon/RiftSummon'
 import { primeAudio } from '../summon/audio'
 import { LrBanner } from './LrBanner'
@@ -81,7 +82,7 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
             <button className="bx__go" onClick={() => summon(10)}>Invoquer</button>
             <button className="bx__ghost" onClick={() => setShowIndex(true)}>Index de la bannière</button>
           </div>
-          <p className="bx__pity">Garantie SSR <b>{pity}/{PITY_MAX}</b><i>·</i>Grande garantie MR <b>{store.multis[banner.id] ?? 0}/{BIG_PITY}</b><i>·</i><span>🎟 {store.tickets} clés</span></p>
+          <p className="bx__pity">Garantie SSR <b>{pity}/{PITY_MAX}</b><i>·</i>Grande garantie MR <b>{store.multis[banner.id] ?? 0}/{BIG_PITY}</b><i>·</i><span className="bx__bal"><Coin name="seal" size={18} />{store.tickets}</span><span className="bx__bal"><Coin name="soul" size={18} />{store.gems}</span></p>
           <KeyTimer long />
         </div>
         <div className="bx__fan">

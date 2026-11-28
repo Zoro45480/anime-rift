@@ -11,7 +11,7 @@ describe('apparence du profil', () => {
     expect(count('aura') + count('effect')).toBe(13)
     expect(count('color')).toBe(17)
     expect(count('theme')).toBe(14)
-    expect(count('title')).toBe(24)
+    expect(count('title')).toBe(24 + 93) // 24 en boutique + 93 titres de quête
     for (const kind of ['frame', 'color', 'effect', 'theme']) expect(COSMETICS.some((c) => c.kind === kind && hasCosmetic(c, none))).toBe(true)
   })
   it('offert, gagné (niveau, arc, Renaissance) ou acheté', () => {

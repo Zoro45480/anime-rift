@@ -1116,3 +1116,7 @@ body:has(.sc) .chat__toggle, body:has(.sc) .chat__panel { display: none !importa
 .summon { grid-template-columns: minmax(0, 1fr) !important; }
 .summon > * { grid-column: 1 / -1; min-width: 0; max-width: 100%; }
 .bx, .bx-chips, .bx-aff { width: 100%; }
+.bx__bal { display: inline-flex; align-items: center; gap: 5px; font-weight: 800; color: #fff; }
+.rw__title { padding: 2px 9px !important; border-radius: 999px; font-weight: 800; font-size: 12px; color: #1a1020 !important; background: #c9d3ea; }
+.rw__title--rare { background: #8fb6ff; } .rw__title--epic { background: #c9a6ff; } .rw__title--legend { background: linear-gradient(90deg, #ffe08a, #ffc24d); }
+.rw__title--mythic { background: linear-gradient(90deg, #ff6ad5, #ffd166, #6af0ff); }
