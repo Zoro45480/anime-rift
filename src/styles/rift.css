@@ -1349,3 +1349,4 @@ body:has(.sc) .chat__toggle, body:has(.sc) .chat__panel { display: none !importa
   .st-slider { grid-template-columns: auto 1fr 56px; } .st-slider input { grid-column: 1 / -1; grid-row: 2; }
   .st-seg button { padding: 10px; } .st-seg button b { font-size: 15px; }
 }
+.bz-tabs { margin-top: 8px; }

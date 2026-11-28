@@ -226,7 +226,7 @@ const Cards = ({ onSummon }: { onSummon: () => void }) => {
 
       <div className="col__dupes">
         <b>Doublons</b>
-        <p>{merged || 'Tes doublons restent dans ta collection. À toi de choisir quand les fusionner (de l’XP pour la carte) ou les vendre au Bazar.'}</p>
+        <p>{merged || 'Tes doublons restent dans ta collection. À toi de choisir quand les fusionner (de l’XP pour la carte) ou les vendre au Marché.'}</p>
         <button disabled={dupes === 0} onClick={() => { const r = mergeAll(); setMerged(r.merged ? `${r.merged} doublon${r.merged > 1 ? 's' : ''} fusionné${r.merged > 1 ? 's' : ''} sur ${r.cards} carte${r.cards > 1 ? 's' : ''}.` : 'Rien à fusionner : ces cartes sont déjà au niveau maximum.') }}>⇪ Fusionner tous les doublons <i>×{dupes}</i></button>
       </div>
 

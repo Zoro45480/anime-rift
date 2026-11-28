@@ -20,12 +20,12 @@ export const setLang = (l: Lang) => { try { localStorage.setItem(KEY, l) } catch
 // [français, anglais, allemand]
 const WORDS: [string, string, string][] = [
   ['Accueil', 'Home', 'Startseite'], ['Portails', 'Portals', 'Portale'], ['Jouer', 'Play', 'Spielen'], ['Collection', 'Collection', 'Sammlung'],
-  ['Bazar', 'Bazaar', 'Basar'], ['Missions', 'Missions', 'Missionen'], ['Communauté', 'Community', 'Community'], ['Social', 'Social', 'Sozial'],
+  ['Marché', 'Market', 'Markt'], ['Missions', 'Missions', 'Missionen'], ['Communauté', 'Community', 'Community'], ['Social', 'Social', 'Sozial'],
   ['Guilde', 'Guild', 'Gilde'], ['Panthéon', 'Pantheon', 'Pantheon'], ['Lien de Faille', 'Rift Link', 'Riss-Link'], ['Profil', 'Profile', 'Profil'],
   ['Récompense du jour', 'Daily reward', 'Tagesbelohnung'], ['Pass de combat', 'Battle pass', 'Battle Pass'], ['Parcours', 'Journey', 'Werdegang'],
   ['Cartes', 'Cards', 'Karten'], ['Inventaire', 'Inventory', 'Inventar'], ['Ascension', 'Ascension', 'Aufstieg'],
   ['Acheter', 'Buy', 'Kaufen'], ['Marchands', 'Merchants', 'Händler'], ['Vendre aux marchands', 'Sell to merchants', 'An Händler verkaufen'], ['Échanger', 'Trade', 'Tauschen'],
-  ['Mon Bazar', 'My Bazaar', 'Mein Basar'], ['Le Bazar des Failles', 'The Rift Bazaar', 'Der Basar der Risse'], ['Entre collectionneurs', 'Between collectors', 'Unter Sammlern'],
+  ['Mon Marché', 'My Market', 'Mein Markt'], ['Le Marché', 'The Market', 'Der Markt'], ['Entre collectionneurs', 'Between collectors', 'Unter Sammlern'],
   ['Se connecter', 'Sign in', 'Anmelden'], ['Se déconnecter', 'Sign out', 'Abmelden'], ['Paramètres', 'Settings', 'Einstellungen'], ['Réglages', 'Settings', 'Einstellungen'],
   ['Fermer', 'Close', 'Schließen'], ['Annuler', 'Cancel', 'Abbrechen'], ['Valider', 'Confirm', 'Bestätigen'], ['Enregistrer', 'Save', 'Speichern'], ['Retour', 'Back', 'Zurück'], ['← Retour', '← Back', '← Zurück'],
   ['Passer', 'Skip', 'Überspringen'], ['Suivant', 'Next', 'Weiter'], ['Continuer', 'Continue', 'Weiter'], ['Récupérer', 'Claim', 'Abholen'], ['Récupéré', 'Claimed', 'Abgeholt'],
@@ -51,7 +51,7 @@ const WORDS: [string, string, string][] = [
   ['Mon équipe', 'My team', 'Mein Team'], ['Mes envies', 'My wishlist', 'Wunschliste'], ['Recherche', 'Search', 'Suche'], ['Rareté', 'Rarity', 'Seltenheit'], ['Univers', 'Universe', 'Universum'],
   ['Rôle', 'Role', 'Rolle'], ['Filtres', 'Filters', 'Filter'], ['Trier par', 'Sort by', 'Sortieren nach'], ['Toutes', 'All', 'Alle'], ['Tous', 'All', 'Alle'],
   ['Enchères', 'Auctions', 'Auktionen'], ['Mettre en vente', 'List for sale', 'Zum Verkauf anbieten'], ['Prix fixe', 'Fixed price', 'Festpreis'], ['Enchère', 'Auction', 'Auktion'], ['Enchérir', 'Bid', 'Bieten'],
-  ['Débloque le Bazar entre joueurs', 'Unlock the player Bazaar', 'Spieler-Basar freischalten'], ['Ancienneté du compte', 'Account age', 'Kontoalter'], ['Jours de connexion', 'Login days', 'Login-Tage'], ['Victoires en Aventure', 'Adventure wins', 'Abenteuer-Siege'],
+  ['Débloque le Marché entre joueurs', 'Unlock the player Market', 'Spieler-Markt freischalten'], ['Ancienneté du compte', 'Account age', 'Kontoalter'], ['Jours de connexion', 'Login days', 'Login-Tage'], ['Victoires en Aventure', 'Adventure wins', 'Abenteuer-Siege'],
   ['Replier', 'Collapse', 'Einklappen'], ['Afficher', 'Show', 'Anzeigen'], ['Tu donnes', 'You give', 'Du gibst'], ['Tu demandes', 'You ask for', 'Du verlangst'],
   ['Envoyer la proposition →', 'Send offer →', 'Angebot senden →'], ['Il te manque', 'Missing', 'Fehlt dir'], ['Quotidiennes', 'Daily', 'Täglich'], ['Hebdomadaires', 'Weekly', 'Wöchentlich'],
   ['Histoire', 'Story', 'Geschichte'], ['Événement', 'Event', 'Event'], ['PvP', 'PvP', 'PvP'], ['Gratuit', 'Free', 'Gratis'], ['Premium', 'Premium', 'Premium'],

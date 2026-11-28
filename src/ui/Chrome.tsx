@@ -102,7 +102,7 @@ export const Dock = ({ tab, onTab, profileOn, onProfile }: { tab: TabId; onTab: 
         {item('banners', 'Portails', 'banners')}
         {item('play', 'Jouer', 'play')}
         {item('collection', 'Collection', 'collection')}
-        {item('bazaar', 'Bazar', 'bazaar')}
+        {item('bazaar', 'Marché', 'bazaar')}
         <button className={`tabbar__btn ${inMore || more ? 'is-active' : ''}`} onClick={() => setMore(!more)} aria-expanded={more} aria-label={questsReady ? `Plus (${questsReady} récompenses à récupérer)` : 'Plus'}>
           <TabIcon d={ICONS.more} /><span>Plus</span>{questsReady > 0 && <i className="dot tabbar__dot" />}
         </button>
@@ -131,7 +131,7 @@ export const TopNav = ({ tab, profileOn, onTab, onQuest, onCommunity, onProfile 
     { id: 'banners', label: 'Portails', icon: 'nav-summon', key: '2' },
     { id: 'play', label: 'Jouer', icon: 'nav-nexus', key: '3' },
     { id: 'collection', label: 'Collection', icon: 'nav-cards', key: '4' },
-    { id: 'bazaar', label: 'Bazar', icon: 'nav-bazaar', key: '5' },
+    { id: 'bazaar', label: 'Marché', icon: 'nav-bazaar', key: '5' },
     { id: 'contracts', label: 'Missions', icon: 'nav-contracts', key: '6' },
     { id: 'community', label: 'Communauté', icon: 'nav-profile', key: '7' },
   ]

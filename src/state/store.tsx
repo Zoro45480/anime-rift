@@ -305,9 +305,9 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         const h = heroById(a.heroId)
         const r = auctionResult(a, h)
         if (r.sold) { gems += r.price; trades.unshift({ t: a.ends, heroId: a.heroId, kind: 'auction', price: r.price }) } else owned[a.heroId] = (owned[a.heroId] ?? 0) + 1
-        news.push({ id: t * 100 + news.length, t, kind: 'bazaar', read: false, text: r.sold ? `Bazar : ${h.name} vendu aux enchères pour ${r.price} Éclats (${r.bids} offres).` : `Bazar : personne n'a enchéri sur ${h.name}, la carte revient dans ta collection.` })
+        news.push({ id: t * 100 + news.length, t, kind: 'bazaar', read: false, text: r.sold ? `Marché : ${h.name} vendu aux enchères pour ${r.price} Éclats (${r.bids} offres).` : `Marché : personne n'a enchéri sur ${h.name}, la carte revient dans ta collection.` })
       }
-      for (const a of hits) { const x = stall.find((y) => y.hero.id === a.heroId)!; news.push({ id: t * 100 + 50 + news.length, t, kind: 'bazaar', read: false, text: `Alerte de prix : ${x.hero.name} est au Bazar à ${x.price} Éclats (ton seuil : ${a.below}).` }) }
+      for (const a of hits) { const x = stall.find((y) => y.hero.id === a.heroId)!; news.push({ id: t * 100 + 50 + news.length, t, kind: 'bazaar', read: false, text: `Alerte de prix : ${x.hero.name} est au Marché à ${x.price} Éclats (ton seuil : ${a.below}).` }) }
       return { ...s, gems, owned, notifs: [...news, ...s.notifs].slice(0, NOTIF_MAX), bazaar: { ...s.bazaar, auctions: s.bazaar.auctions.filter((x) => x.ends > t), trades: trades.slice(0, 300), alerted: s.bazaar.alerts.length ? day : s.bazaar.alerted } }
     })
   }, [state, now])
@@ -726,7 +726,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       if (!item || b.bought.includes(id) || state.gems < item.price) return false
       const h = item.hero
       setState(tracked({ ...state, gems: state.gems - item.price, gemsSpent: state.gemsSpent + item.price, owned: { ...state.owned, [h.id]: (state.owned[h.id] ?? 0) + 1 },
-        log: withLog(state.log, h.id, { k: 'pull', note: `Achetée au Bazar · ${item.merchant}, ${item.price} Éclats` }),
+        log: withLog(state.log, h.id, { k: 'pull', note: `Achetée au Marché · ${item.merchant}, ${item.price} Éclats` }),
         bazaar: { ...b, bought: [...b.bought, id], trades: [{ t: Date.now(), heroId: h.id, kind: 'buy' as const, price: item.price }, ...b.trades].slice(0, 300) } }, { gemsSpent: item.price, newCards: state.owned[h.id] ? 0 : 1 }))
       return true
     }

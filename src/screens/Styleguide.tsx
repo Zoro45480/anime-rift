@@ -26,7 +26,7 @@ export const Styleguide = () => (
 
     <section className="sg__panel"><h2>Typographie</h2>
       <p className="eyebrow">Entre collectionneurs</p>
-      <p className="sg__title">Le Bazar des Failles</p>
+      <p className="sg__title">Le Marché</p>
       <p style={{ fontSize: 32, fontWeight: 800, letterSpacing: '-0.04em' }}>Titre H1 en Manrope</p>
       <p style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.03em' }}>Titre H2 en Manrope</p>
       <p>Texte courant en Manrope : lisible, net, à 14 px.</p>

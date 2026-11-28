@@ -38,7 +38,7 @@ const tog = <T,>(list: T[], x: T) => (list.includes(x) ? list.filter((y) => y !=
 
 export const Bazaar = () => {
   const store = useStore()
-  const [tab, setTab] = useState<Tab>(() => { try { return sessionStorage.getItem('anime-rift:bz-q') ? 'buy' : 'players' } catch { return 'players' } })
+  const [tab, setTab] = useState<Tab>('players')
   const [now, setNow] = useState(() => Date.now())
   const [msg, setMsg] = useState('')
   const [q, setQ] = useState(() => { try { const v = sessionStorage.getItem('anime-rift:bz-q') ?? ''; sessionStorage.removeItem('anime-rift:bz-q'); return v } catch { return '' } })
@@ -71,7 +71,7 @@ export const Bazaar = () => {
   const nFilters = rars.length + worlds.length + roles.length + affs.length + only.length + (q ? 1 : 0)
   const resetF = () => { setQ(''); setRars([]); setWorlds([]); setRoles([]); setAffs([]); setOnly([]); setSort('value-desc') }
   const Filters = ({ buy }: { buy: boolean }) => (
-    <section className="filters bz-filters" aria-label="Filtres du Bazar">
+    <section className="filters bz-filters" aria-label="Filtres du Marché">
       <div className="filters__search"><label className="filters__label" htmlFor="bz-q">Recherche</label><input id="bz-q" type="search" placeholder="Nom, titre ou univers…" value={q} onChange={(e) => setQ(e.target.value)} /></div>
       <div className="filters__row"><span className="filters__label">Rareté</span><div className="filters__chips">
         {RARITY_ORDER.map((r) => <button key={r} className={`fchip ${rars.includes(r) ? 'is-on' : ''}`} style={{ ['--rc' as string]: RARITIES[r].color }} aria-pressed={rars.includes(r)} onClick={() => setRars(tog(rars, r))}><b>{RARITIES[r].short}</b></button>)}
@@ -102,7 +102,7 @@ export const Bazaar = () => {
     <div className="bz">
       <header className="bz__head">
         <img src={uiArt('nav-bazaar')} alt="" />
-        <div><p className="eyebrow">Entre collectionneurs</p><h1 className="page-title">Le Bazar des Failles</h1><p>Achète, vends, mets aux enchères et échange. Tes Éclats : <Price v={store.gems} /></p></div>
+        <div><p className="eyebrow">Entre collectionneurs</p><h1 className="page-title">Le Marché</h1><p>Achète, vends, mets aux enchères et échange. Tes Éclats : <Price v={store.gems} /></p></div>
       </header>
       <ul className="bz__rules bz__rules--v5">
         <li><b>Sans ticket</b> : mettre en vente ne coûte rien.</li>
@@ -111,9 +111,9 @@ export const Bazaar = () => {
         <li>Seuls les doublons se vendent : ta dernière copie reste toujours dans ta collection.</li>
       </ul>
       <Unlock steps={steps} open={!unlocked} />
-      <div className="coltabs__bar" role="tablist" aria-label="Sections du Bazar">
-        {([['players', 'Acheter'], ['buy', 'Marchands'], ['sell', 'Vendre aux marchands'], ['auctions', `Enchères (${store.bazaar.auctions.length})`], ['trade', 'Échanger'], ['mine', 'Mon Bazar']] as [Tab, string][]).map(([id, label]) => (
-          <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>{label}</button>
+      <div className="mi-tabs bz-tabs" role="tablist" aria-label="Sections du Marché">
+        {([['players', 'Acheter'], ['sell', 'Vendre'], ['auctions', 'Enchères'], ['trade', 'Échanger'], ['mine', 'Mon marché']] as [Tab, string][]).map(([id, label]) => (
+          <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-on' : ''} onClick={() => setTab(id)}>{label}</button>
         ))}
       </div>
       <p className="cd__notice" role="status">{msg}</p>
@@ -220,17 +220,17 @@ export const Bazaar = () => {
 }
 export type { Hero }
 
-// Bandeau « Débloque le Bazar » : trois étapes, repliable.
+// Bandeau « Débloque le Marché » : trois étapes, repliable.
 const Unlock = ({ steps, open }: { steps: ReturnType<typeof unlockSteps>; open: boolean }) => {
   const [shut, setShut] = useState(false)
   if (!open) return null
   const done = steps.filter((x) => x.done).length
   return (
-    <section className={`bz-unlock ${shut ? 'is-shut' : ''}`} aria-label="Débloquer le Bazar">
-      <header><div><p className="eyebrow">Anti-abus</p><h2>Débloque le Bazar entre joueurs <small>{done}/3</small></h2></div>
+    <section className={`bz-unlock ${shut ? 'is-shut' : ''}`} aria-label="Débloquer le Marché">
+      <header><div><p className="eyebrow">Anti-abus</p><h2>Débloque le Marché entre joueurs <small>{done}/3</small></h2></div>
         <button className="linkbtn" onClick={() => setShut(!shut)} aria-expanded={!shut}>{shut ? 'Afficher' : 'Replier'}</button></header>
       {!shut && <>
-        <p className="set__note">En attendant, tu peux regarder les annonces, mais pas acheter, vendre ni échanger avec les joueurs. Les marchands restent ouverts.</p>
+        <p className="set__note">En attendant, tu peux regarder les annonces, mais pas acheter, vendre ni échanger avec les joueurs.</p>
         <ol className="bz-unlock__steps">{steps.map((x) => (
           <li key={x.id} className={x.done ? 'is-done' : ''}><span>{x.done ? '✓' : ''}</span><b>{x.label}</b><div className="cd-bar"><i style={{ width: `${(x.have / x.need) * 100}%` }} /></div><small>{x.have} / {x.need} {x.unit}</small></li>
         ))}</ol>

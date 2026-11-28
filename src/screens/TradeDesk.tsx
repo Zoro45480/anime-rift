@@ -44,7 +44,7 @@ export const TradeDesk = ({ locked, onConnect }: { locked: boolean; onConnect: (
     const r = await proposeTrade(who.id, give, want, note.trim())
     setBusy(false)
     if (r !== 'ok') { store.giveCards(give); return setMsg(r) }
-    setMsg(`Proposition envoyée à ${who.name}. Tes cartes sont mises de côté jusqu'à sa réponse (retrouve-la dans Mon Bazar).`)
+    setMsg(`Proposition envoyée à ${who.name}. Tes cartes sont mises de côté jusqu'à sa réponse (retrouve-la dans Mon Marché).`)
     setGive([]); setWant([]); setNote('')
   }
 
@@ -77,7 +77,7 @@ export const TradeDesk = ({ locked, onConnect }: { locked: boolean; onConnect: (
           <li>Une carte reçue ne peut repartir qu'après 24 h.</li>
         </ul>
       </div>
-      {locked && <p className="td-locked">Le Bazar entre joueurs n'est pas encore débloqué : tu peux préparer un échange, mais pas l'envoyer.</p>}
+      {locked && <p className="td-locked">Le Marché entre joueurs n'est pas encore débloqué : tu peux préparer un échange, mais pas l'envoyer.</p>}
 
       {!who ? (
         <div className="so-box">

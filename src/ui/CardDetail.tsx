@@ -119,7 +119,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
               {has && <button className="cd-btn cd-btn--main" disabled={copies < 2 || maxed} onClick={onMerge}>Fusionner un doublon<small>{maxed ? 'Niveau maximum' : copies < 2 ? 'Il faut 2 exemplaires' : `+${n(MERGE_XP[hero.rarity])} XP`}</small></button>}
               {has && <button className={`cd-btn ${isPinned ? 'is-on' : ''}`} aria-pressed={isPinned} onClick={onPin}>{isPinned ? 'Retirer de ma vitrine' : 'Épingler dans ma vitrine'}<small>{pinned.length} / {SHOWCASE_MAX} places</small></button>}
               <button className={`cd-btn ${wished ? 'is-on' : ''}`} aria-pressed={wished} onClick={() => toggleWish(hero.id)}>{wished ? '♥ Dans mes envies' : '♡ Ajouter aux envies'}</button>
-              <button className="cd-btn" onClick={() => { try { sessionStorage.setItem('anime-rift:bz-q', hero.name) } catch { /* rien */ } onClose(); window.dispatchEvent(new CustomEvent('anime-rift:go', { detail: 'bazaar' })) }}>Chercher au Bazar →<small>Annonces de cette carte</small></button>
+              <button className="cd-btn" onClick={() => { try { sessionStorage.setItem('anime-rift:bz-q', hero.name) } catch { /* rien */ } onClose(); window.dispatchEvent(new CustomEvent('anime-rift:go', { detail: 'bazaar' })) }}>Chercher au Marché →<small>Annonces de cette carte</small></button>
             </div>
             <p className="cd__notice" role="status">{notice}</p>
           </div>
@@ -219,7 +219,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
           <p className="cd-note">Les titres de l'univers {hero.world}. La carte porte le plus haut qu'elle a mérité.</p>
         </Section>
 
-        <Section hue="#b78bff" title="Cote de la carte" aside="Bazar">
+        <Section hue="#b78bff" title="Cote de la carte" aside="Marché">
           <div className="cd-market">
             <div><small>Valeur du jour</small><b>{n(valueOf(hero, has ? state.level : 1, today))} Éclats</b></div>
             <div><small>Vente immédiate</small><b>{n(quickPrice(hero, has ? state.level : 1, today))} Éclats</b></div>
@@ -229,7 +229,7 @@ export const CardDetail = ({ hero, onClose, onOpen }: { hero: Hero; onClose: () 
             <div><small>Exemplaires chez toi</small><b>{copies}</b></div>
           </div>
           <Spark trades={cote.all} />
-          <p className="cd-note">La valeur suit la rareté, le niveau de la carte et la demande du jour au Bazar. Les médianes viennent uniquement de tes vrais achats et ventes : aucun prix n'est inventé. Le Bazar est dans la barre du bas.</p>
+          <p className="cd-note">La valeur suit la rareté, le niveau de la carte et la demande du jour au Marché. Les médianes viennent uniquement de tes vrais achats et ventes : aucun prix n'est inventé. Le Marché est dans la barre du bas.</p>
         </Section>
 
         <Section hue="#4be3a4" title="Où l'obtenir">
