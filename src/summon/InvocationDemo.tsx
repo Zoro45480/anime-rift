@@ -16,9 +16,16 @@ import page from './demo/invocation.html?raw'
 
 const files = import.meta.glob('./demo/{bg.jpg,logo.webp}', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 const cadres = import.meta.glob('./demo/cadres/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
+// Tirage de test : la MR choisie + des cartes au hasard (une SSR et une LR pour voir tous les effets).
+const testPull = (id: string, n: number): Hero[] => {
+  const one = (r: RarityId) => { const l = HEROES.filter((h) => h.rarity === r); return l[Math.floor(Math.random() * l.length)] }
+  const extra: RarityId[] = ['legend', 'ultra', 'epic', 'rare', 'rare', 'common', 'common', 'common', 'common']
+  return [HEROES.find((h) => h.id === id)!, ...extra.slice(0, Math.max(0, n - 1)).map(one)]
+}
 const RANK: Record<RarityId, number> = { common: 0, rare: 1, epic: 2, ultra: 3, legend: 4, rift: 5 }
 
-export const InvocationDemo = ({ banner, count = 10, currency = 'ticket', onClose }: { banner: Banner; count?: number; currency?: Currency; onClose: () => void }) => {
+// `test` : identifiant d'une MR à faire tomber (page de test) : rien n'est dépensé, rien n'est ajouté à la collection.
+export const InvocationDemo = ({ banner, count = 10, currency = 'ticket', onClose, test }: { banner: Banner; count?: number; currency?: Currency; onClose: () => void; test?: string }) => {
   const store = useStore()
   const live = useRef(store)
   live.current = store
@@ -42,7 +49,7 @@ export const InvocationDemo = ({ banner, count = 10, currency = 'ticket', onClos
   const send = (m: unknown) => frame.current?.contentWindow?.postMessage(m, '*')
   const balance = () => {
     const s = live.current
-    send({ type: 'balance', tickets: s.tickets, gems: s.gems, pity: s.pity[banner.id] ?? 0, ct: COST.ticket, cg: COST.gems })
+    send({ type: 'balance', tickets: test ? 999 : s.tickets, gems: test ? 99999 : s.gems, pity: s.pity[banner.id] ?? 0, ct: COST.ticket, cg: COST.gems }) // en test : soldes fictifs
   }
 
   useEffect(() => {
@@ -59,7 +66,7 @@ export const InvocationDemo = ({ banner, count = 10, currency = 'ticket', onClos
       if (m.type === 'pull') {
         primeAudio()
         const before = s.owned
-        const heroes = s.summon(banner, m.pay === 't' ? 'ticket' : 'gems', m.n ?? 1) // le vrai tirage, AVANT l'animation
+        const heroes = test ? testPull(test, m.n ?? 1) : s.summon(banner, m.pay === 't' ? 'ticket' : 'gems', m.n ?? 1) // le vrai tirage, AVANT l'animation
         if (!heroes) { send({ type: 'pulled', pulls: null }); return }
         const seen: Record<string, number> = {}
         send({ type: 'pulled', pulls: heroes.map((h) => {
@@ -68,13 +75,13 @@ export const InvocationDemo = ({ banner, count = 10, currency = 'ticket', onClos
           return { id: h.id, k: RANK[h.rarity], name: h.name, dup, atk: h.atk, def: h.def, img: s.customArt[h.id] ?? s.remoteArt[h.id] ?? heroArt(h.model, 'full') }
         }) })
       }
-      if (m.type === 'mr' && m.id) { const h = HEROES.find((x) => x.id === m.id); if (h) setMr({ hero: h, stage: 'video', dup: (s.owned[h.id] ?? 0) > 1 }) }
+      if (m.type === 'mr' && m.id) { const h = HEROES.find((x) => x.id === m.id); if (h) setMr({ hero: h, stage: 'video', dup: !test && (s.owned[h.id] ?? 0) > 1 }) }
       if (m.type === 'close') done.current()
       if (m.type === 'collection') { done.current(); window.dispatchEvent(new CustomEvent('anime-rift:go', { detail: 'collection' })) }
     }
     addEventListener('message', onMsg)
     return () => removeEventListener('message', onMsg)
-  }, [banner, count, currency]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [banner, count, currency, test]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // soldes et pity tenus à jour dans la démo
   useEffect(() => { if (ready) balance() }, [ready, store.tickets, store.gems, store.pity]) // eslint-disable-line react-hooks/exhaustive-deps

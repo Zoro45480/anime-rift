@@ -3,7 +3,8 @@ import { heroById, HEROES } from '../data/heroes'
 import { createPortal } from 'react-dom'
 import { MR_YOUTUBE } from '../data/mrVideos'
 import { StoreProvider } from '../state/store'
-import { SummonCinematic } from '../summon/SummonCinematic'
+import { InvocationDemo } from '../summon/InvocationDemo'
+import { BANNERS } from '../data/banners'
 import { CardViewerProvider } from '../ui/CardViewer'
 import { YtEdit } from '../summon/MrEdit'
 
@@ -38,12 +39,12 @@ export const MrTest = () => {
         <span>Durée : {e - s} s</span>
       </div>
       <button className="mrtest__go" disabled={!id} onClick={() => { setEnded(false); setPlay(true) }}>▶ Lancer l'edit</button>
-      <button className="mrtest__go mrtest__go--full" disabled={!id} onClick={() => { MR_YOUTUBE[hero.id] = { id, start: s, end: e }; setFull(true) }}>✦ Tester l'invocation complète (comme dans le jeu)</button>
-      <p className="mrtest__note">L'invocation complète joue toute l'animation de tirage de {hero.name}, puis l'edit et la carte. C'est un test : la carte n'est pas ajoutée à ta collection.</p>
+      <button className="mrtest__go mrtest__go--full" disabled={!id} onClick={() => { MR_YOUTUBE[hero.id] = { id, start: s, end: e }; setFull(true) }}>✦ Tester l'invocation ×10 avec cette MR (nouvel écran)</button>
+      <p className="mrtest__note">Ouvre la faille, puis révèle les cartes une par une ou touche « Tout révéler » : l'edit de {hero.name} se lance, puis sa carte en grand. C'est un test : aucune clé n'est dépensée et rien n'est ajouté à ta collection.</p>
       {ended && <p className="mrtest__done">Fin de l'edit : ici la carte MR de {hero.name} apparaît.</p>}
       <p className="mrtest__link">Quand c'est bon, envoie-moi ces réglages : <b>{hero.name} · {fmt(s)} → {fmt(e)}</b><br /><small>{link}</small></p>
       {play && id && <YtEdit hero={hero} clip={{ id, start: s, end: e }} onDone={() => { setPlay(false); setEnded(true) }} />}
-      {full && createPortal(<StoreProvider><CardViewerProvider><SummonCinematic heroes={[hero]} onClose={() => setFull(false)} /></CardViewerProvider></StoreProvider>, document.body)}
+      {full && createPortal(<StoreProvider><CardViewerProvider><InvocationDemo banner={BANNERS.find((b) => b.pool.includes(hero.world)) ?? BANNERS[0]} count={10} test={hero.id} onClose={() => setFull(false)} /></CardViewerProvider></StoreProvider>, document.body)}
     </main>
   )
 }
