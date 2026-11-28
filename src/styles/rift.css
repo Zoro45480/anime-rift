@@ -1381,5 +1381,6 @@ body:has(.sc) .chat__toggle, body:has(.sc) .chat__panel { display: none !importa
 @media (prefers-reduced-motion: reduce) { .mrs__rays, .mrs__embers i, .mrs__card { animation: none !important; } }
 /* Edit YouTube : la vidéo couvre tout l'écran et déborde un peu, pour cacher le titre, la chaîne et les boutons de YouTube */
 .mredit--video { overflow: hidden; }
-.mredit--video iframe.mredit__yt { position: absolute; inset: auto; left: 50%; top: 50%; width: max(100vw, 177.78vh); height: max(56.25vw, 100vh); transform: translate(-50%, -50%) scale(1.32); pointer-events: none; border: 0; }
+.mredit--video iframe.mredit__yt { position: absolute; inset: auto; left: 50%; top: 50%; width: max(100vw, 177.78vh); height: max(56.25vw, 100vh); transform: translate(-50%, -50%) scale(1.12); pointer-events: none; border: 0; }
+@media (orientation: portrait) { .mredit--video iframe.mredit__yt { width: 100vw; height: 56.25vw; transform: translate(-50%, -50%) scale(1.18); } .mredit--video { background: #000; } }
 .mredit__shield { position: absolute; inset: 0; z-index: 1; }
