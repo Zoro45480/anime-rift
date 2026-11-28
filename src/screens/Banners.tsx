@@ -12,7 +12,8 @@ import { Guide } from '../ui/Guide'
 import { useStore, type Currency } from '../state/store'
 import { Card, LazyCard } from '../ui/Card'
 import { Coin } from '../ui/Coin'
-import { readFav, RiftSummon, toggleFav } from '../summon/RiftSummon'
+import { readFav, toggleFav } from '../summon/RiftSummon'
+import { InvocationDemo } from '../summon/InvocationDemo'
 import { primeAudio } from '../summon/audio'
 import { LrBanner } from './LrBanner'
 import { KeyTimer } from '../ui/Chrome'
@@ -278,7 +279,7 @@ export const Banners = ({ onRebirth, start = 0 }: { onRebirth: () => void; start
       )}
 
       <Guide id="banners" />
-      {rift !== null && <RiftSummon banner={banner} count={rift} currency={currency} onClose={() => setRift(null)} />}
+      {rift !== null && <InvocationDemo banner={banner} count={rift} currency={currency} onClose={() => setRift(null)} />}
     </div>
   )
 }
