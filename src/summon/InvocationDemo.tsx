@@ -6,15 +6,17 @@ import type { RarityId } from '../data/rarities'
 import { MR_VIDEOS, MR_YOUTUBE } from '../data/mrVideos'
 import { heroArt, iconArt } from '../assets/manifest'
 import { useStore, type Currency } from '../state/store'
-import { primeAudio } from './audio'
+import { isSoundOn, primeAudio } from './audio'
 import { MrEdit } from './MrEdit'
 import { Card } from '../ui/Card'
 import { RARITIES } from '../data/rarities'
 // La démo d'invocation, reprise TELLE QUELLE (demo/invocation.html : CSS, shaders et JavaScript inchangés).
 // Seuls changent : le tirage (fait ici par le jeu, avec la pity), l'image des persos, les soldes du joueur et DEMO_MR = false.
 import page from './demo/invocation.html?raw'
+import cadreBox from './demo/cadre_box.json'
 
 const files = import.meta.glob('./demo/{bg.jpg,logo.webp}', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
+const sons = import.meta.glob('./demo/sons/*.mp3', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 const cadres = import.meta.glob('./demo/cadres/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string, string>
 // Tirage de test : la MR choisie + des cartes au hasard (une SSR et une LR pour voir tous les effets).
 const testPull = (id: string, n: number): Hero[] => {
@@ -31,7 +33,7 @@ export const InvocationDemo = ({ banner, count = 10, currency = 'ticket', onClos
   live.current = store
   const frame = useRef<HTMLIFrameElement>(null)
   const [ready, setReady] = useState(false)
-  const [mr, setMr] = useState<{ hero: Hero; stage: 'video' | 'card'; dup: boolean } | null>(null) // MR obtenue : son edit vidéo, puis sa présentation
+  const [mr, setMr] = useState<{ hero: Hero; stage: 'video' | 'card'; dup: boolean; then?: 'card' | 'back' } | null>(null) // MR obtenue : son edit vidéo, puis sa présentation
   const done = useRef(onClose)
   done.current = onClose
 
@@ -43,7 +45,7 @@ export const InvocationDemo = ({ banner, count = 10, currency = 'ticket', onClos
       .replaceAll('logo.webp', files['./demo/logo.webp'])
       .replaceAll('__SEAL__', iconArt('seal'))
       .replaceAll('__SOUL__', iconArt('soul'))
-      .replace('<body>', `<body><script>window.CADRES=${JSON.stringify(map)}</script>`)
+      .replace('<body>', `<body><script>window.CADRE_BOX=${JSON.stringify(cadreBox)};window.CADRES=${JSON.stringify(map)};window.SONS=${JSON.stringify(Object.fromEntries(Object.entries(sons).map(([k, v]) => [k.split('/').pop()!.replace('.mp3', ''), v])))}</script>`)
   }, [])
 
   const send = (m: unknown) => frame.current?.contentWindow?.postMessage(m, '*')
@@ -55,11 +57,12 @@ export const InvocationDemo = ({ banner, count = 10, currency = 'ticket', onClos
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {
       if (e.source !== frame.current?.contentWindow) return
-      const m = e.data as { type: string; n?: number; pay?: string; id?: string }
+      const m = e.data as { type: string; n?: number; pay?: string; id?: string; vid?: boolean }
       const s = live.current
       if (m.type === 'ready') {
         balance()
         send({ type: 'open', banner: BANNERS.indexOf(banner), n: count, pay: currency === 'ticket' ? 't' : 'g', ends: BANNERS.map((b) => Date.parse(b.endsAt)) })
+        if (!isSoundOn()) send({ type: 'mute', muted: true }) // le réglage « Couper le son » du jeu
         setTimeout(() => setReady(true), 60)
         frame.current?.focus()
       }
@@ -75,7 +78,10 @@ export const InvocationDemo = ({ banner, count = 10, currency = 'ticket', onClos
           return { id: h.id, k: RANK[h.rarity], name: h.name, dup, atk: h.atk, def: h.def, img: s.customArt[h.id] ?? s.remoteArt[h.id] ?? heroArt(h.model, 'full') }
         }) })
       }
-      if (m.type === 'mr' && m.id) { const h = HEROES.find((x) => x.id === m.id); if (h) setMr({ hero: h, stage: 'video', dup: !test && (s.owned[h.id] ?? 0) > 1 }) }
+      // la vidéo de la MR, AVANT de voir la carte (puis la démo continue : cinématique et retournement)
+      if (m.type === 'mrvideo' && m.id) { const h = HEROES.find((x) => x.id === m.id); if (h) setMr({ hero: h, stage: 'video', dup: false, then: 'back' }); else send({ type: 'videodone' }) }
+      // la carte MR présentée en grand, à la fin (avec la vidéo d'abord si elle n'est pas encore passée, ex. « Tout révéler »)
+      if (m.type === 'mr' && m.id) { const h = HEROES.find((x) => x.id === m.id); if (h) setMr({ hero: h, stage: m.vid ? 'card' : 'video', dup: !test && (s.owned[h.id] ?? 0) > 1, then: 'card' }) }
       if (m.type === 'close') done.current()
       if (m.type === 'collection') { done.current(); window.dispatchEvent(new CustomEvent('anime-rift:go', { detail: 'collection' })) }
     }
@@ -90,7 +96,7 @@ export const InvocationDemo = ({ banner, count = 10, currency = 'ticket', onClos
   return createPortal(
     <div className="inv">
       <iframe ref={frame} className={`inv__frame ${ready ? 'is-ready' : ''}`} srcDoc={doc} title={`Invocation · ${banner.world}`} allow="autoplay; fullscreen" />
-      {mr?.stage === 'video' && <div className="inv__edit"><MrEdit hero={mr.hero} art={store.customArt[mr.hero.id] ?? store.remoteArt[mr.hero.id] ?? heroArt(mr.hero.model, 'full')} onDone={() => setMr({ ...mr, stage: 'card' })} /></div>}
+      {mr?.stage === 'video' && <div className="inv__edit"><MrEdit hero={mr.hero} art={store.customArt[mr.hero.id] ?? store.remoteArt[mr.hero.id] ?? heroArt(mr.hero.model, 'full')} onDone={() => { if (mr.then === 'back') { setMr(null); send({ type: 'videodone' }) } else setMr({ ...mr, stage: 'card' }) }} /></div>}
       {mr?.stage === 'card' && <MrShowcase hero={mr.hero} dup={mr.dup} video={Boolean(MR_YOUTUBE[mr.hero.id] || MR_VIDEOS.includes(mr.hero.id))} onClose={() => setMr(null)} />}
     </div>,
     document.body,
